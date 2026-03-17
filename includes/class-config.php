@@ -250,16 +250,12 @@ class Prime_Cache_Config {
 			@unlink( $file );
 		}
 
-		// Also clean up legacy config files.
+		// Only clean up the legacy fixed-name config (pre-install-key era).
+		// Do NOT glob-delete site-config-*.php — other installs sharing this
+		// wp-content directory have their own install-key-based config files.
 		$legacy_plain = $config_dir . 'site-config.php';
 		if ( file_exists( $legacy_plain ) ) {
 			@unlink( $legacy_plain );
-		}
-		$legacy_files = glob( $config_dir . 'site-config-*.php' );
-		if ( ! empty( $legacy_files ) ) {
-			foreach ( $legacy_files as $lf ) {
-				@unlink( $lf );
-			}
 		}
 
 		// Remove config dir if empty.
