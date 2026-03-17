@@ -316,9 +316,14 @@ class Prime_Cache_Admin_Settings {
 		if ( preg_match( '#\(\.\*\)\+|\(\.\+\)\+|\(\.\*\)\*|\(\.\+\)\*#', $value ) ) {
 			return '';
 		}
-		// Strip null bytes and carriage returns (safety for .htaccess injection).
-		$value = preg_replace( '#[\x00\r]#', '', $value );
-		// Test the pattern with a short timeout to ensure it's valid.
+		// Strip null bytes, carriage returns, and newlines (safety for .htaccess injection).
+		$value = preg_replace( '#[\x00\r\n]#', '', $value );
+		// Block characters that break Apache RewriteCond context:
+		// spaces, quotes, backticks, angle brackets, and unescaped flags like [L].
+		if ( preg_match( '#[\s"\'`<>]|\[(?:L|R|F|G|NC|OR)\]#i', $value ) ) {
+			return '';
+		}
+		// Test the pattern to ensure it's valid PHP regex.
 		$test = @preg_match( '#' . $value . '#', '' );
 		if ( false === $test ) {
 			return '';

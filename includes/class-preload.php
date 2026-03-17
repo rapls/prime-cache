@@ -107,13 +107,24 @@ class Prime_Cache_Preload {
 				break;
 			}
 
-			// Non-blocking request to warm cache.
+			// Non-blocking request to warm desktop cache.
 			wp_remote_get( $url, array(
 				'timeout'   => 0.01,
 				'blocking'  => false,
 				'sslverify' => true,
 				'headers'   => array( 'X-Prime-Cache-Preload' => '1' ),
 			) );
+
+			// If mobile separate is enabled, also warm the mobile variant.
+			if ( ! empty( $this->settings['cache_mobile_separate'] ) ) {
+				wp_remote_get( $url, array(
+					'timeout'    => 0.01,
+					'blocking'   => false,
+					'sslverify'  => true,
+					'user-agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+					'headers'    => array( 'X-Prime-Cache-Preload' => '1' ),
+				) );
+			}
 
 			$count++;
 
@@ -270,7 +281,11 @@ class Prime_Cache_Preload {
 	 * Check if a URL is already cached.
 	 */
 	private function is_url_cached( $url ) {
-		// Use the same cache dir resolution as the storage class.
+		// When vary cookies are active, preload can only warm the default (no-cookie)
+		// variant. Don't claim "fully cached" — always allow preload to run for the
+		// base variant, but accept that cookie variants are generated on first real visit.
+		// The check below only validates base + mobile variants, not cookie variants.
+
 		$dir = Prime_Cache_Storage::get_cache_dir( $url );
 
 		if ( ! is_dir( $dir ) ) {

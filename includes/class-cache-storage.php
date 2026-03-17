@@ -97,13 +97,9 @@ class Prime_Cache_Storage {
 			return false;
 		}
 
-		// Gzip variant.
+		// Gzip variant: append .gz to the original filename to preserve all suffixes.
 		if ( $gzip && function_exists( 'gzencode' ) ) {
-			$gz_filename  = self::get_cache_filename(
-				strpos( $filename, '-https' ) !== false,
-				strpos( $filename, '-mobile' ) !== false,
-				true
-			);
+			$gz_filename  = $filename . '.gz';
 			$gz_filepath  = $dir . $gz_filename;
 			$gz_temp      = $gz_filepath . '.tmp.' . uniqid();
 			$gz_content   = gzencode( $content, 6 );
