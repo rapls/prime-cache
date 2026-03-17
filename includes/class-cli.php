@@ -121,6 +121,11 @@ class Prime_Cache_CLI extends WP_CLI_Command {
 		wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
 		wp_schedule_single_event( time() + 3, 'prime_cache_preload_batch' );
 		WP_CLI::success( 'Cache preloading scheduled.' );
+
+		$s = prime_cache_get_settings();
+		if ( ! empty( trim( $s['cache_vary_cookies'] ?? '' ) ) ) {
+			WP_CLI::warning( 'Vary Cookies active — preload warms default variant only. Cookie-specific variants are generated on first visitor request.' );
+		}
 	}
 
 	/**

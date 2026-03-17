@@ -245,18 +245,23 @@ class Prime_Cache_Admin_Settings {
 			}
 		}
 
+		// Multisite: do not touch advanced-cache.php, config file, or .htaccess
+		// page-cache rules. Page caching is not supported on multisite.
+		if ( ! is_multisite() ) {
+			$ac_result = Prime_Cache_Config::install_advanced_cache();
+			if ( ! $ac_result && 'external' === Prime_Cache_Config::get_advanced_cache_owner() ) {
+				$warnings[] = __( 'advanced-cache.php is managed by another plugin. Prime Cache page caching cannot be enabled until the other plugin is deactivated.', 'prime-cache' );
+			}
+
+			Prime_Cache_Config::write_config_file( $s );
+			$s['htaccess_enabled'] ? Prime_Cache_Htaccess::add_rules( $s ) : Prime_Cache_Htaccess::remove_rules();
+		}
+
+		// Set transient AFTER all warnings are collected (including install_advanced_cache result).
 		if ( ! empty( $warnings ) ) {
 			set_transient( 'prime_cache_env_warnings', $warnings, 60 );
 		}
 
-		// Check advanced-cache.php ownership before install.
-		$ac_result = Prime_Cache_Config::install_advanced_cache();
-		if ( ! $ac_result && 'external' === Prime_Cache_Config::get_advanced_cache_owner() ) {
-			$warnings[] = __( 'advanced-cache.php is managed by another plugin. Prime Cache page caching cannot be enabled until the other plugin is deactivated.', 'prime-cache' );
-		}
-
-		Prime_Cache_Config::write_config_file( $s );
-		$s['htaccess_enabled'] ? Prime_Cache_Htaccess::add_rules( $s ) : Prime_Cache_Htaccess::remove_rules();
 		return $s;
 	}
 
