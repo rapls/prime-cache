@@ -42,7 +42,7 @@ $prime_cache_config = array(
 
 if ( defined( 'PRIME_CACHE_CONFIG_DIR' ) ) {
 	// Install-unique config file (ABSPATH + DB_NAME hash prevents shared wp-content collision).
-	$_pc_install_seed = ABSPATH . '|' . ( defined( 'DB_NAME' ) ? DB_NAME : '' );
+	$_pc_install_seed = ABSPATH . '|' . ( defined( 'DB_NAME' ) ? DB_NAME : '' ) . '|' . ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' );
 	$_pc_install_key  = substr( md5( $_pc_install_seed ), 0, 8 );
 	$_pc_config_file  = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $_pc_install_key . '.php';
 	if ( is_readable( $_pc_config_file ) ) {

@@ -482,6 +482,9 @@ class Prime_Cache_Admin_Settings {
 				<a href="<?php echo esc_url( admin_url( 'admin.php?pc_action=clear_all&_wpnonce=' . $n ) ); ?>" class="pc-btn pc-btn--r pc-btn--sm"><span class="dashicons dashicons-trash"></span><?php esc_html_e( 'Clear All Cache', 'prime-cache' ); ?></a>
 				<?php if ( $settings['preload_enabled'] ) : ?>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?pc_action=clear_and_preload&_wpnonce=' . $n ) ); ?>" class="pc-btn pc-btn--p pc-btn--sm"><span class="dashicons dashicons-controls-forward"></span><?php esc_html_e( 'Clear Cache & Preload', 'prime-cache' ); ?></a>
+				<?php if ( ! empty( trim( $settings['cache_vary_cookies'] ?? '' ) ) ) : ?>
+					<span class="pc-meta" style="align-self:center"><?php esc_html_e( 'Default variant only', 'prime-cache' ); ?></span>
+				<?php endif; ?>
 				<?php endif; ?>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?pc_action=clear_minified&_wpnonce=' . $n ) ); ?>" class="pc-btn pc-btn--o pc-btn--sm"><?php esc_html_e( 'Clear Minified CSS/JS', 'prime-cache' ); ?></a>
 				<?php if ( 'off' !== $oc && 'external' !== $oc ) : ?>

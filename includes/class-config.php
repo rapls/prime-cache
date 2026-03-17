@@ -192,7 +192,7 @@ class Prime_Cache_Config {
 		// Install-unique config file. Uses a hash of ABSPATH + DB_NAME to prevent
 		// collision when multiple WP installations share the same wp-content directory,
 		// even if they share the same filesystem path (e.g. containers with different DBs).
-		$install_seed = ABSPATH . '|' . DB_NAME;
+		$install_seed = ABSPATH . '|' . DB_NAME . '|' . ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' );
 		$install_key  = substr( md5( $install_seed ), 0, 8 );
 		$file = $config_dir . 'site-config-' . $install_key . '.php';
 
@@ -242,7 +242,7 @@ class Prime_Cache_Config {
 			? PRIME_CACHE_CONFIG_DIR
 			: WP_CONTENT_DIR . '/prime-cache-config/';
 
-		$install_seed = ABSPATH . '|' . DB_NAME;
+		$install_seed = ABSPATH . '|' . DB_NAME . '|' . ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' );
 		$install_key  = substr( md5( $install_seed ), 0, 8 );
 		$file = $config_dir . 'site-config-' . $install_key . '.php';
 

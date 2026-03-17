@@ -69,7 +69,7 @@ Prime Cache is a comprehensive WordPress performance optimization plugin that co
 
 = Preloading =
 
-* **Cache Preloading** - Background crawling to warm page cache
+* **Cache Preloading** - Background crawling to warm page cache (desktop + mobile). When Vary Cookies are active, only the default variant is preloaded; cookie-specific variants are generated on first visitor request.
 * **Sitemap Preloading** - Discover URLs from XML sitemap
 * **Link Prefetching** - JavaScript-based hover/viewport prefetch
 * **Speculation Rules API** - Chrome prerendering for instant navigation
@@ -223,6 +223,14 @@ Multiple ways: Admin bar menu (10+ options), Dashboard quick actions, WP-CLI com
 = Can I disable cache for a specific page? =
 
 Yes. Edit the post/page and check "Disable cache for this page" in the Prime Cache metabox in the sidebar.
+
+= Does the .htaccess fast-path work for all requests? =
+
+The .htaccess fast-path serves cached pages without loading PHP for maximum speed. It requires: lowercase Host header, no query string (unless cache_query_strings is disabled), no Vary Cookies, ASCII-safe URL paths, and GET requests only. Requests that don't match these conditions are served via the PHP drop-in, which is still very fast but not zero-PHP.
+
+= Does it support WordPress multisite? =
+
+Page caching is not supported on multisite installations. Other features (file optimization, lazy load, CDN, image optimization, etc.) work normally on multisite.
 
 = What is the Speculation Rules API? =
 
