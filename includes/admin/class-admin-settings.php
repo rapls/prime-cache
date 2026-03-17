@@ -128,6 +128,7 @@ class Prime_Cache_Admin_Settings {
 		$s['browser_cache_html']    = isset( $input['browser_cache_html'] ) ? max( 0, (int) $input['browser_cache_html'] ) : 0;
 		$s['brotli_compression']    = ! empty( $input['brotli_compression'] );
 		$s['cache_control_immutable'] = ! empty( $input['cache_control_immutable'] );
+		$s['img_conversion_enabled'] = ! empty( $input['img_conversion_enabled'] );
 		$s['webp_enabled']          = ! empty( $input['webp_enabled'] );
 		$s['avif_enabled']          = ! empty( $input['avif_enabled'] );
 		$s['img_quality_mode']      = in_array( $input['img_quality_mode'] ?? '', array( 'lossy', 'lossless', 'custom' ), true ) ? $input['img_quality_mode'] : 'lossy';
@@ -500,7 +501,7 @@ class Prime_Cache_Admin_Settings {
 						array( 'off' !== $oc, __( 'Object Cache', 'prime-cache' ) . ( 'off' !== $oc && 'external' !== $oc ? ' (' . strtoupper( $oc ) . ')' : '' ) ),
 						array( $settings['minify_html'] || $settings['minify_css'] || $settings['minify_js'], __( 'File Optimization', 'prime-cache' ) ),
 						array( $settings['lazyload_images'], __( 'Lazy Load', 'prime-cache' ) ),
-						array( $settings['webp_enabled'] || $settings['avif_enabled'], 'WebP / AVIF' ),
+						array( ! empty( $settings['img_conversion_enabled'] ) && ( $settings['webp_enabled'] || $settings['avif_enabled'] ), 'WebP / AVIF' ),
 						array( $settings['cdn_enabled'], __( 'CDN', 'prime-cache' ) ),
 						array( $settings['preload_enabled'], __( 'Cache Preload', 'prime-cache' ) ),
 						array( $settings['htaccess_enabled'], '.htaccess' ),
@@ -1050,7 +1051,7 @@ class Prime_Cache_Admin_Settings {
 	private function tab_media( $settings ) {
 		$vis = array(
 			'lazyload_images','lazyload_iframes','lazyload_videos','lazyload_disable_native','lazyload_exclude',			'youtube_thumbnail','add_missing_dimensions',
-			'webp_enabled','avif_enabled','img_quality_mode','webp_quality','avif_quality',
+			'img_conversion_enabled','webp_enabled','avif_enabled','img_quality_mode','webp_quality','avif_quality',
 			'img_strip_exif','img_resize','img_max_width','img_max_height',
 			'img_auto_optimize','img_auto_remove_larger','img_exclude_png',
 			'img_include_uploads','img_include_themes','img_include_plugins','img_include_custom','img_exclude_folders',
@@ -1099,6 +1100,8 @@ class Prime_Cache_Admin_Settings {
 			<!-- Format Conversion -->
 			<div class="pc-card">
 				<span class="pc-card__h"><?php esc_html_e( 'Format Conversion', 'prime-cache' ); ?></span>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[img_conversion_enabled]" value="1" <?php checked( $settings['img_conversion_enabled'] ); ?> id="pc-fc-toggle"><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Enable Format Conversion', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Master switch for all image format conversion features (WebP, AVIF, auto-convert, delivery, bulk optimization). Disable to turn off all conversion at once without losing individual settings.', 'prime-cache' ); ?></small></span></label>
+				<div id="pc-fc-options" style="<?php echo $settings['img_conversion_enabled'] ? '' : 'opacity:0.45;pointer-events:none;'; ?>">
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[webp_enabled]" value="1" <?php checked( $settings['webp_enabled'] ); ?> <?php echo ( $caps['gd_webp'] || $caps['imagick_webp'] ) ? '' : 'disabled'; ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b>WebP</b> <small><?php esc_html_e( 'Convert JPG/PNG to WebP. Reduces file size by 25-35%.', 'prime-cache' ); ?></small></span></label>
 				<?php if ( $caps['gd_webp'] || $caps['imagick_webp'] ) : ?><span class="pc-badge pc-badge--g" style="margin-left:52px"><?php echo $caps['gd_webp'] ? 'GD' : 'Imagick'; ?></span>
 				<?php else : ?><span class="pc-badge pc-badge--r" style="margin-left:52px"><?php esc_html_e( 'Not available', 'prime-cache' ); ?></span><?php endif; ?>
@@ -1178,8 +1181,17 @@ class Prime_Cache_Admin_Settings {
 				</div>
 			</div>
 
+			</div><!-- /#pc-fc-options -->
+
 			<div class="pc-actions"><?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?></div>
 		</form>
+
+		<script>
+		(function(){
+			var fcToggle=document.getElementById('pc-fc-toggle'),fcOpts=document.getElementById('pc-fc-options');
+			if(fcToggle&&fcOpts){fcToggle.addEventListener('change',function(){fcOpts.style.opacity=this.checked?'':'0.45';fcOpts.style.pointerEvents=this.checked?'':'none';});}
+		})();
+		</script>
 
 		<script>
 		(function(){

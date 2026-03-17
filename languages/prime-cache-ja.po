@@ -1673,3 +1673,9 @@ msgstr "注意:"
 
 msgid "Vary Cookies are active. Preloading warms only the default cookie variant for each URL. Cookie-specific variants (e.g. currency, country) are generated on the first real visitor request."
 msgstr "Cookie 別キャッシュ振り分けが有効です。プリロードは各 URL のデフォルトバリアントのみをウォームアップします。Cookie 固有のバリアント (通貨、国など) は最初の実際の訪問者リクエスト時に生成されます。"
+
+msgid "Enable Format Conversion"
+msgstr "フォーマット変換を有効化"
+
+msgid "Master switch for all image format conversion features (WebP, AVIF, auto-convert, delivery, bulk optimization). Disable to turn off all conversion at once without losing individual settings."
+msgstr "すべての画像フォーマット変換機能 (WebP、AVIF、自動変換、配信方法、一括最適化) のマスタースイッチです。個別設定を失うことなく、すべての変換を一括でオフにできます。"

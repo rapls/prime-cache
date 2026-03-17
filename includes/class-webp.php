@@ -24,7 +24,8 @@ class Prime_Cache_WebP {
 	public function __construct() {
 		$this->settings = prime_cache_get_settings();
 
-		$active = $this->settings['webp_enabled'] || $this->settings['avif_enabled'];
+		$conversion_on = ! empty( $this->settings['img_conversion_enabled'] );
+		$active = $conversion_on && ( $this->settings['webp_enabled'] || $this->settings['avif_enabled'] );
 
 		// Auto-optimize on upload.
 		if ( $active && $this->settings['img_auto_optimize'] ) {
