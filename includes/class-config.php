@@ -189,9 +189,11 @@ class Prime_Cache_Config {
 			return false;
 		}
 
-		// Install-unique config file. Uses a hash of ABSPATH to prevent collision
-		// when multiple WordPress installations share the same wp-content directory.
-		$install_key = substr( md5( ABSPATH ), 0, 8 );
+		// Install-unique config file. Uses a hash of ABSPATH + DB_NAME to prevent
+		// collision when multiple WP installations share the same wp-content directory,
+		// even if they share the same filesystem path (e.g. containers with different DBs).
+		$install_seed = ABSPATH . '|' . DB_NAME;
+		$install_key  = substr( md5( $install_seed ), 0, 8 );
 		$file = $config_dir . 'site-config-' . $install_key . '.php';
 
 		$lines   = array();
@@ -240,14 +242,15 @@ class Prime_Cache_Config {
 			? PRIME_CACHE_CONFIG_DIR
 			: WP_CONTENT_DIR . '/prime-cache-config/';
 
-		$install_key = substr( md5( ABSPATH ), 0, 8 );
+		$install_seed = ABSPATH . '|' . DB_NAME;
+		$install_key  = substr( md5( $install_seed ), 0, 8 );
 		$file = $config_dir . 'site-config-' . $install_key . '.php';
 
 		if ( file_exists( $file ) ) {
 			@unlink( $file );
 		}
 
-		// Also clean up legacy config files (old site-config.php without install key).
+		// Also clean up legacy config files.
 		$legacy_plain = $config_dir . 'site-config.php';
 		if ( file_exists( $legacy_plain ) ) {
 			@unlink( $legacy_plain );

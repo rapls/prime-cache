@@ -267,9 +267,18 @@ class Prime_Cache_Htaccess {
 		$cache_path   = self::get_relative_cache_path();
 		$use_gzip     = ! empty( $settings['gzip_compression'] );
 		$sep_mobile   = ! empty( $settings['cache_mobile_separate'] );
-		// Sanitize regex patterns for safe .htaccess injection (strip newlines and null bytes).
+		// Sanitize patterns for safe .htaccess embedding.
+		// Only allow characters safe in Apache RewriteCond regex context.
 		$sanitize_htaccess = function( $v ) {
-			return preg_replace( '#[\r\n\x00]#', '', trim( $v ?? '' ) );
+			$v = trim( $v ?? '' );
+			if ( '' === $v ) return '';
+			// Strip null bytes, newlines.
+			$v = preg_replace( '#[\x00\r\n]#', '', $v );
+			// Only allow: a-zA-Z0-9 . * + ? | ( ) ^ $ _ - / \
+			$v = preg_replace( '#[^a-zA-Z0-9.*+?|()^$_\-/\\\\]#', '', $v );
+			// Reject if empty after sanitization or if preg_match fails.
+			if ( '' === $v || false === @preg_match( '#' . $v . '#', '' ) ) return '';
+			return $v;
 		};
 		$reject_uri      = $sanitize_htaccess( $settings['cache_reject_uri'] ?? '' );
 		$reject_ua       = $sanitize_htaccess( $settings['cache_reject_ua'] ?? '' );
