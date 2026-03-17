@@ -86,6 +86,7 @@ class Prime_Cache {
 	 */
 	public static function activate() {
 		$settings = prime_cache_get_settings();
+		$warnings = array();
 
 		// Create cache directory.
 		wp_mkdir_p( PRIME_CACHE_CACHE_DIR );
@@ -94,10 +95,21 @@ class Prime_Cache {
 		Prime_Cache_Config::write_config_file( $settings );
 
 		// Install advanced-cache.php dropin.
-		Prime_Cache_Config::install_advanced_cache();
+		$ac_result = Prime_Cache_Config::install_advanced_cache();
+		if ( ! $ac_result ) {
+			$owner = Prime_Cache_Config::get_advanced_cache_owner();
+			if ( 'external' === $owner ) {
+				$warnings[] = __( 'advanced-cache.php is managed by another plugin. Prime Cache page caching will not work until the other plugin is deactivated.', 'prime-cache' );
+			}
+		}
 
 		// Enable WP_CACHE in wp-config.php.
 		Prime_Cache_Config::set_wp_cache( true );
+
+		// Verify WP_CACHE is actually true.
+		if ( ! defined( 'WP_CACHE' ) || ! WP_CACHE ) {
+			$warnings[] = __( 'WP_CACHE could not be set to true. Another definition of WP_CACHE may exist in wp-config.php. Page caching will not work until WP_CACHE is set to true.', 'prime-cache' );
+		}
 
 		// Schedule cron events.
 		if ( ! wp_next_scheduled( 'prime_cache_cleanup_expired' ) ) {
@@ -107,6 +119,10 @@ class Prime_Cache {
 		// Write .htaccess rules if enabled.
 		if ( ! empty( $settings['htaccess_enabled'] ) ) {
 			Prime_Cache_Htaccess::add_rules( $settings );
+		}
+
+		if ( ! empty( $warnings ) ) {
+			set_transient( 'prime_cache_activation_warnings', $warnings, 120 );
 		}
 	}
 

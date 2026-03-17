@@ -88,7 +88,14 @@ class Prime_Cache_Tests {
 			return false;
 		}
 
-		if ( http_response_code() !== 200 ) {
+		// Check HTTP status code — allow 404 if cache_404 is enabled.
+		$status = http_response_code();
+		if ( 404 === $status ) {
+			$s = prime_cache_get_settings();
+			if ( empty( $s['cache_404'] ) ) {
+				return false;
+			}
+		} elseif ( 200 !== $status ) {
 			return false;
 		}
 
@@ -101,14 +108,7 @@ class Prime_Cache_Tests {
 			return false;
 		}
 
-		// Skip 404 and search results when running inside WordPress.
-		if ( function_exists( 'is_404' ) && is_404() ) {
-			$s = prime_cache_get_settings();
-			if ( empty( $s['cache_404'] ) ) {
-				return false;
-			}
-		}
-
+		// Skip search results.
 		if ( function_exists( 'is_search' ) && is_search() ) {
 			return false;
 		}

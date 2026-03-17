@@ -1633,3 +1633,21 @@ msgstr "オブジェクトキャッシュの切り替えに失敗しました。
 
 msgid "Scan your media library for images that have not yet been converted to WebP/AVIF and process them in batches. Statistics are based on a sample of up to 1,000 images."
 msgstr "メディアライブラリをスキャンして、まだ WebP/AVIF に変換されていない画像をバッチ処理します。統計は最大 1,000 件のサンプルに基づいています。"
+
+msgid "advanced-cache.php is managed by another plugin. Prime Cache page caching will not work until the other plugin is deactivated."
+msgstr "advanced-cache.php は別のプラグインによって管理されています。そのプラグインを無効化するまで Prime Cache のページキャッシュは動作しません。"
+
+msgid "WP_CACHE could not be set to true. Another definition of WP_CACHE may exist in wp-config.php. Page caching will not work until WP_CACHE is set to true."
+msgstr "WP_CACHE を true に設定できませんでした。wp-config.php に別の WP_CACHE 定義が存在する可能性があります。WP_CACHE が true に設定されるまでページキャッシュは動作しません。"
+
+msgid "WP_CACHE is not set to true. Page caching will not work. Please check wp-config.php — another define( 'WP_CACHE', false ) may exist."
+msgstr "WP_CACHE が true に設定されていません。ページキャッシュが動作しません。wp-config.php を確認してください。別の define( 'WP_CACHE', false ) が存在する可能性があります。"
+
+msgid "advanced-cache.php is managed by another plugin. Prime Cache page caching will not work until the other plugin is deactivated or its drop-in is removed."
+msgstr "advanced-cache.php は別のプラグインによって管理されています。そのプラグインを無効化するか、ドロップインを削除するまで Prime Cache のページキャッシュは動作しません。"
+
+msgid "advanced-cache.php is managed by another plugin. Prime Cache page caching cannot be enabled until the other plugin is deactivated."
+msgstr "advanced-cache.php は別のプラグインによって管理されています。そのプラグインを無効化するまで Prime Cache のページキャッシュを有効化できません。"
+
+msgid "External"
+msgstr "外部管理"

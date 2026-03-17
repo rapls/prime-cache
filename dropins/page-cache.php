@@ -296,8 +296,24 @@ if ( is_readable( $_pc_cache_file ) ) {
 		// Fall through to output buffering below.
 	} else {
 
-	// HTTP 304 Not Modified support.
-	if ( ! empty( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
+	// Read meta FIRST to determine original status code before 304 processing.
+	$_pc_meta_file = $_pc_cache_dir . $_pc_filename . '.meta.json';
+	if ( ! is_readable( $_pc_meta_file ) ) {
+		// Legacy fallback: shared meta.json from pre-1.1. Remove after a full cache flush cycle.
+		$_pc_meta_file = $_pc_cache_dir . 'meta.json';
+	}
+	$_pc_meta           = null;
+	$_pc_original_status = 200;
+	if ( is_readable( $_pc_meta_file ) ) {
+		$_pc_meta = json_decode( file_get_contents( $_pc_meta_file ), true );
+		if ( ! empty( $_pc_meta['status'] ) ) {
+			$_pc_original_status = (int) $_pc_meta['status'];
+		}
+	}
+
+	// HTTP 304 Not Modified — only for 200 responses.
+	// Non-200 (e.g. cached 404) should always return their full body + status.
+	if ( 200 === $_pc_original_status && ! empty( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
 		$_pc_since = strtotime( $_SERVER['HTTP_IF_MODIFIED_SINCE'] );
 		if ( $_pc_since && $_pc_since >= $_pc_modified_time ) {
 			header( $_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified', true, 304 );
@@ -307,22 +323,15 @@ if ( is_readable( $_pc_cache_file ) ) {
 		}
 	}
 
-	// Restore meta headers and status code if available (per-variant meta file).
-	$_pc_meta_file = $_pc_cache_dir . $_pc_filename . '.meta.json';
-	if ( ! is_readable( $_pc_meta_file ) ) {
-		// Legacy fallback: shared meta.json from pre-1.1. Remove after a full cache flush cycle.
-		$_pc_meta_file = $_pc_cache_dir . 'meta.json';
-	}
-	if ( is_readable( $_pc_meta_file ) ) {
-		$_pc_meta = json_decode( file_get_contents( $_pc_meta_file ), true );
+	// Restore meta headers and status code.
+	if ( $_pc_meta ) {
 		if ( ! empty( $_pc_meta['headers'] ) ) {
 			foreach ( $_pc_meta['headers'] as $_pc_header ) {
 				header( $_pc_header );
 			}
 		}
-		// Restore original HTTP status code (e.g., 404 for cached 404 pages).
-		if ( ! empty( $_pc_meta['status'] ) && 200 !== (int) $_pc_meta['status'] ) {
-			http_response_code( (int) $_pc_meta['status'] );
+		if ( 200 !== $_pc_original_status ) {
+			http_response_code( $_pc_original_status );
 		}
 	}
 

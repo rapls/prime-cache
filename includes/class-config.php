@@ -12,17 +12,53 @@ class Prime_Cache_Config {
 	/**
 	 * Generate and install the advanced-cache.php dropin.
 	 *
-	 * @return bool
+	 * Refuses to overwrite another plugin's advanced-cache.php.
+	 *
+	 * @return bool True on success, false if blocked or write failed.
 	 */
 	public static function install_advanced_cache() {
 		$dropin_path = WP_CONTENT_DIR . '/advanced-cache.php';
+
+		// Refuse to overwrite another plugin's advanced-cache.php.
+		if ( file_exists( $dropin_path ) ) {
+			$existing = file_get_contents( $dropin_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			if ( false === strpos( $existing, 'PRIME_CACHE' ) ) {
+				return false; // Not ours — do not overwrite.
+			}
+		}
 
 		$content = self::get_advanced_cache_content();
 		if ( false === $content ) {
 			return false;
 		}
 
-		return (bool) file_put_contents( $dropin_path, $content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		// Atomic write: temp file + rename.
+		$tempfile = $dropin_path . '.tmp.' . getmypid();
+		if ( false === file_put_contents( $tempfile, $content ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			return false;
+		}
+		if ( ! rename( $tempfile, $dropin_path ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
+			@unlink( $tempfile );
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Check if the current advanced-cache.php belongs to Prime Cache.
+	 *
+	 * @return string 'ours', 'external', or 'none'.
+	 */
+	public static function get_advanced_cache_owner() {
+		$dropin_path = WP_CONTENT_DIR . '/advanced-cache.php';
+		if ( ! file_exists( $dropin_path ) ) {
+			return 'none';
+		}
+		$content = file_get_contents( $dropin_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( false !== strpos( $content, 'PRIME_CACHE' ) ) {
+			return 'ours';
+		}
+		return 'external';
 	}
 
 	/**

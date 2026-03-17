@@ -247,8 +247,13 @@ class Prime_Cache_Admin_Settings {
 			set_transient( 'prime_cache_env_warnings', $warnings, 60 );
 		}
 
+		// Check advanced-cache.php ownership before install.
+		$ac_result = Prime_Cache_Config::install_advanced_cache();
+		if ( ! $ac_result && 'external' === Prime_Cache_Config::get_advanced_cache_owner() ) {
+			$warnings[] = __( 'advanced-cache.php is managed by another plugin. Prime Cache page caching cannot be enabled until the other plugin is deactivated.', 'prime-cache' );
+		}
+
 		Prime_Cache_Config::write_config_file( $s );
-		Prime_Cache_Config::install_advanced_cache();
 		$s['htaccess_enabled'] ? Prime_Cache_Htaccess::add_rules( $s ) : Prime_Cache_Htaccess::remove_rules();
 		return $s;
 	}
@@ -273,8 +278,9 @@ class Prime_Cache_Admin_Settings {
 	private function get_system_status() {
 		$s = array();
 		$s['wp_cache'] = defined( 'WP_CACHE' ) && WP_CACHE;
-		$dp = WP_CONTENT_DIR . '/advanced-cache.php';
-		$s['advanced_cache'] = file_exists( $dp ) && false !== strpos( file_get_contents( $dp ), 'PRIME_CACHE' ); // phpcs:ignore
+		$ac_owner = Prime_Cache_Config::get_advanced_cache_owner();
+		$s['advanced_cache']          = 'ours' === $ac_owner;
+		$s['advanced_cache_external'] = 'external' === $ac_owner;
 		$s['cache_dir_writable'] = wp_is_writable( PRIME_CACHE_CACHE_DIR ) || wp_is_writable( dirname( PRIME_CACHE_CACHE_DIR ) );
 		$s['gzip_available'] = function_exists( 'gzencode' );
 		$cfg = prime_cache_get_settings();
@@ -462,8 +468,9 @@ class Prime_Cache_Admin_Settings {
 					}
 					foreach ( $checks as $chk ) :
 						$ok = $sys[ $chk[0] ] ?? false;
+						$is_ext = ( 'advanced_cache' === $chk[0] && ! empty( $sys['advanced_cache_external'] ) );
 					?>
-					<div class="pc-sys__row"><span class="pc-dot pc-dot--<?php echo $ok ? 'g' : 'r'; ?>"></span><span class="pc-sys__lbl"><?php echo esc_html( $chk[1] ); ?></span><span class="pc-sys__val"><?php echo $ok ? esc_html__( 'Active', 'prime-cache' ) : esc_html__( 'Inactive', 'prime-cache' ); ?></span></div>
+					<div class="pc-sys__row"><span class="pc-dot pc-dot--<?php echo $ok ? 'g' : ( $is_ext ? 'a' : 'r' ); ?>"></span><span class="pc-sys__lbl"><?php echo esc_html( $chk[1] ); ?></span><span class="pc-sys__val"><?php echo $is_ext ? esc_html__( 'External', 'prime-cache' ) : ( $ok ? esc_html__( 'Active', 'prime-cache' ) : esc_html__( 'Inactive', 'prime-cache' ) ); ?></span></div>
 					<?php endforeach; ?>
 				</div>
 			</div>
@@ -2098,6 +2105,23 @@ class Prime_Cache_Admin_Settings {
 	/* ── notices ───────────────────────────────────────────── */
 
 	public function show_notices() {
+		// Persistent warning: WP_CACHE is not true but Prime Cache expects it.
+		$screen = get_current_screen();
+		if ( $screen && 'toplevel_page_prime-cache' === $screen->id ) {
+			$cfg = prime_cache_get_settings();
+			if ( ! empty( $cfg['cache_enabled'] ) && ( ! defined( 'WP_CACHE' ) || ! WP_CACHE ) ) {
+				echo '<div class="notice notice-error"><p><strong>Prime Cache:</strong> '
+					. esc_html__( 'WP_CACHE is not set to true. Page caching will not work. Please check wp-config.php — another define( \'WP_CACHE\', false ) may exist.', 'prime-cache' )
+					. '</p></div>';
+			}
+			$ac_owner = Prime_Cache_Config::get_advanced_cache_owner();
+			if ( ! empty( $cfg['cache_enabled'] ) && 'external' === $ac_owner ) {
+				echo '<div class="notice notice-error"><p><strong>Prime Cache:</strong> '
+					. esc_html__( 'advanced-cache.php is managed by another plugin. Prime Cache page caching will not work until the other plugin is deactivated or its drop-in is removed.', 'prime-cache' )
+					. '</p></div>';
+			}
+		}
+
 		if ( isset( $_GET['prime_cache_cleared'] ) && '1' === $_GET['prime_cache_cleared'] )
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Cache cleared successfully.', 'prime-cache' ) . '</p></div>';
 
@@ -2138,6 +2162,15 @@ class Prime_Cache_Admin_Settings {
 
 		if ( isset( $_GET['prime_cache_stats_reset'] ) && '1' === $_GET['prime_cache_stats_reset'] )
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Statistics have been reset.', 'prime-cache' ) . '</p></div>';
+
+		// Activation warnings (advanced-cache.php / WP_CACHE issues).
+		$act_warnings = get_transient( 'prime_cache_activation_warnings' );
+		if ( ! empty( $act_warnings ) && is_array( $act_warnings ) ) {
+			delete_transient( 'prime_cache_activation_warnings' );
+			foreach ( $act_warnings as $warning ) {
+				echo '<div class="notice notice-error is-dismissible"><p><strong>Prime Cache:</strong> ' . esc_html( $warning ) . '</p></div>';
+			}
+		}
 
 		// Environment pre-check warnings from sanitize_settings().
 		$env_warnings = get_transient( 'prime_cache_env_warnings' );
