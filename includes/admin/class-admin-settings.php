@@ -315,21 +315,22 @@ class Prime_Cache_Admin_Settings {
 			return '';
 		}
 		// Length limit: prevent excessively long patterns.
-		if ( strlen( $value ) > 1024 ) {
+		if ( strlen( $value ) > 512 ) {
 			return '';
 		}
-		// Strip null bytes, carriage returns, and newlines (safety for .htaccess injection).
+		// Strip null bytes, carriage returns, and newlines.
 		$value = preg_replace( '#[\x00\r\n]#', '', $value );
-		// Allowlist: only permit characters safe for both PHP and Apache regex context.
-		// Allows: a-z A-Z 0-9 . * + ? | ( ) ^ $ _ - / \
-		// Blocks: spaces, quotes, backticks, angle brackets, #, ;, =, {, }, [, ], comma, etc.
-		// This is intentionally restrictive — complex regex should use the exclusion
-		// settings in the admin UI, not be embedded in .htaccess rewrite rules.
-		if ( preg_match( '#[^a-zA-Z0-9.*+?|()^$_\-/\\\\]#', $value ) ) {
+		// Tight allowlist for Apache RewriteCond safety.
+		// Allows: a-z A-Z 0-9 . | ^ $ _ - /
+		// Blocks: ( ) * + ? { } [ ] \ spaces, quotes, and all other special chars.
+		// This means patterns are limited to pipe-separated literal substrings
+		// with . as single-char wildcard and ^ $ as anchors — sufficient for
+		// URL path, cookie name, and user-agent matching.
+		if ( preg_match( '#[^a-zA-Z0-9.|^$_\-/]#', $value ) ) {
 			return '';
 		}
-		// Block patterns likely to cause catastrophic backtracking.
-		if ( preg_match( '#\(\.\*\)\+|\(\.\+\)\+|\(\.\*\)\*|\(\.\+\)\*#', $value ) ) {
+		// Block empty alternation branches (||) which match everything.
+		if ( preg_match( '#\|\||^\||^$#', $value ) ) {
 			return '';
 		}
 		// Test the pattern to ensure it's valid PHP regex.

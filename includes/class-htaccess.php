@@ -268,16 +268,17 @@ class Prime_Cache_Htaccess {
 		$use_gzip     = ! empty( $settings['gzip_compression'] );
 		$sep_mobile   = ! empty( $settings['cache_mobile_separate'] );
 		// Sanitize patterns for safe .htaccess embedding.
-		// Only allow characters safe in Apache RewriteCond regex context.
+		// Tight allowlist: pipe-separated literals with . ^ $ as only meta-chars.
+		// No quantifiers (* + ? ), no groups ( ), no backslash escapes.
 		$sanitize_htaccess = function( $v ) {
 			$v = trim( $v ?? '' );
 			if ( '' === $v ) return '';
-			// Strip null bytes, newlines.
 			$v = preg_replace( '#[\x00\r\n]#', '', $v );
-			// Only allow: a-zA-Z0-9 . * + ? | ( ) ^ $ _ - / \
-			$v = preg_replace( '#[^a-zA-Z0-9.*+?|()^$_\-/\\\\]#', '', $v );
-			// Reject if empty after sanitization or if preg_match fails.
-			if ( '' === $v || false === @preg_match( '#' . $v . '#', '' ) ) return '';
+			// Strip anything not in the safe set.
+			$v = preg_replace( '#[^a-zA-Z0-9.|^$_\-/]#', '', $v );
+			// Reject empty alternation branches (||) or trailing/leading pipe.
+			if ( '' === $v || preg_match( '#\|\||^\||^$#', $v ) ) return '';
+			if ( false === @preg_match( '#' . $v . '#', '' ) ) return '';
 			return $v;
 		};
 		$reject_uri      = $sanitize_htaccess( $settings['cache_reject_uri'] ?? '' );
