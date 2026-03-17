@@ -41,7 +41,9 @@ $prime_cache_config = array(
 );
 
 if ( defined( 'PRIME_CACHE_CONFIG_DIR' ) ) {
-	$_pc_host        = isset( $_SERVER['HTTP_HOST'] ) ? preg_replace( '#[^a-zA-Z0-9.\-]#', '', $_SERVER['HTTP_HOST'] ) : '';
+	// Use shared host normalization to match the filename written by class-config.php.
+	require_once dirname( __FILE__ ) . '/../includes/cache-key-functions.php';
+	$_pc_host        = _prime_cache_config_host_key( isset( $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : '' );
 	$_pc_config_file = PRIME_CACHE_CONFIG_DIR . $_pc_host . '.php';
 	if ( is_readable( $_pc_config_file ) ) {
 		include $_pc_config_file;

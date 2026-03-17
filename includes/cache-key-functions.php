@@ -21,23 +21,54 @@ if ( function_exists( '_prime_cache_normalize_host' ) ) {
  * @return string Normalized hostname.
  */
 function _prime_cache_normalize_host( $host ) {
-	$host = strtolower( $host );
+	$host = strtolower( trim( $host ) );
 
-	// Handle IPv6 literal: [2001:db8::1] or [2001:db8::1]:8080
+	if ( '' === $host ) {
+		return '';
+	}
+
+	// Handle bracketed IPv6: [2001:db8::1] or [2001:db8::1]:8080
 	if ( 0 === strpos( $host, '[' ) ) {
 		$bracket_end = strpos( $host, ']' );
 		if ( false !== $bracket_end ) {
-			// Extract address inside brackets, remove brackets and port.
 			$host = substr( $host, 1, $bracket_end - 1 );
 		}
 	} else {
-		// IPv4 or hostname: strip port (e.g. example.com:8080 → example.com).
-		if ( false !== ( $colon = strrpos( $host, ':' ) ) ) {
-			$host = substr( $host, 0, $colon );
+		// Detect bare IPv6 (multiple colons = IPv6, not host:port).
+		$colon_count = substr_count( $host, ':' );
+		if ( $colon_count > 1 ) {
+			// Bare IPv6 address — keep as-is (no port stripping).
+		} elseif ( 1 === $colon_count ) {
+			// Single colon = host:port — strip port.
+			$host = substr( $host, 0, strrpos( $host, ':' ) );
 		}
 	}
 
 	return preg_replace( '#[^a-z0-9.\-]#', '', $host );
+}
+
+/**
+ * Normalize a URL path into safe, collision-free filesystem segments.
+ *
+ * - Does NOT rawurldecode (preserves %2F vs / distinction)
+ * - Each segment is encoded with underscore-hex for unsafe chars
+ * - Traversal attempts (.. and encoded variants) are blocked
+ *
+ * @param string $path Raw URL path.
+ * @return string Normalized path with trailing slash.
+ */
+/**
+ * Generate a config filename key from a hostname.
+ *
+ * Uses the same normalization as cache directory host, ensuring that
+ * config write (WP context), config read (dropin), and config delete
+ * all produce the same filename.
+ *
+ * @param string $host Raw hostname.
+ * @return string Safe filename (without extension).
+ */
+function _prime_cache_config_host_key( $host ) {
+	return _prime_cache_normalize_host( $host );
 }
 
 /**

@@ -189,12 +189,15 @@ class Prime_Cache_Config {
 			return false;
 		}
 
-		$host = wp_parse_url( home_url(), PHP_URL_HOST );
-		$file = $config_dir . sanitize_file_name( $host ) . '.php';
+		require_once __DIR__ . '/cache-key-functions.php';
+		$raw_host = wp_parse_url( home_url(), PHP_URL_HOST );
+		$host_key = _prime_cache_config_host_key( $raw_host ?: '' );
+		$file     = $config_dir . $host_key . '.php';
 
 		$lines   = array();
 		$lines[] = '<?php';
-		$lines[] = '/** Prime Cache config for ' . esc_html( $host ) . ' */';
+		$lines[] = '/** Prime Cache config for ' . esc_html( $raw_host ?: $host_key ) . ' */';
+
 		$lines[] = 'defined( \'ABSPATH\' ) || exit;';
 		$lines[] = '';
 
@@ -237,8 +240,9 @@ class Prime_Cache_Config {
 			? PRIME_CACHE_CONFIG_DIR
 			: WP_CONTENT_DIR . '/prime-cache-config/';
 
-		$host = wp_parse_url( home_url(), PHP_URL_HOST );
-		$file = $config_dir . sanitize_file_name( $host ) . '.php';
+		require_once __DIR__ . '/cache-key-functions.php';
+		$host_key = _prime_cache_config_host_key( wp_parse_url( home_url(), PHP_URL_HOST ) ?: '' );
+		$file     = $config_dir . $host_key . '.php';
 
 		if ( file_exists( $file ) ) {
 			@unlink( $file );

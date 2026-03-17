@@ -1299,6 +1299,11 @@ class Prime_Cache_Admin_Settings {
 			<!-- Cache Preloading -->
 			<div class="pc-card">
 				<span class="pc-card__h"><?php esc_html_e( 'Cache Preloading', 'prime-cache' ); ?></span>
+				<?php if ( ! empty( trim( $settings['cache_vary_cookies'] ?? '' ) ) ) : ?>
+				<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:10px 14px;margin:0 0 12px;font-size:13px;color:#92400e">
+					<strong><?php esc_html_e( 'Note:', 'prime-cache' ); ?></strong> <?php esc_html_e( 'Vary Cookies are active. Preloading warms only the default cookie variant for each URL. Cookie-specific variants (e.g. currency, country) are generated on the first real visitor request.', 'prime-cache' ); ?>
+				</div>
+				<?php endif; ?>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[preload_enabled]" value="1" <?php checked( $settings['preload_enabled'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Enable Cache Preloading', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Automatically crawl your site in the background to warm the page cache. Pages are preloaded via non-blocking HTTP requests so visitors always receive cached pages. Preloading restarts after a full cache purge.', 'prime-cache' ); ?></small></span></label>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[preload_homepage]" value="1" <?php checked( $settings['preload_homepage'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Preload Homepage', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Include the front page, posts page, and home URL in the preload queue.', 'prime-cache' ); ?></small></span></label>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[preload_public_posts]" value="1" <?php checked( $settings['preload_public_posts'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Preload Public Posts', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Preload all published posts, pages, and custom post types (up to 500, most recently modified first).', 'prime-cache' ); ?></small></span></label>

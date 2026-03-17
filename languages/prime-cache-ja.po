@@ -1667,3 +1667,9 @@ msgstr "設定はインポートされましたが、設定ファイルを書き
 
 msgid "Settings imported but advanced-cache.php could not be updated."
 msgstr "設定はインポートされましたが、advanced-cache.php を更新できませんでした。"
+
+msgid "Note:"
+msgstr "注意:"
+
+msgid "Vary Cookies are active. Preloading warms only the default cookie variant for each URL. Cookie-specific variants (e.g. currency, country) are generated on the first real visitor request."
+msgstr "Cookie 別キャッシュ振り分けが有効です。プリロードは各 URL のデフォルトバリアントのみをウォームアップします。Cookie 固有のバリアント (通貨、国など) は最初の実際の訪問者リクエスト時に生成されます。"
