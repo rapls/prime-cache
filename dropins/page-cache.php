@@ -218,19 +218,17 @@ function _prime_cache_get_cache_dir() {
 	$host = isset( $_SERVER['HTTP_HOST'] ) ? preg_replace( '#[^a-zA-Z0-9.\-]#', '', $_SERVER['HTTP_HOST'] ) : '';
 	$path = strtok( $_pc_request_uri, '?' );
 
-	// Normalize: decode percent-encoding first, then re-encode for safe filesystem names.
-	$path = rawurldecode( $path );
-
-	// Split into segments and encode each one to prevent collisions.
-	// e.g. /c++/ and /c/ remain distinct; /café/ stays unique.
+	// Do NOT rawurldecode() — /a%2Fb/ and /a/b/ are distinct URLs and must
+	// produce distinct cache directories to prevent content mixing.
+	// Each segment is encoded for safe filesystem naming without decoding first.
 	$segments = explode( '/', $path );
 	$safe_segments = array();
 	foreach ( $segments as $seg ) {
 		if ( '' === $seg ) {
 			continue;
 		}
-		// Remove traversal attempts.
-		if ( '..' === $seg || '.' === $seg ) {
+		// Block traversal (literal and encoded forms).
+		if ( '..' === $seg || '.' === $seg || '%2e%2e' === strtolower( $seg ) || '%2e' === strtolower( $seg ) ) {
 			continue;
 		}
 		// Keep safe chars as-is, encode everything else with underscore-hex.
@@ -320,10 +318,6 @@ if ( is_readable( $_pc_cache_file ) ) {
 
 	// Read meta FIRST to determine original status code before 304 processing.
 	$_pc_meta_file = $_pc_cache_dir . $_pc_filename . '.meta.json';
-	if ( ! is_readable( $_pc_meta_file ) ) {
-		// Legacy fallback: shared meta.json from pre-1.1. Remove after a full cache flush cycle.
-		$_pc_meta_file = $_pc_cache_dir . 'meta.json';
-	}
 	$_pc_meta           = null;
 	$_pc_original_status = 200;
 	if ( is_readable( $_pc_meta_file ) ) {

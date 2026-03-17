@@ -273,13 +273,30 @@ class Prime_Cache_Preload {
 		// Use the same cache dir resolution as the storage class.
 		$dir = Prime_Cache_Storage::get_cache_dir( $url );
 
-		// Check for any index*.html file.
 		if ( ! is_dir( $dir ) ) {
 			return false;
 		}
 
-		$files = glob( $dir . 'index*.html' );
-		return ! empty( $files );
+		// Build the expected filename for this URL's variant.
+		$parsed = wp_parse_url( $url );
+		$is_ssl = isset( $parsed['scheme'] ) && 'https' === $parsed['scheme'];
+		$filename = Prime_Cache_Storage::get_cache_filename( $is_ssl, false, false );
+
+		// Also check the mobile variant if mobile separate is enabled.
+		$s = $this->settings;
+		$filename_mobile = '';
+		if ( ! empty( $s['cache_mobile_separate'] ) ) {
+			$filename_mobile = Prime_Cache_Storage::get_cache_filename( $is_ssl, true, false );
+		}
+
+		if ( is_readable( $dir . $filename ) ) {
+			return true;
+		}
+		if ( $filename_mobile && is_readable( $dir . $filename_mobile ) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

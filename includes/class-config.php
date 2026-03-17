@@ -308,7 +308,10 @@ class Prime_Cache_Config {
 				$content = file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 				if ( false !== strpos( $content, 'PRIME_OBJECT_CACHE' ) ) {
 					@unlink( $file );
+					return true;
 				}
+				// External drop-in exists — cannot disable, report failure.
+				return false;
 			}
 			return true;
 		}
@@ -443,24 +446,48 @@ PHP;
 			return false;
 		}
 
-		// Strip PHP comments to avoid matching inside commented-out code.
-		$stripped = preg_replace( '#//[^\n]*#', '', $content );
-		$stripped = preg_replace( '#/\*.*?\*/#s', '', $stripped );
+		// Use PHP's tokenizer for accurate parsing — avoids false matches
+		// inside strings, comments, or malformed code.
+		$tokens = token_get_all( $content );
+		$count  = count( $tokens );
 
-		// Find all WP_CACHE definitions (not WP_CACHE_KEY_SALT etc.).
-		$matches = array();
-		preg_match_all(
-			'#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*([^)]+)\)#mi',
-			$stripped,
-			$matches
-		);
+		for ( $i = 0; $i < $count; $i++ ) {
+			// Look for: define ( 'WP_CACHE' , <value> )
+			if ( ! is_array( $tokens[ $i ] ) || T_STRING !== $tokens[ $i ][0] || 'define' !== strtolower( $tokens[ $i ][1] ) ) {
+				continue;
+			}
 
-		if ( empty( $matches[1] ) ) {
-			return false; // No definition found.
+			// Scan forward for ( 'WP_CACHE' , <value> ).
+			$j = $i + 1;
+			// Skip whitespace.
+			while ( $j < $count && is_array( $tokens[ $j ] ) && T_WHITESPACE === $tokens[ $j ][0] ) { $j++; }
+			// Expect (
+			if ( $j >= $count || '(' !== $tokens[ $j ] ) { continue; }
+			$j++;
+			while ( $j < $count && is_array( $tokens[ $j ] ) && T_WHITESPACE === $tokens[ $j ][0] ) { $j++; }
+			// Expect string constant 'WP_CACHE' or "WP_CACHE".
+			if ( $j >= $count || ! is_array( $tokens[ $j ] ) || T_CONSTANT_ENCAPSED_STRING !== $tokens[ $j ][0] ) { continue; }
+			$const_name = trim( $tokens[ $j ][1], "\"'" );
+			if ( 'WP_CACHE' !== $const_name ) { continue; }
+			$j++;
+			while ( $j < $count && is_array( $tokens[ $j ] ) && T_WHITESPACE === $tokens[ $j ][0] ) { $j++; }
+			// Expect comma.
+			if ( $j >= $count || ',' !== $tokens[ $j ] ) { continue; }
+			$j++;
+			while ( $j < $count && is_array( $tokens[ $j ] ) && T_WHITESPACE === $tokens[ $j ][0] ) { $j++; }
+			// Read the value token.
+			if ( $j >= $count ) { continue; }
+
+			if ( is_array( $tokens[ $j ] ) ) {
+				$val = strtolower( $tokens[ $j ][1] );
+				// PHP uses first define() — return immediately.
+				return in_array( $val, array( 'true', '1' ), true );
+			}
+
+			// Non-array token (e.g. a number literal).
+			return '1' === $tokens[ $j ];
 		}
 
-		// PHP uses the first define() — check if it resolves to true.
-		$first_value = strtolower( trim( $matches[1][0] ) );
-		return in_array( $first_value, array( 'true', '1', "'1'" ), true );
+		return false; // No WP_CACHE definition found.
 	}
 }

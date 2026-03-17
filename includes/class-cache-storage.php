@@ -21,12 +21,15 @@ class Prime_Cache_Storage {
 		// Sanitize host: only safe chars.
 		$host = preg_replace( '#[^a-zA-Z0-9.\-]#', '', $host );
 
-		// Normalize path: decode, then encode each segment for collision-free FS names.
-		$path = rawurldecode( $path );
+		// Do NOT rawurldecode() — preserve percent-encoding so that /a%2Fb/ and
+		// /a/b/ remain distinct cache directories (prevents content mixing).
 		$segments = explode( '/', $path );
 		$safe = array();
 		foreach ( $segments as $seg ) {
 			if ( '' === $seg || '..' === $seg || '.' === $seg ) {
+				continue;
+			}
+			if ( '%2e%2e' === strtolower( $seg ) || '%2e' === strtolower( $seg ) ) {
 				continue;
 			}
 			$safe[] = preg_replace_callback(

@@ -805,6 +805,18 @@ class Prime_Cache {
 			exit;
 		}
 
+		// MIME type validation via finfo (content-based, not trust client header).
+		if ( function_exists( 'finfo_open' ) ) {
+			$finfo = finfo_open( FILEINFO_MIME_TYPE );
+			$mime  = finfo_file( $finfo, $_FILES['pc_import_file']['tmp_name'] );
+			finfo_close( $finfo );
+			// JSON files may report as application/json or text/plain.
+			if ( $mime && ! in_array( $mime, array( 'application/json', 'text/plain', 'text/json' ), true ) ) {
+				wp_safe_redirect( $error_url );
+				exit;
+			}
+		}
+
 		$content = file_get_contents( $_FILES['pc_import_file']['tmp_name'] ); // phpcs:ignore
 		$data    = json_decode( $content, true );
 
