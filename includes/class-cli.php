@@ -140,7 +140,7 @@ class Prime_Cache_CLI extends WP_CLI_Command {
 		WP_CLI::line( 'WP_CACHE:      ' . ( defined( 'WP_CACHE' ) && WP_CACHE ? 'Yes' : 'No' ) );
 
 		$dropin = WP_CONTENT_DIR . '/advanced-cache.php';
-		WP_CLI::line( 'Dropin:        ' . ( file_exists( $dropin ) && false !== strpos( file_get_contents( $dropin ), 'PRIME_CACHE' ) ? 'Installed' : 'Missing' ) );
+		WP_CLI::line( 'Dropin:        ' . ( file_exists( $dropin ) && false !== strpos( file_get_contents( $dropin ), 'PRIME_CACHE_DROPIN_SIGNATURE' ) ? 'Installed' : 'Missing' ) );
 
 		// Cache stats (DB baseline + file increments).
 		$db_stats = get_option( 'prime_cache_stats', array( 'hit' => 0, 'miss' => 0, 'since' => 0 ) );

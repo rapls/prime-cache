@@ -277,23 +277,47 @@ class Prime_Cache_Preload {
 			return false;
 		}
 
-		// Build the expected filename for this URL's variant.
 		$parsed = wp_parse_url( $url );
 		$is_ssl = isset( $parsed['scheme'] ) && 'https' === $parsed['scheme'];
-		$filename = Prime_Cache_Storage::get_cache_filename( $is_ssl, false, false );
+		$s      = $this->settings;
+
+		// Build query-string suffix (same logic as dropin).
+		$qs_suffix = '';
+		if ( ! empty( $parsed['query'] ) ) {
+			parse_str( $parsed['query'], $qs_params );
+			$ignored   = array_filter( array_map( 'trim', explode( ',', $s['cache_ignore_qs'] ?? '' ) ) );
+			$cached_qs = array_filter( array_map( 'trim', explode( ',', $s['cache_query_strings'] ?? '' ) ) );
+			$remaining = array_diff_key( $qs_params, array_flip( $ignored ) );
+			if ( ! empty( $remaining ) && ! empty( $cached_qs ) ) {
+				$to_cache = array_intersect_key( $remaining, array_flip( $cached_qs ) );
+				if ( ! empty( $to_cache ) ) {
+					ksort( $to_cache );
+					$qs_suffix = '-qs_' . substr( md5( http_build_query( $to_cache ) ), 0, 8 );
+				}
+			}
+		}
+
+		// Build filename with variant suffixes.
+		$base = 'index';
+		if ( $is_ssl ) {
+			$base .= '-https';
+		}
+		$base .= $qs_suffix . '.html';
+
+		if ( is_readable( $dir . $base ) ) {
+			return true;
+		}
 
 		// Also check the mobile variant if mobile separate is enabled.
-		$s = $this->settings;
-		$filename_mobile = '';
 		if ( ! empty( $s['cache_mobile_separate'] ) ) {
-			$filename_mobile = Prime_Cache_Storage::get_cache_filename( $is_ssl, true, false );
-		}
-
-		if ( is_readable( $dir . $filename ) ) {
-			return true;
-		}
-		if ( $filename_mobile && is_readable( $dir . $filename_mobile ) ) {
-			return true;
+			$mobile_base = 'index';
+			if ( $is_ssl ) {
+				$mobile_base .= '-https';
+			}
+			$mobile_base .= '-mobile' . $qs_suffix . '.html';
+			if ( is_readable( $dir . $mobile_base ) ) {
+				return true;
+			}
 		}
 
 		return false;

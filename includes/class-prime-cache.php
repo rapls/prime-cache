@@ -885,14 +885,33 @@ class Prime_Cache {
 		// Save sanitized settings to database.
 		update_option( 'prime_cache_settings', $sanitized );
 
-		// Regenerate config files.
-		Prime_Cache_Config::write_config_file( $sanitized );
-		Prime_Cache_Config::install_advanced_cache();
+		// Regenerate config files and track partial failures.
+		$config_ok = Prime_Cache_Config::write_config_file( $sanitized );
+		$ac_ok     = Prime_Cache_Config::install_advanced_cache();
 
 		// Force refresh the settings cache.
 		prime_cache_get_settings( true );
 
-		wp_safe_redirect( add_query_arg( array( 'tab' => 'tools', 'pc_imported' => 'ok' ), admin_url( 'admin.php?page=prime-cache' ) ) );
+		// Determine import result status.
+		$result = 'ok';
+		if ( ! $config_ok || ! $ac_ok ) {
+			$result = 'partial';
+			$warnings = array();
+			if ( ! $config_ok ) {
+				$warnings[] = __( 'Settings imported but config file could not be written. Cache may not reflect the new settings until the next save.', 'prime-cache' );
+			}
+			if ( ! $ac_ok ) {
+				$ac_owner = Prime_Cache_Config::get_advanced_cache_owner();
+				if ( 'external' === $ac_owner ) {
+					$warnings[] = __( 'Settings imported but advanced-cache.php is managed by another plugin. Page caching will not work until the other plugin is deactivated.', 'prime-cache' );
+				} else {
+					$warnings[] = __( 'Settings imported but advanced-cache.php could not be updated.', 'prime-cache' );
+				}
+			}
+			set_transient( 'prime_cache_import_warnings', $warnings, 60 );
+		}
+
+		wp_safe_redirect( add_query_arg( array( 'tab' => 'tools', 'pc_imported' => $result ), admin_url( 'admin.php?page=prime-cache' ) ) );
 		exit;
 	}
 

@@ -1757,6 +1757,20 @@ class Prime_Cache_Admin_Settings {
 		<?php if ( isset( $_GET['pc_imported'] ) ) : ?>
 			<?php if ( 'ok' === $_GET['pc_imported'] ) : ?>
 				<div class="notice notice-success is-dismissible" style="margin:0 0 16px"><p><?php esc_html_e( 'Settings imported successfully.', 'prime-cache' ); ?></p></div>
+			<?php elseif ( 'partial' === $_GET['pc_imported'] ) : ?>
+				<div class="notice notice-warning is-dismissible" style="margin:0 0 16px"><p><?php esc_html_e( 'Settings imported with warnings.', 'prime-cache' ); ?></p>
+				<?php
+				$import_warnings = get_transient( 'prime_cache_import_warnings' );
+				if ( ! empty( $import_warnings ) && is_array( $import_warnings ) ) {
+					delete_transient( 'prime_cache_import_warnings' );
+					echo '<ul style="margin:4px 0 0 16px;list-style:disc">';
+					foreach ( $import_warnings as $iw ) {
+						echo '<li>' . esc_html( $iw ) . '</li>';
+					}
+					echo '</ul>';
+				}
+				?>
+				</div>
 			<?php else : ?>
 				<div class="notice notice-error is-dismissible" style="margin:0 0 16px"><p><?php esc_html_e( 'Import failed. Please upload a valid Prime Cache settings JSON file.', 'prime-cache' ); ?></p></div>
 			<?php endif; ?>

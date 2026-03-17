@@ -14,34 +14,13 @@ class Prime_Cache_Storage {
 	 * @return string Directory path.
 	 */
 	public static function get_cache_dir( $url ) {
+		require_once __DIR__ . '/cache-key-functions.php';
+
 		$parsed = wp_parse_url( $url );
-		$host   = isset( $parsed['host'] ) ? $parsed['host'] : '';
-		$path   = isset( $parsed['path'] ) ? $parsed['path'] : '/';
+		$host   = _prime_cache_normalize_host( isset( $parsed['host'] ) ? $parsed['host'] : '' );
+		$path   = _prime_cache_normalize_path( isset( $parsed['path'] ) ? $parsed['path'] : '/' );
 
-		// Sanitize host: only safe chars.
-		$host = preg_replace( '#[^a-zA-Z0-9.\-]#', '', $host );
-
-		// Do NOT rawurldecode() — preserve percent-encoding so that /a%2Fb/ and
-		// /a/b/ remain distinct cache directories (prevents content mixing).
-		$segments = explode( '/', $path );
-		$safe = array();
-		foreach ( $segments as $seg ) {
-			if ( '' === $seg || '..' === $seg || '.' === $seg ) {
-				continue;
-			}
-			if ( '%2e%2e' === strtolower( $seg ) || '%2e' === strtolower( $seg ) ) {
-				continue;
-			}
-			$safe[] = preg_replace_callback(
-				'#[^a-zA-Z0-9_\-]#',
-				function( $m ) { return '_' . bin2hex( $m[0] ); },
-				$seg
-			);
-		}
-
-		$safe_path = empty( $safe ) ? '/' : '/' . implode( '/', $safe ) . '/';
-
-		return PRIME_CACHE_CACHE_DIR . $host . $safe_path;
+		return PRIME_CACHE_CACHE_DIR . $host . $path;
 	}
 
 	/**
@@ -214,7 +193,8 @@ class Prime_Cache_Storage {
 	 * @return bool
 	 */
 	public static function delete_host( $host ) {
-		$host = self::sanitize_path_segment( $host );
+		require_once __DIR__ . '/cache-key-functions.php';
+		$host = _prime_cache_normalize_host( $host );
 		$dir  = PRIME_CACHE_CACHE_DIR . $host . '/';
 
 		if ( ! is_dir( $dir ) ) {

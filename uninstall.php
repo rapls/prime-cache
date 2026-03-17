@@ -20,7 +20,7 @@ if ( file_exists( $htaccess ) && function_exists( 'insert_with_markers' ) ) {
 $dropin = WP_CONTENT_DIR . '/advanced-cache.php';
 if ( file_exists( $dropin ) ) {
 	$content = file_get_contents( $dropin ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-	if ( false !== strpos( $content, 'PRIME_CACHE' ) ) {
+	if ( false !== strpos( $content, 'PRIME_CACHE_DROPIN_SIGNATURE' ) ) {
 		@unlink( $dropin );
 	}
 }
@@ -29,7 +29,7 @@ if ( file_exists( $dropin ) ) {
 $object_dropin = WP_CONTENT_DIR . '/object-cache.php';
 if ( file_exists( $object_dropin ) ) {
 	$content = file_get_contents( $object_dropin ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-	if ( false !== strpos( $content, 'PRIME_OBJECT_CACHE' ) ) {
+	if ( false !== strpos( $content, 'PRIME_CACHE_DROPIN_SIGNATURE' ) ) {
 		@unlink( $object_dropin );
 	}
 }

@@ -215,33 +215,13 @@ $_pc_is_ssl = ( ! empty( $_SERVER['HTTPS'] ) && 'off' !== $_SERVER['HTTPS'] )
 function _prime_cache_get_cache_dir() {
 	global $_pc_request_uri;
 
-	$host = isset( $_SERVER['HTTP_HOST'] ) ? preg_replace( '#[^a-zA-Z0-9.\-]#', '', $_SERVER['HTTP_HOST'] ) : '';
-	$path = strtok( $_pc_request_uri, '?' );
+	// Load shared cache key functions (pure PHP, no WordPress dependency).
+	require_once dirname( __FILE__ ) . '/../includes/cache-key-functions.php';
 
-	// Do NOT rawurldecode() — /a%2Fb/ and /a/b/ are distinct URLs and must
-	// produce distinct cache directories to prevent content mixing.
-	// Each segment is encoded for safe filesystem naming without decoding first.
-	$segments = explode( '/', $path );
-	$safe_segments = array();
-	foreach ( $segments as $seg ) {
-		if ( '' === $seg ) {
-			continue;
-		}
-		// Block traversal (literal and encoded forms).
-		if ( '..' === $seg || '.' === $seg || '%2e%2e' === strtolower( $seg ) || '%2e' === strtolower( $seg ) ) {
-			continue;
-		}
-		// Keep safe chars as-is, encode everything else with underscore-hex.
-		$safe_segments[] = preg_replace_callback(
-			'#[^a-zA-Z0-9_\-]#',
-			function( $m ) { return '_' . bin2hex( $m[0] ); },
-			$seg
-		);
-	}
+	$host = _prime_cache_normalize_host( isset( $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : '' );
+	$path = _prime_cache_normalize_path( strtok( $_pc_request_uri, '?' ) );
 
-	$safe_path = empty( $safe_segments ) ? '/' : '/' . implode( '/', $safe_segments ) . '/';
-
-	return PRIME_CACHE_CACHE_DIR . $host . $safe_path;
+	return PRIME_CACHE_CACHE_DIR . $host . $path;
 }
 
 /**
