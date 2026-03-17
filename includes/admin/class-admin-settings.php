@@ -268,11 +268,23 @@ class Prime_Cache_Admin_Settings {
 		return $r;
 	}
 	private function get_hit_stats() {
-		$d = array( 'hit' => 0, 'miss' => 0, 'since' => 0 );
+		// DB stores the persisted baseline; file stores increments since last sync.
+		$db = get_option( 'prime_cache_stats', array() );
+		$db = wp_parse_args( $db, array( 'hit' => 0, 'miss' => 0, 'since' => 0 ) );
+
 		$f = PRIME_CACHE_CACHE_DIR . 'stats.json';
-		if ( ! is_readable( $f ) ) return $d;
-		$j = json_decode( file_get_contents( $f ), true ); // phpcs:ignore
-		return is_array( $j ) ? wp_parse_args( $j, $d ) : $d;
+		if ( is_readable( $f ) ) {
+			$j = json_decode( file_get_contents( $f ), true ); // phpcs:ignore
+			if ( is_array( $j ) ) {
+				$db['hit']  += (int) ( $j['hit'] ?? 0 );
+				$db['miss'] += (int) ( $j['miss'] ?? 0 );
+				if ( ! $db['since'] && ! empty( $j['since'] ) ) {
+					$db['since'] = (int) $j['since'];
+				}
+			}
+		}
+
+		return $db;
 	}
 	private function fmt( $b ) { if ( $b < 1024 ) return $b . ' B'; if ( $b < 1048576 ) return round( $b / 1024, 1 ) . ' KB'; return round( $b / 1048576, 1 ) . ' MB'; }
 	private function get_system_status() {
@@ -427,7 +439,10 @@ class Prime_Cache_Admin_Settings {
 		<div class="pc-card">
 			<div class="pc-card__row">
 				<span class="pc-card__h"><?php esc_html_e( 'Cache Hit Rate', 'prime-cache' ); ?></span>
-				<span class="pc-meta"><?php if ( $hs['since'] ) printf( esc_html__( 'Since: %s', 'prime-cache' ), esc_html( wp_date( 'Y/m/d H:i', $hs['since'] ) ) ); ?></span>
+				<div style="display:flex;align-items:center;gap:12px">
+					<span class="pc-meta"><?php if ( $hs['since'] ) printf( esc_html__( 'Since: %s', 'prime-cache' ), esc_html( wp_date( 'Y/m/d H:i', $hs['since'] ) ) ); ?></span>
+					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=prime-cache&prime_cache_reset_stats=1' ), 'prime_cache_reset_stats' ) ); ?>" class="pc-btn pc-btn--o pc-btn--sm" style="font-size:11px;padding:3px 10px" onclick="return confirm(<?php echo esc_attr( wp_json_encode( __( 'Reset all hit/miss statistics to zero?', 'prime-cache' ) ) ); ?>)"><span class="dashicons dashicons-image-rotate" style="font-size:13px;width:13px;height:13px;line-height:13px"></span><?php esc_html_e( 'Reset', 'prime-cache' ); ?></a>
+				</div>
 			</div>
 			<div class="pc-bar"><div class="pc-bar__fill" style="width:<?php echo esc_attr( $rate ); ?>%"></div></div>
 			<div class="pc-bar__info">

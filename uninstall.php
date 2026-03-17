@@ -103,7 +103,8 @@ if ( is_dir( $fo_dir ) ) {
 	@rmdir( $fo_dir );
 }
 
-// Remove image optimization metadata (#18).
+// Remove stats and image optimization metadata.
+delete_option( 'prime_cache_stats' );
 delete_option( 'prime_cache_img_stats' );
 global $wpdb;
 $wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_prime_cache_img_opt' ) );

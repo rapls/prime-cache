@@ -343,6 +343,7 @@ class Prime_Cache {
 
 		switch ( $action ) {
 			case 'clear_all':
+				self::sync_stats_to_db(); // Persist stats before cache dir is cleared.
 				$this->purge->purge_all();
 				$this->clear_minified_files();
 				$this->clear_critical_css_files();
@@ -353,6 +354,7 @@ class Prime_Cache {
 				break;
 
 			case 'clear_and_preload':
+				self::sync_stats_to_db();
 				$this->purge->purge_all();
 				$this->clear_minified_files();
 				if ( function_exists( 'wp_cache_flush' ) ) {
@@ -612,9 +614,12 @@ class Prime_Cache {
 			return;
 		}
 
+		// Reset DB stats.
+		update_option( 'prime_cache_stats', array( 'hit' => 0, 'miss' => 0, 'since' => time() ), false );
+
+		// Reset file-based stats.
 		$stats_file = PRIME_CACHE_CACHE_DIR . 'stats.json';
 		$data = wp_json_encode( array( 'hit' => 0, 'miss' => 0, 'since' => time() ) );
-		// Use flock to avoid corrupting stats if drop-in is writing concurrently.
 		$fp = fopen( $stats_file, 'c' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 		if ( $fp ) {
 			flock( $fp, LOCK_EX );
@@ -629,6 +634,46 @@ class Prime_Cache {
 		$redirect = add_query_arg( 'prime_cache_stats_reset', '1', $redirect );
 		wp_safe_redirect( $redirect );
 		exit;
+	}
+
+	/**
+	 * Sync file-based stats into the database and reset the file counters.
+	 *
+	 * Called before cache directory deletion so stats survive purge_all.
+	 */
+	public static function sync_stats_to_db() {
+		$stats_file = PRIME_CACHE_CACHE_DIR . 'stats.json';
+		if ( ! is_readable( $stats_file ) ) {
+			return;
+		}
+
+		$fp = fopen( $stats_file, 'c' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		if ( ! $fp ) {
+			return;
+		}
+
+		flock( $fp, LOCK_EX );
+		fseek( $fp, 0 );
+		$raw = stream_get_contents( $fp );
+		$file_stats = $raw ? json_decode( $raw, true ) : null;
+
+		if ( is_array( $file_stats ) ) {
+			$db = get_option( 'prime_cache_stats', array( 'hit' => 0, 'miss' => 0, 'since' => 0 ) );
+			$db['hit']  = (int) ( $db['hit'] ?? 0 ) + (int) ( $file_stats['hit'] ?? 0 );
+			$db['miss'] = (int) ( $db['miss'] ?? 0 ) + (int) ( $file_stats['miss'] ?? 0 );
+			if ( ! $db['since'] && ! empty( $file_stats['since'] ) ) {
+				$db['since'] = (int) $file_stats['since'];
+			}
+			update_option( 'prime_cache_stats', $db, false );
+
+			// Reset file counters to zero (keep since).
+			ftruncate( $fp, 0 );
+			fseek( $fp, 0 );
+			fwrite( $fp, json_encode( array( 'hit' => 0, 'miss' => 0, 'since' => $db['since'] ) ) );
+		}
+
+		flock( $fp, LOCK_UN );
+		fclose( $fp );
 	}
 
 	/**
@@ -681,11 +726,19 @@ class Prime_Cache {
 	 * Render dashboard widget content.
 	 */
 	public function render_dashboard_widget() {
+		// Merge DB baseline + file increments.
+		$db = get_option( 'prime_cache_stats', array( 'hit' => 0, 'miss' => 0, 'since' => 0 ) );
+		$hs = wp_parse_args( $db, array( 'hit' => 0, 'miss' => 0, 'since' => 0 ) );
 		$stats_file = PRIME_CACHE_CACHE_DIR . 'stats.json';
-		$hs = array( 'hit' => 0, 'miss' => 0, 'since' => 0 );
 		if ( is_readable( $stats_file ) ) {
 			$d = json_decode( file_get_contents( $stats_file ), true ); // phpcs:ignore
-			if ( is_array( $d ) ) $hs = wp_parse_args( $d, $hs );
+			if ( is_array( $d ) ) {
+				$hs['hit']  += (int) ( $d['hit'] ?? 0 );
+				$hs['miss'] += (int) ( $d['miss'] ?? 0 );
+				if ( ! $hs['since'] && ! empty( $d['since'] ) ) {
+					$hs['since'] = (int) $d['since'];
+				}
+			}
 		}
 		$total = $hs['hit'] + $hs['miss'];
 		$rate  = $total > 0 ? round( ( $hs['hit'] / $total ) * 100, 1 ) : 0;

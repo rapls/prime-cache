@@ -142,19 +142,24 @@ class Prime_Cache_CLI extends WP_CLI_Command {
 		$dropin = WP_CONTENT_DIR . '/advanced-cache.php';
 		WP_CLI::line( 'Dropin:        ' . ( file_exists( $dropin ) && false !== strpos( file_get_contents( $dropin ), 'PRIME_CACHE' ) ? 'Installed' : 'Missing' ) );
 
-		// Cache stats.
+		// Cache stats (DB baseline + file increments).
+		$db_stats = get_option( 'prime_cache_stats', array( 'hit' => 0, 'miss' => 0, 'since' => 0 ) );
+		$hit  = (int) ( $db_stats['hit'] ?? 0 );
+		$miss = (int) ( $db_stats['miss'] ?? 0 );
 		$stats_file = PRIME_CACHE_CACHE_DIR . 'stats.json';
 		if ( is_readable( $stats_file ) ) {
-			$data = json_decode( file_get_contents( $stats_file ), true );
-			if ( $data ) {
-				$total = ( $data['hit'] ?? 0 ) + ( $data['miss'] ?? 0 );
-				$rate  = $total > 0 ? round( ( $data['hit'] / $total ) * 100, 1 ) : 0;
-				WP_CLI::line( '' );
-				WP_CLI::line( 'Hit Rate:  ' . $rate . '%' );
-				WP_CLI::line( 'HIT:       ' . number_format( $data['hit'] ?? 0 ) );
-				WP_CLI::line( 'MISS:      ' . number_format( $data['miss'] ?? 0 ) );
+			$file_data = json_decode( file_get_contents( $stats_file ), true );
+			if ( is_array( $file_data ) ) {
+				$hit  += (int) ( $file_data['hit'] ?? 0 );
+				$miss += (int) ( $file_data['miss'] ?? 0 );
 			}
 		}
+		$total = $hit + $miss;
+		$rate  = $total > 0 ? round( ( $hit / $total ) * 100, 1 ) : 0;
+		WP_CLI::line( '' );
+		WP_CLI::line( 'Hit Rate:  ' . $rate . '%' );
+		WP_CLI::line( 'HIT:       ' . number_format( $hit ) );
+		WP_CLI::line( 'MISS:      ' . number_format( $miss ) );
 
 		// Disk usage.
 		$files = 0; $size = 0;
