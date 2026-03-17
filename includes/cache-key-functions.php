@@ -44,7 +44,14 @@ function _prime_cache_normalize_host( $host ) {
 		}
 	}
 
-	return preg_replace( '#[^a-z0-9.\-]#', '', $host );
+	// Encode unsafe chars with underscore-hex (same approach as path segments).
+	// This preserves IPv6 colons as _3a instead of stripping them, preventing
+	// distinct addresses from collapsing to the same string.
+	return preg_replace_callback(
+		'#[^a-z0-9.\-]#',
+		function( $m ) { return '_' . bin2hex( $m[0] ); },
+		$host
+	);
 }
 
 /**

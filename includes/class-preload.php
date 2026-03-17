@@ -297,30 +297,30 @@ class Prime_Cache_Preload {
 			}
 		}
 
-		// Build filename with variant suffixes.
+		// Desktop/base variant MUST exist — this is the primary cache.
 		$base = 'index';
 		if ( $is_ssl ) {
 			$base .= '-https';
 		}
 		$base .= $qs_suffix . '.html';
 
-		if ( is_readable( $dir . $base ) ) {
-			return true;
+		if ( ! is_readable( $dir . $base ) ) {
+			return false; // Desktop not cached — needs preloading.
 		}
 
-		// Also check the mobile variant if mobile separate is enabled.
+		// If mobile separate is enabled, mobile variant must also exist.
 		if ( ! empty( $s['cache_mobile_separate'] ) ) {
 			$mobile_base = 'index';
 			if ( $is_ssl ) {
 				$mobile_base .= '-https';
 			}
 			$mobile_base .= '-mobile' . $qs_suffix . '.html';
-			if ( is_readable( $dir . $mobile_base ) ) {
-				return true;
+			if ( ! is_readable( $dir . $mobile_base ) ) {
+				return false; // Mobile not cached — needs preloading.
 			}
 		}
 
-		return false;
+		return true; // All required variants exist.
 	}
 
 	/**

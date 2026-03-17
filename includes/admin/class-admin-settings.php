@@ -308,10 +308,19 @@ class Prime_Cache_Admin_Settings {
 		if ( empty( $value ) ) {
 			return '';
 		}
-		// Test the pattern to ensure it's valid and doesn't hang.
+		// Length limit: prevent excessively long patterns.
+		if ( strlen( $value ) > 2048 ) {
+			return '';
+		}
+		// Block patterns likely to cause catastrophic backtracking.
+		if ( preg_match( '#\(\.\*\)\+|\(\.\+\)\+|\(\.\*\)\*|\(\.\+\)\*#', $value ) ) {
+			return '';
+		}
+		// Strip null bytes and carriage returns (safety for .htaccess injection).
+		$value = preg_replace( '#[\x00\r]#', '', $value );
+		// Test the pattern with a short timeout to ensure it's valid.
 		$test = @preg_match( '#' . $value . '#', '' );
 		if ( false === $test ) {
-			// Invalid regex — strip it to prevent errors.
 			return '';
 		}
 		return $value;

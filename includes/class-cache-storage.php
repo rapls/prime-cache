@@ -26,12 +26,16 @@ class Prime_Cache_Storage {
 	/**
 	 * Build the cache filename based on request properties.
 	 *
-	 * @param bool $is_ssl     Whether the request is HTTPS.
-	 * @param bool $is_mobile  Whether the request is from a mobile device.
-	 * @param bool $gzip       Whether to add .gz extension.
+	 * Matches the logic in dropins/page-cache.php _prime_cache_get_filename().
+	 *
+	 * @param bool   $is_ssl       Whether the request is HTTPS.
+	 * @param bool   $is_mobile    Whether the request is from a mobile device.
+	 * @param bool   $gzip         Whether to add .gz extension.
+	 * @param string $vary_suffix  Vary cookie suffix (e.g. '-vc_abc12345').
+	 * @param string $qs_suffix    Query string suffix (e.g. '-qs_def67890').
 	 * @return string Filename.
 	 */
-	public static function get_cache_filename( $is_ssl = false, $is_mobile = false, $gzip = false ) {
+	public static function get_cache_filename( $is_ssl = false, $is_mobile = false, $gzip = false, $vary_suffix = '', $qs_suffix = '' ) {
 		$name = 'index';
 
 		if ( $is_ssl ) {
@@ -40,6 +44,14 @@ class Prime_Cache_Storage {
 
 		if ( $is_mobile ) {
 			$name .= '-mobile';
+		}
+
+		if ( '' !== $vary_suffix ) {
+			$name .= $vary_suffix;
+		}
+
+		if ( '' !== $qs_suffix ) {
+			$name .= $qs_suffix;
 		}
 
 		$name .= '.html';
