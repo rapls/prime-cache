@@ -315,9 +315,11 @@ class Prime_Cache_Admin_Settings {
 		// Strip null bytes, carriage returns, and newlines (safety for .htaccess injection).
 		$value = preg_replace( '#[\x00\r\n]#', '', $value );
 		// Allowlist: only permit characters safe for both PHP and Apache regex context.
-		// Allows: a-z A-Z 0-9 . * + ? | ( ) [ ] { } ^ $ _ - / \ ,
-		// Blocks: spaces, quotes, backticks, angle brackets, #, ;, =, etc.
-		if ( preg_match( '#[^a-zA-Z0-9.*+?|()\[\]{}^$_\-/\\\\,]#', $value ) ) {
+		// Allows: a-z A-Z 0-9 . * + ? | ( ) ^ $ _ - / \
+		// Blocks: spaces, quotes, backticks, angle brackets, #, ;, =, {, }, [, ], comma, etc.
+		// This is intentionally restrictive — complex regex should use the exclusion
+		// settings in the admin UI, not be embedded in .htaccess rewrite rules.
+		if ( preg_match( '#[^a-zA-Z0-9.*+?|()^$_\-/\\\\]#', $value ) ) {
 			return '';
 		}
 		// Block patterns likely to cause catastrophic backtracking.

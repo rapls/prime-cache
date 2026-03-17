@@ -250,10 +250,17 @@ class Prime_Cache_Htaccess {
 		$has_vary_cookies  = ! empty( trim( $settings['cache_vary_cookies'] ?? '' ) );
 		$has_cache_qs      = ! empty( trim( $settings['cache_query_strings'] ?? '' ) );
 
-		if ( $has_vary_cookies ) {
+		if ( $has_vary_cookies || $has_cache_qs ) {
+			$reasons = array();
+			if ( $has_vary_cookies ) {
+				$reasons[] = 'cache_vary_cookies';
+			}
+			if ( $has_cache_qs ) {
+				$reasons[] = 'cache_query_strings';
+			}
 			return array(
-				'# .htaccess fast-path disabled: cache_vary_cookies is active.',
-				'# Cookie-based variants require PHP (drop-in) to determine the correct cache file.',
+				'# .htaccess fast-path disabled: ' . implode( ' and ', $reasons ) . ' active.',
+				'# Variant filenames (-vc_xxx, -qs_xxx) require PHP (drop-in) to determine the correct cache file.',
 			);
 		}
 
@@ -358,12 +365,12 @@ class Prime_Cache_Htaccess {
 		// Mobile suffix (empty string if not separating).
 		$mobile_env = $sep_mobile ? '%{ENV:PC_MOBILE}' : '';
 
-		// Cache directories are stored with lowercase host. Apache cannot lowercase
-		// variables in .htaccess, so we use SERVER_NAME (always lowercase in Apache)
-		// with an HTTP_HOST port-strip fallback. Uppercase Host headers will miss
-		// the fast-path and fall through to the PHP drop-in which normalizes correctly.
+		// Cache directories use lowercase host names. Apache .htaccess cannot
+		// lowercase variables, so only lowercase Host headers use the fast-path.
+		// Uppercase hosts (rare in production) fall through to the PHP drop-in
+		// which normalizes correctly — this is by design, not a bug.
 		$r[] = '';
-		$r[] = '    # Extract host: strip port from HTTP_HOST, require lowercase';
+		$r[] = '    # Extract host: strip port, require lowercase (uppercase → drop-in fallback)';
 		$r[] = '    RewriteCond %{HTTP_HOST} ^([a-z0-9.\-]+)(:[0-9]+)?$';
 		$r[] = '    RewriteRule .* - [E=PC_HOST:%1]';
 		$r[] = '';
