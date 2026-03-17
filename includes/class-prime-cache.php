@@ -614,7 +614,16 @@ class Prime_Cache {
 
 		$stats_file = PRIME_CACHE_CACHE_DIR . 'stats.json';
 		$data = wp_json_encode( array( 'hit' => 0, 'miss' => 0, 'since' => time() ) );
-		file_put_contents( $stats_file, $data ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		// Use flock to avoid corrupting stats if drop-in is writing concurrently.
+		$fp = fopen( $stats_file, 'c' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		if ( $fp ) {
+			flock( $fp, LOCK_EX );
+			ftruncate( $fp, 0 );
+			fseek( $fp, 0 );
+			fwrite( $fp, $data );
+			flock( $fp, LOCK_UN );
+			fclose( $fp );
+		}
 
 		$redirect = remove_query_arg( array( 'prime_cache_reset_stats', '_wpnonce' ) );
 		$redirect = add_query_arg( 'prime_cache_stats_reset', '1', $redirect );
@@ -766,8 +775,33 @@ class Prime_Cache {
 			return;
 		}
 
-		if ( empty( $_FILES['pc_import_file']['tmp_name'] ) ) {
-			wp_safe_redirect( add_query_arg( array( 'tab' => 'tools', 'pc_imported' => 'error' ), admin_url( 'admin.php?page=prime-cache' ) ) );
+		$error_url = add_query_arg( array( 'tab' => 'tools', 'pc_imported' => 'error' ), admin_url( 'admin.php?page=prime-cache' ) );
+
+		// Validate upload.
+		if ( empty( $_FILES['pc_import_file']['tmp_name'] )
+			|| ! isset( $_FILES['pc_import_file']['error'] )
+			|| UPLOAD_ERR_OK !== (int) $_FILES['pc_import_file']['error']
+		) {
+			wp_safe_redirect( $error_url );
+			exit;
+		}
+
+		// Verify it is a real upload (prevents local file inclusion).
+		if ( ! is_uploaded_file( $_FILES['pc_import_file']['tmp_name'] ) ) {
+			wp_safe_redirect( $error_url );
+			exit;
+		}
+
+		// Size limit: 256 KB max for a settings JSON.
+		if ( $_FILES['pc_import_file']['size'] > 262144 ) {
+			wp_safe_redirect( $error_url );
+			exit;
+		}
+
+		// Extension check.
+		$ext = strtolower( pathinfo( $_FILES['pc_import_file']['name'], PATHINFO_EXTENSION ) );
+		if ( 'json' !== $ext ) {
+			wp_safe_redirect( $error_url );
 			exit;
 		}
 
@@ -775,7 +809,7 @@ class Prime_Cache {
 		$data    = json_decode( $content, true );
 
 		if ( ! is_array( $data ) ) {
-			wp_safe_redirect( add_query_arg( array( 'tab' => 'tools', 'pc_imported' => 'error' ), admin_url( 'admin.php?page=prime-cache' ) ) );
+			wp_safe_redirect( $error_url );
 			exit;
 		}
 

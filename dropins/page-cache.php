@@ -217,11 +217,33 @@ function _prime_cache_get_cache_dir() {
 
 	$host = isset( $_SERVER['HTTP_HOST'] ) ? preg_replace( '#[^a-zA-Z0-9.\-]#', '', $_SERVER['HTTP_HOST'] ) : '';
 	$path = strtok( $_pc_request_uri, '?' );
-	$path = str_replace( '..', '', $path );
-	$path = preg_replace( '#[^a-zA-Z0-9/_\-\.]#', '', $path );
-	$path = rtrim( $path, '/' ) . '/';
 
-	return PRIME_CACHE_CACHE_DIR . $host . $path;
+	// Normalize: decode percent-encoding first, then re-encode for safe filesystem names.
+	$path = rawurldecode( $path );
+
+	// Split into segments and encode each one to prevent collisions.
+	// e.g. /c++/ and /c/ remain distinct; /café/ stays unique.
+	$segments = explode( '/', $path );
+	$safe_segments = array();
+	foreach ( $segments as $seg ) {
+		if ( '' === $seg ) {
+			continue;
+		}
+		// Remove traversal attempts.
+		if ( '..' === $seg || '.' === $seg ) {
+			continue;
+		}
+		// Keep safe chars as-is, encode everything else with underscore-hex.
+		$safe_segments[] = preg_replace_callback(
+			'#[^a-zA-Z0-9_\-]#',
+			function( $m ) { return '_' . bin2hex( $m[0] ); },
+			$seg
+		);
+	}
+
+	$safe_path = empty( $safe_segments ) ? '/' : '/' . implode( '/', $safe_segments ) . '/';
+
+	return PRIME_CACHE_CACHE_DIR . $host . $safe_path;
 }
 
 /**

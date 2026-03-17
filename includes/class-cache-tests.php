@@ -94,6 +94,11 @@ class Prime_Cache_Tests {
 			return false;
 		}
 
+		// Mobile: skip if mobile caching is disabled.
+		if ( $this->is_mobile() && empty( $this->settings['cache_mobile'] ) ) {
+			return false;
+		}
+
 		return true;
 	}
 

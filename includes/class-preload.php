@@ -270,12 +270,8 @@ class Prime_Cache_Preload {
 	 * Check if a URL is already cached.
 	 */
 	private function is_url_cached( $url ) {
-		$parsed = wp_parse_url( $url );
-		$host   = $parsed['host'] ?? '';
-		$path   = $parsed['path'] ?? '/';
-		$path   = preg_replace( '#[^a-zA-Z0-9/_\-\.]#', '', str_replace( '..', '', $path ) );
-		$path   = rtrim( $path, '/' ) . '/';
-		$dir    = PRIME_CACHE_CACHE_DIR . $host . $path;
+		// Use the same cache dir resolution as the storage class.
+		$dir = Prime_Cache_Storage::get_cache_dir( $url );
 
 		// Check for any index*.html file.
 		if ( ! is_dir( $dir ) ) {

@@ -443,11 +443,24 @@ PHP;
 			return false;
 		}
 
-		// Check if any WP_CACHE definition is set to true.
-		if ( preg_match( '#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*true\s*\)#mi', $content ) ) {
-			return true;
+		// Strip PHP comments to avoid matching inside commented-out code.
+		$stripped = preg_replace( '#//[^\n]*#', '', $content );
+		$stripped = preg_replace( '#/\*.*?\*/#s', '', $stripped );
+
+		// Find all WP_CACHE definitions (not WP_CACHE_KEY_SALT etc.).
+		$matches = array();
+		preg_match_all(
+			'#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*([^)]+)\)#mi',
+			$stripped,
+			$matches
+		);
+
+		if ( empty( $matches[1] ) ) {
+			return false; // No definition found.
 		}
 
-		return false;
+		// PHP uses the first define() — check if it resolves to true.
+		$first_value = strtolower( trim( $matches[1][0] ) );
+		return in_array( $first_value, array( 'true', '1', "'1'" ), true );
 	}
 }

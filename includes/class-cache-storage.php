@@ -17,12 +17,28 @@ class Prime_Cache_Storage {
 		$parsed = wp_parse_url( $url );
 		$host   = isset( $parsed['host'] ) ? $parsed['host'] : '';
 		$path   = isset( $parsed['path'] ) ? $parsed['path'] : '/';
-		$path   = rtrim( $path, '/' ) . '/';
 
-		$host = self::sanitize_path_segment( $host );
-		$path = self::sanitize_path_segment( $path );
+		// Sanitize host: only safe chars.
+		$host = preg_replace( '#[^a-zA-Z0-9.\-]#', '', $host );
 
-		return PRIME_CACHE_CACHE_DIR . $host . $path;
+		// Normalize path: decode, then encode each segment for collision-free FS names.
+		$path = rawurldecode( $path );
+		$segments = explode( '/', $path );
+		$safe = array();
+		foreach ( $segments as $seg ) {
+			if ( '' === $seg || '..' === $seg || '.' === $seg ) {
+				continue;
+			}
+			$safe[] = preg_replace_callback(
+				'#[^a-zA-Z0-9_\-]#',
+				function( $m ) { return '_' . bin2hex( $m[0] ); },
+				$seg
+			);
+		}
+
+		$safe_path = empty( $safe ) ? '/' : '/' . implode( '/', $safe ) . '/';
+
+		return PRIME_CACHE_CACHE_DIR . $host . $safe_path;
 	}
 
 	/**
@@ -291,18 +307,4 @@ class Prime_Cache_Storage {
 		return true;
 	}
 
-	/**
-	 * Sanitize a path segment to prevent directory traversal.
-	 *
-	 * @param string $segment Path segment.
-	 * @return string
-	 */
-	private static function sanitize_path_segment( $segment ) {
-		// Loop to handle nested traversal attempts (e.g., '....' → '..' → '').
-		while ( false !== strpos( $segment, '..' ) ) {
-			$segment = str_replace( '..', '', $segment );
-		}
-		$segment = preg_replace( '#[^a-zA-Z0-9/_\-\.]#', '', $segment );
-		return $segment;
-	}
 }
