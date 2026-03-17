@@ -431,7 +431,8 @@ class Prime_Cache {
 			case 'start_preload':
 				wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
 				wp_schedule_single_event( time() + 3, 'prime_cache_preload_batch' );
-				$msg = 'preload_started';
+				$s_tmp = prime_cache_get_settings();
+				$msg = ! empty( trim( $s_tmp['cache_vary_cookies'] ?? '' ) ) ? 'preload_started_partial' : 'preload_started';
 				break;
 
 			case 'reset_settings':

@@ -189,9 +189,10 @@ class Prime_Cache_Config {
 			return false;
 		}
 
-		// Host-independent config file. Single file per installation.
-		// Multisite is blocked at activation, so no cross-site collision risk.
-		$file = $config_dir . 'site-config.php';
+		// Install-unique config file. Uses a hash of ABSPATH to prevent collision
+		// when multiple WordPress installations share the same wp-content directory.
+		$install_key = substr( md5( ABSPATH ), 0, 8 );
+		$file = $config_dir . 'site-config-' . $install_key . '.php';
 
 		$lines   = array();
 		$lines[] = '<?php';
@@ -239,13 +240,18 @@ class Prime_Cache_Config {
 			? PRIME_CACHE_CONFIG_DIR
 			: WP_CONTENT_DIR . '/prime-cache-config/';
 
-		$file = $config_dir . 'site-config.php';
+		$install_key = substr( md5( ABSPATH ), 0, 8 );
+		$file = $config_dir . 'site-config-' . $install_key . '.php';
 
 		if ( file_exists( $file ) ) {
 			@unlink( $file );
 		}
 
-		// Also clean up any legacy per-host or blog_id-based config files.
+		// Also clean up legacy config files (old site-config.php without install key).
+		$legacy_plain = $config_dir . 'site-config.php';
+		if ( file_exists( $legacy_plain ) ) {
+			@unlink( $legacy_plain );
+		}
 		$legacy_files = glob( $config_dir . 'site-config-*.php' );
 		if ( ! empty( $legacy_files ) ) {
 			foreach ( $legacy_files as $lf ) {

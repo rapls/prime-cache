@@ -2231,6 +2231,7 @@ class Prime_Cache_Admin_Settings {
 				'cloudflare'      => __( 'Cloudflare cache purged successfully.', 'prime-cache' ),
 				'sucuri_error'    => __( 'Failed to clear Sucuri cache. Check your API key.', 'prime-cache' ),
 				'preload_started' => __( 'Cache preloading has been scheduled and will start shortly.', 'prime-cache' ),
+				'preload_started_partial' => __( 'Cache preloading scheduled (default variant only). Cookie-specific variants will be generated on first visitor request.', 'prime-cache' ),
 				'reset'           => __( 'All settings have been reset to defaults.', 'prime-cache' ),
 			);
 			$key   = sanitize_key( $_GET['pc_cleared'] );

@@ -41,8 +41,9 @@ $prime_cache_config = array(
 );
 
 if ( defined( 'PRIME_CACHE_CONFIG_DIR' ) ) {
-	// Single host-independent config file. Multisite is blocked at activation.
-	$_pc_config_file = PRIME_CACHE_CONFIG_DIR . 'site-config.php';
+	// Install-unique config file (ABSPATH hash prevents shared wp-content collision).
+	$_pc_install_key = substr( md5( ABSPATH ), 0, 8 );
+	$_pc_config_file = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $_pc_install_key . '.php';
 	if ( is_readable( $_pc_config_file ) ) {
 		include $_pc_config_file;
 	}
