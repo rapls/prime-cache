@@ -217,8 +217,8 @@ msgstr "カンマ区切りでパラメーター名を指定します。ここに
 msgid "Cached Query Parameters"
 msgstr "キャッシュするクエリーパラメーター"
 
-msgid "Comma-separated parameter names. Each unique value generates a separate cache file. For example, specifying <code>lang</code> creates separate caches for <code>?lang=en</code> and <code>?lang=ja</code>. Use for multilingual plugins or currency switchers. URLs with parameters not in either list are not cached."
-msgstr "カンマ区切りでパラメーター名を指定します。ここに記載されたパラメーターは、値ごとに個別のキャッシュファイルを生成します。例えば <code>lang</code> を指定すると、<code>?lang=en</code> と <code>?lang=ja</code> にそれぞれ別のキャッシュが保存されます。多言語プラグインや通貨切替など、クエリーパラメーターでコンテンツが変わるサイトで使用します。どちらのリストにも含まれないパラメーターが付いた URL はキャッシュされません。"
+msgid "Comma-separated parameter names. Each unique value generates a separate cache file. For example, specifying <code>lang</code> creates separate caches for <code>?lang=en</code> and <code>?lang=ja</code>. Use for multilingual plugins or currency switchers. URLs with parameters not in either list are not cached. <strong>Note:</strong> .htaccess fast-path does not serve query string variants — they are served via the drop-in (still very fast, but not zero-PHP)."
+msgstr "カンマ区切りでパラメーター名を指定します。ここに記載されたパラメーターは、値ごとに個別のキャッシュファイルを生成します。例えば <code>lang</code> を指定すると、<code>?lang=en</code> と <code>?lang=ja</code> にそれぞれ別のキャッシュが保存されます。多言語プラグインや通貨切替など、クエリーパラメーターでコンテンツが変わるサイトで使用します。どちらのリストにも含まれないパラメーターが付いた URL はキャッシュされません。<strong>注意:</strong> .htaccess 高速配信はクエリーパラメーターバリアントに対応していません。ドロップインを経由して配信されます (非常に高速ですが、PHP なしではありません)。"
 
 msgid "Cookie-based Cache Splitting"
 msgstr "Cookie 別キャッシュ振り分け"
@@ -226,8 +226,8 @@ msgstr "Cookie 別キャッシュ振り分け"
 msgid "Vary Cookie Names"
 msgstr "振り分け対象 Cookie 名"
 
-msgid "Comma-separated cookie names. Different cache files are generated based on each cookie's value, even for the same URL. For example, specifying the <code>currency</code> cookie serves separate caches to users with <code>currency=USD</code> vs <code>currency=JPY</code>. Use for e-commerce currency/country display or A/B testing."
-msgstr "カンマ区切りで Cookie 名を指定します。指定された Cookie の値に応じて、同じ URL でも異なるキャッシュファイルを生成・配信します。例えば通貨切替 Cookie <code>currency</code> を指定すると、<code>currency=USD</code> のユーザーと <code>currency=JPY</code> のユーザーにそれぞれ別のキャッシュが配信されます。EC サイトの通貨・国別表示、A/B テストなど、Cookie によってページ内容が変わる場合に使用します。"
+msgid "Comma-separated cookie names. Different cache files are generated based on each cookie's value, even for the same URL. For example, specifying the <code>currency</code> cookie serves separate caches to users with <code>currency=USD</code> vs <code>currency=JPY</code>. Use for e-commerce currency/country display or A/B testing. <strong>Note:</strong> When active, .htaccess fast-path is automatically disabled — all requests are served via the drop-in to ensure correct variant selection."
+msgstr "カンマ区切りで Cookie 名を指定します。指定された Cookie の値に応じて、同じ URL でも異なるキャッシュファイルを生成・配信します。例えば通貨切替 Cookie <code>currency</code> を指定すると、<code>currency=USD</code> のユーザーと <code>currency=JPY</code> のユーザーにそれぞれ別のキャッシュが配信されます。EC サイトの通貨・国別表示、A/B テストなど、Cookie によってページ内容が変わる場合に使用します。<strong>注意:</strong> この機能が有効な場合、.htaccess 高速配信は自動的に無効化されます。正しいバリアントを選択するため、すべてのリクエストがドロップインを経由して配信されます。"
 
 msgid "Purge Settings"
 msgstr "パージ設定"

@@ -22,10 +22,21 @@ if ( function_exists( '_prime_cache_normalize_host' ) ) {
  */
 function _prime_cache_normalize_host( $host ) {
 	$host = strtolower( $host );
-	// Strip port.
-	if ( false !== ( $colon = strrpos( $host, ':' ) ) ) {
-		$host = substr( $host, 0, $colon );
+
+	// Handle IPv6 literal: [2001:db8::1] or [2001:db8::1]:8080
+	if ( 0 === strpos( $host, '[' ) ) {
+		$bracket_end = strpos( $host, ']' );
+		if ( false !== $bracket_end ) {
+			// Extract address inside brackets, remove brackets and port.
+			$host = substr( $host, 1, $bracket_end - 1 );
+		}
+	} else {
+		// IPv4 or hostname: strip port (e.g. example.com:8080 → example.com).
+		if ( false !== ( $colon = strrpos( $host, ':' ) ) ) {
+			$host = substr( $host, 0, $colon );
+		}
 	}
+
 	return preg_replace( '#[^a-z0-9.\-]#', '', $host );
 }
 

@@ -244,6 +244,19 @@ class Prime_Cache_Htaccess {
 	 * @return array
 	 */
 	private static function build_rewrite_rules( $settings ) {
+		// When cache_vary_cookies or cache_query_strings are active, Apache cannot
+		// reproduce the PHP-side variant filename logic (-vc_xxx, -qs_xxx).
+		// Disable .htaccess fast-path to prevent serving wrong content.
+		$has_vary_cookies  = ! empty( trim( $settings['cache_vary_cookies'] ?? '' ) );
+		$has_cache_qs      = ! empty( trim( $settings['cache_query_strings'] ?? '' ) );
+
+		if ( $has_vary_cookies ) {
+			return array(
+				'# .htaccess fast-path disabled: cache_vary_cookies is active.',
+				'# Cookie-based variants require PHP (drop-in) to determine the correct cache file.',
+			);
+		}
+
 		$cache_path   = self::get_relative_cache_path();
 		$use_gzip     = ! empty( $settings['gzip_compression'] );
 		$sep_mobile   = ! empty( $settings['cache_mobile_separate'] );
@@ -302,12 +315,25 @@ class Prime_Cache_Htaccess {
 		// Conditions: only GET, no query string.
 		$r[] = '    # Serve cached file only for GET without query string';
 		$r[] = '    RewriteCond %{REQUEST_METHOD} GET';
+		if ( $has_cache_qs ) {
+			$r[] = '    # Note: query string variants are handled by the drop-in, not .htaccess';
+		}
 		$r[] = '    RewriteCond %{QUERY_STRING} ^$';
+
+		// Only match ASCII-safe URL paths (no percent-encoding, no special chars).
+		// URLs with encoded characters use different cache directory names (underscore-hex)
+		// which Apache rewrite cannot reproduce, so they fall through to the drop-in.
+		$r[] = '    RewriteCond %{REQUEST_URI} ^[a-zA-Z0-9/_\-\.]+$';
 
 		// Exclude logged-in users and comment authors.
 		$r[] = '    RewriteCond %{HTTP:Cookie} !wordpress_logged_in_ [NC]';
 		$r[] = '    RewriteCond %{HTTP:Cookie} !comment_author_ [NC]';
 		$r[] = '    RewriteCond %{HTTP:Cookie} !wp-postpass_ [NC]';
+
+		// Exclude WooCommerce session cookies.
+		$r[] = '    RewriteCond %{HTTP:Cookie} !woocommerce_cart_hash [NC]';
+		$r[] = '    RewriteCond %{HTTP:Cookie} !wp_woocommerce_session_ [NC]';
+		$r[] = '    RewriteCond %{HTTP:Cookie} !woocommerce_items_in_cart [NC]';
 
 		// Exclude rejected cookies (user-configured).
 		if ( $reject_cookies ) {
@@ -332,9 +358,13 @@ class Prime_Cache_Htaccess {
 		// Mobile suffix (empty string if not separating).
 		$mobile_env = $sep_mobile ? '%{ENV:PC_MOBILE}' : '';
 
-		// Check cached file exists and serve it.
-		$r[] = '    RewriteCond "%{DOCUMENT_ROOT}/' . $cache_path . '%{HTTP_HOST}%{REQUEST_URI}index%{ENV:PC_SSL}' . $mobile_env . '.html%{ENV:PC_GZ}" -f';
-		$r[] = '    RewriteRule .* "/' . $cache_path . '%{HTTP_HOST}%{REQUEST_URI}index%{ENV:PC_SSL}' . $mobile_env . '.html%{ENV:PC_GZ}" [L]';
+		// Host is stored lowercase by PHP. Skip .htaccess fast-path for uppercase
+		// hosts (rare) — they'll fall through to the drop-in which normalizes correctly.
+		// Strip port from HTTP_HOST by using SERVER_NAME (which excludes port).
+		$r[] = '';
+		$r[] = '    # Check cached file exists and serve it';
+		$r[] = '    RewriteCond "%{DOCUMENT_ROOT}/' . $cache_path . '%{SERVER_NAME}%{REQUEST_URI}index%{ENV:PC_SSL}' . $mobile_env . '.html%{ENV:PC_GZ}" -f';
+		$r[] = '    RewriteRule .* "/' . $cache_path . '%{SERVER_NAME}%{REQUEST_URI}index%{ENV:PC_SSL}' . $mobile_env . '.html%{ENV:PC_GZ}" [L]';
 
 		$r[] = '</IfModule>';
 
