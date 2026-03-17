@@ -436,10 +436,17 @@ class Prime_Cache {
 
 			case 'reset_settings':
 				delete_option( 'prime_cache_settings' );
-				$defaults = prime_cache_get_settings( true ); // Force refresh past static cache.
-				Prime_Cache_Config::write_config_file( $defaults );
-				Prime_Cache_Config::install_advanced_cache();
-				Prime_Cache_Htaccess::remove_rules();
+				$defaults = prime_cache_get_settings( true );
+				if ( ! is_multisite() ) {
+					Prime_Cache_Config::write_config_file( $defaults );
+					$ac_ok = Prime_Cache_Config::install_advanced_cache();
+					Prime_Cache_Htaccess::remove_rules();
+					if ( ! $ac_ok && 'external' === Prime_Cache_Config::get_advanced_cache_owner() ) {
+						set_transient( 'prime_cache_env_warnings', array(
+							__( 'Settings reset but advanced-cache.php is managed by another plugin. Page caching will not work until the other plugin is deactivated.', 'prime-cache' ),
+						), 60 );
+					}
+				}
 				$redirect = add_query_arg( array( 'tab' => 'tools', 'pc_cleared' => 'reset' ), admin_url( 'admin.php?page=prime-cache' ) );
 				wp_safe_redirect( $redirect );
 				exit;
@@ -451,12 +458,19 @@ class Prime_Cache {
 					$current = prime_cache_get_settings();
 					$merged  = array_merge( $current, $preset_settings );
 					update_option( 'prime_cache_settings', $merged );
-					Prime_Cache_Config::write_config_file( $merged );
-					Prime_Cache_Config::install_advanced_cache();
-					if ( $merged['htaccess_enabled'] ) {
-						Prime_Cache_Htaccess::add_rules( $merged );
-					} else {
-						Prime_Cache_Htaccess::remove_rules();
+					if ( ! is_multisite() ) {
+						Prime_Cache_Config::write_config_file( $merged );
+						$ac_ok = Prime_Cache_Config::install_advanced_cache();
+						if ( $merged['htaccess_enabled'] ) {
+							Prime_Cache_Htaccess::add_rules( $merged );
+						} else {
+							Prime_Cache_Htaccess::remove_rules();
+						}
+						if ( ! $ac_ok && 'external' === Prime_Cache_Config::get_advanced_cache_owner() ) {
+							set_transient( 'prime_cache_env_warnings', array(
+								__( 'Preset applied but advanced-cache.php is managed by another plugin. Page caching will not work until the other plugin is deactivated.', 'prime-cache' ),
+							), 60 );
+						}
 					}
 				}
 				$redirect = add_query_arg( array( 'tab' => 'tools', 'pc_preset' => $preset ), admin_url( 'admin.php?page=prime-cache' ) );
@@ -893,9 +907,13 @@ class Prime_Cache {
 		// Save sanitized settings to database.
 		update_option( 'prime_cache_settings', $sanitized );
 
-		// Regenerate config files and track partial failures.
-		$config_ok = Prime_Cache_Config::write_config_file( $sanitized );
-		$ac_ok     = Prime_Cache_Config::install_advanced_cache();
+		// Regenerate config files (skip on multisite — page caching not supported).
+		$config_ok = true;
+		$ac_ok     = true;
+		if ( ! is_multisite() ) {
+			$config_ok = Prime_Cache_Config::write_config_file( $sanitized );
+			$ac_ok     = Prime_Cache_Config::install_advanced_cache();
+		}
 
 		// Force refresh the settings cache.
 		prime_cache_get_settings( true );
