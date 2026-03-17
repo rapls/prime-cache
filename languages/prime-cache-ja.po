@@ -1674,6 +1674,12 @@ msgstr "注意:"
 msgid "Vary Cookies are active. Preloading warms only the default cookie variant for each URL. Cookie-specific variants (e.g. currency, country) are generated on the first real visitor request."
 msgstr "Cookie 別キャッシュ振り分けが有効です。プリロードは各 URL のデフォルトバリアントのみをウォームアップします。Cookie 固有のバリアント (通貨、国など) は最初の実際の訪問者リクエスト時に生成されます。"
 
+msgid "Partial preload:"
+msgstr "部分的なプリロード:"
+
+msgid "Vary Cookies are active. Preloading can only warm the default (no-cookie) variant for each URL. Cookie-specific cache files (e.g. for currency, country, A/B tests) cannot be preloaded and will be generated on the first real visitor request with that cookie value. This is a technical limitation — not a bug."
+msgstr "Cookie 別キャッシュ振り分けが有効です。プリロードはデフォルト (Cookie なし) バリアントのみウォームアップできます。Cookie 固有のキャッシュファイル (通貨、国、A/B テストなど) はプリロードできず、その Cookie 値を持つ最初の訪問者リクエスト時に生成されます。これは技術的な制限であり、不具合ではありません。"
+
 msgid "Enable Format Conversion"
 msgstr "フォーマット変換を有効化"
 

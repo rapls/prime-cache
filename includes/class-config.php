@@ -189,14 +189,13 @@ class Prime_Cache_Config {
 			return false;
 		}
 
-		require_once __DIR__ . '/cache-key-functions.php';
-		$raw_host = wp_parse_url( home_url(), PHP_URL_HOST );
-		$host_key = _prime_cache_config_host_key( $raw_host ?: '' );
-		$file     = $config_dir . $host_key . '.php';
+		// Use a single host-independent config file. This avoids mismatches when
+		// HTTP_HOST differs from home_url() (e.g. www vs non-www, aliases, proxies).
+		$file = $config_dir . 'site-config.php';
 
 		$lines   = array();
 		$lines[] = '<?php';
-		$lines[] = '/** Prime Cache config for ' . esc_html( $raw_host ?: $host_key ) . ' */';
+		$lines[] = '/** Prime Cache site config — generated ' . gmdate( 'Y-m-d H:i:s' ) . ' UTC */';
 
 		$lines[] = 'defined( \'ABSPATH\' ) || exit;';
 		$lines[] = '';
@@ -240,12 +239,18 @@ class Prime_Cache_Config {
 			? PRIME_CACHE_CONFIG_DIR
 			: WP_CONTENT_DIR . '/prime-cache-config/';
 
-		require_once __DIR__ . '/cache-key-functions.php';
-		$host_key = _prime_cache_config_host_key( wp_parse_url( home_url(), PHP_URL_HOST ) ?: '' );
-		$file     = $config_dir . $host_key . '.php';
+		$file = $config_dir . 'site-config.php';
 
 		if ( file_exists( $file ) ) {
 			@unlink( $file );
+		}
+
+		// Also clean up legacy per-host config files if any exist.
+		$legacy = glob( $config_dir . '*.php' );
+		if ( ! empty( $legacy ) ) {
+			foreach ( $legacy as $lf ) {
+				@unlink( $lf );
+			}
 		}
 
 		// Remove config dir if empty.

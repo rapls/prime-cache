@@ -309,18 +309,19 @@ class Prime_Cache_Admin_Settings {
 			return '';
 		}
 		// Length limit: prevent excessively long patterns.
-		if ( strlen( $value ) > 2048 ) {
-			return '';
-		}
-		// Block patterns likely to cause catastrophic backtracking.
-		if ( preg_match( '#\(\.\*\)\+|\(\.\+\)\+|\(\.\*\)\*|\(\.\+\)\*#', $value ) ) {
+		if ( strlen( $value ) > 1024 ) {
 			return '';
 		}
 		// Strip null bytes, carriage returns, and newlines (safety for .htaccess injection).
 		$value = preg_replace( '#[\x00\r\n]#', '', $value );
-		// Block characters that break Apache RewriteCond context:
-		// spaces, quotes, backticks, angle brackets, and unescaped flags like [L].
-		if ( preg_match( '#[\s"\'`<>]|\[(?:L|R|F|G|NC|OR)\]#i', $value ) ) {
+		// Allowlist: only permit characters safe for both PHP and Apache regex context.
+		// Allows: a-z A-Z 0-9 . * + ? | ( ) [ ] { } ^ $ _ - / \ ,
+		// Blocks: spaces, quotes, backticks, angle brackets, #, ;, =, etc.
+		if ( preg_match( '#[^a-zA-Z0-9.*+?|()\[\]{}^$_\-/\\\\,]#', $value ) ) {
+			return '';
+		}
+		// Block patterns likely to cause catastrophic backtracking.
+		if ( preg_match( '#\(\.\*\)\+|\(\.\+\)\+|\(\.\*\)\*|\(\.\+\)\*#', $value ) ) {
 			return '';
 		}
 		// Test the pattern to ensure it's valid PHP regex.
@@ -1327,7 +1328,7 @@ class Prime_Cache_Admin_Settings {
 				<span class="pc-card__h"><?php esc_html_e( 'Cache Preloading', 'prime-cache' ); ?></span>
 				<?php if ( ! empty( trim( $settings['cache_vary_cookies'] ?? '' ) ) ) : ?>
 				<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:10px 14px;margin:0 0 12px;font-size:13px;color:#92400e">
-					<strong><?php esc_html_e( 'Note:', 'prime-cache' ); ?></strong> <?php esc_html_e( 'Vary Cookies are active. Preloading warms only the default cookie variant for each URL. Cookie-specific variants (e.g. currency, country) are generated on the first real visitor request.', 'prime-cache' ); ?>
+					<strong><?php esc_html_e( 'Partial preload:', 'prime-cache' ); ?></strong> <?php esc_html_e( 'Vary Cookies are active. Preloading can only warm the default (no-cookie) variant for each URL. Cookie-specific cache files (e.g. for currency, country, A/B tests) cannot be preloaded and will be generated on the first real visitor request with that cookie value. This is a technical limitation — not a bug.', 'prime-cache' ); ?>
 				</div>
 				<?php endif; ?>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[preload_enabled]" value="1" <?php checked( $settings['preload_enabled'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Enable Cache Preloading', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Automatically crawl your site in the background to warm the page cache. Pages are preloaded via non-blocking HTTP requests so visitors always receive cached pages. Preloading restarts after a full cache purge.', 'prime-cache' ); ?></small></span></label>

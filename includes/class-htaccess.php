@@ -358,18 +358,17 @@ class Prime_Cache_Htaccess {
 		// Mobile suffix (empty string if not separating).
 		$mobile_env = $sep_mobile ? '%{ENV:PC_MOBILE}' : '';
 
-		// Extract lowercase host without port for cache path lookup.
-		// PHP side uses _prime_cache_normalize_host() on HTTP_HOST.
-		// Apache: capture host-only part from HTTP_HOST (strip :port if present).
+		// Cache directories are stored with lowercase host. Apache cannot lowercase
+		// variables in .htaccess, so we use SERVER_NAME (always lowercase in Apache)
+		// with an HTTP_HOST port-strip fallback. Uppercase Host headers will miss
+		// the fast-path and fall through to the PHP drop-in which normalizes correctly.
 		$r[] = '';
-		$r[] = '    # Extract host without port from HTTP_HOST';
-		$r[] = '    RewriteCond %{HTTP_HOST} ^([a-z0-9.\-]+)(:[0-9]+)?$ [NC]';
+		$r[] = '    # Extract host: strip port from HTTP_HOST, require lowercase';
+		$r[] = '    RewriteCond %{HTTP_HOST} ^([a-z0-9.\-]+)(:[0-9]+)?$';
 		$r[] = '    RewriteRule .* - [E=PC_HOST:%1]';
 		$r[] = '';
-		$r[] = '    # Only serve if host is lowercase (matches PHP normalization)';
-		$r[] = '    RewriteCond %{ENV:PC_HOST} ^[a-z0-9.\-]+$';
-		$r[] = '';
 		$r[] = '    # Check cached file exists and serve it';
+		$r[] = '    RewriteCond %{ENV:PC_HOST} !^$';
 		$r[] = '    RewriteCond "%{DOCUMENT_ROOT}/' . $cache_path . '%{ENV:PC_HOST}%{REQUEST_URI}index%{ENV:PC_SSL}' . $mobile_env . '.html%{ENV:PC_GZ}" -f';
 		$r[] = '    RewriteRule .* "/' . $cache_path . '%{ENV:PC_HOST}%{REQUEST_URI}index%{ENV:PC_SSL}' . $mobile_env . '.html%{ENV:PC_GZ}" [L]';
 
