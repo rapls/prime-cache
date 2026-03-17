@@ -41,8 +41,9 @@ $prime_cache_config = array(
 );
 
 if ( defined( 'PRIME_CACHE_CONFIG_DIR' ) ) {
-	// Single host-independent config file — works for all Host headers.
-	$_pc_config_file = PRIME_CACHE_CONFIG_DIR . 'site-config.php';
+	// Blog-id-based config file — safe for multisite, works for all Host headers.
+	$_pc_blog_id     = defined( 'PRIME_CACHE_BLOG_ID' ) ? PRIME_CACHE_BLOG_ID : 1;
+	$_pc_config_file = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $_pc_blog_id . '.php';
 	if ( is_readable( $_pc_config_file ) ) {
 		include $_pc_config_file;
 	}

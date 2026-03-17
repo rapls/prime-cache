@@ -28,7 +28,8 @@ class Prime_Cache_Admin_Settings {
 		$s = array();
 		$s['cache_enabled']         = ! empty( $input['cache_enabled'] );
 		$s['cache_mobile']          = ! empty( $input['cache_mobile'] );
-		$s['cache_mobile_separate'] = ! empty( $input['cache_mobile_separate'] );
+		// Mobile separate only makes sense when mobile caching is enabled.
+		$s['cache_mobile_separate'] = ! empty( $input['cache_mobile_separate'] ) && $s['cache_mobile'];
 		$s['cache_logged_in']       = ! empty( $input['cache_logged_in'] );
 		$s['gzip_compression']      = ! empty( $input['gzip_compression'] );
 		$s['htaccess_enabled']      = ! empty( $input['htaccess_enabled'] );
