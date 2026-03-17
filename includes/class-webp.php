@@ -376,9 +376,13 @@ class Prime_Cache_WebP {
 			return $html;
 		}
 
-		// Prevent page cache from serving WebP/AVIF rewritten HTML to non-supporting browsers.
-		// Set DONOTCACHEPAGE so the dropin generates separate cache per Accept header.
-		if ( ! defined( 'DONOTCACHEPAGE' ) && 'url' === $this->settings['img_delivery_method'] ) {
+		// URL rewrite mode changes HTML based on Accept header. This creates a
+		// variant mismatch with page cache — a WebP-rewritten page could be served
+		// to a browser that doesn't support WebP. Disable page caching for safety.
+		if ( 'url' === $this->settings['img_delivery_method'] ) {
+			if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+				define( 'DONOTCACHEPAGE', true );
+			}
 			header( 'Vary: Accept' );
 		}
 

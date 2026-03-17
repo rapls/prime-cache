@@ -63,8 +63,9 @@ class Prime_Cache_Preload {
 	 * Schedule the preload batch to start.
 	 */
 	public function schedule_preload() {
-		// Clear any existing schedule then set new one.
+		// Clear existing schedule and queue so URLs are re-collected fresh.
 		wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
+		delete_option( 'prime_cache_preload_queue' );
 		wp_schedule_single_event( time() + 5, 'prime_cache_preload_batch' );
 	}
 
@@ -72,38 +73,50 @@ class Prime_Cache_Preload {
 	 * Run a batch of preload requests.
 	 */
 	public function run_preload_batch() {
-		$urls = $this->collect_preload_urls();
-		if ( empty( $urls ) ) {
-			return;
+		$interval = max( 1, (int) $this->settings['preload_interval'] );
+		$limit    = 10; // Small batch — release PHP worker quickly, no sleep().
+
+		// Use a persistent queue to avoid re-collecting URLs every batch.
+		$queue = get_option( 'prime_cache_preload_queue', array() );
+		if ( empty( $queue ) ) {
+			$urls = $this->collect_preload_urls();
+			if ( empty( $urls ) ) {
+				return;
+			}
+			// Filter exclusions once at queue creation.
+			$excludes = $this->parse_patterns( $this->settings['preload_excluded_uri'] );
+			$queue = array();
+			foreach ( $urls as $url ) {
+				$path = wp_parse_url( $url, PHP_URL_PATH ) ?: '/';
+				if ( ! $this->matches_exclude( $path, $excludes ) ) {
+					$queue[] = $url;
+				}
+			}
+			if ( empty( $queue ) ) {
+				return;
+			}
+			update_option( 'prime_cache_preload_queue', $queue, false );
 		}
 
-		$interval = max( 1, (int) $this->settings['preload_interval'] );
-		$excludes = $this->parse_patterns( $this->settings['preload_excluded_uri'] );
-		$count    = 0;
-		$limit    = 50;
-		$start    = time();
+		$count     = 0;
+		$remaining = array();
+		$started   = false;
 
-		foreach ( $urls as $url ) {
+		foreach ( $queue as $url ) {
 			if ( $count >= $limit ) {
-				// Schedule next batch.
-				wp_schedule_single_event( time() + 30, 'prime_cache_preload_batch' );
-				break;
+				$remaining[] = $url;
+				continue; // Collect remaining URLs for next batch.
 			}
 
-			// Check exclusions.
-			$path = wp_parse_url( $url, PHP_URL_PATH ) ?: '/';
-			if ( $this->matches_exclude( $path, $excludes ) ) {
-				continue;
-			}
-
-			// Check if already cached.
+			// Skip already cached URLs.
 			if ( $this->is_url_cached( $url ) ) {
 				continue;
 			}
 
 			// Check server load.
 			if ( ! $this->server_load_ok() ) {
-				wp_schedule_single_event( time() + 60, 'prime_cache_preload_batch' );
+				// Put this URL and all remaining back in the queue.
+				$remaining = array_merge( array( $url ), $remaining );
 				break;
 			}
 
@@ -127,14 +140,16 @@ class Prime_Cache_Preload {
 			}
 
 			$count++;
+			$started = true;
+		}
 
-			// Check execution time BEFORE sleeping to avoid exceeding max_execution_time.
-			if ( ( time() - $start ) > 25 ) {
-				wp_schedule_single_event( time() + 30, 'prime_cache_preload_batch' );
-				break;
-			}
-
-			sleep( $interval );
+		if ( ! empty( $remaining ) ) {
+			update_option( 'prime_cache_preload_queue', array_values( $remaining ), false );
+			// Schedule next batch after interval — no sleep() needed.
+			wp_schedule_single_event( time() + $interval, 'prime_cache_preload_batch' );
+		} else {
+			// Queue exhausted — cleanup.
+			delete_option( 'prime_cache_preload_queue' );
 		}
 	}
 

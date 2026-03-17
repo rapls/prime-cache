@@ -103,8 +103,9 @@ if ( is_dir( $fo_dir ) ) {
 	@rmdir( $fo_dir );
 }
 
-// Remove stats and image optimization metadata.
+// Remove stats, preload queue, and image optimization metadata.
 delete_option( 'prime_cache_stats' );
+delete_option( 'prime_cache_preload_queue' );
 delete_option( 'prime_cache_img_stats' );
 global $wpdb;
 $wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_prime_cache_img_opt' ) );
@@ -114,6 +115,7 @@ $wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_prime_cache_disabled' ) )
 wp_clear_scheduled_hook( 'prime_cache_cleanup_expired' );
 wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
 wp_clear_scheduled_hook( 'prime_cache_db_cleanup' );
+wp_clear_scheduled_hook( 'prime_cache_refresh_local_analytics' );
 
 // Remove transients (#20).
 delete_transient( 'prime_cache_preload_fonts' );

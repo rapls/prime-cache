@@ -12,10 +12,13 @@ class Prime_Cache_Database_Optimizer {
 	public function __construct() {
 		$s = prime_cache_get_settings();
 
+		// Always register custom cron intervals so they're available when
+		// wp_schedule_event() is called during the same request (OFF → ON toggle).
+		add_filter( 'cron_schedules', array( $this, 'add_cron_intervals' ) );
+
 		// Scheduled auto-cleanup.
 		if ( $s['db_auto_cleanup'] ) {
 			add_action( self::CRON_HOOK, array( $this, 'run_scheduled_cleanup' ) );
-			add_filter( 'cron_schedules', array( $this, 'add_cron_intervals' ) );
 		}
 
 		// Manual cleanup handler.

@@ -329,8 +329,8 @@ class Prime_Cache_Admin_Settings {
 		if ( preg_match( '#[^a-zA-Z0-9.|^$_\-/]#', $value ) ) {
 			return '';
 		}
-		// Block empty alternation branches (||) which match everything.
-		if ( preg_match( '#\|\||^\||^$#', $value ) ) {
+		// Block empty alternation branches (||, leading |, trailing |).
+		if ( preg_match( '#\|\||^\||\|$|^$#', $value ) ) {
 			return '';
 		}
 		// Test the pattern to ensure it's valid PHP regex.
@@ -1593,7 +1593,7 @@ class Prime_Cache_Admin_Settings {
 
 		<?php if ( isset( $_GET['prime_cache_db_cleaned'] ) ) : ?>
 			<div class="notice notice-success is-dismissible" style="margin:0 0 16px">
-				<p><?php printf( esc_html__( 'Database cleanup complete. %s items processed.', 'prime-cache' ), '<b>' . esc_html( (int) $_GET['prime_cache_db_cleaned'] ) . '</b>' ); ?></p>
+				<p><?php printf( esc_html__( 'Database cleanup processed %s items (max 1,000 per task). Run again if more remain.', 'prime-cache' ), '<b>' . esc_html( (int) $_GET['prime_cache_db_cleaned'] ) . '</b>' ); ?></p>
 			</div>
 		<?php endif; ?>
 

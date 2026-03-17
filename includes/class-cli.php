@@ -206,7 +206,7 @@ class Prime_Cache_CLI extends WP_CLI_Command {
 			}
 		}
 
-		WP_CLI::success( "Database cleanup complete. {$total} items processed." );
+		WP_CLI::success( "Database cleanup processed {$total} items (max 1,000 per task). Run again if more remain." );
 	}
 }
 

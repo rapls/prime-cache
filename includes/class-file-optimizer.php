@@ -29,6 +29,9 @@ class Prime_Cache_File_Optimizer {
 		$this->cache_dir = WP_CONTENT_DIR . '/cache/prime-cache-fo/';
 		$this->cache_url = content_url( '/cache/prime-cache-fo/' );
 
+		// Cron handler for async local analytics refresh (avoids sync HTTP in page generation).
+		add_action( 'prime_cache_refresh_local_analytics', array( $this, 'cron_refresh_local_analytics' ) );
+
 		if ( ! $this->should_optimize() ) {
 			return;
 		}
@@ -1168,21 +1171,15 @@ JS;
 			$local_url  = $cache_url . $info[1];
 
 			// Download if missing or older than 24 hours.
+			// Use a non-blocking approach: schedule a cron job for the download
+			// instead of fetching synchronously during page generation.
 			if ( ! file_exists( $local_path ) || ( time() - filemtime( $local_path ) ) > DAY_IN_SECONDS ) {
-				// Find the full URL with query params.
-				if ( preg_match( '#["\'](' . preg_quote( $info[0], '#' ) . '[^"\']*)["\']#', $html, $url_m ) ) {
-					$remote = $url_m[1];
-				} else {
-					$remote = $info[0];
+				if ( ! wp_next_scheduled( 'prime_cache_refresh_local_analytics' ) ) {
+					wp_schedule_single_event( time() + 10, 'prime_cache_refresh_local_analytics' );
 				}
-
-				$response = wp_remote_get( $remote, array( 'timeout' => 10, 'sslverify' => true ) );
-				if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
-					$body = wp_remote_retrieve_body( $response );
-					if ( ! empty( $body ) ) {
-						wp_mkdir_p( $cache_dir );
-						file_put_contents( $local_path, $body ); // phpcs:ignore
-					}
+				// If file doesn't exist at all, skip local replacement — use original URL.
+				if ( ! file_exists( $local_path ) ) {
+					continue;
 				}
 			}
 
@@ -1197,6 +1194,32 @@ JS;
 		}
 
 		return $html;
+	}
+
+	/**
+	 * Cron handler: refresh local analytics files asynchronously.
+	 */
+	public function cron_refresh_local_analytics() {
+		$cache_dir = $this->cache_dir;
+		$scripts = array(
+			'gtag'      => array( 'https://www.googletagmanager.com/gtag/js', 'gtag.js' ),
+			'analytics' => array( 'https://www.google-analytics.com/analytics.js', 'analytics.js' ),
+		);
+
+		foreach ( $scripts as $info ) {
+			$local_path = $cache_dir . $info[1];
+			if ( file_exists( $local_path ) && ( time() - filemtime( $local_path ) ) <= DAY_IN_SECONDS ) {
+				continue;
+			}
+			$response = wp_remote_get( $info[0], array( 'timeout' => 15, 'sslverify' => true ) );
+			if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
+				$body = wp_remote_retrieve_body( $response );
+				if ( ! empty( $body ) ) {
+					wp_mkdir_p( $cache_dir );
+					file_put_contents( $local_path, $body ); // phpcs:ignore
+				}
+			}
+		}
 	}
 
 	// ── Query String Removal ─────────────────────────────────

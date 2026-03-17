@@ -84,7 +84,8 @@ class Prime_Cache_CDN {
 
 		// Also rewrite relative URLs (starting with /wp-content/ etc.) not caught above.
 		if ( $this->settings['cdn_relative'] ) {
-			$rel_pattern = '#((?:src|href|srcset)\s*=\s*["\'])(/(?:' . $dirs_pattern . ')/[^\s"\']+)#i';
+			// Handle src and href (single URL).
+			$rel_pattern = '#((?:src|href)\s*=\s*["\'])(/(?:' . $dirs_pattern . ')/[^\s"\']+)#i';
 			$html = preg_replace_callback( $rel_pattern, function( $m ) use ( $cdn_hosts, $host_count, &$i, $excludes, $scheme ) {
 				$path = $m[2];
 				foreach ( $excludes as $ex ) {
@@ -95,6 +96,37 @@ class Prime_Cache_CDN {
 				$cdn = $cdn_hosts[ $i % $host_count ];
 				$i++;
 				return $m[1] . $scheme . '://' . $cdn . $path;
+			}, $html );
+
+			// Handle srcset separately — may contain multiple comma-separated candidates.
+			$srcset_pattern = '#(srcset\s*=\s*["\'])([^"\']+)(["\'])#i';
+			$html = preg_replace_callback( $srcset_pattern, function( $m ) use ( $cdn_hosts, $host_count, &$i, $excludes, $scheme, $dirs_pattern ) {
+				$candidates = explode( ',', $m[2] );
+				$rewritten  = array();
+				foreach ( $candidates as $candidate ) {
+					$candidate = trim( $candidate );
+					// Split "url descriptor" (e.g. "/img.jpg 2x" or "/img.jpg 768w").
+					$parts = preg_split( '#\s+#', $candidate, 2 );
+					$url   = $parts[0];
+					$desc  = isset( $parts[1] ) ? ' ' . $parts[1] : '';
+
+					if ( preg_match( '#^/(?:' . $dirs_pattern . ')/#i', $url ) ) {
+						$skip = false;
+						foreach ( $excludes as $ex ) {
+							if ( ! empty( $ex ) && false !== stripos( $url, $ex ) ) {
+								$skip = true;
+								break;
+							}
+						}
+						if ( ! $skip ) {
+							$cdn = $cdn_hosts[ $i % $host_count ];
+							$i++;
+							$url = $scheme . '://' . $cdn . $url;
+						}
+					}
+					$rewritten[] = $url . $desc;
+				}
+				return $m[1] . implode( ', ', $rewritten ) . $m[3];
 			}, $html );
 		}
 
