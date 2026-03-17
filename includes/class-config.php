@@ -328,7 +328,16 @@ class Prime_Cache_Config {
 
 		$content = self::get_object_cache_content( $backend, $dropin_source );
 
-		return (bool) file_put_contents( $file, $content, LOCK_EX ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		// Atomic write: temp file + rename.
+		$tempfile = $file . '.tmp.' . getmypid();
+		if ( false === file_put_contents( $tempfile, $content ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			return false;
+		}
+		if ( ! rename( $tempfile, $file ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
+			@unlink( $tempfile );
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -410,6 +419,33 @@ PHP;
 
 		if ( file_exists( dirname( ABSPATH ) . '/wp-config.php' ) ) {
 			return dirname( ABSPATH ) . '/wp-config.php';
+		}
+
+		return false;
+	}
+
+	/**
+	 * Verify that WP_CACHE is set to true in wp-config.php by reading the file.
+	 *
+	 * This is necessary because PHP constants loaded at the start of the request
+	 * do not reflect changes made by set_wp_cache() during the same request.
+	 *
+	 * @return bool True if wp-config.php contains WP_CACHE set to true.
+	 */
+	public static function verify_wp_cache_enabled() {
+		$config_path = self::get_wp_config_path();
+		if ( ! $config_path ) {
+			return false;
+		}
+
+		$content = file_get_contents( $config_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( false === $content ) {
+			return false;
+		}
+
+		// Check if any WP_CACHE definition is set to true.
+		if ( preg_match( '#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*true\s*\)#mi', $content ) ) {
+			return true;
 		}
 
 		return false;

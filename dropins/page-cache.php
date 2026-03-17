@@ -327,7 +327,12 @@ if ( is_readable( $_pc_cache_file ) ) {
 	if ( $_pc_meta ) {
 		if ( ! empty( $_pc_meta['headers'] ) ) {
 			foreach ( $_pc_meta['headers'] as $_pc_header ) {
-				header( $_pc_header );
+				// Link and X- headers can appear multiple times — use replace=false.
+				$_pc_replace = true;
+				if ( 0 === strncasecmp( $_pc_header, 'Link:', 5 ) || 0 === strncasecmp( $_pc_header, 'X-', 2 ) ) {
+					$_pc_replace = false;
+				}
+				header( $_pc_header, $_pc_replace );
 			}
 		}
 		if ( 200 !== $_pc_original_status ) {

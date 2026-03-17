@@ -104,11 +104,14 @@ class Prime_Cache {
 		}
 
 		// Enable WP_CACHE in wp-config.php.
-		Prime_Cache_Config::set_wp_cache( true );
+		$wp_cache_result = Prime_Cache_Config::set_wp_cache( true );
 
-		// Verify WP_CACHE is actually true.
-		if ( ! defined( 'WP_CACHE' ) || ! WP_CACHE ) {
-			$warnings[] = __( 'WP_CACHE could not be set to true. Another definition of WP_CACHE may exist in wp-config.php. Page caching will not work until WP_CACHE is set to true.', 'prime-cache' );
+		// Verify WP_CACHE was written. Check the file content since the current
+		// request's PHP constants are already loaded and won't reflect the change.
+		if ( ! $wp_cache_result ) {
+			$warnings[] = __( 'WP_CACHE could not be set to true. wp-config.php may not be writable.', 'prime-cache' );
+		} elseif ( ! Prime_Cache_Config::verify_wp_cache_enabled() ) {
+			$warnings[] = __( 'WP_CACHE is defined as false by another source in wp-config.php. Page caching will not work until this is corrected.', 'prime-cache' );
 		}
 
 		// Schedule cron events.

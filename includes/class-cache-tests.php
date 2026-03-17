@@ -3,6 +3,7 @@
  * Cache eligibility tests.
  *
  * Used both inside WordPress (full test) and from the dropin (early test).
+ * Must stay aligned with dropins/page-cache.php conditions.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -38,6 +39,20 @@ class Prime_Cache_Tests {
 			return false;
 		}
 
+		// WooCommerce early exclusion (boundary-aware).
+		if ( preg_match( '#(?:^|/)(?:cart|checkout|my-account)(?:/|$|\?)|(?:^|/)wc-api(?:/|$)|(?:[?&](?:wc-ajax|add-to-cart)=)#i', $request_uri ) ) {
+			return false;
+		}
+
+		// WooCommerce session cookies.
+		if ( ! empty( $_COOKIE ) ) {
+			foreach ( array_keys( $_COOKIE ) as $ck ) {
+				if ( 0 === strpos( $ck, 'woocommerce_cart_hash' ) || 0 === strpos( $ck, 'wp_woocommerce_session_' ) || 0 === strpos( $ck, 'woocommerce_items_in_cart' ) ) {
+					return false;
+				}
+			}
+		}
+
 		// Skip non-HTML file extensions.
 		$path = wp_parse_url( $request_uri, PHP_URL_PATH );
 		if ( $path && preg_match( '#\.(php|xml|xsl|json|css|js|map|txt)$#i', $path ) && ! preg_match( '#/index\.php$#', $path ) ) {
@@ -49,7 +64,7 @@ class Prime_Cache_Tests {
 			return false;
 		}
 
-		// Query string handling.
+		// Query string handling (aligned with dropin: ignore + cache-list + reject).
 		if ( ! $this->can_cache_query_string() ) {
 			return false;
 		}
@@ -71,6 +86,11 @@ class Prime_Cache_Tests {
 
 		// Rejected user agents.
 		if ( $this->is_rejected_ua() ) {
+			return false;
+		}
+
+		// Rejected referrers.
+		if ( $this->is_rejected_referrer() ) {
 			return false;
 		}
 
@@ -135,6 +155,11 @@ class Prime_Cache_Tests {
 	/**
 	 * Check query string cacheability.
 	 *
+	 * Aligned with dropin logic:
+	 *  - cache_ignore_qs: strip these params (no effect on cache key)
+	 *  - cache_query_strings: create unique cache variant per value
+	 *  - Any other param: reject (don't cache)
+	 *
 	 * @return bool True if request is cacheable.
 	 */
 	private function can_cache_query_string() {
@@ -147,7 +172,20 @@ class Prime_Cache_Tests {
 
 		$remaining = array_diff_key( $_GET, array_flip( $ignored ) );
 
-		return empty( $remaining );
+		if ( empty( $remaining ) ) {
+			return true;
+		}
+
+		// Check if remaining params are in the cache_query_strings whitelist.
+		$cached_qs = array_map( 'trim', explode( ',', $this->settings['cache_query_strings'] ?? '' ) );
+		$cached_qs = array_filter( $cached_qs );
+
+		if ( empty( $cached_qs ) ) {
+			return false; // Unknown params, no whitelist.
+		}
+
+		$unknown = array_diff_key( $remaining, array_flip( $cached_qs ) );
+		return empty( $unknown );
 	}
 
 	/**
@@ -226,6 +264,20 @@ class Prime_Cache_Tests {
 		}
 
 		return (bool) @preg_match( '#' . $pattern . '#i', $ua );
+	}
+
+	/**
+	 * Check for rejected referrers.
+	 *
+	 * @return bool
+	 */
+	private function is_rejected_referrer() {
+		$pattern = trim( $this->settings['cache_reject_referrer'] ?? '' );
+		if ( empty( $pattern ) || empty( $_SERVER['HTTP_REFERER'] ) ) {
+			return false;
+		}
+
+		return (bool) @preg_match( '#(' . $pattern . ')#i', $_SERVER['HTTP_REFERER'] );
 	}
 
 	/**

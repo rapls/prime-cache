@@ -44,7 +44,7 @@ foreach ( $config_paths as $config_path ) {
 	if ( file_exists( $config_path ) && is_writable( $config_path ) ) {
 		$config_content = file_get_contents( $config_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		if ( false === strpos( $config_content, 'Added by Prime Cache' ) ) {
-			break; // Not our line — leave it alone.
+			continue; // Not our line in this file — check next candidate.
 		}
 		$config_content = preg_replace(
 			'#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*[^)]+\)\s*;\s*//\s*Added by Prime Cache[^\n]*\n?#mi',
@@ -52,8 +52,14 @@ foreach ( $config_paths as $config_path ) {
 			$config_content
 		);
 		$config_content = preg_replace( "#\n{3,}#", "\n\n", $config_content );
-		file_put_contents( $config_path, $config_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-		break;
+		// Atomic write: temp file + rename.
+		$tempfile = $config_path . '.tmp.' . getmypid();
+		if ( false !== file_put_contents( $tempfile, $config_content ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			if ( ! rename( $tempfile, $config_path ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
+				@unlink( $tempfile );
+			}
+		}
+		break; // Found and cleaned — done.
 	}
 }
 

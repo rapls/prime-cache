@@ -196,7 +196,24 @@ class Prime_Cache_Preload {
 	/**
 	 * Parse a sitemap XML (supports sitemap index) and extract URLs.
 	 */
-	private function parse_sitemap( $sitemap_url ) {
+	private function parse_sitemap( $sitemap_url, $depth = 0 ) {
+		// Prevent infinite recursion.
+		if ( $depth > 3 ) {
+			return array();
+		}
+
+		// Same-host restriction: only fetch sitemaps from the site's own host.
+		$site_host = wp_parse_url( home_url(), PHP_URL_HOST );
+		$url_host  = wp_parse_url( $sitemap_url, PHP_URL_HOST );
+		if ( ! $url_host || strtolower( $url_host ) !== strtolower( $site_host ) ) {
+			return array();
+		}
+
+		// Reject private/loopback IPs via wp_http_validate_url().
+		if ( function_exists( 'wp_http_validate_url' ) && ! wp_http_validate_url( $sitemap_url ) ) {
+			return array();
+		}
+
 		$response = wp_remote_get( $sitemap_url, array( 'timeout' => 15, 'sslverify' => true ) );
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return array();
@@ -221,7 +238,7 @@ class Prime_Cache_Preload {
 		if ( isset( $xml->sitemap ) ) {
 			foreach ( $xml->sitemap as $entry ) {
 				if ( isset( $entry->loc ) ) {
-					$child_urls = $this->parse_sitemap( (string) $entry->loc );
+					$child_urls = $this->parse_sitemap( (string) $entry->loc, $depth + 1 );
 					$urls = array_merge( $urls, $child_urls );
 					if ( count( $urls ) > 1000 ) {
 						break;
@@ -230,11 +247,15 @@ class Prime_Cache_Preload {
 			}
 		}
 
-		// Standard sitemap — collect <loc> URLs.
+		// Standard sitemap — collect <loc> URLs (same-host only).
 		if ( isset( $xml->url ) ) {
 			foreach ( $xml->url as $entry ) {
 				if ( isset( $entry->loc ) ) {
-					$urls[] = (string) $entry->loc;
+					$loc      = (string) $entry->loc;
+					$loc_host = wp_parse_url( $loc, PHP_URL_HOST );
+					if ( $loc_host && strtolower( $loc_host ) === strtolower( $site_host ) ) {
+						$urls[] = $loc;
+					}
 					if ( count( $urls ) > 1000 ) {
 						break;
 					}
