@@ -626,14 +626,17 @@ class Prime_Cache {
 			return;
 		}
 
-		Prime_Cache_Config::setup_object_cache( $backend );
+		$result = Prime_Cache_Config::setup_object_cache( $backend );
 
-		// Flush cache when switching backends.
-		if ( function_exists( 'wp_cache_flush' ) ) {
-			wp_cache_flush();
+		if ( $result ) {
+			// Flush cache when switching backends.
+			if ( function_exists( 'wp_cache_flush' ) ) {
+				wp_cache_flush();
+			}
+			$redirect = admin_url( 'admin.php?page=prime-cache&tab=object-cache&prime_cache_oc_switched=1' );
+		} else {
+			$redirect = admin_url( 'admin.php?page=prime-cache&tab=object-cache&prime_cache_oc_switch_failed=1' );
 		}
-
-		$redirect = admin_url( 'admin.php?page=prime-cache&tab=object-cache&prime_cache_oc_switched=1' );
 		wp_safe_redirect( $redirect );
 		exit;
 	}

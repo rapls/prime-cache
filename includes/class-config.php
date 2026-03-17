@@ -92,27 +92,49 @@ class Prime_Cache_Config {
 			return false;
 		}
 
-		// Remove existing WP_CACHE definition (exact constant name only, not WP_CACHE_KEY_SALT etc.).
-		$content = preg_replace(
-			'#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*[^)]+\)\s*;\s*(?://[^\n]*)?\n?#mi',
-			'',
-			$content
-		);
+		$prime_cache_marker = '// Added by Prime Cache';
+		$has_prime_line     = false !== strpos( $content, $prime_cache_marker );
+
+		// Only remove WP_CACHE lines that Prime Cache added (identified by comment marker).
+		if ( $has_prime_line ) {
+			$content = preg_replace(
+				'#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*[^)]+\)\s*;\s*//\s*Added by Prime Cache[^\n]*\n?#mi',
+				'',
+				$content
+			);
+		}
 
 		if ( $enable ) {
-			// Add WP_CACHE after opening PHP tag.
-			$content = preg_replace(
-				'#^<\?php\s*#',
-				"<?php\ndefine( 'WP_CACHE', true ); // Added by Prime Cache\n",
-				$content,
-				1
+			// Check if a WP_CACHE definition already exists (from another source).
+			$has_existing = preg_match(
+				'#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,#mi',
+				$content
 			);
+
+			if ( ! $has_existing ) {
+				// Add WP_CACHE after opening PHP tag.
+				$content = preg_replace(
+					'#^<\?php\s*#',
+					"<?php\ndefine( 'WP_CACHE', true ); " . $prime_cache_marker . "\n",
+					$content,
+					1
+				);
+			}
 		}
 
 		// Clean up double blank lines.
 		$content = preg_replace( "#\n{3,}#", "\n\n", $content );
 
-		return (bool) file_put_contents( $config_path, $content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		// Atomic write: temp file + rename.
+		$tempfile = $config_path . '.tmp.' . getmypid();
+		if ( false === file_put_contents( $tempfile, $content ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			return false;
+		}
+		if ( ! rename( $tempfile, $config_path ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
+			@unlink( $tempfile );
+			return false;
+		}
+		return true;
 	}
 
 	/**

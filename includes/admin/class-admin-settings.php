@@ -1146,7 +1146,7 @@ class Prime_Cache_Admin_Settings {
 			<!-- Bulk Optimization -->
 			<div class="pc-card">
 				<span class="pc-card__h"><?php esc_html_e( 'Bulk Optimization', 'prime-cache' ); ?></span>
-				<p class="pc-help" style="margin:0 0 12px"><?php esc_html_e( 'Scan your media library for images that have not yet been converted to WebP/AVIF and process them in batches.', 'prime-cache' ); ?></p>
+				<p class="pc-help" style="margin:0 0 12px"><?php esc_html_e( 'Scan your media library for images that have not yet been converted to WebP/AVIF and process them in batches. Statistics are based on a sample of up to 1,000 images.', 'prime-cache' ); ?></p>
 				<div id="pc-bulk-area">
 					<button type="button" class="pc-btn pc-btn--p pc-btn--sm" id="pc-bulk-scan"><?php esc_html_e( 'Scan Unconverted Images', 'prime-cache' ); ?></button>
 					<div id="pc-bulk-status" style="margin-top:12px;display:none">
@@ -2064,6 +2064,7 @@ class Prime_Cache_Admin_Settings {
 		?>
 		<h2 class="pc-title"><?php esc_html_e('Object Cache','prime-cache'); ?></h2>
 		<?php if(isset($_GET['prime_cache_oc_switched'])): ?><div class="notice notice-success is-dismissible" style="margin:0 0 16px"><p><?php esc_html_e('Object cache settings have been updated.','prime-cache'); ?></p></div><?php endif; ?>
+		<?php if(isset($_GET['prime_cache_oc_switch_failed'])): ?><div class="notice notice-error is-dismissible" style="margin:0 0 16px"><p><?php esc_html_e('Object cache switch failed. Another plugin may be managing object-cache.php, or the required PHP extension is not available.','prime-cache'); ?></p></div><?php endif; ?>
 
 		<div class="pc-card pc-oc-banner">
 			<span class="pc-dot pc-dot--<?php echo 'off'===$act?'m':'g'; ?> pc-dot--xl"></span>

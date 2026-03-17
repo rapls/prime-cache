@@ -103,7 +103,8 @@ if ( preg_match( '#(/wp-admin|/wp-login\.php|/wp-cron\.php|/xmlrpc\.php)#', $_pc
 }
 
 // WooCommerce: always skip cart, checkout, account, and AJAX endpoints.
-if ( preg_match( '#(/cart|/checkout|/my-account|/wc-api|wc-ajax=|add-to-cart=)#i', $_pc_request_uri ) ) {
+// Boundary-aware to avoid matching /cartoon/, /checkout-guide/, /my-accounting/ etc.
+if ( preg_match( '#(?:^|/)(?:cart|checkout|my-account)(?:/|$|\?)|(?:^|/)wc-api(?:/|$)|(?:[?&](?:wc-ajax|add-to-cart)=)#i', $_pc_request_uri ) ) {
 	return;
 }
 // WooCommerce: skip if session cookies present.
@@ -309,7 +310,8 @@ if ( is_readable( $_pc_cache_file ) ) {
 	// Restore meta headers and status code if available (per-variant meta file).
 	$_pc_meta_file = $_pc_cache_dir . $_pc_filename . '.meta.json';
 	if ( ! is_readable( $_pc_meta_file ) ) {
-		$_pc_meta_file = $_pc_cache_dir . 'meta.json'; // Fallback to legacy shared meta.
+		// Legacy fallback: shared meta.json from pre-1.1. Remove after a full cache flush cycle.
+		$_pc_meta_file = $_pc_cache_dir . 'meta.json';
 	}
 	if ( is_readable( $_pc_meta_file ) ) {
 		$_pc_meta = json_decode( file_get_contents( $_pc_meta_file ), true );
@@ -334,6 +336,7 @@ if ( is_readable( $_pc_cache_file ) ) {
 	$_pc_gz_file     = $_pc_cache_dir . _prime_cache_get_filename( $_pc_is_ssl, $_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], true, $_pc_vary_suffix, $_pc_qs_suffix );
 
 	if ( $_pc_accept_gzip && is_readable( $_pc_gz_file ) ) {
+		header( 'Vary: Accept-Encoding' );
 		header( 'Content-Encoding: gzip' );
 		readfile( $_pc_gz_file );
 		exit;
@@ -462,23 +465,40 @@ ob_start( function ( $buffer ) {
 		}
 	}
 
-	// Save response headers as meta.
-	$headers_list_raw = headers_list();
+	// Save response headers and status as meta.
+	$_pc_current_status = http_response_code();
+	$headers_list_raw   = headers_list();
+	$meta_headers       = array();
 	if ( ! empty( $headers_list_raw ) ) {
-		$meta_headers = array();
 		foreach ( $headers_list_raw as $header ) {
 			// Only preserve Content-Type and custom headers, not cache control.
 			if ( preg_match( '#^(Content-Type|X-|Link)#i', $header ) ) {
 				$meta_headers[] = $header;
 			}
 		}
-		if ( ! empty( $meta_headers ) || http_response_code() !== 200 ) {
-			$meta_data = json_encode( array( 'headers' => $meta_headers, 'status' => http_response_code() ) );
-			$meta_file = $cache_dir . $filename . '.meta.json';
-			$meta_tmp  = $meta_file . '.tmp.' . getmypid();
-			if ( false !== file_put_contents( $meta_tmp, $meta_data ) ) {
-				rename( $meta_tmp, $meta_file );
+	}
+
+	if ( ! empty( $meta_headers ) || 200 !== $_pc_current_status ) {
+		$meta_data = json_encode( array( 'headers' => $meta_headers, 'status' => $_pc_current_status ) );
+		$meta_file = $cache_dir . $filename . '.meta.json';
+		$meta_tmp  = $meta_file . '.tmp.' . getmypid();
+		$meta_ok   = false;
+		if ( false !== file_put_contents( $meta_tmp, $meta_data ) ) {
+			$meta_ok = rename( $meta_tmp, $meta_file );
+			if ( ! $meta_ok ) {
+				@unlink( $meta_tmp );
 			}
+		}
+
+		// If status is non-200 (e.g. 404) and meta failed, roll back the HTML file
+		// to prevent serving error-page content with a 200 status on next HIT.
+		if ( ! $meta_ok && 200 !== $_pc_current_status ) {
+			@unlink( $filepath );
+			// Also remove gzip variant if it was written.
+			if ( isset( $gz_filepath ) ) {
+				@unlink( $gz_filepath );
+			}
+			return $buffer;
 		}
 	}
 
