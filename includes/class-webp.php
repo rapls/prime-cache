@@ -728,12 +728,15 @@ class Prime_Cache_WebP {
 			}
 		}
 
+		$sampled = count( $ids );
 		wp_send_json_success( array(
 			'total'      => $total,
+			'sampled'    => $sampled,
 			'webp'       => $webp_count,
 			'avif'       => $avif_count,
 			'saved'      => max( 0, $total_saved ),
 			'saved_fmt'  => size_format( max( 0, $total_saved ) ),
+			'is_sample'  => $sampled < $total,
 		) );
 	}
 

@@ -415,6 +415,25 @@ class Prime_Cache {
 				wp_safe_redirect( $redirect );
 				exit;
 
+			case 'apply_preset':
+				$preset = sanitize_key( $_GET['preset'] ?? '' );
+				$preset_settings = self::get_preset( $preset );
+				if ( $preset_settings ) {
+					$current = prime_cache_get_settings();
+					$merged  = array_merge( $current, $preset_settings );
+					update_option( 'prime_cache_settings', $merged );
+					Prime_Cache_Config::write_config_file( $merged );
+					Prime_Cache_Config::install_advanced_cache();
+					if ( $merged['htaccess_enabled'] ) {
+						Prime_Cache_Htaccess::add_rules( $merged );
+					} else {
+						Prime_Cache_Htaccess::remove_rules();
+					}
+				}
+				$redirect = add_query_arg( array( 'tab' => 'tools', 'pc_preset' => $preset ), admin_url( 'admin.php?page=prime-cache' ) );
+				wp_safe_redirect( $redirect );
+				exit;
+
 			default:
 				return;
 		}
@@ -423,6 +442,100 @@ class Prime_Cache {
 		$redirect = add_query_arg( 'pc_cleared', $msg, $redirect );
 		wp_safe_redirect( $redirect );
 		exit;
+	}
+
+	/**
+	 * Get preset settings for a given mode.
+	 *
+	 * @param string $preset Preset slug: safe, balanced, aggressive.
+	 * @return array|false Settings overrides, or false if invalid.
+	 */
+	public static function get_preset( $preset ) {
+		$common = array(
+			'cache_enabled'    => true,
+			'cache_mobile'     => true,
+			'gzip_compression' => true,
+			'cache_footprint'  => true,
+		);
+
+		switch ( $preset ) {
+			case 'safe':
+				return array_merge( $common, array(
+					'lazyload_images'     => true,
+					'lazyload_iframes'    => true,
+					'browser_cache'       => true,
+					'htaccess_enabled'    => true,
+					'preload_links'       => true,
+					// Keep everything else at defaults (off).
+					'minify_html'         => false,
+					'minify_css'          => false,
+					'minify_js'           => false,
+					'combine_css'         => false,
+					'combine_js'          => false,
+					'defer_js'            => false,
+					'delay_js'            => false,
+					'optimize_css_delivery' => false,
+				) );
+
+			case 'balanced':
+				return array_merge( $common, array(
+					'lazyload_images'      => true,
+					'lazyload_iframes'     => true,
+					'lazyload_videos'      => true,
+					'browser_cache'        => true,
+					'htaccess_enabled'     => true,
+					'preload_links'        => true,
+					'minify_html'          => true,
+					'minify_css'           => true,
+					'minify_js'            => true,
+					'remove_html_comments' => true,
+					'disable_emoji'        => true,
+					'disable_wp_embed'     => true,
+					'remove_query_strings' => true,
+					'preload_fonts'        => true,
+					// Keep combining/deferring off for stability.
+					'combine_css'          => false,
+					'combine_js'           => false,
+					'defer_js'             => false,
+					'delay_js'             => false,
+				) );
+
+			case 'aggressive':
+				return array_merge( $common, array(
+					'lazyload_images'       => true,
+					'lazyload_iframes'      => true,
+					'lazyload_videos'       => true,
+					'browser_cache'         => true,
+					'htaccess_enabled'      => true,
+					'preload_links'         => true,
+					'minify_html'           => true,
+					'minify_css'            => true,
+					'minify_js'             => true,
+					'remove_html_comments'  => true,
+					'combine_css'           => true,
+					'combine_js'            => true,
+					'defer_js'              => true,
+					'delay_js'              => true,
+					'delay_js_safe_mode'    => true,
+					'optimize_css_delivery' => true,
+					'css_delivery_method'   => 'async_css',
+					'critical_css_auto'     => true,
+					'inline_small_css'      => true,
+					'disable_emoji'         => true,
+					'disable_wp_embed'      => true,
+					'disable_dashicons'     => true,
+					'remove_query_strings'  => true,
+					'preload_fonts'         => true,
+					'preload_enabled'       => true,
+					'preload_homepage'      => true,
+					'preload_public_posts'  => true,
+					'lcp_optimization'      => true,
+					'speculation_rules'     => true,
+				) );
+
+			default:
+				return false;
+		}
 	}
 
 	/**

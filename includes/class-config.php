@@ -260,6 +260,14 @@ class Prime_Cache_Config {
 			return false;
 		}
 
+		// Refuse to overwrite another plugin's object-cache.php.
+		if ( file_exists( $file ) ) {
+			$existing = file_get_contents( $file ); // phpcs:ignore
+			if ( false === strpos( $existing, 'PRIME_OBJECT_CACHE' ) ) {
+				return false; // Not ours — do not overwrite.
+			}
+		}
+
 		$content = self::get_object_cache_content( $backend, $dropin_source );
 
 		return (bool) file_put_contents( $file, $content, LOCK_EX ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents

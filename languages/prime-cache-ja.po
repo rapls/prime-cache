@@ -1575,3 +1575,57 @@ msgstr "ユーザープロフィールの更新"
 
 msgid "Clear the author archive page and home page when a user profile is updated or a user is deleted."
 msgstr "ユーザープロフィールが更新されたとき、またはユーザーが削除されたときに、投稿者アーカイブページとホームページのキャッシュをクリアします。"
+
+msgid "Optimization Presets"
+msgstr "最適化プリセット"
+
+msgid "Quickly apply a preset configuration based on your comfort level. You can customize individual settings afterward."
+msgstr "設定レベルに応じたプリセットをすばやく適用できます。適用後に個別の設定をカスタマイズできます。"
+
+msgid "Safe"
+msgstr "安全"
+
+msgid "Minimal risk. Enables page caching, gzip compression, browser caching, and lazy loading. No file optimization or advanced features. Recommended for beginners or production sites that need stability."
+msgstr "リスクを最小限に抑えます。ページキャッシュ、gzip 圧縮、ブラウザーキャッシュ、遅延読み込みを有効化します。ファイル最適化や高度な機能は使用しません。初心者や安定性を重視する本番サイトにおすすめです。"
+
+msgid "Balanced"
+msgstr "バランス"
+
+msgid "Good performance with low risk. Adds HTML/CSS/JS minification, DNS prefetch, link prefetching, emoji removal, and .htaccess optimization on top of Safe settings."
+msgstr "低リスクで良好なパフォーマンスを実現します。安全プリセットの設定に加え、HTML/CSS/JS の圧縮、DNS プリフェッチ、リンクプリフェッチ、絵文字の無効化、.htaccess 最適化を追加します。"
+
+msgid "Aggressive"
+msgstr "アグレッシブ"
+
+msgid "Maximum performance. Adds CSS/JS combining, defer/delay JS, async CSS, critical CSS auto-generation, and preloading. May require testing and exclusion rules for compatibility."
+msgstr "パフォーマンスを最大化します。CSS/JS の結合、JS の遅延読み込み/遅延実行、非同期 CSS、クリティカル CSS の自動生成、プリロードを追加します。互換性のためにテストや除外ルールが必要な場合があります。"
+
+msgid "Apply"
+msgstr "適用"
+
+msgid "Apply the \"%s\" preset? This will overwrite your current settings."
+msgstr "「%s」プリセットを適用しますか？ 現在の設定は上書きされます。"
+
+msgid "\"%s\" preset applied successfully."
+msgstr "「%s」プリセットが正常に適用されました。"
+
+msgid "WebP conversion disabled: no compatible image library (GD or Imagick with WebP support) found."
+msgstr "WebP 変換が無効化されました。互換性のある画像ライブラリ (WebP 対応の GD または Imagick) が見つかりません。"
+
+msgid "AVIF conversion disabled: no compatible image library (GD with AVIF or Imagick with AVIF support) found."
+msgstr "AVIF 変換が無効化されました。互換性のある画像ライブラリ (AVIF 対応の GD または Imagick) が見つかりません。"
+
+msgid "Combine JavaScript enabled. This is an advanced feature — please test your site thoroughly, as some scripts may break when combined."
+msgstr "JavaScript の結合が有効化されました。これは上級者向けの機能です。一部のスクリプトが結合時に動作しなくなる可能性があるため、サイトを十分にテストしてください。"
+
+msgid "Delay JavaScript enabled. This is an advanced feature — some interactive elements may not work until user interaction. Add problematic scripts to the exclusion list if needed."
+msgstr "JavaScript の遅延実行が有効化されました。これは上級者向けの機能です。一部のインタラクティブな要素がユーザー操作まで動作しない場合があります。問題のあるスクリプトは必要に応じて除外リストに追加してください。"
+
+msgid "Redis object cache not enabled: the Redis PHP extension is not installed."
+msgstr "Redis オブジェクトキャッシュを有効化できません。Redis PHP 拡張がインストールされていません。"
+
+msgid "Memcached object cache not enabled: the Memcached PHP extension is not installed."
+msgstr "Memcached オブジェクトキャッシュを有効化できません。Memcached PHP 拡張がインストールされていません。"
+
+msgid "APCu object cache not enabled: the APCu PHP extension is not installed."
+msgstr "APCu オブジェクトキャッシュを有効化できません。APCu PHP 拡張がインストールされていません。"

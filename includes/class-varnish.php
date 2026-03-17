@@ -115,7 +115,7 @@ class Prime_Cache_Varnish {
 			'blocking'    => false,
 			'redirection' => 0,
 			'timeout'     => 5,
-			'sslverify'   => false,
+			'sslverify'   => true,
 			'headers'     => $headers,
 		);
 

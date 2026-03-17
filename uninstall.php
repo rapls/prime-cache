@@ -34,23 +34,27 @@ if ( file_exists( $object_dropin ) ) {
 	}
 }
 
-// Remove WP_CACHE from wp-config.php.
-$config_paths = array(
-	ABSPATH . 'wp-config.php',
-	dirname( ABSPATH ) . '/wp-config.php',
-);
+// Remove WP_CACHE from wp-config.php — only if advanced-cache.php was ours.
+$dropin_was_ours = ! file_exists( $dropin ) || ( isset( $content ) && false !== strpos( $content, 'PRIME_CACHE' ) );
+if ( $dropin_was_ours ) {
+	$config_paths = array(
+		ABSPATH . 'wp-config.php',
+		dirname( ABSPATH ) . '/wp-config.php',
+	);
 
-foreach ( $config_paths as $config_path ) {
-	if ( file_exists( $config_path ) && is_writable( $config_path ) ) {
-		$config_content = file_get_contents( $config_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$config_content = preg_replace(
-			'#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*[^)]+\)\s*;\s*(?://[^\n]*)?\n?#mi',
-			'',
-			$config_content
-		);
-		$config_content = preg_replace( "#\n{3,}#", "\n\n", $config_content );
-		file_put_contents( $config_path, $config_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-		break;
+	foreach ( $config_paths as $config_path ) {
+		if ( file_exists( $config_path ) && is_writable( $config_path ) ) {
+			$config_content = file_get_contents( $config_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			// Only remove if the line was added by Prime Cache.
+			$config_content = preg_replace(
+				'#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*[^)]+\)\s*;\s*(?://\s*Added by Prime Cache[^\n]*)?\n?#mi',
+				'',
+				$config_content
+			);
+			$config_content = preg_replace( "#\n{3,}#", "\n\n", $config_content );
+			file_put_contents( $config_path, $config_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			break;
+		}
 	}
 }
 

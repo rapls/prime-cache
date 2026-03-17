@@ -201,6 +201,52 @@ class Prime_Cache_Admin_Settings {
 			Prime_Cache_Database_Optimizer::unschedule();
 		}
 
+		// Environment pre-checks for high-risk features.
+		$warnings = array();
+
+		// WebP/AVIF: check image library availability.
+		if ( $s['webp_enabled'] && ! ( function_exists( 'imagecreatefromjpeg' ) || ( extension_loaded( 'imagick' ) && in_array( 'WEBP', \Imagick::queryFormats(), true ) ) ) ) {
+			$s['webp_enabled'] = false;
+			$warnings[] = __( 'WebP conversion disabled: no compatible image library (GD or Imagick with WebP support) found.', 'prime-cache' );
+		}
+		if ( $s['avif_enabled'] && ! ( ( function_exists( 'imageavif' ) ) || ( extension_loaded( 'imagick' ) && in_array( 'AVIF', \Imagick::queryFormats(), true ) ) ) ) {
+			$s['avif_enabled'] = false;
+			$warnings[] = __( 'AVIF conversion disabled: no compatible image library (GD with AVIF or Imagick with AVIF support) found.', 'prime-cache' );
+		}
+
+		// Combine JS: warn about potential breakage.
+		if ( $s['combine_js'] && ! $defaults['combine_js'] ) {
+			$warnings[] = __( 'Combine JavaScript enabled. This is an advanced feature — please test your site thoroughly, as some scripts may break when combined.', 'prime-cache' );
+		}
+
+		// Delay JS: warn about potential breakage.
+		if ( $s['delay_js'] && ! $defaults['delay_js'] ) {
+			$warnings[] = __( 'Delay JavaScript enabled. This is an advanced feature — some interactive elements may not work until user interaction. Add problematic scripts to the exclusion list if needed.', 'prime-cache' );
+		}
+
+		// Object cache: verify the PHP extension is available.
+		if ( ! empty( $input['object_cache'] ) && 'off' !== $input['object_cache'] ) {
+			$backend = sanitize_key( $input['object_cache'] );
+			$ext_ok = true;
+			if ( 'redis' === $backend && ! class_exists( 'Redis' ) ) {
+				$ext_ok = false;
+				$warnings[] = __( 'Redis object cache not enabled: the Redis PHP extension is not installed.', 'prime-cache' );
+			} elseif ( 'memcached' === $backend && ! class_exists( 'Memcached' ) ) {
+				$ext_ok = false;
+				$warnings[] = __( 'Memcached object cache not enabled: the Memcached PHP extension is not installed.', 'prime-cache' );
+			} elseif ( 'apcu' === $backend && ! function_exists( 'apcu_add' ) ) {
+				$ext_ok = false;
+				$warnings[] = __( 'APCu object cache not enabled: the APCu PHP extension is not installed.', 'prime-cache' );
+			}
+			if ( ! $ext_ok ) {
+				$input['object_cache'] = 'off';
+			}
+		}
+
+		if ( ! empty( $warnings ) ) {
+			set_transient( 'prime_cache_env_warnings', $warnings, 60 );
+		}
+
 		Prime_Cache_Config::write_config_file( $s );
 		Prime_Cache_Config::install_advanced_cache();
 		$s['htaccess_enabled'] ? Prime_Cache_Htaccess::add_rules( $s ) : Prime_Cache_Htaccess::remove_rules();
@@ -1694,6 +1740,52 @@ class Prime_Cache_Admin_Settings {
 			<?php endif; ?>
 		<?php endif; ?>
 
+		<?php if ( isset( $_GET['pc_preset'] ) ) : ?>
+			<div class="notice notice-success is-dismissible" style="margin:0 0 16px"><p><?php printf( esc_html__( '"%s" preset applied successfully.', 'prime-cache' ), esc_html( ucfirst( sanitize_key( $_GET['pc_preset'] ) ) ) ); ?></p></div>
+		<?php endif; ?>
+
+		<!-- Presets -->
+		<div class="pc-card">
+			<span class="pc-card__h"><?php esc_html_e( 'Optimization Presets', 'prime-cache' ); ?></span>
+			<p class="pc-help" style="margin:0 0 16px"><?php esc_html_e( 'Quickly apply a preset configuration based on your comfort level. You can customize individual settings afterward.', 'prime-cache' ); ?></p>
+			<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+				<?php
+				$preset_n = wp_create_nonce( 'prime_cache_admin_action' );
+				$presets = array(
+					'safe' => array(
+						__( 'Safe', 'prime-cache' ),
+						__( 'Minimal risk. Enables page caching, gzip compression, browser caching, and lazy loading. No file optimization or advanced features. Recommended for beginners or production sites that need stability.', 'prime-cache' ),
+						'#22c55e',
+						'dashicons-shield',
+					),
+					'balanced' => array(
+						__( 'Balanced', 'prime-cache' ),
+						__( 'Good performance with low risk. Adds HTML/CSS/JS minification, DNS prefetch, link prefetching, emoji removal, and .htaccess optimization on top of Safe settings.', 'prime-cache' ),
+						'#f59e0b',
+						'dashicons-performance',
+					),
+					'aggressive' => array(
+						__( 'Aggressive', 'prime-cache' ),
+						__( 'Maximum performance. Adds CSS/JS combining, defer/delay JS, async CSS, critical CSS auto-generation, and preloading. May require testing and exclusion rules for compatibility.', 'prime-cache' ),
+						'#ef4444',
+						'dashicons-controls-forward',
+					),
+				);
+				foreach ( $presets as $pk => $pv ) :
+					$preset_url = wp_nonce_url( admin_url( 'admin.php?pc_action=apply_preset&preset=' . $pk ), 'prime_cache_admin_action' );
+				?>
+				<div style="border:2px solid <?php echo esc_attr( $pv[2] ); ?>;border-radius:var(--radius);padding:20px;text-align:center">
+					<span class="dashicons <?php echo esc_attr( $pv[3] ); ?>" style="font-size:32px;width:32px;height:32px;color:<?php echo esc_attr( $pv[2] ); ?>;margin-bottom:8px"></span>
+					<h3 style="margin:0 0 8px;font-size:16px"><?php echo esc_html( $pv[0] ); ?></h3>
+					<p class="pc-help" style="margin:0 0 14px;font-size:12px;min-height:60px"><?php echo esc_html( $pv[1] ); ?></p>
+					<a href="<?php echo esc_url( $preset_url ); ?>" class="pc-btn pc-btn--p pc-btn--sm" style="width:100%" onclick="return confirm(<?php echo esc_attr( wp_json_encode( sprintf( __( 'Apply the "%s" preset? This will overwrite your current settings.', 'prime-cache' ), $pv[0] ) ) ); ?>)">
+						<?php esc_html_e( 'Apply', 'prime-cache' ); ?>
+					</a>
+				</div>
+				<?php endforeach; ?>
+			</div>
+		</div>
+
 		<!-- Import / Export -->
 		<div class="pc-card">
 			<span class="pc-card__h"><?php esc_html_e( 'Import / Export Settings', 'prime-cache' ); ?></span>
@@ -2045,6 +2137,15 @@ class Prime_Cache_Admin_Settings {
 
 		if ( isset( $_GET['prime_cache_stats_reset'] ) && '1' === $_GET['prime_cache_stats_reset'] )
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Statistics have been reset.', 'prime-cache' ) . '</p></div>';
+
+		// Environment pre-check warnings from sanitize_settings().
+		$env_warnings = get_transient( 'prime_cache_env_warnings' );
+		if ( ! empty( $env_warnings ) && is_array( $env_warnings ) ) {
+			delete_transient( 'prime_cache_env_warnings' );
+			foreach ( $env_warnings as $warning ) {
+				echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html( $warning ) . '</p></div>';
+			}
+		}
 	}
 
 	/* ── css ───────────────────────────────────────────────── */

@@ -102,6 +102,19 @@ if ( preg_match( '#(/wp-admin|/wp-login\.php|/wp-cron\.php|/xmlrpc\.php)#', $_pc
 	return;
 }
 
+// WooCommerce: always skip cart, checkout, account, and AJAX endpoints.
+if ( preg_match( '#(/cart|/checkout|/my-account|/wc-api|wc-ajax=|add-to-cart=)#i', $_pc_request_uri ) ) {
+	return;
+}
+// WooCommerce: skip if session cookies present.
+if ( ! empty( $_COOKIE ) ) {
+	foreach ( array_keys( $_COOKIE ) as $_pc_wc_ck ) {
+		if ( 0 === strpos( $_pc_wc_ck, 'woocommerce_cart_hash' ) || 0 === strpos( $_pc_wc_ck, 'wp_woocommerce_session_' ) || 0 === strpos( $_pc_wc_ck, 'woocommerce_items_in_cart' ) ) {
+			return;
+		}
+	}
+}
+
 // Skip non-HTML extensions.
 $_pc_path = strtok( $_pc_request_uri, '?' );
 if ( $_pc_path && preg_match( '#\.(php|xml|xsl|json|css|js|map|txt)$#i', $_pc_path ) && ! preg_match( '#/index\.php$#', $_pc_path ) ) {
@@ -293,8 +306,11 @@ if ( is_readable( $_pc_cache_file ) ) {
 		}
 	}
 
-	// Restore meta headers and status code if available.
-	$_pc_meta_file = $_pc_cache_dir . 'meta.json';
+	// Restore meta headers and status code if available (per-variant meta file).
+	$_pc_meta_file = $_pc_cache_dir . $_pc_filename . '.meta.json';
+	if ( ! is_readable( $_pc_meta_file ) ) {
+		$_pc_meta_file = $_pc_cache_dir . 'meta.json'; // Fallback to legacy shared meta.
+	}
 	if ( is_readable( $_pc_meta_file ) ) {
 		$_pc_meta = json_decode( file_get_contents( $_pc_meta_file ), true );
 		if ( ! empty( $_pc_meta['headers'] ) ) {
@@ -339,7 +355,13 @@ ob_start( function ( $buffer ) {
 		return $buffer;
 	}
 
-	if ( http_response_code() !== 200 ) {
+	// Check HTTP status code — allow 404 if cache_404 is enabled.
+	$_pc_status = http_response_code();
+	if ( 404 === $_pc_status ) {
+		if ( empty( $prime_cache_config['cache_404'] ) ) {
+			return $buffer;
+		}
+	} elseif ( 200 !== $_pc_status ) {
 		return $buffer;
 	}
 
@@ -351,10 +373,7 @@ ob_start( function ( $buffer ) {
 		return $buffer;
 	}
 
-	// Skip 404 (unless cache_404 is enabled) and search results.
-	if ( function_exists( 'is_404' ) && is_404() && empty( $prime_cache_config['cache_404'] ) ) {
-		return $buffer;
-	}
+	// Skip search results.
 	if ( function_exists( 'is_search' ) && is_search() ) {
 		return $buffer;
 	}
@@ -455,9 +474,10 @@ ob_start( function ( $buffer ) {
 		}
 		if ( ! empty( $meta_headers ) || http_response_code() !== 200 ) {
 			$meta_data = json_encode( array( 'headers' => $meta_headers, 'status' => http_response_code() ) );
-			$meta_tmp = $cache_dir . 'meta.json.tmp.' . getmypid();
+			$meta_file = $cache_dir . $filename . '.meta.json';
+			$meta_tmp  = $meta_file . '.tmp.' . getmypid();
 			if ( false !== file_put_contents( $meta_tmp, $meta_data ) ) {
-				rename( $meta_tmp, $cache_dir . 'meta.json' );
+				rename( $meta_tmp, $meta_file );
 			}
 		}
 	}

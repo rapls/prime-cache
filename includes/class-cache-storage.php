@@ -109,14 +109,15 @@ class Prime_Cache_Storage {
 	}
 
 	/**
-	 * Write meta file with response headers.
+	 * Write meta file with response headers (per-variant).
 	 *
-	 * @param string $dir     Cache directory path.
-	 * @param array  $headers Response headers.
+	 * @param string $dir      Cache directory path.
+	 * @param array  $headers  Response headers.
+	 * @param string $filename Cache filename (e.g. index-https.html).
 	 * @return bool
 	 */
-	public static function write_meta( $dir, $headers ) {
-		$meta_path = $dir . 'meta.json';
+	public static function write_meta( $dir, $headers, $filename = '' ) {
+		$meta_path = $dir . self::get_meta_filename( $filename );
 		$temp_path = $meta_path . '.tmp.' . uniqid();
 		$data      = array( 'headers' => $headers );
 
@@ -131,13 +132,14 @@ class Prime_Cache_Storage {
 	}
 
 	/**
-	 * Read meta file.
+	 * Read meta file (per-variant).
 	 *
-	 * @param string $dir Cache directory path.
+	 * @param string $dir      Cache directory path.
+	 * @param string $filename Cache filename (e.g. index-https.html).
 	 * @return array|false
 	 */
-	public static function read_meta( $dir ) {
-		$meta_path = $dir . 'meta.json';
+	public static function read_meta( $dir, $filename = '' ) {
+		$meta_path = $dir . self::get_meta_filename( $filename );
 		if ( ! is_readable( $meta_path ) ) {
 			return false;
 		}
@@ -148,6 +150,21 @@ class Prime_Cache_Storage {
 		}
 
 		return json_decode( $content, true );
+	}
+
+	/**
+	 * Get meta filename for a cache variant.
+	 *
+	 * @param string $cache_filename Cache filename (e.g. index-https-mobile.html).
+	 * @return string Meta filename (e.g. index-https-mobile.html.meta.json).
+	 */
+	private static function get_meta_filename( $cache_filename ) {
+		if ( empty( $cache_filename ) ) {
+			return 'meta.json';
+		}
+		// Strip .gz extension for meta — gz shares meta with its html variant.
+		$cache_filename = preg_replace( '#\.gz$#', '', $cache_filename );
+		return $cache_filename . '.meta.json';
 	}
 
 	/**

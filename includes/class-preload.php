@@ -111,7 +111,7 @@ class Prime_Cache_Preload {
 			wp_remote_get( $url, array(
 				'timeout'   => 0.01,
 				'blocking'  => false,
-				'sslverify' => false,
+				'sslverify' => true,
 				'headers'   => array( 'X-Prime-Cache-Preload' => '1' ),
 			) );
 
@@ -197,7 +197,7 @@ class Prime_Cache_Preload {
 	 * Parse a sitemap XML (supports sitemap index) and extract URLs.
 	 */
 	private function parse_sitemap( $sitemap_url ) {
-		$response = wp_remote_get( $sitemap_url, array( 'timeout' => 15, 'sslverify' => false ) );
+		$response = wp_remote_get( $sitemap_url, array( 'timeout' => 15, 'sslverify' => true ) );
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return array();
 		}
