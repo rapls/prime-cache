@@ -1,0 +1,1387 @@
+<?php
+/**
+ * File Optimizer — HTML/CSS/JS optimization via output buffer processing.
+ *
+ * Hooks into template_redirect to capture final HTML and applies:
+ *  - HTML minification & comment removal
+ *  - CSS minification, combining, async loading
+ *  - JS minification, combining, defer, delay
+ *  - Google Fonts optimization
+ *  - Query string removal from static resources
+ *  - DNS prefetch injection
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+class Prime_Cache_File_Optimizer {
+
+	/** @var array */
+	private $settings;
+
+	/** @var string Cache directory for combined files. */
+	private $cache_dir;
+
+	/** @var string Cache URL for combined files. */
+	private $cache_url;
+
+	public function __construct() {
+		$this->settings  = prime_cache_get_settings();
+		$this->cache_dir = WP_CONTENT_DIR . '/cache/prime-cache-fo/';
+		$this->cache_url = content_url( '/cache/prime-cache-fo/' );
+
+		if ( ! $this->should_optimize() ) {
+			return;
+		}
+
+		add_action( 'template_redirect', array( $this, 'start_buffer' ), -1 );
+
+		// Debug logging.
+		if ( ! empty( $this->settings['debug_log'] ) ) {
+			add_action( 'prime_cache_after_purge_all', function() {
+				self::debug_log( 'PURGE ALL' );
+			} );
+			add_action( 'prime_cache_url_purged', function( $url ) {
+				self::debug_log( 'PURGE URL: ' . $url );
+			} );
+		}
+
+		// Rewrite file optimizer: serve combined files via clean URL.
+		if ( $this->settings['rewrite_file_optimizer'] ) {
+			add_action( 'init', array( $this, 'register_rewrite_rules' ) );
+			add_action( 'parse_request', array( $this, 'handle_rewrite_request' ) );
+		}
+	}
+
+	/**
+	 * Whether optimization should run on this request.
+	 */
+	private function should_optimize() {
+		if ( is_admin() || wp_doing_cron() || wp_doing_ajax() ) {
+			return false;
+		}
+		if ( defined( 'DOING_AUTOSAVE' ) || defined( 'XMLRPC_REQUEST' ) || defined( 'REST_REQUEST' ) ) {
+			return false;
+		}
+
+		$s = $this->settings;
+		// At least one optimization must be enabled.
+		return $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['combine_css']
+			|| $s['async_css'] || $s['remove_unused_css'] || $s['minify_js'] || $s['combine_js']
+			|| $s['defer_js'] || $s['delay_js'] || $s['combine_google_fonts'] || $s['self_host_google_fonts']
+			|| $s['remove_query_strings'] || ! empty( $s['prefetch_dns'] ) || $s['local_analytics']
+			|| $s['inline_small_css'];
+	}
+
+	public function start_buffer() {
+		ob_start( array( $this, 'process_html' ) );
+	}
+
+	/**
+	 * Main HTML processing pipeline.
+	 */
+	public function process_html( $html ) {
+		if ( strlen( $html ) < 255 || false === stripos( $html, '</html>' ) ) {
+			return $html;
+		}
+
+		$s = $this->settings;
+
+		// DNS Prefetch.
+		if ( ! empty( $s['prefetch_dns'] ) ) {
+			$html = $this->inject_dns_prefetch( $html );
+		}
+
+		// Remove query strings from static resources.
+		if ( $s['remove_query_strings'] ) {
+			$html = $this->strip_query_strings( $html );
+		}
+
+		// Local Google Analytics.
+		if ( $s['local_analytics'] ) {
+			$html = $this->localize_analytics( $html );
+		}
+
+		// Google Fonts optimization (before CSS processing).
+		if ( $s['combine_google_fonts'] ) {
+			$html = $this->optimize_google_fonts( $html );
+		}
+
+		// Self-host Google Fonts — download CSS & font files locally.
+		if ( $s['self_host_google_fonts'] ) {
+			$html = $this->self_host_google_fonts( $html );
+		}
+
+		// Remove Unused CSS (before other CSS processing).
+		if ( $s['remove_unused_css'] ) {
+			$html = $this->remove_unused_css( $html );
+		}
+
+		// Auto-generate Critical CSS.
+		if ( $s['critical_css_auto'] && $s['async_css'] ) {
+			$html = $this->auto_critical_css( $html );
+		}
+
+		// CSS optimizations.
+		if ( $s['minify_css'] || $s['combine_css'] || $s['async_css'] ) {
+			$html = $this->process_css( $html );
+		}
+
+		// JS optimizations.
+		if ( $s['minify_js'] || $s['combine_js'] || $s['defer_js'] || $s['delay_js'] ) {
+			$html = $this->process_js( $html );
+		}
+
+		// HTML minification (last step).
+		if ( $s['remove_html_comments'] ) {
+			$html = $this->remove_html_comments( $html );
+		}
+		if ( $s['minify_html'] ) {
+			$html = $this->minify_html( $html );
+		}
+
+		return $html;
+	}
+
+	// ── HTML ─────────────────────────────────────────────────
+
+	private function minify_html( $html ) {
+		if ( $this->settings['minify_html_dom'] ) {
+			return $this->minify_html_dom( $html );
+		}
+		return $this->minify_html_regex( $html );
+	}
+
+	/**
+	 * Regex-based HTML minification (fast, safe).
+	 */
+	private function minify_html_regex( $html ) {
+		$preserved = array();
+		$html = preg_replace_callback( '#<(pre|script|style|textarea)[^>]*>.*?</\\1>#si', function( $m ) use ( &$preserved ) {
+			$key = '<!--PC_PRESERVE_' . count( $preserved ) . '-->';
+			$preserved[ $key ] = $m[0];
+			return $key;
+		}, $html );
+
+		$html = preg_replace( '#>\s+<#', '> <', $html );
+		$html = preg_replace( '#\s{2,}#', ' ', $html );
+		// Only remove whitespace around = inside HTML tags (not in text content).
+		$html = preg_replace_callback( '#<[^>]+>#', function( $m ) {
+			return preg_replace( '#\s*=\s*#', '=', $m[0] );
+		}, $html );
+
+		$html = str_replace( array_keys( $preserved ), array_values( $preserved ), $html );
+		return $html;
+	}
+
+	/**
+	 * DOM-based HTML minification (deeper optimization).
+	 *
+	 * Parses HTML via DOMDocument for more aggressive whitespace removal
+	 * between block-level elements while preserving inline formatting.
+	 */
+	private function minify_html_dom( $html ) {
+		// Preserve pre/script/style/textarea first.
+		$preserved = array();
+		$html = preg_replace_callback( '#<(pre|script|style|textarea)[^>]*>.*?</\\1>#si', function( $m ) use ( &$preserved ) {
+			$key = '<!--PC_DOM_' . count( $preserved ) . '-->';
+			$preserved[ $key ] = $m[0];
+			return $key;
+		}, $html );
+
+		$doc = new DOMDocument();
+		libxml_use_internal_errors( true );
+		$loaded = $doc->loadHTML( '<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NOERROR );
+		libxml_clear_errors();
+
+		if ( ! $loaded ) {
+			// Fallback to regex if DOM parsing fails.
+			$html = str_replace( array_keys( $preserved ), array_values( $preserved ), $html );
+			return $this->minify_html_regex( $html );
+		}
+
+		// Walk text nodes and collapse whitespace.
+		$this->dom_collapse_whitespace( $doc );
+
+		$result = $doc->saveHTML();
+		// Remove the XML encoding declaration.
+		$result = preg_replace( '#^<\?xml encoding="UTF-8"\>#', '', $result );
+
+		// Additional regex pass for remaining whitespace between tags.
+		$result = preg_replace( '#>\s+<#', '> <', $result );
+		$result = preg_replace( '#\s{2,}#', ' ', $result );
+
+		// Remove redundant boolean attribute values added by DOMDocument.
+		$result = preg_replace( '#\s(defer|async|disabled|checked|selected|readonly|required|autofocus|autoplay|controls|loop|muted|hidden|novalidate)="(\\1|)"#i', ' $1', $result );
+
+		// Restore preserved blocks.
+		$result = str_replace( array_keys( $preserved ), array_values( $preserved ), $result );
+		return $result;
+	}
+
+	/**
+	 * Recursively collapse whitespace in DOM text nodes.
+	 */
+	private function dom_collapse_whitespace( $node ) {
+		if ( ! $node->hasChildNodes() ) {
+			return;
+		}
+
+		$block_tags = array( 'div', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'section', 'article', 'aside', 'nav', 'header', 'footer', 'main', 'figure', 'figcaption', 'blockquote', 'form', 'fieldset', 'details', 'summary', 'dl', 'dt', 'dd', 'hr', 'br' );
+
+		foreach ( $node->childNodes as $child ) {
+			if ( $child->nodeType === XML_TEXT_NODE ) {
+				$parent_tag = strtolower( $child->parentNode->nodeName ?? '' );
+				// Don't touch text inside inline elements that need precise spacing.
+				if ( ! in_array( $parent_tag, array( 'pre', 'code', 'script', 'style', 'textarea' ), true ) ) {
+					$text = preg_replace( '#\s+#', ' ', $child->nodeValue );
+					$child->nodeValue = $text;
+				}
+			} elseif ( $child->nodeType === XML_ELEMENT_NODE ) {
+				$this->dom_collapse_whitespace( $child );
+			}
+		}
+	}
+
+	private function remove_html_comments( $html ) {
+		// Remove HTML comments but keep IE conditionals and preserved markers.
+		return preg_replace( '#<!--(?!\[if\s|!?\[endif|PC_PRESERVE_).*?-->#s', '', $html );
+	}
+
+	// ── CSS ──────────────────────────────────────────────────
+
+	private function process_css( $html ) {
+		$s = $this->settings;
+		$excludes = $this->parse_list( $s['exclude_css'] );
+
+		// Find all <link rel="stylesheet"> tags.
+		if ( ! preg_match_all( '#<link\s[^>]*rel=["\']stylesheet["\'][^>]*/?\s*>#i', $html, $matches, PREG_SET_ORDER ) ) {
+			return $html;
+		}
+
+		$to_combine = array();
+
+		foreach ( $matches as $match ) {
+			$tag = $match[0];
+
+			// Extract href.
+			if ( ! preg_match( '#href=["\']([^"\']+)["\']#i', $tag, $href_match ) ) {
+				continue;
+			}
+			$href = $href_match[1];
+
+			// Check exclusions.
+			if ( $this->matches_patterns( $href, $excludes ) ) {
+				continue;
+			}
+
+			// Inline small CSS files.
+			if ( ! empty( $s['inline_small_css'] ) && $this->is_local_url( $href ) ) {
+				$path = $this->url_to_path( $href );
+				if ( $path && is_readable( $path ) && filesize( $path ) <= (int) ( $s['inline_css_threshold'] ?? 8192 ) ) {
+					$css = file_get_contents( $path ); // phpcs:ignore
+					if ( false !== $css ) {
+						$css = $this->rebase_css_urls( $css, $path );
+						if ( $s['minify_css'] ) {
+							$css = $this->minify_css_content( $css );
+						}
+						$html = str_replace( $tag, '<style>' . $css . '</style>', $html );
+						continue;
+					}
+				}
+			}
+
+			// Minify individual CSS files.
+			if ( $s['minify_css'] && ! $s['combine_css'] && $this->is_local_url( $href ) ) {
+				$minified_url = $this->minify_css_file( $href );
+				if ( $minified_url ) {
+					$new_tag = str_replace( $href, $minified_url, $tag );
+					$html = str_replace( $tag, $new_tag, $html );
+				}
+				continue;
+			}
+
+			// Collect for combining.
+			if ( $s['combine_css'] && $this->is_local_url( $href ) ) {
+				$to_combine[] = array( 'tag' => $tag, 'href' => $href );
+			}
+		}
+
+		// Combine CSS.
+		if ( $s['combine_css'] && ! empty( $to_combine ) ) {
+			$html = $this->combine_css_files( $html, $to_combine );
+		}
+
+		// Async CSS loading.
+		if ( $s['async_css'] ) {
+			$html = $this->async_css( $html, $excludes );
+		}
+
+		return $html;
+	}
+
+	private function minify_css_content( $css ) {
+		// Preserve calc() expressions.
+		$calcs = array();
+		$css = preg_replace_callback( '#calc\([^)]+\)#i', function( $m ) use ( &$calcs ) {
+			$key = '/*PC_CALC_' . count( $calcs ) . '*/';
+			$calcs[ $key ] = $m[0];
+			return $key;
+		}, $css );
+
+		$css = preg_replace( '#/\*(?!PC_CALC_).*?\*/#s', '', $css );
+		$css = preg_replace( '#\s*([{};:,])\s*#', '$1', $css );
+		$css = preg_replace( '#\s+#', ' ', $css );
+		$css = str_replace( ';}', '}', $css );
+
+		// Restore calc() expressions.
+		if ( $calcs ) {
+			$css = str_replace( array_keys( $calcs ), array_values( $calcs ), $css );
+		}
+		return trim( $css );
+	}
+
+	private function minify_css_file( $url ) {
+		$path = $this->url_to_path( $url );
+		if ( ! $path || ! is_readable( $path ) ) {
+			return false;
+		}
+
+		$hash = md5( $url . filemtime( $path ) );
+		$out  = $this->cache_dir . 'css/' . $hash . '.css';
+		$out_url = $this->cache_url . 'css/' . $hash . '.css';
+
+		if ( file_exists( $out ) ) {
+			return $out_url;
+		}
+
+		$css = file_get_contents( $path ); // phpcs:ignore
+		if ( false === $css ) {
+			return false;
+		}
+
+		$css = $this->rebase_css_urls( $css, $path );
+		$css = $this->minify_css_content( $css );
+
+		wp_mkdir_p( dirname( $out ) );
+		file_put_contents( $out, $css ); // phpcs:ignore
+
+		return $out_url;
+	}
+
+	private function rebase_css_urls( $css, $css_path ) {
+		$css_dir = dirname( $css_path );
+		return preg_replace_callback( '#url\(\s*["\']?(?!data:|https?://|//)([^"\')\s]+)["\']?\s*\)#i', function( $m ) use ( $css_dir ) {
+			$abs = realpath( $css_dir . '/' . $m[1] );
+			if ( $abs && strpos( $abs, ABSPATH ) === 0 ) {
+				return 'url(' . site_url( '/' . ltrim( str_replace( ABSPATH, '', $abs ), '/' ) ) . ')';
+			}
+			return $m[0];
+		}, $css );
+	}
+
+	private function combine_css_files( $html, $entries ) {
+		$contents = '';
+		$hash_src = '';
+		$first_tag = null;
+
+		foreach ( $entries as $entry ) {
+			$path = $this->url_to_path( $entry['href'] );
+			if ( ! $path || ! is_readable( $path ) ) {
+				continue;
+			}
+
+			$css = file_get_contents( $path ); // phpcs:ignore
+			if ( false === $css ) {
+				continue;
+			}
+
+			$css = $this->rebase_css_urls( $css, $path );
+			if ( $this->settings['minify_css'] ) {
+				$css = $this->minify_css_content( $css );
+			}
+
+			$contents .= "/* {$entry['href']} */\n" . $css . "\n";
+			$hash_src .= $entry['href'] . filemtime( $path );
+
+			if ( null === $first_tag ) {
+				$first_tag = $entry['tag'];
+			} else {
+				$html = str_replace( $entry['tag'], '', $html );
+			}
+		}
+
+		if ( empty( $contents ) || null === $first_tag ) {
+			return $html;
+		}
+
+		$hash = md5( $hash_src );
+		$out  = $this->cache_dir . 'css/' . $hash . '.css';
+		$out_url = $this->cache_url . 'css/' . $hash . '.css';
+
+		wp_mkdir_p( dirname( $out ) );
+		file_put_contents( $out, $contents ); // phpcs:ignore
+
+		$combined_tag = '<link rel="stylesheet" href="' . esc_url( $out_url ) . '">';
+		$pos = strpos( $html, $first_tag ); if ( false !== $pos ) { $html = substr_replace( $html, $combined_tag, $pos, strlen( $first_tag ) ); }
+
+		return $html;
+	}
+
+	private function async_css( $html, $excludes ) {
+		$critical = trim( $this->settings['critical_css'] );
+
+		// Inject critical CSS.
+		if ( $critical ) {
+			$html = str_replace( '</head>', '<style id="pc-critical-css">' . $this->minify_css_content( $critical ) . '</style>' . "\n</head>", $html );
+		}
+
+		// Convert stylesheet links to async loading.
+		$html = preg_replace_callback( '#<link\s([^>]*rel=["\']stylesheet["\'][^>]*)(/?\s*>)#i', function( $m ) use ( $excludes ) {
+			$attrs = $m[1];
+			if ( preg_match( '#href=["\']([^"\']+)["\']#i', $attrs, $href_m ) ) {
+				if ( $this->matches_patterns( $href_m[1], $excludes ) ) {
+					return $m[0];
+				}
+			}
+			// media="print" onload="this.media='all'" pattern.
+			$attrs = preg_replace( '#media=["\'][^"\']*["\']#i', '', $attrs );
+			return '<link ' . $attrs . ' media="print" onload="this.media=\'all\'"' . $m[2]
+				. '<noscript>' . $m[0] . '</noscript>';
+		}, $html );
+
+		return $html;
+	}
+
+	// ── Remove Unused CSS ────────────────────────────────────
+
+	/**
+	 * Remove CSS rules that don't match any element in the current page HTML.
+	 *
+	 * Parses each local stylesheet, extracts selectors, checks them against
+	 * the page DOM, and rebuilds CSS with only matched rules.
+	 */
+	private function remove_unused_css( $html ) {
+		$safelist = $this->parse_list( $this->settings['ucss_safelist'] );
+		$excludes = $this->parse_list( $this->settings['exclude_css'] );
+
+		// Build a map of selectors present in the HTML.
+		$body_html = $html;
+
+		if ( ! preg_match_all( '#<link\s[^>]*rel=["\']stylesheet["\'][^>]*href=["\']([^"\']+)["\'][^>]*/?\s*>#i', $html, $links, PREG_SET_ORDER ) ) {
+			return $html;
+		}
+
+		foreach ( $links as $link ) {
+			$tag  = $link[0];
+			$href = $link[1];
+
+			if ( $this->matches_patterns( $href, $excludes ) || ! $this->is_local_url( $href ) ) {
+				continue;
+			}
+
+			$path = $this->url_to_path( $href );
+			if ( ! $path || ! is_readable( $path ) ) {
+				continue;
+			}
+
+			// Use page type for UCSS cache key to share across similar pages.
+			$page_type = 'page';
+			if ( function_exists( 'is_front_page' ) && is_front_page() ) $page_type = 'front';
+			elseif ( function_exists( 'is_singular' ) && is_singular() ) $page_type = 'singular-' . get_post_type();
+			elseif ( function_exists( 'is_archive' ) && is_archive() ) $page_type = 'archive';
+			elseif ( function_exists( 'is_search' ) && is_search() ) $page_type = 'search';
+			elseif ( function_exists( 'is_404' ) && is_404() ) $page_type = '404';
+			$hash    = md5( 'ucss_' . $href . filemtime( $path ) . $page_type );
+			$out     = $this->cache_dir . 'ucss/' . $hash . '.css';
+			$out_url = $this->cache_url . 'ucss/' . $hash . '.css';
+
+			if ( ! file_exists( $out ) ) {
+				$css = file_get_contents( $path ); // phpcs:ignore
+				if ( false === $css ) {
+					continue;
+				}
+
+				$css = $this->rebase_css_urls( $css, $path );
+				$cleaned = $this->filter_used_rules( $css, $body_html, $safelist );
+
+				wp_mkdir_p( dirname( $out ) );
+				file_put_contents( $out, $cleaned ); // phpcs:ignore
+			}
+
+			$html = str_replace( $href, $out_url, $html );
+		}
+
+		return $html;
+	}
+
+	/**
+	 * Filter CSS to keep only rules whose selectors match something in the HTML.
+	 */
+	private function filter_used_rules( $css, $html, $safelist ) {
+		// Remove CSS comments.
+		$css = preg_replace( '#/\*.*?\*/#s', '', $css );
+
+		// Split into rule blocks: selector { ... }
+		// This handles simple cases; deeply nested @media queries are preserved.
+		$output = '';
+
+		// Preserve @media, @font-face, @keyframes, @import blocks entirely.
+		$css = preg_replace_callback( '#(@(?:media|supports)[^{]*\{)((?:[^{}]*\{[^}]*\})*\s*)\}#si', function( $m ) use ( $html, $safelist, &$output ) {
+			$inner = $this->filter_used_rules( $m[2], $html, $safelist );
+			if ( ! empty( trim( $inner ) ) ) {
+				$output .= $m[1] . $inner . "}\n";
+			}
+			return '';
+		}, $css );
+
+		// Preserve @font-face, @keyframes, @import unconditionally.
+		$css = preg_replace_callback( '#@(font-face|keyframes|import)[^{]*(\{[^}]*(\{[^}]*\}[^}]*)?\}|[^;]*;)#si', function( $m ) use ( &$output ) {
+			$output .= $m[0] . "\n";
+			return '';
+		}, $css );
+
+		// Process remaining selector { property } blocks.
+		preg_match_all( '#([^{}]+)\{([^}]*)\}#s', $css, $rules, PREG_SET_ORDER );
+
+		foreach ( $rules as $rule ) {
+			$selectors_raw = trim( $rule[1] );
+			$body          = $rule[2];
+
+			if ( empty( $selectors_raw ) || empty( trim( $body ) ) ) {
+				continue;
+			}
+
+			$selectors = array_map( 'trim', explode( ',', $selectors_raw ) );
+			$keep      = false;
+
+			foreach ( $selectors as $sel ) {
+				if ( $this->selector_used_in_html( $sel, $html, $safelist ) ) {
+					$keep = true;
+					break;
+				}
+			}
+
+			if ( $keep ) {
+				$output .= $selectors_raw . '{' . $body . "}\n";
+			}
+		}
+
+		return $output;
+	}
+
+	/**
+	 * Check if a CSS selector matches anything in the page HTML.
+	 */
+	private function selector_used_in_html( $selector, $html, $safelist ) {
+		// Always keep safelisted patterns.
+		foreach ( $safelist as $safe ) {
+			if ( false !== strpos( $selector, $safe ) ) {
+				return true;
+			}
+		}
+
+		// Keep pseudo-element/class selectors (::before, :hover, etc.) — check base selector.
+		$base = preg_replace( '#::?[a-z\-]+(\(.*?\))?$#i', '', $selector );
+		$base = trim( $base );
+		if ( empty( $base ) || '*' === $base ) {
+			return true; // Universal or pseudo-only — keep.
+		}
+
+		// Extract tag, class, id from the last segment of the selector.
+		$parts = preg_split( '#[\s>+~]+#', $base );
+		$last  = end( $parts );
+
+		// ID selector: #foo.
+		if ( preg_match( '#\#([a-zA-Z0-9_-]+)#', $last, $id_m ) ) {
+			return false !== strpos( $html, 'id="' . $id_m[1] . '"' ) || false !== strpos( $html, "id='" . $id_m[1] . "'" );
+		}
+
+		// Class selector: .foo.
+		if ( preg_match( '#\.([a-zA-Z0-9_-]+)#', $last, $cls_m ) ) {
+			return (bool) preg_match( '#class=["\'][^"\']*\b' . preg_quote( $cls_m[1], '#' ) . '\b#i', $html );
+		}
+
+		// Tag selector.
+		$tag = preg_replace( '#[\[\.#:].*#', '', $last );
+		if ( $tag && preg_match( '#^[a-zA-Z][a-zA-Z0-9]*$#', $tag ) ) {
+			return false !== stripos( $html, '<' . $tag );
+		}
+
+		// Attribute selectors or complex — keep to be safe.
+		return true;
+	}
+
+	// ── Auto Critical CSS ────────────────────────────────────
+
+	/**
+	 * Auto-extract critical CSS by collecting styles for above-the-fold elements.
+	 *
+	 * Generates a per-URL critical CSS file by extracting rules that match common
+	 * above-the-fold selectors (body, header, nav, hero, h1, etc.).
+	 */
+	private function auto_critical_css( $html ) {
+		// Skip if manual critical CSS is already provided.
+		if ( ! empty( trim( $this->settings['critical_css'] ) ) ) {
+			return $html;
+		}
+
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '/';
+		$hash        = md5( 'ccss_' . $request_uri );
+		$ccss_file   = $this->cache_dir . 'ccss/' . $hash . '.css';
+
+		// Check cache.
+		if ( file_exists( $ccss_file ) && ( time() - filemtime( $ccss_file ) ) < 7 * DAY_IN_SECONDS ) {
+			$critical = file_get_contents( $ccss_file ); // phpcs:ignore
+			if ( $critical ) {
+				$this->settings['critical_css'] = $critical;
+			}
+			return $html;
+		}
+
+		// Collect CSS from all linked stylesheets.
+		$all_css = '';
+		if ( preg_match_all( '#<link\s[^>]*rel=["\']stylesheet["\'][^>]*href=["\']([^"\']+)["\'][^>]*/?\s*>#i', $html, $links ) ) {
+			foreach ( $links[1] as $href ) {
+				if ( ! $this->is_local_url( $href ) ) {
+					continue;
+				}
+				$path = $this->url_to_path( $href );
+				if ( $path && is_readable( $path ) ) {
+					$css = file_get_contents( $path ); // phpcs:ignore
+					if ( $css ) {
+						$all_css .= $this->rebase_css_urls( $css, $path ) . "\n";
+					}
+				}
+			}
+		}
+
+		// Also collect inline <style> blocks.
+		if ( preg_match_all( '#<style[^>]*>(.*?)</style>#si', $html, $styles ) ) {
+			foreach ( $styles[1] as $inline ) {
+				$all_css .= $inline . "\n";
+			}
+		}
+
+		if ( empty( $all_css ) ) {
+			return $html;
+		}
+
+		// Extract rules matching above-the-fold selectors.
+		$atf_patterns = array(
+			'html', 'body', ':root',
+			'header', 'nav', '.nav', '#nav', '.menu', '.navbar', '.site-header',
+			'h1', 'h2', '.hero', '.banner', '.masthead', '.jumbotron',
+			'.logo', '.site-title', '.site-branding',
+			'.container', '.wrapper', '.row', '.col',
+			'img', 'figure', '.wp-block-image',
+			'a', 'p', 'ul', 'ol', 'li',
+			'@font-face', '@keyframes',
+		);
+
+		$all_css  = preg_replace( '#/\*.*?\*/#s', '', $all_css );
+		$critical = '';
+
+		// Keep @font-face and @keyframes unconditionally.
+		preg_match_all( '#@(font-face|keyframes)[^{]*\{[^}]*(\{[^}]*\}[^}]*)?\}#si', $all_css, $at_rules );
+		if ( ! empty( $at_rules[0] ) ) {
+			$critical .= implode( "\n", $at_rules[0] ) . "\n";
+		}
+
+		// Extract matching rules.
+		preg_match_all( '#([^{}]+)\{([^}]*)\}#s', $all_css, $rules, PREG_SET_ORDER );
+		foreach ( $rules as $rule ) {
+			$selector = trim( $rule[1] );
+			foreach ( $atf_patterns as $pattern ) {
+				if ( false !== stripos( $selector, $pattern ) ) {
+					$critical .= $selector . '{' . $rule[2] . "}\n";
+					break;
+				}
+			}
+		}
+
+		$critical = $this->minify_css_content( $critical );
+
+		// Cap at ~50KB to avoid bloating the HTML.
+		if ( strlen( $critical ) > 51200 ) {
+			// Truncate at the last complete rule (closing brace) within the limit.
+			$critical = substr( $critical, 0, 51200 );
+			$last_brace = strrpos( $critical, '}' );
+			if ( false !== $last_brace ) {
+				$critical = substr( $critical, 0, $last_brace + 1 );
+			}
+		}
+
+		wp_mkdir_p( dirname( $ccss_file ) );
+		file_put_contents( $ccss_file, $critical ); // phpcs:ignore
+
+		$this->settings['critical_css'] = $critical;
+
+		return $html;
+	}
+
+	// ── JS ───────────────────────────────────────────────────
+
+	private function process_js( $html ) {
+		$s = $this->settings;
+		$excludes       = $this->parse_list( $s['exclude_js'] );
+		$inline_excl    = $this->parse_list( $s['exclude_inline_js'] );
+		$defer_excl     = $this->parse_list( $s['exclude_defer_js'] );
+		$delay_excl     = $this->parse_list( $s['exclude_delay_js'] );
+
+		// Process <script> tags.
+		$html = preg_replace_callback( '#<script\b([^>]*)>(.*?)</script>#si', function( $m ) use ( $s, $excludes, $inline_excl, $defer_excl, $delay_excl ) {
+			$attrs   = $m[1];
+			$content = $m[2];
+			$full    = $m[0];
+
+			$has_src = preg_match( '#src=["\']([^"\']+)["\']#i', $attrs, $src_match );
+			$src     = $has_src ? $src_match[1] : '';
+
+			// Skip type="application/ld+json", type="text/template" etc.
+			if ( preg_match( '#type=["\'](?!text/javascript|module)[^"\']+["\']#i', $attrs ) ) {
+				return $full;
+			}
+
+			// Check exclusions.
+			if ( $has_src && $this->matches_patterns( $src, $excludes ) ) {
+				return $full;
+			}
+			if ( ! $has_src && $this->matches_inline_patterns( $content, $inline_excl ) ) {
+				return $full;
+			}
+
+			// Skip data-no-defer and data-no-delay attributes.
+			$no_defer = false !== strpos( $attrs, 'data-no-defer' );
+			$no_delay = false !== strpos( $attrs, 'data-no-delay' );
+
+			// Delay JS execution.
+			if ( $s['delay_js'] && ! $no_delay && ! $this->matches_patterns( $src ?: $content, $delay_excl ) ) {
+				// Safe mode: skip internal scripts (wp-includes, wp-content).
+				if ( ! empty( $s['delay_js_safe_mode'] ) && $has_src ) {
+					$home = home_url();
+					if ( 0 === strpos( $src, $home ) || ( 0 === strpos( $src, '/' ) && 0 !== strpos( $src, '//' ) ) ) {
+						// Internal script — do not delay in safe mode.
+					} else {
+						return $this->delay_script( $attrs, $content, $has_src, $src );
+					}
+				} else {
+					return $this->delay_script( $attrs, $content, $has_src, $src );
+				}
+			}
+
+			// Defer JS.
+			if ( $s['defer_js'] && $has_src && ! $no_defer && ! $this->matches_patterns( $src, $defer_excl ) ) {
+				if ( false === strpos( $attrs, 'defer' ) && false === strpos( $attrs, 'async' ) ) {
+					$attrs .= ' defer';
+					return '<script' . $attrs . '>' . $content . '</script>';
+				}
+			}
+
+			// Minify inline JS.
+			if ( $s['minify_js'] && ! $has_src && ! empty( trim( $content ) ) ) {
+				$content = $this->minify_js_content( $content );
+				return '<script' . $attrs . '>' . $content . '</script>';
+			}
+
+			// Minify external JS file.
+			if ( $s['minify_js'] && $has_src && $this->is_local_url( $src ) ) {
+				$min_url = $this->minify_js_file( $src );
+				if ( $min_url ) {
+					return str_replace( $src, $min_url, $full );
+				}
+			}
+
+			return $full;
+		}, $html );
+
+		// Combine JS files.
+		if ( $s['combine_js'] && ! $s['delay_js'] ) {
+			$html = $this->combine_js_files( $html, $excludes );
+		}
+
+		// Inject delay JS loader script.
+		if ( $s['delay_js'] ) {
+			$html = $this->inject_delay_loader( $html );
+		}
+
+		return $html;
+	}
+
+	private function minify_js_content( $js ) {
+		// Preserve string literals and template literals.
+		$strings = array();
+		$js = preg_replace_callback( '#(["\'])(?:\\\\.|(?!\1).)*\1|`(?:\\\\.|[^`])*`#s', function( $m ) use ( &$strings ) {
+			$key = '"PC_STR_' . count( $strings ) . '"';
+			$strings[ $key ] = $m[0];
+			return $key;
+		}, $js );
+
+		// Remove multi-line comments.
+		$js = preg_replace( '#/\*.*?\*/#s', '', $js );
+		// Remove single-line comments (only at line start or after semicolons/braces).
+		$js = preg_replace( '#(^|[;{}()\n])\s*//[^\n]*#m', '$1', $js );
+		// Collapse whitespace.
+		$js = preg_replace( '#[\t ]+#', ' ', $js );
+		$js = preg_replace( '#\n+#', "\n", $js );
+
+		// Restore string literals.
+		if ( $strings ) {
+			$js = str_replace( array_keys( $strings ), array_values( $strings ), $js );
+		}
+		return trim( $js );
+	}
+
+	/**
+	 * Combine local JS files into a single file.
+	 */
+	private function combine_js_files( $html, $excludes ) {
+		if ( ! preg_match_all( '#<script\s[^>]*src=["\']([^"\']+)["\'][^>]*>\s*</script>#i', $html, $matches, PREG_SET_ORDER ) ) {
+			return $html;
+		}
+
+		$to_combine = array();
+		foreach ( $matches as $match ) {
+			$tag = $match[0];
+			$src = $match[1];
+
+			if ( ! $this->is_local_url( $src ) ) continue;
+			if ( $this->matches_patterns( $src, $excludes ) ) continue;
+			if ( false !== strpos( $tag, 'async' ) || false !== strpos( $tag, 'defer' ) ) continue;
+			if ( preg_match( '#type=["\'](?!text/javascript|module)[^"\']+["\']#i', $tag ) ) continue;
+
+			$to_combine[] = array( 'tag' => $tag, 'src' => $src );
+		}
+
+		if ( count( $to_combine ) < 2 ) {
+			return $html;
+		}
+
+		$contents = '';
+		$hash_src = '';
+		$first_tag = null;
+
+		foreach ( $to_combine as $entry ) {
+			$path = $this->url_to_path( $entry['src'] );
+			if ( ! $path || ! is_readable( $path ) ) continue;
+
+			$js = file_get_contents( $path ); // phpcs:ignore
+			if ( false === $js ) continue;
+
+			if ( $this->settings['minify_js'] && ! preg_match( '#\.min\.js$#', $path ) ) {
+				$js = $this->minify_js_content( $js );
+			}
+
+			$contents .= "/* " . basename( $entry['src'] ) . " */\n" . $js . ";\n";
+			$hash_src .= $entry['src'] . filemtime( $path );
+
+			if ( null === $first_tag ) {
+				$first_tag = $entry['tag'];
+			} else {
+				$html = str_replace( $entry['tag'], '', $html );
+			}
+		}
+
+		if ( empty( $contents ) || null === $first_tag ) {
+			return $html;
+		}
+
+		$hash = md5( $hash_src );
+		$out  = $this->cache_dir . 'js/' . $hash . '.js';
+		$out_url = $this->cache_url . 'js/' . $hash . '.js';
+
+		wp_mkdir_p( dirname( $out ) );
+		file_put_contents( $out, $contents ); // phpcs:ignore
+
+		$combined_tag = '<script src="' . esc_url( $out_url ) . '"></script>';
+		$pos = strpos( $html, $first_tag ); if ( false !== $pos ) { $html = substr_replace( $html, $combined_tag, $pos, strlen( $first_tag ) ); }
+
+		return $html;
+	}
+
+	private function minify_js_file( $url ) {
+		$path = $this->url_to_path( $url );
+		if ( ! $path || ! is_readable( $path ) ) {
+			return false;
+		}
+
+		// Already minified.
+		if ( preg_match( '#\.min\.js$#', $path ) ) {
+			return false;
+		}
+
+		$hash = md5( $url . filemtime( $path ) );
+		$out  = $this->cache_dir . 'js/' . $hash . '.js';
+		$out_url = $this->cache_url . 'js/' . $hash . '.js';
+
+		if ( file_exists( $out ) ) {
+			return $out_url;
+		}
+
+		$js = file_get_contents( $path ); // phpcs:ignore
+		if ( false === $js ) {
+			return false;
+		}
+
+		$js = $this->minify_js_content( $js );
+		wp_mkdir_p( dirname( $out ) );
+		file_put_contents( $out, $js ); // phpcs:ignore
+
+		return $out_url;
+	}
+
+	private function delay_script( $attrs, $content, $has_src, $src ) {
+		if ( $has_src ) {
+			// Replace src with data-pc-src, set type to pc-delay.
+			$attrs = str_replace( $src, '', $attrs );
+			$attrs = preg_replace( '#src=["\']["\']#i', '', $attrs );
+			$attrs = preg_replace( '#type=["\'][^"\']*["\']#i', '', $attrs );
+			return '<script type="pc-delay/javascript" data-pc-src="' . esc_attr( $src ) . '"' . $attrs . '></script>';
+		}
+
+		// Inline script — replace type.
+		$attrs = preg_replace( '#type=["\'][^"\']*["\']#i', '', $attrs );
+		return '<script type="pc-delay/javascript"' . $attrs . '>' . $content . '</script>';
+	}
+
+	private function inject_delay_loader( $html ) {
+		$timeout = (int) $this->settings['delay_js_timeout'];
+		$timeout_js = $timeout > 0 ? "setTimeout(run,{$timeout});" : '';
+
+		$loader = <<<JS
+<script id="pc-delay-loader">
+(function(){
+	var done=false;
+	function run(){
+		if(done)return;done=true;
+		document.querySelectorAll('script[type="pc-delay/javascript"]').forEach(function(el){
+			var n=document.createElement('script');
+			Array.from(el.attributes).forEach(function(a){
+				if(a.name==='type')return;
+				if(a.name==='data-pc-src'){n.src=a.value;return;}
+				n.setAttribute(a.name,a.value);
+			});
+			if(!n.src&&el.textContent)n.textContent=el.textContent;
+			el.parentNode.replaceChild(n,el);
+		});
+	}
+	['mousemove','touchstart','scroll','keydown','click'].forEach(function(e){
+		window.addEventListener(e,run,{once:true,passive:true});
+	});
+	{$timeout_js}
+})();
+</script>
+JS;
+
+		return str_replace( '</body>', $loader . "\n</body>", $html );
+	}
+
+	// ── Google Fonts ─────────────────────────────────────────
+
+	private function optimize_google_fonts( $html ) {
+		$pattern = '#<link[^>]+href=["\']https?://fonts\.googleapis\.com/css2?\?([^"\']+)["\'][^>]*/?\s*>#i';
+
+		if ( ! preg_match_all( $pattern, $html, $matches, PREG_SET_ORDER ) ) {
+			return $html;
+		}
+
+		$families = array();
+		$first_tag = null;
+
+		foreach ( $matches as $match ) {
+			$query = $match[1];
+			parse_str( $query, $params );
+
+			if ( isset( $params['family'] ) ) {
+				$fams = is_array( $params['family'] ) ? $params['family'] : explode( '|', $params['family'] );
+				$families = array_merge( $families, $fams );
+			}
+
+			if ( null === $first_tag ) {
+				$first_tag = $match[0];
+			} else {
+				$html = str_replace( $match[0], '', $html );
+			}
+		}
+
+		if ( empty( $families ) || null === $first_tag ) {
+			return $html;
+		}
+
+		$families = array_unique( $families );
+		$display  = $this->settings['google_fonts_display'] ? '&display=swap' : '';
+		$combined = 'https://fonts.googleapis.com/css2?family=' . implode( '&family=', array_map( 'urlencode', $families ) ) . $display;
+
+		$tag = '<link rel="stylesheet" href="' . esc_url( $combined ) . '">';
+		$html = str_replace( $first_tag, $tag, $html );
+
+		return $html;
+	}
+
+	// ── Self-host Google Fonts ────────────────────────────────
+
+	/**
+	 * Download Google Fonts CSS and font files, rewrite URLs to serve locally.
+	 *
+	 * Flow:
+	 * 1. Find all <link> tags pointing to fonts.googleapis.com.
+	 * 2. For each unique URL, fetch the CSS (with a modern UA to get woff2).
+	 * 3. Parse @font-face src URLs (fonts.gstatic.com), download each font file.
+	 * 4. Rewrite the CSS to point to local font file URLs.
+	 * 5. Save the rewritten CSS locally.
+	 * 6. Replace the original <link> tag with the local CSS URL.
+	 */
+	private function self_host_google_fonts( $html ) {
+		$pattern = '#<link[^>]+href=["\'](?P<url>https?://fonts\.googleapis\.com/css2?\?[^"\']+)["\'][^>]*/?\s*>#i';
+
+		if ( ! preg_match_all( $pattern, $html, $matches, PREG_SET_ORDER ) ) {
+			return $html;
+		}
+
+		$fonts_dir = $this->cache_dir . 'fonts/';
+		$fonts_url = $this->cache_url . 'fonts/';
+
+		wp_mkdir_p( $fonts_dir );
+
+		foreach ( $matches as $match ) {
+			$original_tag = $match[0];
+			$gf_url       = html_entity_decode( $match['url'] );
+
+			$local_css_url = $this->fetch_and_localize_gf_css( $gf_url, $fonts_dir, $fonts_url );
+			if ( ! $local_css_url ) {
+				continue;
+			}
+
+			$new_tag = '<link rel="stylesheet" href="' . esc_url( $local_css_url ) . '">';
+			$html    = str_replace( $original_tag, $new_tag, $html );
+		}
+
+		return $html;
+	}
+
+	/**
+	 * Fetch a Google Fonts CSS file, download its font files, rewrite URLs.
+	 *
+	 * @param string $gf_url    Google Fonts CSS URL.
+	 * @param string $fonts_dir Local directory for font files.
+	 * @param string $fonts_url Local URL base for font files.
+	 * @return string|false Local CSS URL or false on failure.
+	 */
+	private function fetch_and_localize_gf_css( $gf_url, $fonts_dir, $fonts_url ) {
+		// Use URL hash as cache key so we only fetch once.
+		$hash     = md5( $gf_url );
+		$css_file = $fonts_dir . $hash . '.css';
+		$css_url  = $fonts_url . $hash . '.css';
+
+		// Return cached version if it exists and is less than 30 days old.
+		if ( file_exists( $css_file ) && ( time() - filemtime( $css_file ) ) < 30 * DAY_IN_SECONDS ) {
+			return $css_url;
+		}
+
+		// Fetch CSS from Google with a modern user-agent to get woff2 format.
+		$response = wp_remote_get( $gf_url, array(
+			'timeout'    => 10,
+			'user-agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+		) );
+
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return false;
+		}
+
+		$css = wp_remote_retrieve_body( $response );
+		if ( empty( $css ) ) {
+			return false;
+		}
+
+		// Find all font file URLs in the CSS and download them.
+		$css = preg_replace_callback( '#url\(\s*(?P<url>https?://fonts\.gstatic\.com/[^\s\)]+)\s*\)#i', function( $m ) use ( $fonts_dir, $fonts_url ) {
+			$remote_url = $m['url'];
+			$local      = $this->download_font_file( $remote_url, $fonts_dir, $fonts_url );
+			return $local ? 'url(' . $local . ')' : $m[0];
+		}, $css );
+
+		// Add display swap if enabled.
+		if ( $this->settings['google_fonts_display'] && false === strpos( $css, 'font-display' ) ) {
+			$css = preg_replace( '#(\{[^}]*)(})#', '$1font-display:swap;$2', $css );
+		}
+
+		file_put_contents( $css_file, $css ); // phpcs:ignore
+
+		return $css_url;
+	}
+
+	/**
+	 * Download a single font file to the local cache.
+	 *
+	 * @param string $remote_url Remote font file URL.
+	 * @param string $fonts_dir  Local directory.
+	 * @param string $fonts_url  Local URL base.
+	 * @return string|false Local URL or false on failure.
+	 */
+	private function download_font_file( $remote_url, $fonts_dir, $fonts_url ) {
+		// Derive a stable filename from the URL.
+		$ext  = pathinfo( wp_parse_url( $remote_url, PHP_URL_PATH ), PATHINFO_EXTENSION ) ?: 'woff2';
+		$name = md5( $remote_url ) . '.' . $ext;
+		$path = $fonts_dir . $name;
+		$url  = $fonts_url . $name;
+
+		// Already downloaded.
+		if ( file_exists( $path ) ) {
+			return $url;
+		}
+
+		$response = wp_remote_get( $remote_url, array( 'timeout' => 15 ) );
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return false;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		if ( empty( $body ) ) {
+			return false;
+		}
+
+		file_put_contents( $path, $body ); // phpcs:ignore
+
+		return $url;
+	}
+
+	// ── Local Google Analytics ────────────────────────────────
+
+	/**
+	 * Download gtag.js / analytics.js and serve locally.
+	 */
+	private function localize_analytics( $html ) {
+		$scripts = array(
+			'gtag'      => array( 'https://www.googletagmanager.com/gtag/js', 'gtag.js' ),
+			'analytics' => array( 'https://www.google-analytics.com/analytics.js', 'analytics.js' ),
+			'gtm'       => array( 'https://www.googletagmanager.com/gtm.js', 'gtm.js' ),
+		);
+
+		$cache_dir = $this->cache_dir . 'analytics/';
+		$cache_url = $this->cache_url . 'analytics/';
+
+		foreach ( $scripts as $key => $info ) {
+			if ( false === strpos( $html, $info[0] ) ) {
+				continue;
+			}
+
+			$local_path = $cache_dir . $info[1];
+			$local_url  = $cache_url . $info[1];
+
+			// Download if missing or older than 24 hours.
+			if ( ! file_exists( $local_path ) || ( time() - filemtime( $local_path ) ) > DAY_IN_SECONDS ) {
+				// Find the full URL with query params.
+				if ( preg_match( '#["\'](' . preg_quote( $info[0], '#' ) . '[^"\']*)["\']#', $html, $url_m ) ) {
+					$remote = $url_m[1];
+				} else {
+					$remote = $info[0];
+				}
+
+				$response = wp_remote_get( $remote, array( 'timeout' => 10, 'sslverify' => true ) );
+				if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
+					$body = wp_remote_retrieve_body( $response );
+					if ( ! empty( $body ) ) {
+						wp_mkdir_p( $cache_dir );
+						file_put_contents( $local_path, $body ); // phpcs:ignore
+					}
+				}
+			}
+
+			// Replace remote URL with local.
+			if ( file_exists( $local_path ) ) {
+				$html = preg_replace(
+					'#' . preg_quote( $info[0], '#' ) . '[^"\']*#',
+					$local_url . '?' . filemtime( $local_path ),
+					$html
+				);
+			}
+		}
+
+		return $html;
+	}
+
+	// ── Query String Removal ─────────────────────────────────
+
+	private function strip_query_strings( $html ) {
+		// Remove all query strings (?ver=, ?v=, ?timestamp=, etc.) from CSS/JS URLs.
+		return preg_replace_callback(
+			'#(href|src)=["\']([^"\']+\.(css|js))\?[^"\']*["\']#i',
+			function( $m ) {
+				return $m[1] . '="' . $m[2] . '"';
+			},
+			$html
+		);
+	}
+
+	// ── DNS Prefetch ─────────────────────────────────────────
+
+	private function inject_dns_prefetch( $html ) {
+		$domains = $this->parse_list( $this->settings['prefetch_dns'] );
+		if ( empty( $domains ) ) {
+			return $html;
+		}
+
+		$tags = '';
+		foreach ( $domains as $domain ) {
+			$domain = trim( $domain );
+			if ( empty( $domain ) ) {
+				continue;
+			}
+			if ( 0 !== strpos( $domain, '//' ) && 0 !== strpos( $domain, 'http' ) ) {
+				$domain = '//' . $domain;
+			}
+			$tags .= '<link rel="dns-prefetch" href="' . esc_url( $domain ) . '">' . "\n";
+		}
+
+		if ( $tags ) {
+			$html = str_replace( '</head>', $tags . '</head>', $html );
+		}
+
+		return $html;
+	}
+
+	// ── Rewrite File Optimizer ────────────────────────────────
+
+	/**
+	 * Register rewrite rule for serving optimized files via /_pc-static/ URL.
+	 */
+	public function register_rewrite_rules() {
+		add_rewrite_rule( '^_pc-static/(.+)$', 'index.php?pc_static_file=$1', 'top' );
+		add_filter( 'query_vars', function( $vars ) {
+			$vars[] = 'pc_static_file';
+			return $vars;
+		} );
+	}
+
+	/**
+	 * Handle requests for /_pc-static/ optimized files.
+	 */
+	public function handle_rewrite_request( $wp ) {
+		if ( empty( $wp->query_vars['pc_static_file'] ) ) {
+			return;
+		}
+
+		$file = sanitize_file_name( $wp->query_vars['pc_static_file'] );
+		$ext  = pathinfo( $file, PATHINFO_EXTENSION );
+
+		$type_map = array( 'css' => 'text/css', 'js' => 'application/javascript' );
+		if ( ! isset( $type_map[ $ext ] ) ) {
+			status_header( 404 );
+			exit;
+		}
+
+		// Look up in cache subdirectories.
+		$search_dirs = array( 'css/', 'js/', 'ucss/', 'ccss/', 'fonts/' );
+		$found = false;
+		foreach ( $search_dirs as $sub ) {
+			$path = $this->cache_dir . $sub . $file;
+			if ( file_exists( $path ) ) {
+				$found = $path;
+				break;
+			}
+		}
+
+		if ( ! $found ) {
+			status_header( 404 );
+			exit;
+		}
+
+		// Verify path is within cache dir.
+		$real = realpath( $found );
+		$real_cache = realpath( $this->cache_dir );
+		if ( ! $real || ! $real_cache || 0 !== strpos( $real, $real_cache ) ) {
+			status_header( 403 );
+			exit;
+		}
+
+		header( 'Content-Type: ' . $type_map[ $ext ] . '; charset=UTF-8' );
+		header( 'Cache-Control: public, max-age=31536000, immutable' );
+		header( 'X-Prime-Cache-FO: HIT' );
+		readfile( $found );
+		exit;
+	}
+
+	// ── Utility ──────────────────────────────────────────────
+
+	private function parse_list( $value ) {
+		if ( empty( $value ) ) {
+			return array();
+		}
+		// Support comma-separated and newline-separated.
+		$items = preg_split( '#[\r\n,]+#', $value );
+		return array_filter( array_map( 'trim', $items ) );
+	}
+
+	private function matches_patterns( $subject, $patterns ) {
+		foreach ( $patterns as $pattern ) {
+			if ( empty( $pattern ) ) {
+				continue;
+			}
+			if ( false !== strpos( $subject, $pattern ) ) {
+				return true;
+			}
+			// Support wildcard.
+			if ( false !== strpos( $pattern, '*' ) ) {
+				$regex = '#' . str_replace( '\*', '.*', preg_quote( $pattern, '#' ) ) . '#i';
+				if ( @preg_match( $regex, $subject ) ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private function matches_inline_patterns( $content, $patterns ) {
+		foreach ( $patterns as $pattern ) {
+			if ( ! empty( $pattern ) && false !== strpos( $content, $pattern ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Write a debug log entry.
+	 */
+	public static function debug_log( $message ) {
+		if ( ! defined( 'PRIME_CACHE_CACHE_DIR' ) ) return;
+		$log_file = PRIME_CACHE_CACHE_DIR . 'debug.log';
+		$line = '[' . gmdate( 'Y-m-d H:i:s' ) . ' UTC] ' . $message . "\n";
+		// Cap log at 1 MB.
+		if ( file_exists( $log_file ) && filesize( $log_file ) > 1048576 ) {
+			file_put_contents( $log_file, $line ); // phpcs:ignore -- overwrite
+		} else {
+			file_put_contents( $log_file, $line, FILE_APPEND | LOCK_EX ); // phpcs:ignore
+		}
+	}
+
+	private function is_local_url( $url ) {
+		$home = home_url();
+		if ( 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ) {
+			return true;
+		}
+		return 0 === strpos( $url, $home );
+	}
+
+	private function url_to_path( $url ) {
+		$home_url  = home_url( '/' );
+		$home_path = ABSPATH;
+
+		if ( 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ) {
+			$path = ABSPATH . ltrim( $url, '/' );
+		} elseif ( 0 === strpos( $url, $home_url ) ) {
+			$path = $home_path . substr( $url, strlen( $home_url ) );
+		} else {
+			return false;
+		}
+
+		// Strip query string.
+		$path = strtok( $path, '?' );
+
+		$real = realpath( $path );
+		if ( $real && 0 === strpos( $real, realpath( ABSPATH ) ) ) {
+			return $real;
+		}
+
+		return false;
+	}
+}

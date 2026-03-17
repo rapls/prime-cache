@@ -1,0 +1,110 @@
+<?php
+/**
+ * Prime Cache uninstall.
+ *
+ * Runs when the plugin is deleted via WordPress admin.
+ */
+
+defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
+
+// Remove plugin option.
+delete_option( 'prime_cache_settings' );
+
+// Remove .htaccess rules.
+$htaccess = ABSPATH . '.htaccess';
+if ( file_exists( $htaccess ) && function_exists( 'insert_with_markers' ) ) {
+	insert_with_markers( $htaccess, 'Prime Cache', array() );
+}
+
+// Remove advanced-cache.php if ours.
+$dropin = WP_CONTENT_DIR . '/advanced-cache.php';
+if ( file_exists( $dropin ) ) {
+	$content = file_get_contents( $dropin ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	if ( false !== strpos( $content, 'PRIME_CACHE' ) ) {
+		@unlink( $dropin );
+	}
+}
+
+// Remove object-cache.php if ours.
+$object_dropin = WP_CONTENT_DIR . '/object-cache.php';
+if ( file_exists( $object_dropin ) ) {
+	$content = file_get_contents( $object_dropin ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	if ( false !== strpos( $content, 'PRIME_OBJECT_CACHE' ) ) {
+		@unlink( $object_dropin );
+	}
+}
+
+// Remove WP_CACHE from wp-config.php.
+$config_paths = array(
+	ABSPATH . 'wp-config.php',
+	dirname( ABSPATH ) . '/wp-config.php',
+);
+
+foreach ( $config_paths as $config_path ) {
+	if ( file_exists( $config_path ) && is_writable( $config_path ) ) {
+		$config_content = file_get_contents( $config_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$config_content = preg_replace(
+			'#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*[^)]+\)\s*;\s*(?://[^\n]*)?\n?#mi',
+			'',
+			$config_content
+		);
+		$config_content = preg_replace( "#\n{3,}#", "\n\n", $config_content );
+		file_put_contents( $config_path, $config_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		break;
+	}
+}
+
+// Remove cache directory.
+$cache_dir = WP_CONTENT_DIR . '/cache/prime-cache/';
+if ( is_dir( $cache_dir ) ) {
+	$iterator = new RecursiveIteratorIterator(
+		new RecursiveDirectoryIterator( $cache_dir, RecursiveDirectoryIterator::SKIP_DOTS ),
+		RecursiveIteratorIterator::CHILD_FIRST
+	);
+	foreach ( $iterator as $item ) {
+		if ( $item->isDir() ) {
+			@rmdir( $item->getPathname() );
+		} else {
+			@unlink( $item->getPathname() );
+		}
+	}
+	@rmdir( $cache_dir );
+}
+
+// Remove config directory.
+$config_dir = WP_CONTENT_DIR . '/prime-cache-config/';
+if ( is_dir( $config_dir ) ) {
+	$files = glob( $config_dir . '*' );
+	foreach ( $files as $file ) {
+		@unlink( $file );
+	}
+	@rmdir( $config_dir );
+}
+
+// Remove file optimizer cache directory (#17).
+$fo_dir = WP_CONTENT_DIR . '/cache/prime-cache-fo/';
+if ( is_dir( $fo_dir ) ) {
+	$iterator = new RecursiveIteratorIterator(
+		new RecursiveDirectoryIterator( $fo_dir, RecursiveDirectoryIterator::SKIP_DOTS ),
+		RecursiveIteratorIterator::CHILD_FIRST
+	);
+	foreach ( $iterator as $item ) {
+		$item->isDir() ? @rmdir( $item->getPathname() ) : @unlink( $item->getPathname() );
+	}
+	@rmdir( $fo_dir );
+}
+
+// Remove image optimization metadata (#18).
+delete_option( 'prime_cache_img_stats' );
+global $wpdb;
+$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_prime_cache_img_opt' ) );
+$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_prime_cache_disabled' ) );
+
+// Remove scheduled cron events (#19).
+wp_clear_scheduled_hook( 'prime_cache_cleanup_expired' );
+wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
+wp_clear_scheduled_hook( 'prime_cache_db_cleanup' );
+
+// Remove transients (#20).
+delete_transient( 'prime_cache_preload_fonts' );
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_pc_imgdim_%' OR option_name LIKE '_transient_timeout_pc_imgdim_%'" );

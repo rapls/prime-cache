@@ -1,0 +1,395 @@
+# Copyright (C) 2026 Min
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Prime Cache 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-16 00:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: includes/class-prime-cache.php
+msgid "Clear Cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Cache Enabled"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Cache Disabled"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Page Cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Object Cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Cache Control"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Exclusion Rules"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Hit Rate"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Pages"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Cache Hit Rate"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Since: %s"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Reset"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Total: %s"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Size: %s"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "System Status"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "WP_CACHE Constant"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Cache Directory"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid ".htaccess Rules"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Gzip Support"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Active"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Inactive"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "General Settings"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Mobile Cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Serve cached pages to smartphones and tablets. When disabled, WordPress dynamically generates every page for mobile visitors."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Separate Mobile Cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "For themes that output different HTML for desktop and mobile. Maintains separate cache files per device type. Not needed for responsive themes."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Logged-in User Cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Serve cached pages to logged-in users. Disable if your site shows admin bars or user-specific content. Useful for membership sites serving identical content to all users."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Gzip Compression"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Pre-compress cache files with gzip. Supported browsers receive the compressed version, reducing transfer size by 60-80%. Recommended for most environments."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid ".htaccess Optimization"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Write optimization rules to .htaccess. Apache serves cached files directly without invoking PHP, significantly improving response time. Also enables mod_deflate compression, mod_expires browser caching, and ETag removal. No effect on Nginx."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Cache Footprint"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Append an HTML comment with cache generation time to the source. Useful for verifying cache behavior via \"View Source\". Can be disabled in production."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid ".htaccess Active"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid ".htaccess Not Writable"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Cache Lifespan"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Unlimited"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "1 Hour"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "6 Hours"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "12 Hours"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "1 Day"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "2 Days"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "7 Days"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Days"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Hours"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Minutes"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Seconds"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "sec"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "How long until cache files are automatically discarded. Expired caches are regenerated on the next visit and cleaned up hourly by WP-Cron. Set to 0 for unlimited (purge only on post updates, comments, and term changes). For frequently updated news sites, use 1-6 hours. For less active sites, use 1-7 days or unlimited."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Save Settings"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Query Parameters"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Ignored Query Parameters"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Comma-separated parameter names. These parameters are stripped and the same cache is served as if they were absent. Register ad-tracking parameters (utm_source, fbclid, gclid, etc.) to prevent unnecessary cache duplication."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Cached Query Parameters"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Comma-separated parameter names. Each unique value generates a separate cache file. For example, specifying <code>lang</code> creates separate caches for <code>?lang=en</code> and <code>?lang=ja</code>. Use for multilingual plugins or currency switchers. URLs with parameters not in either list are not cached."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Cookie-based Cache Splitting"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Vary Cookie Names"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Comma-separated cookie names. Different cache files are generated based on each cookie's value, even for the same URL. For example, specifying the <code>currency</code> cookie serves separate caches to users with <code>currency=USD</code> vs <code>currency=JPY</code>. Use for e-commerce currency/country display or A/B testing."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Purge Settings"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Always Purge URLs"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "One URL per line. Whenever any post is updated, caches for these URLs are also cleared in addition to the standard related pages (home, categories, tags, author, date archives). Use for sitemaps, custom landing pages, or shortcode-based post listing pages that are not auto-detected."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Excluded URLs"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "URL patterns to never cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Enter URL path regex patterns separated by <code>|</code>. Matched URLs are always dynamically generated by WordPress. Specify WooCommerce cart/checkout, my-account pages, or any page with user-specific content or dynamic API endpoints."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Excluded Cookies"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Cookies that disable caching"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Enter cookie name regex patterns separated by <code>|</code>. When any listed cookie is present in the browser, the request is not cached. Specify WooCommerce cart sessions, form plugin tokens, or any cookies holding user-specific state. WordPress login cookies (wordpress_logged_in_) are excluded automatically."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Excluded User Agents"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "User agents to never cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Enter user-agent regex patterns separated by <code>|</code>. Matched browsers or crawlers receive uncached responses. Use to always show fresh content to specific bots or to exclude monitoring tool requests from the cache."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Excluded Referrers"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Referrers to never cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Enter referrer URL regex patterns separated by <code>|</code>. Requests from matching referrers are excluded from the cache. Use to block spam referrers or to always show fresh content on specific ad landing flows."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Regex"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Object Cache: Disabled"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Object Cache: Managed by another plugin"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Object Cache: Active via %s"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Select a backend to enable object caching."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Another plugin's object-cache.php was detected."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Database query results are being cached in memory."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Shared memory within PHP processes. Ideal for single-server environments."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "High-performance in-memory data store. Supports persistence and replication."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Distributed memory cache. Ideal for sharing across multiple servers."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Object cache settings have been updated."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Disable"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Enable"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Not Found"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Available"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "PHP Extension Required"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Ext: %s"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "What is Object Cache?"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "WordPress executes many database queries during page generation. Object cache stores query results in memory, returning subsequent requests for the same data without hitting the database. Especially effective for sites with many logged-in users or WooCommerce environments with uncacheable pages."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Cache cleared successfully."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Statistics have been reset."
+msgstr ""

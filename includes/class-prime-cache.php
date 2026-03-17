@@ -1,0 +1,711 @@
+<?php
+/**
+ * Main plugin class.
+ *
+ * Orchestrates initialization, activation, and deactivation.
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+class Prime_Cache {
+
+	/**
+	 * @var Prime_Cache|null
+	 */
+	private static $instance = null;
+
+	/**
+	 * @var Prime_Cache_Purge|null
+	 */
+	private $purge = null;
+
+	/**
+	 * Get singleton instance.
+	 *
+	 * @return Prime_Cache
+	 */
+	public static function get_instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Constructor.
+	 */
+	private function __construct() {
+		$this->purge = new Prime_Cache_Purge();
+		new Prime_Cache_File_Optimizer();
+		new Prime_Cache_Preload();
+		new Prime_Cache_Database_Optimizer();
+		new Prime_Cache_Varnish();
+		new Prime_Cache_Sucuri();
+		new Prime_Cache_Heartbeat();
+		new Prime_Cache_LazyLoad();
+		new Prime_Cache_CDN();
+		new Prime_Cache_Cloudflare();
+		new Prime_Cache_WebP();
+		new Prime_Cache_Media_Optimizer();
+		new Prime_Cache_Post_Metabox();
+		new Prime_Cache_Compatibility();
+		new Prime_Cache_Performance_Tweaks();
+
+		// Dashboard widget.
+		add_action( 'wp_dashboard_setup', array( $this, 'add_dashboard_widget' ) );
+
+		// Disable WordPress emoji.
+		if ( ! empty( prime_cache_get_settings()['disable_emoji'] ) ) {
+			add_action( 'init', array( $this, 'disable_emoji' ) );
+		}
+
+		if ( is_admin() ) {
+			new Prime_Cache_Admin_Settings();
+		}
+
+		// Admin bar menu.
+		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 100 );
+
+		// Action handlers — use closure to avoid OPcache method resolution issues.
+		$self = $this;
+		add_action( 'init', function() use ( $self ) {
+			$self->maybe_handle_actions();
+		} );
+
+		add_action( 'admin_init', array( $this, 'handle_stats_reset' ) );
+		add_action( 'admin_init', array( $this, 'handle_export' ) );
+		add_action( 'admin_init', array( $this, 'handle_import' ) );
+		add_action( 'admin_init', array( $this, 'handle_object_cache_switch' ) );
+
+		// Expired cache cleanup cron (handler only — scheduling done on activation).
+		add_action( 'prime_cache_cleanup_expired', array( $this, 'cleanup_expired_cache' ) );
+	}
+
+	/**
+	 * Plugin activation.
+	 */
+	public static function activate() {
+		$settings = prime_cache_get_settings();
+
+		// Create cache directory.
+		wp_mkdir_p( PRIME_CACHE_CACHE_DIR );
+
+		// Write config file.
+		Prime_Cache_Config::write_config_file( $settings );
+
+		// Install advanced-cache.php dropin.
+		Prime_Cache_Config::install_advanced_cache();
+
+		// Enable WP_CACHE in wp-config.php.
+		Prime_Cache_Config::set_wp_cache( true );
+
+		// Schedule cron events.
+		if ( ! wp_next_scheduled( 'prime_cache_cleanup_expired' ) ) {
+			wp_schedule_event( time(), 'hourly', 'prime_cache_cleanup_expired' );
+		}
+
+		// Write .htaccess rules if enabled.
+		if ( ! empty( $settings['htaccess_enabled'] ) ) {
+			Prime_Cache_Htaccess::add_rules( $settings );
+		}
+	}
+
+	/**
+	 * Plugin deactivation.
+	 */
+	public static function deactivate() {
+		// Unschedule crons.
+		$timestamp = wp_next_scheduled( 'prime_cache_cleanup_expired' );
+		if ( $timestamp ) {
+			wp_unschedule_event( $timestamp, 'prime_cache_cleanup_expired' );
+		}
+		wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
+		Prime_Cache_Database_Optimizer::unschedule();
+
+		// Remove .htaccess rules.
+		Prime_Cache_Htaccess::remove_rules();
+
+		// Remove advanced-cache.php.
+		Prime_Cache_Config::uninstall_advanced_cache();
+
+		// Remove object-cache.php if ours.
+		Prime_Cache_Config::setup_object_cache( 'off' );
+
+		// Disable WP_CACHE.
+		Prime_Cache_Config::set_wp_cache( false );
+
+		// Delete config file.
+		Prime_Cache_Config::delete_config_file();
+
+		// Clear all cached files.
+		$host = wp_parse_url( home_url(), PHP_URL_HOST );
+		if ( $host ) {
+			Prime_Cache_Storage::delete_host( $host );
+		}
+	}
+
+	/**
+	 * Add purge button to admin bar.
+	 *
+	 * @param WP_Admin_Bar $wp_admin_bar Admin bar instance.
+	 */
+	public function admin_bar_menu( $wp_admin_bar ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$n   = wp_create_nonce( 'prime_cache_admin_action' );
+		$s   = prime_cache_get_settings();
+		$url = function( $action, $extra = '' ) use ( $n ) {
+			return admin_url( 'admin.php?pc_action=' . $action . $extra . '&_wpnonce=' . $n );
+		};
+
+		// ── Parent ───────────────────────────────────────────
+		$wp_admin_bar->add_node( array(
+			'id'    => 'prime-cache',
+			'title' => '<span class="ab-icon dashicons dashicons-performance" style="font:normal 20px/1 dashicons;margin-right:6px;vertical-align:middle;opacity:.9"></span>Prime Cache',
+			'href'  => admin_url( 'admin.php?page=prime-cache' ),
+		) );
+
+		// ── Cache clearing ───────────────────────────────────
+
+		// Clear All Cache.
+		$wp_admin_bar->add_node( array(
+			'id' => 'pc-clear-all', 'parent' => 'prime-cache',
+			'title' => __( 'Clear All Cache', 'prime-cache' ),
+			'href'  => $url( 'clear_all' ),
+		) );
+
+		// Clear and Preload (WP-Rocket style).
+		if ( $s['preload_enabled'] ) {
+			$wp_admin_bar->add_node( array(
+				'id' => 'pc-clear-preload', 'parent' => 'prime-cache',
+				'title' => __( 'Clear Cache & Preload', 'prime-cache' ),
+				'href'  => $url( 'clear_and_preload' ),
+			) );
+		}
+
+		// Clear Page Cache Only.
+		$wp_admin_bar->add_node( array(
+			'id' => 'pc-clear-page', 'parent' => 'prime-cache',
+			'title' => __( 'Clear Page Cache Only', 'prime-cache' ),
+			'href'  => $url( 'clear_page_cache' ),
+		) );
+
+		// Clear Minified CSS/JS.
+		$wp_admin_bar->add_node( array(
+			'id' => 'pc-clear-minified', 'parent' => 'prime-cache',
+			'title' => __( 'Clear Minified CSS/JS', 'prime-cache' ),
+			'href'  => $url( 'clear_minified' ),
+		) );
+
+		// Clear Critical CSS.
+		if ( $s['critical_css_auto'] || $s['async_css'] ) {
+			$wp_admin_bar->add_node( array(
+				'id' => 'pc-clear-ccss', 'parent' => 'prime-cache',
+				'title' => __( 'Clear Critical CSS', 'prime-cache' ),
+				'href'  => $url( 'clear_critical_css' ),
+			) );
+		}
+
+		// Clear Object Cache.
+		$oc = Prime_Cache_Config::get_active_object_cache();
+		if ( 'off' !== $oc && 'external' !== $oc ) {
+			$wp_admin_bar->add_node( array(
+				'id' => 'pc-clear-oc', 'parent' => 'prime-cache',
+				'title' => __( 'Clear Object Cache', 'prime-cache' ),
+				'href'  => $url( 'clear_object_cache' ),
+			) );
+		}
+
+		// Purge Varnish Cache.
+		if ( $s['varnish_enabled'] ) {
+			$wp_admin_bar->add_node( array(
+				'id' => 'pc-clear-varnish', 'parent' => 'prime-cache',
+				'title' => __( 'Purge Varnish Cache', 'prime-cache' ),
+				'href'  => $url( 'purge_varnish' ),
+			) );
+		}
+
+		// Purge Sucuri Cache.
+		if ( $s['sucuri_enabled'] ) {
+			$wp_admin_bar->add_node( array(
+				'id' => 'pc-clear-sucuri', 'parent' => 'prime-cache',
+				'title' => __( 'Purge Sucuri Cache', 'prime-cache' ),
+				'href'  => $url( 'purge_sucuri' ),
+			) );
+		}
+
+		// Purge Cloudflare Cache.
+		if ( $s['cloudflare_enabled'] ) {
+			$wp_admin_bar->add_node( array(
+				'id' => 'pc-clear-cf', 'parent' => 'prime-cache',
+				'title' => __( 'Purge Cloudflare Cache', 'prime-cache' ),
+				'href'  => $url( 'purge_cloudflare' ),
+			) );
+		}
+
+		// ── Context-specific ─────────────────────────────────
+
+		// Clear This Page (frontend).
+		if ( ! is_admin() ) {
+			global $wp;
+			$page_url = home_url( add_query_arg( array(), $wp->request ) );
+			$wp_admin_bar->add_node( array(
+				'id' => 'pc-clear-this', 'parent' => 'prime-cache',
+				'title' => __( 'Clear This Page', 'prime-cache' ),
+				'href'  => $url( 'clear_url', '&pc_url=' . rawurlencode( $page_url ) ),
+			) );
+		}
+
+		// Clear This Post (admin post editor).
+		if ( is_admin() ) {
+			global $post;
+			if ( $post && 'publish' === get_post_status( $post ) ) {
+				$wp_admin_bar->add_node( array(
+					'id' => 'pc-clear-post', 'parent' => 'prime-cache',
+					'title' => __( 'Clear This Post', 'prime-cache' ),
+					'href'  => $url( 'clear_post', '&pc_post_id=' . (int) $post->ID ),
+				) );
+			}
+		}
+
+		// ── Preload ──────────────────────────────────────────
+		if ( $s['preload_enabled'] ) {
+			$wp_admin_bar->add_node( array(
+				'id' => 'pc-sep1', 'parent' => 'prime-cache',
+				'title' => '<hr style="margin:4px 0;border:none;border-top:1px solid rgba(255,255,255,.15)">',
+			) );
+			$wp_admin_bar->add_node( array(
+				'id' => 'pc-preload', 'parent' => 'prime-cache',
+				'title' => __( 'Start Preload', 'prime-cache' ),
+				'href'  => $url( 'start_preload' ),
+			) );
+		}
+
+		// ── Settings ─────────────────────────────────────────
+		$wp_admin_bar->add_node( array(
+			'id' => 'pc-sep2', 'parent' => 'prime-cache',
+			'title' => '<hr style="margin:4px 0;border:none;border-top:1px solid rgba(255,255,255,.15)">',
+		) );
+		$wp_admin_bar->add_node( array(
+			'id' => 'pc-settings', 'parent' => 'prime-cache',
+			'title' => __( 'Settings', 'prime-cache' ),
+			'href'  => admin_url( 'admin.php?page=prime-cache' ),
+		) );
+	}
+
+	/**
+	 * Handle all admin bar actions. Called directly from constructor, not via hook.
+	 */
+	public function maybe_handle_actions() {
+		if ( ! isset( $_GET['pc_action'] ) ) {
+			// Backward compat: old purge URL.
+			if ( isset( $_GET['prime_cache_purge'] ) ) {
+				if ( current_user_can( 'manage_options' ) && wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'prime_cache_purge' ) ) {
+					$this->purge->purge_all();
+					wp_safe_redirect( add_query_arg( 'prime_cache_cleared', '1', remove_query_arg( array( 'prime_cache_purge', '_wpnonce' ) ) ) );
+					exit;
+				}
+			}
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'prime_cache_admin_action' ) ) {
+			return;
+		}
+
+		$action = sanitize_key( $_GET['pc_action'] );
+		$msg    = '';
+
+		switch ( $action ) {
+			case 'clear_all':
+				$this->purge->purge_all();
+				$this->clear_minified_files();
+				$this->clear_critical_css_files();
+				if ( function_exists( 'wp_cache_flush' ) ) {
+					wp_cache_flush();
+				}
+				$msg = 'all';
+				break;
+
+			case 'clear_and_preload':
+				$this->purge->purge_all();
+				$this->clear_minified_files();
+				if ( function_exists( 'wp_cache_flush' ) ) {
+					wp_cache_flush();
+				}
+				// Preload will start via the prime_cache_after_purge_all hook.
+				$msg = 'preload';
+				break;
+
+			case 'clear_page_cache':
+				$this->purge->purge_all();
+				$msg = 'page';
+				break;
+
+			case 'clear_minified':
+				$this->clear_minified_files();
+				$msg = 'minified';
+				break;
+
+			case 'clear_critical_css':
+				$this->clear_critical_css_files();
+				$msg = 'ccss';
+				break;
+
+			case 'clear_object_cache':
+				if ( function_exists( 'wp_cache_flush' ) ) {
+					wp_cache_flush();
+				}
+				$msg = 'object';
+				break;
+
+			case 'clear_url':
+				$url = isset( $_GET['pc_url'] ) ? esc_url_raw( rawurldecode( $_GET['pc_url'] ) ) : '';
+				if ( $url ) {
+					Prime_Cache_Storage::delete_url( $url );
+				}
+				$msg = 'url';
+				break;
+
+			case 'clear_post':
+				$post_id = isset( $_GET['pc_post_id'] ) ? (int) $_GET['pc_post_id'] : 0;
+				if ( $post_id ) {
+					$this->purge->purge_post_and_related( $post_id );
+				}
+				$msg = 'post';
+				break;
+
+			case 'purge_cloudflare':
+				$cf = new Prime_Cache_Cloudflare();
+				$cf->purge_everything();
+				$msg = 'cloudflare';
+				break;
+
+			case 'purge_sucuri':
+				$sucuri = new Prime_Cache_Sucuri();
+				$result = $sucuri->purge();
+				$msg = is_wp_error( $result ) ? 'sucuri_error' : 'sucuri';
+				break;
+
+			case 'purge_varnish':
+				$varnish = new Prime_Cache_Varnish();
+				$varnish->purge_all();
+				$msg = 'varnish';
+				break;
+
+			case 'start_preload':
+				wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
+				wp_schedule_single_event( time() + 3, 'prime_cache_preload_batch' );
+				$msg = 'preload_started';
+				break;
+
+			case 'reset_settings':
+				delete_option( 'prime_cache_settings' );
+				$defaults = prime_cache_get_settings( true ); // Force refresh past static cache.
+				Prime_Cache_Config::write_config_file( $defaults );
+				Prime_Cache_Config::install_advanced_cache();
+				Prime_Cache_Htaccess::remove_rules();
+				$redirect = add_query_arg( array( 'tab' => 'tools', 'pc_cleared' => 'reset' ), admin_url( 'admin.php?page=prime-cache' ) );
+				wp_safe_redirect( $redirect );
+				exit;
+
+			default:
+				return;
+		}
+
+		$redirect = remove_query_arg( array( 'pc_action', 'pc_url', '_wpnonce' ) );
+		$redirect = add_query_arg( 'pc_cleared', $msg, $redirect );
+		wp_safe_redirect( $redirect );
+		exit;
+	}
+
+	/**
+	 * Delete all minified/combined CSS/JS files in the file optimizer cache.
+	 */
+	private function clear_minified_files() {
+		$fo_dir = WP_CONTENT_DIR . '/cache/prime-cache-fo/';
+		if ( ! is_dir( $fo_dir ) ) {
+			return;
+		}
+
+		$iterator = new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator( $fo_dir, RecursiveDirectoryIterator::SKIP_DOTS ),
+			RecursiveIteratorIterator::CHILD_FIRST
+		);
+
+		foreach ( $iterator as $item ) {
+			if ( $item->isDir() ) {
+				@rmdir( $item->getPathname() );
+			} else {
+				@unlink( $item->getPathname() );
+			}
+		}
+	}
+
+	/**
+	 * Delete generated critical CSS cache files.
+	 */
+	private function clear_critical_css_files() {
+		$ccss_dir = WP_CONTENT_DIR . '/cache/prime-cache-fo/ccss/';
+		if ( ! is_dir( $ccss_dir ) ) {
+			return;
+		}
+		$files = glob( $ccss_dir . '*.css' );
+		if ( $files ) {
+			foreach ( $files as $file ) {
+				@unlink( $file );
+			}
+		}
+	}
+
+	/**
+	 * Handle stats reset request.
+	 */
+	public function handle_stats_reset() {
+		if ( ! isset( $_GET['prime_cache_reset_stats'] ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'prime_cache_reset_stats' ) ) {
+			return;
+		}
+
+		$stats_file = PRIME_CACHE_CACHE_DIR . 'stats.json';
+		$data = wp_json_encode( array( 'hit' => 0, 'miss' => 0, 'since' => time() ) );
+		file_put_contents( $stats_file, $data ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+
+		$redirect = remove_query_arg( array( 'prime_cache_reset_stats', '_wpnonce' ) );
+		$redirect = add_query_arg( 'prime_cache_stats_reset', '1', $redirect );
+		wp_safe_redirect( $redirect );
+		exit;
+	}
+
+	/**
+	 * Handle object cache backend switch.
+	 */
+	public function handle_object_cache_switch() {
+		if ( ! isset( $_GET['prime_cache_object_cache'] ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'prime_cache_object_cache' ) ) {
+			return;
+		}
+
+		$backend = sanitize_key( $_GET['prime_cache_object_cache'] );
+		$allowed = array_merge( array( 'off' ), array_keys( Prime_Cache_Config::get_available_object_caches() ) );
+
+		if ( ! in_array( $backend, $allowed, true ) ) {
+			return;
+		}
+
+		Prime_Cache_Config::setup_object_cache( $backend );
+
+		// Flush cache when switching backends.
+		if ( function_exists( 'wp_cache_flush' ) ) {
+			wp_cache_flush();
+		}
+
+		$redirect = admin_url( 'admin.php?page=prime-cache&tab=object-cache&prime_cache_oc_switched=1' );
+		wp_safe_redirect( $redirect );
+		exit;
+	}
+
+	/**
+	 * Register dashboard widget.
+	 */
+	public function add_dashboard_widget() {
+		if ( ! current_user_can( 'manage_options' ) ) return;
+		wp_add_dashboard_widget( 'prime_cache_dashboard', 'Prime Cache', array( $this, 'render_dashboard_widget' ) );
+	}
+
+	/**
+	 * Render dashboard widget content.
+	 */
+	public function render_dashboard_widget() {
+		$stats_file = PRIME_CACHE_CACHE_DIR . 'stats.json';
+		$hs = array( 'hit' => 0, 'miss' => 0, 'since' => 0 );
+		if ( is_readable( $stats_file ) ) {
+			$d = json_decode( file_get_contents( $stats_file ), true ); // phpcs:ignore
+			if ( is_array( $d ) ) $hs = wp_parse_args( $d, $hs );
+		}
+		$total = $hs['hit'] + $hs['miss'];
+		$rate  = $total > 0 ? round( ( $hs['hit'] / $total ) * 100, 1 ) : 0;
+
+		$files = 0; $size = 0;
+		if ( is_dir( PRIME_CACHE_CACHE_DIR ) ) {
+			$it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( PRIME_CACHE_CACHE_DIR, RecursiveDirectoryIterator::SKIP_DOTS ) );
+			foreach ( $it as $f ) { if ( $f->isFile() && 'html' === $f->getExtension() ) $files++; if ( $f->isFile() ) $size += $f->getSize(); }
+		}
+
+		$s  = prime_cache_get_settings();
+		$oc = Prime_Cache_Config::get_active_object_cache();
+		$n  = wp_create_nonce( 'prime_cache_admin_action' );
+		?>
+		<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+			<div style="text-align:center;padding:10px;background:#f0fdf4;border-radius:8px"><b style="font-size:20px;color:#15803d"><?php echo esc_html( $rate ); ?>%</b><br><span style="font-size:11px;color:#6b7280"><?php esc_html_e( 'Hit Rate', 'prime-cache' ); ?></span></div>
+			<div style="text-align:center;padding:10px;background:#f0f9ff;border-radius:8px"><b style="font-size:20px;color:#1d4ed8"><?php echo esc_html( number_format( $files ) ); ?></b><br><span style="font-size:11px;color:#6b7280"><?php esc_html_e( 'Pages', 'prime-cache' ); ?></span></div>
+		</div>
+		<ul style="margin:0;font-size:13px;line-height:2">
+			<li><?php printf( 'HIT: <b>%s</b> / MISS: <b>%s</b>', esc_html( number_format( $hs['hit'] ) ), esc_html( number_format( $hs['miss'] ) ) ); ?></li>
+			<li><?php printf( esc_html__( 'Size: %s', 'prime-cache' ), '<b>' . esc_html( size_format( $size ) ) . '</b>' ); ?></li>
+			<li><?php esc_html_e( 'Object Cache', 'prime-cache' ); ?>: <b><?php echo 'off' === $oc ? esc_html__( 'Inactive', 'prime-cache' ) : esc_html( strtoupper( $oc ) ); ?></b></li>
+			<li><?php esc_html_e( 'Page Cache', 'prime-cache' ); ?>: <b><?php echo $s['cache_enabled'] ? esc_html__( 'Active', 'prime-cache' ) : esc_html__( 'Inactive', 'prime-cache' ); ?></b></li>
+		</ul>
+		<p style="margin:12px 0 0;display:flex;gap:8px">
+			<a href="<?php echo esc_url( admin_url( 'admin.php?pc_action=clear_all&_wpnonce=' . $n ) ); ?>" class="button button-small"><?php esc_html_e( 'Clear Cache', 'prime-cache' ); ?></a>
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=prime-cache' ) ); ?>" class="button button-small"><?php esc_html_e( 'Settings', 'prime-cache' ); ?></a>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Remove WordPress emoji inline CSS, JS, and DNS prefetch.
+	 */
+	public function disable_emoji() {
+		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		remove_action( 'admin_print_styles', 'print_emoji_styles' );
+		remove_filter( 'the_content_feed', 'wp_staticize_emoji' );
+		remove_filter( 'comment_text_rss', 'wp_staticize_emoji' );
+		remove_filter( 'wp_mail', 'wp_staticize_emoji_for_email' );
+
+		add_filter( 'tiny_mce_plugins', function( $plugins ) {
+			return is_array( $plugins ) ? array_diff( $plugins, array( 'wpemoji' ) ) : array();
+		} );
+
+		add_filter( 'wp_resource_hints', function( $urls, $relation_type ) {
+			if ( 'dns-prefetch' === $relation_type ) {
+				$urls = array_filter( $urls, function( $url ) {
+					return false === strpos( $url, 'https://s.w.org/images/core/emoji/' );
+				} );
+			}
+			return $urls;
+		}, 10, 2 );
+	}
+
+	/**
+	 * Export settings as JSON download.
+	 */
+	public function handle_export() {
+		if ( ! isset( $_GET['pc_export_settings'] ) || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'pc_export' ) ) {
+			return;
+		}
+
+		$settings = get_option( 'prime_cache_settings', array() );
+		$data     = wp_json_encode( $settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+
+		header( 'Content-Type: application/json' );
+		header( 'Content-Disposition: attachment; filename="prime-cache-settings-' . gmdate( 'Y-m-d' ) . '.json"' );
+		header( 'Content-Length: ' . strlen( $data ) );
+		echo $data;
+		exit;
+	}
+
+	/**
+	 * Import settings from uploaded JSON file.
+	 */
+	public function handle_import() {
+		if ( ! isset( $_POST['pc_import_settings'] ) || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		if ( ! wp_verify_nonce( $_POST['_wpnonce'] ?? '', 'pc_import' ) ) {
+			return;
+		}
+
+		if ( empty( $_FILES['pc_import_file']['tmp_name'] ) ) {
+			wp_safe_redirect( add_query_arg( array( 'tab' => 'tools', 'pc_imported' => 'error' ), admin_url( 'admin.php?page=prime-cache' ) ) );
+			exit;
+		}
+
+		$content = file_get_contents( $_FILES['pc_import_file']['tmp_name'] ); // phpcs:ignore
+		$data    = json_decode( $content, true );
+
+		if ( ! is_array( $data ) ) {
+			wp_safe_redirect( add_query_arg( array( 'tab' => 'tools', 'pc_imported' => 'error' ), admin_url( 'admin.php?page=prime-cache' ) ) );
+			exit;
+		}
+
+		// Sanitize imported data through the same pipeline as normal saves.
+		$admin = new Prime_Cache_Admin_Settings();
+		$sanitized = $admin->sanitize_settings( $data );
+
+		// Save sanitized settings to database.
+		update_option( 'prime_cache_settings', $sanitized );
+
+		// Regenerate config files.
+		Prime_Cache_Config::write_config_file( $sanitized );
+		Prime_Cache_Config::install_advanced_cache();
+
+		// Force refresh the settings cache.
+		prime_cache_get_settings( true );
+
+		wp_safe_redirect( add_query_arg( array( 'tab' => 'tools', 'pc_imported' => 'ok' ), admin_url( 'admin.php?page=prime-cache' ) ) );
+		exit;
+	}
+
+	/**
+	 * Delete cache files that have exceeded their lifespan.
+	 *
+	 * Runs via WP-Cron (hourly). Only acts when cache_lifespan > 0.
+	 */
+	public function cleanup_expired_cache() {
+		$settings = prime_cache_get_settings();
+		$lifespan = (int) $settings['cache_lifespan'];
+
+		if ( $lifespan <= 0 || ! is_dir( PRIME_CACHE_CACHE_DIR ) ) {
+			return;
+		}
+
+		$now      = time();
+		$iterator = new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator( PRIME_CACHE_CACHE_DIR, RecursiveDirectoryIterator::SKIP_DOTS ),
+			RecursiveIteratorIterator::CHILD_FIRST
+		);
+
+		foreach ( $iterator as $item ) {
+			if ( ! $item->isFile() ) {
+				continue;
+			}
+
+			$ext = $item->getExtension();
+			if ( ! in_array( $ext, array( 'html', 'gz', 'json' ), true ) ) {
+				continue;
+			}
+
+			if ( ( $now - $item->getMTime() ) > $lifespan ) {
+				@unlink( $item->getPathname() );
+			}
+		}
+
+		// Remove empty directories.
+		$dir_iterator = new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator( PRIME_CACHE_CACHE_DIR, RecursiveDirectoryIterator::SKIP_DOTS ),
+			RecursiveIteratorIterator::CHILD_FIRST
+		);
+
+		foreach ( $dir_iterator as $item ) {
+			if ( $item->isDir() ) {
+				@rmdir( $item->getPathname() );
+			}
+		}
+	}
+}
