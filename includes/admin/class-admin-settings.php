@@ -2169,6 +2169,16 @@ class Prime_Cache_Admin_Settings {
 	/* ── notices ───────────────────────────────────────────── */
 
 	public function show_notices() {
+		// Multisite: page caching is not supported.
+		if ( is_multisite() ) {
+			$screen = get_current_screen();
+			if ( $screen && 'toplevel_page_prime-cache' === $screen->id ) {
+				echo '<div class="notice notice-warning"><p><strong>Prime Cache:</strong> '
+					. esc_html__( 'Page caching is not supported on WordPress multisite. Other features (file optimization, lazy load, CDN, etc.) work normally.', 'prime-cache' )
+					. '</p></div>';
+			}
+		}
+
 		// Persistent warning: WP_CACHE is not true but Prime Cache expects it.
 		$screen = get_current_screen();
 		if ( $screen && 'toplevel_page_prime-cache' === $screen->id ) {

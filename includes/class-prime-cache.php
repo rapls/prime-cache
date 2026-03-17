@@ -88,6 +88,14 @@ class Prime_Cache {
 		$settings = prime_cache_get_settings();
 		$warnings = array();
 
+		// Multisite: page caching is not supported (pre-WP blog_id resolution
+		// is too complex to do safely). Warn and skip dropin installation.
+		if ( is_multisite() ) {
+			$warnings[] = __( 'Prime Cache page caching is not supported on WordPress multisite. Other features (file optimization, lazy load, etc.) work normally.', 'prime-cache' );
+			set_transient( 'prime_cache_activation_warnings', $warnings, 120 );
+			return;
+		}
+
 		// Create cache directory.
 		wp_mkdir_p( PRIME_CACHE_CACHE_DIR );
 

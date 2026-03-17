@@ -1685,3 +1685,9 @@ msgstr "フォーマット変換を有効化"
 
 msgid "Master switch for all image format conversion features (WebP, AVIF, auto-convert, delivery, bulk optimization). Disable to turn off all conversion at once without losing individual settings."
 msgstr "すべての画像フォーマット変換機能 (WebP、AVIF、自動変換、配信方法、一括最適化) のマスタースイッチです。個別設定を失うことなく、すべての変換を一括でオフにできます。"
+
+msgid "Prime Cache page caching is not supported on WordPress multisite. Other features (file optimization, lazy load, etc.) work normally."
+msgstr "Prime Cache のページキャッシュは WordPress マルチサイトには対応していません。その他の機能 (ファイル最適化、遅延読み込みなど) は通常通り動作します。"
+
+msgid "Page caching is not supported on WordPress multisite. Other features (file optimization, lazy load, CDN, etc.) work normally."
+msgstr "ページキャッシュは WordPress マルチサイトには対応していません。その他の機能 (ファイル最適化、遅延読み込み、CDN など) は通常通り動作します。"
