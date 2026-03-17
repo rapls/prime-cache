@@ -267,6 +267,10 @@ class Prime_Cache_Purge {
 	}
 
 	public function on_settings_update( $old_value, $new_value ) {
+		// Multisite: page caching is not supported — do not write config file.
+		if ( is_multisite() ) {
+			return;
+		}
 		Prime_Cache_Config::write_config_file( $new_value );
 	}
 }
