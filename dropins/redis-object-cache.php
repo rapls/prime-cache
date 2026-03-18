@@ -438,9 +438,16 @@ class WP_Object_Cache {
 			return false;
 		}
 
-		// Clear local runtime cache for this group.
+		// Clear local cache using derive_key structure: prefix+gv:group:grpv:key
+		$prefix     = in_array( $group, $this->global_groups, true ) ? '' : $this->blog_prefix;
+		$key_prefix = $this->key_prefix . $prefix;
+		$prefix_len = strlen( $key_prefix );
+		$group_sep  = $group . ':';
 		foreach ( array_keys( $this->cache ) as $cached_key ) {
-			if ( false !== strpos( $cached_key, ':' . $group . ':' ) ) {
+			if ( 0 !== strpos( $cached_key, $key_prefix ) ) continue;
+			$after = substr( $cached_key, $prefix_len );
+			$colon = strpos( $after, ':' );
+			if ( false !== $colon && 0 === strpos( substr( $after, $colon + 1 ), $group_sep ) ) {
 				unset( $this->cache[ $cached_key ] );
 			}
 		}

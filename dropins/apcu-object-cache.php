@@ -329,12 +329,19 @@ class WP_Object_Cache {
 		}
 		$this->group_versions[ $group ] = $new_version;
 
-		// Clear local cache for this group.
-		// Match ':group:' — the group segment is always colon-bounded in derive_key.
-		// Safe because WordPress group names are simple identifiers (no colons).
-		$needle = ':' . $group . ':';
+		// Clear local cache for this group using derive_key structure.
+		// Format: salt + prefix + gv:group:grpv:key
+		// Check that group appears right after the first ':' following our known prefix.
+		$prefix     = in_array( $group, $this->global_groups, true ) ? '' : $this->blog_prefix;
+		$key_prefix = $this->key_salt . $prefix;
+		$prefix_len = strlen( $key_prefix );
+		$group_with_sep = $group . ':';
 		foreach ( array_keys( $this->cache ) as $cached_key ) {
-			if ( false !== strpos( $cached_key, $needle ) ) {
+			if ( 0 !== strpos( $cached_key, $key_prefix ) ) continue;
+			$after_prefix = substr( $cached_key, $prefix_len );
+			// Skip past gv (everything before first ':'), then check group.
+			$colon = strpos( $after_prefix, ':' );
+			if ( false !== $colon && 0 === strpos( substr( $after_prefix, $colon + 1 ), $group_with_sep ) ) {
 				unset( $this->cache[ $cached_key ] );
 			}
 		}
