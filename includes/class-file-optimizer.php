@@ -1496,9 +1496,10 @@ JS;
 			} elseif ( 0 === $created && $last_attempt > 0 && $last_attempt < $cutoff ) {
 				$is_stale = true; // Legacy format, last attempt > 24h ago.
 			} elseif ( 0 === $created && 0 === $last_attempt ) {
-				// No timestamps at all (legacy or abandoned). Delete — if the URL is
-				// still needed, it will be re-queued on next page request.
-				$is_stale = true;
+				// No timestamps (legacy or abandoned). Stamp it now — if still
+				// unclaimed after 24h, the next cleanup will delete it.
+				$url = ( is_array( $data ) && isset( $data['url'] ) ) ? $data['url'] : $row->option_value;
+				update_option( $row->option_name, wp_json_encode( array( 'url' => $url, 'created' => time() ) ), false );
 			}
 
 			if ( $is_stale ) {
@@ -1536,7 +1537,7 @@ JS;
 			$css = preg_replace( '#(\{[^}]*)(})#', '$1font-display:swap;$2', $css );
 		}
 
-		self::atomic_write( $css_file, $css );
+		return self::atomic_write( $css_file, $css );
 	}
 
 	// ── Query String Removal ─────────────────────────────────

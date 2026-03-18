@@ -347,7 +347,7 @@ class WP_Object_Cache {
 
 		// Clear local in-memory cache for this group.
 		foreach ( array_keys( $this->cache ) as $cached_key ) {
-			if ( false !== strpos( $cached_key, ':' . $group . ':' ) ) {
+			$_gpos = strpos( $cached_key, ':' . $group . ':' ); if ( false !== $_gpos && $_gpos === strpos( $cached_key, ':' ) ) {
 				unset( $this->cache[ $cached_key ] );
 			}
 		}
