@@ -32,6 +32,12 @@ class Prime_Cache_File_Optimizer {
 		// Cron handlers for async external resource fetching.
 		add_action( 'prime_cache_refresh_local_analytics', array( $this, 'cron_refresh_local_analytics' ) );
 		add_action( 'prime_cache_refresh_google_fonts', array( $this, 'cron_refresh_google_fonts' ) );
+		add_action( 'prime_cache_cleanup_gf_options', array( $this, 'cleanup_stale_gf_options' ) );
+
+		// Schedule daily cleanup of stale Google Fonts options.
+		if ( ! wp_next_scheduled( 'prime_cache_cleanup_gf_options' ) ) {
+			wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', 'prime_cache_cleanup_gf_options' );
+		}
 
 		// Flush rewrite rules on next request after setting toggle (deferred from save).
 		if ( get_option( 'prime_cache_flush_rewrite' ) ) {
@@ -1428,6 +1434,17 @@ JS;
 		if ( $still_pending > 0 && ! wp_next_scheduled( 'prime_cache_refresh_google_fonts' ) ) {
 			wp_schedule_single_event( time() + 30, 'prime_cache_refresh_google_fonts' );
 		}
+	}
+
+	/**
+	 * Daily cleanup of stale Google Fonts pending options.
+	 */
+	public function cleanup_stale_gf_options() {
+		global $wpdb;
+		// Delete all pending GF options (URL + attempts) older than 24 hours.
+		$wpdb->query(
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%'"
+		);
 	}
 
 	private function fetch_google_font_css( $gf_url, $fonts_dir, $fonts_url ) {

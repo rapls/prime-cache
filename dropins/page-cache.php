@@ -64,10 +64,15 @@ if ( empty( $prime_cache_config['cache_enabled'] ) ) {
  * @param string $type 'hit' or 'miss'.
  */
 function _prime_cache_record_stat( $type ) {
+	// 1/10 sampling to reduce I/O overhead on high-traffic sites.
+	// Stats are approximate; multiply displayed values by sample rate.
+	if ( mt_rand( 1, 10 ) !== 1 ) {
+		return;
+	}
+
 	$stats_file = PRIME_CACHE_CACHE_DIR . 'stats.json';
 	$stats      = array( 'hit' => 0, 'miss' => 0, 'since' => time() );
 
-	// Use a lock to prevent race conditions (read inside lock only).
 	$fp = fopen( $stats_file, 'c' );
 	if ( $fp && flock( $fp, LOCK_EX | LOCK_NB ) ) {
 		fseek( $fp, 0 );
@@ -78,8 +83,8 @@ function _prime_cache_record_stat( $type ) {
 				$stats = $current_data;
 			}
 		}
-		// Always increment the counter (fixes first-run miss).
-		$stats[ $type ] = isset( $stats[ $type ] ) ? $stats[ $type ] + 1 : 1;
+		// Increment by sample rate (10) to approximate real count.
+		$stats[ $type ] = isset( $stats[ $type ] ) ? $stats[ $type ] + 10 : 10;
 		ftruncate( $fp, 0 );
 		fseek( $fp, 0 );
 		fwrite( $fp, json_encode( $stats ) );
@@ -357,22 +362,20 @@ if ( is_readable( $_pc_cache_file ) ) {
 
 	_prime_cache_record_stat( 'hit' );
 
-	// Serve gzip version if available and accepted.
+	// Determine response file and content headers (same for GET/HEAD).
 	$_pc_accept_gzip = isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && strpos( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) !== false;
 	$_pc_gz_file     = $_pc_cache_dir . _prime_cache_get_filename( $_pc_is_ssl, $_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], true, $_pc_vary_suffix, $_pc_qs_suffix );
+	$_pc_use_gz      = $_pc_accept_gzip && is_readable( $_pc_gz_file );
+	$_pc_serve_file  = $_pc_use_gz ? $_pc_gz_file : $_pc_cache_file;
 
-	if ( $_pc_accept_gzip && is_readable( $_pc_gz_file ) ) {
+	if ( $_pc_use_gz ) {
 		header( 'Content-Encoding: gzip' );
-		header( 'Content-Length: ' . filesize( $_pc_gz_file ) );
-		if ( ! $_pc_is_head ) {
-			readfile( $_pc_gz_file );
-		}
-		exit;
 	}
+	header( 'Content-Length: ' . filesize( $_pc_serve_file ) );
 
-	header( 'Content-Length: ' . filesize( $_pc_cache_file ) );
+	// Output body (GET only — HEAD gets headers without body).
 	if ( ! $_pc_is_head ) {
-		readfile( $_pc_cache_file );
+		readfile( $_pc_serve_file );
 	}
 	exit;
 

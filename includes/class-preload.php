@@ -107,10 +107,11 @@ class Prime_Cache_Preload {
 			update_option( 'prime_cache_preload_queue', $queue, false );
 		}
 
-		// Track per-URL attempt counts to avoid infinite retry on uncacheable URLs.
-		// Uses 'url' for desktop and 'url:m' for mobile to track separately.
+		// Track per-URL attempts with exponential backoff for convergence.
+		// Structure: $attempts[$url] = [ 'count' => int, 'time' => int ]
 		$attempts = get_option( 'prime_cache_preload_attempts', array() );
 		$max_attempts = 3;
+		$now = time();
 		$count = 0;
 		$total = count( $queue );
 		$idx   = 0;
@@ -132,35 +133,47 @@ class Prime_Cache_Preload {
 				continue;
 			}
 
-			// Check per-variant attempt limits.
-			$d_attempts = isset( $attempts[ $url ] ) ? (int) $attempts[ $url ] : 0;
-			$m_attempts = isset( $attempts[ $mobile_key ] ) ? (int) $attempts[ $mobile_key ] : 0;
+			// Check per-variant attempt limits with exponential backoff.
+			$d_info = isset( $attempts[ $url ] ) ? $attempts[ $url ] : array( 'count' => 0, 'time' => 0 );
+			$m_info = isset( $attempts[ $mobile_key ] ) ? $attempts[ $mobile_key ] : array( 'count' => 0, 'time' => 0 );
+			// Normalize legacy format (plain int → array).
+			if ( ! is_array( $d_info ) ) $d_info = array( 'count' => (int) $d_info, 'time' => 0 );
+			if ( ! is_array( $m_info ) ) $m_info = array( 'count' => (int) $m_info, 'time' => 0 );
 
-			$d_exhausted = $d_attempts >= $max_attempts;
-			$m_exhausted = ! $mobile_sep || $m_attempts >= $max_attempts;
+			$d_exhausted = $d_info['count'] >= $max_attempts;
+			$m_exhausted = ! $mobile_sep || $m_info['count'] >= $max_attempts;
 
 			if ( $d_exhausted && $m_exhausted ) {
 				unset( $attempts[ $url ], $attempts[ $mobile_key ] );
 				$idx++;
-				continue; // Both variants exhausted — drop URL.
+				continue;
 			}
+
+			// Exponential backoff: 5s, 30s, 300s per attempt.
+			$backoffs = array( 5, 30, 300 );
+			$d_cooldown = isset( $backoffs[ $d_info['count'] ] ) ? $backoffs[ $d_info['count'] ] : 300;
+			$m_cooldown = isset( $backoffs[ $m_info['count'] ] ) ? $backoffs[ $m_info['count'] ] : 300;
+			$d_ready = ( $now - $d_info['time'] ) >= $d_cooldown;
+			$m_ready = ( $now - $m_info['time'] ) >= $m_cooldown;
 
 			if ( ! $this->server_load_ok() ) {
 				break;
 			}
 
-			// Only warm the variant that's actually missing.
-			if ( $need_desktop && ! $d_exhausted ) {
+			// Only warm the variant that's missing AND past its cooldown.
+			$sent = false;
+			if ( $need_desktop && ! $d_exhausted && $d_ready ) {
 				wp_remote_get( $url, array(
 					'timeout'   => 0.5,
 					'blocking'  => false,
 					'sslverify' => true,
 					'headers'   => array( 'X-Prime-Cache-Preload' => '1' ),
 				) );
-				$attempts[ $url ] = $d_attempts + 1;
+				$attempts[ $url ] = array( 'count' => $d_info['count'] + 1, 'time' => $now );
+				$sent = true;
 			}
 
-			if ( $need_mobile && ! $m_exhausted ) {
+			if ( $need_mobile && ! $m_exhausted && $m_ready ) {
 				wp_remote_get( $url, array(
 					'timeout'    => 0.5,
 					'blocking'   => false,
@@ -168,7 +181,14 @@ class Prime_Cache_Preload {
 					'user-agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
 					'headers'    => array( 'X-Prime-Cache-Preload' => '1' ),
 				) );
-				$attempts[ $mobile_key ] = $m_attempts + 1;
+				$attempts[ $mobile_key ] = array( 'count' => $m_info['count'] + 1, 'time' => $now );
+				$sent = true;
+			}
+
+			if ( ! $sent ) {
+				// Both variants in cooldown — skip this URL for now.
+				$idx++;
+				continue;
 			}
 
 			$count++;
@@ -186,9 +206,8 @@ class Prime_Cache_Preload {
 			$d_ok = ! $this->is_variant_cached( $u, false ) ? false : true;
 			$m_ok = $mobile_sep ? $this->is_variant_cached( $u, true ) : true;
 			if ( ! $d_ok || ! $m_ok ) {
-				// Still not fully cached AND not exhausted — keep in queue.
-				$d_a = isset( $attempts[ $u ] ) ? (int) $attempts[ $u ] : 0;
-				$m_a = isset( $attempts[ $u . ':m' ] ) ? (int) $attempts[ $u . ':m' ] : 0;
+				$d_a = isset( $attempts[ $u ] ) ? ( is_array( $attempts[ $u ] ) ? $attempts[ $u ]['count'] : (int) $attempts[ $u ] ) : 0;
+				$m_a = isset( $attempts[ $u . ':m' ] ) ? ( is_array( $attempts[ $u . ':m' ] ) ? $attempts[ $u . ':m' ]['count'] : (int) $attempts[ $u . ':m' ] ) : 0;
 				if ( $d_a < $max_attempts || ( $mobile_sep && $m_a < $max_attempts ) ) {
 					$still_needed[] = $u;
 				}
