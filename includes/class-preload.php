@@ -365,9 +365,18 @@ class Prime_Cache_Preload {
 			return true;
 		}
 
+		// Detect CPU core count for load normalization.
+		$cores = 1;
+		if ( is_readable( '/proc/cpuinfo' ) ) {
+			$cpuinfo = file_get_contents( '/proc/cpuinfo' ); // phpcs:ignore
+			$cores   = max( 1, substr_count( $cpuinfo, 'processor' ) );
+		}
+
 		// Weighted average: 50% 1min, 30% 5min, 20% 15min.
 		$weighted = ( $load[0] * 0.5 ) + ( $load[1] * 0.3 ) + ( $load[2] * 0.2 );
-		$max = apply_filters( 'prime_cache_preload_max_load', 16.0, $load );
+		// Default max: 80% of core count (e.g. 4-core → 3.2, 8-core → 6.4).
+		$default_max = max( 2.0, $cores * 0.8 );
+		$max = apply_filters( 'prime_cache_preload_max_load', $default_max, $load );
 
 		// Detect spikes.
 		$spike = ( $load[0] > $load[1] * 2 ) || ( $load[1] > $load[2] * 2 );

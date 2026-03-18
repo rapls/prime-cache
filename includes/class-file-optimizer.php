@@ -487,14 +487,10 @@ class Prime_Cache_File_Optimizer {
 				continue;
 			}
 
-			// Use page type for UCSS cache key to share across similar pages.
-			$page_type = 'page';
-			if ( function_exists( 'is_front_page' ) && is_front_page() ) $page_type = 'front';
-			elseif ( function_exists( 'is_singular' ) && is_singular() ) $page_type = 'singular-' . get_post_type();
-			elseif ( function_exists( 'is_archive' ) && is_archive() ) $page_type = 'archive';
-			elseif ( function_exists( 'is_search' ) && is_search() ) $page_type = 'search';
-			elseif ( function_exists( 'is_404' ) && is_404() ) $page_type = '404';
-			$hash    = md5( 'ucss_' . $href . filemtime( $path ) . $page_type );
+			// UCSS cache key: URL-specific to prevent CSS mismatch between pages
+			// with different HTML structure (blocks, CTAs, layouts) within the same type.
+			$ucss_uri = isset( $_SERVER['REQUEST_URI'] ) ? strtok( $_SERVER['REQUEST_URI'], '?' ) : '/';
+			$hash     = md5( 'ucss_' . $href . filemtime( $path ) . $ucss_uri );
 			$out     = $this->cache_dir . 'ucss/' . $hash . '.css';
 			$out_url = $this->cache_url . 'ucss/' . $hash . '.css';
 
@@ -629,20 +625,10 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '/';
-		$hash        = md5( 'ccss_' . $request_uri );
-		$ccss_file   = $this->cache_dir . 'ccss/' . $hash . '.css';
 
-		// Check cache.
-		if ( file_exists( $ccss_file ) && ( time() - filemtime( $ccss_file ) ) < 7 * DAY_IN_SECONDS ) {
-			$critical = file_get_contents( $ccss_file ); // phpcs:ignore
-			if ( $critical ) {
-				$this->settings['critical_css'] = $critical;
-			}
-			return $html;
-		}
-
-		// Collect CSS from all linked stylesheets.
-		$all_css = '';
+		// Collect CSS from all linked stylesheets (needed for both cache key and generation).
+		$all_css       = '';
+		$css_filetimes = '';
 		if ( preg_match_all( '#<link\s[^>]*rel=["\']stylesheet["\'][^>]*href=["\']([^"\']+)["\'][^>]*/?\s*>#i', $html, $links ) ) {
 			foreach ( $links[1] as $href ) {
 				if ( ! $this->is_local_url( $href ) ) {
@@ -650,12 +636,26 @@ class Prime_Cache_File_Optimizer {
 				}
 				$path = $this->url_to_path( $href );
 				if ( $path && is_readable( $path ) ) {
+					$css_filetimes .= filemtime( $path ) . '|';
 					$css = file_get_contents( $path ); // phpcs:ignore
 					if ( $css ) {
 						$all_css .= $this->rebase_css_urls( $css, $path ) . "\n";
 					}
 				}
 			}
+		}
+
+		// Include CSS filemtimes in cache key so theme/plugin CSS updates invalidate critical CSS.
+		$hash      = md5( 'ccss_' . $request_uri . $css_filetimes );
+		$ccss_file = $this->cache_dir . 'ccss/' . $hash . '.css';
+
+		// Check cache.
+		if ( file_exists( $ccss_file ) ) {
+			$critical = file_get_contents( $ccss_file ); // phpcs:ignore
+			if ( $critical ) {
+				$this->settings['critical_css'] = $critical;
+			}
+			return $html;
 		}
 
 		// Also collect inline <style> blocks.

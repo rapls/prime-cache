@@ -262,10 +262,11 @@ class Prime_Cache_Admin_Settings {
 			set_transient( 'prime_cache_env_warnings', $warnings, 60 );
 		}
 
-		// Pre-fetch local analytics on save so files are ready immediately.
-		if ( ! empty( $s['local_analytics'] ) && class_exists( 'Prime_Cache_File_Optimizer' ) ) {
-			$fo = new Prime_Cache_File_Optimizer();
-			$fo->cron_refresh_local_analytics();
+		// Schedule immediate async fetch of local analytics files on save.
+		if ( ! empty( $s['local_analytics'] ) ) {
+			if ( ! wp_next_scheduled( 'prime_cache_refresh_local_analytics' ) ) {
+				wp_schedule_single_event( time(), 'prime_cache_refresh_local_analytics' );
+			}
 		}
 
 		return $s;
@@ -869,8 +870,8 @@ class Prime_Cache_Admin_Settings {
 						<input type="radio" name="prime_cache_settings[css_delivery_method]" value="remove_unused_css" <?php checked( $method, 'remove_unused_css' ); ?>>
 						<span class="pc-radio__mark"></span>
 						<span class="pc-radio__body">
-							<b><?php esc_html_e( 'Remove Unused CSS', 'prime-cache' ); ?></b>
-							<small><?php esc_html_e( 'Removes unused CSS per page and helps to reduce page size and HTTP requests. Recommended for best performance. Test thoroughly!', 'prime-cache' ); ?></small>
+							<b><?php esc_html_e( 'Remove Unused CSS', 'prime-cache' ); ?></b> <span class="pc-badge pc-badge--a" style="font-size:10px"><?php esc_html_e( 'Advanced', 'prime-cache' ); ?></span>
+							<small><?php esc_html_e( 'Removes unused CSS per page (URL-specific). Can significantly reduce page size but may break layouts on pages with dynamic content, JS-injected classes, or complex selectors. Add affected selectors to the safelist below if issues occur. Test thoroughly on all page types!', 'prime-cache' ); ?></small>
 						</span>
 					</label>
 

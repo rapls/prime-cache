@@ -409,9 +409,12 @@ class Prime_Cache_WebP {
 				return $changed ? $attr . implode( ', ', $parts ) . $close : $m[0];
 			}
 
-			if ( preg_match( '#\.(jpe?g|png)$#i', strtok( $value, '?' ) ) ) {
-				if ( $this->variant_exists( $value, $target_ext ) ) {
-					return $attr . $value . '.' . $target_ext . $close;
+			// Split URL from query string so .webp/.avif is inserted before ?query.
+			$url_base = strtok( $value, '?' );
+			$url_qs   = ( false !== strpos( $value, '?' ) ) ? '?' . strtok( '' ) : '';
+			if ( preg_match( '#\.(jpe?g|png)$#i', $url_base ) ) {
+				if ( $this->variant_exists( $url_base, $target_ext ) ) {
+					return $attr . $url_base . '.' . $target_ext . $url_qs . $close;
 				}
 			}
 
