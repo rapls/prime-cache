@@ -384,6 +384,30 @@ ob_start( function ( $buffer ) {
 		return $buffer;
 	}
 
+	// Check response headers for cache-inhibiting signals.
+	$_pc_resp_headers = headers_list();
+	foreach ( $_pc_resp_headers as $_pc_rh ) {
+		$_pc_rh_lower = strtolower( $_pc_rh );
+		// Never cache responses that set cookies (session, consent, A/B, CSRF).
+		if ( 0 === strpos( $_pc_rh_lower, 'set-cookie:' ) ) {
+			return $buffer;
+		}
+		// Respect Cache-Control: private, no-store, no-cache.
+		if ( 0 === strpos( $_pc_rh_lower, 'cache-control:' ) ) {
+			if ( preg_match( '#\b(private|no-store|no-cache)\b#i', $_pc_rh ) ) {
+				return $buffer;
+			}
+		}
+		// Pragma: no-cache.
+		if ( 'pragma: no-cache' === $_pc_rh_lower ) {
+			return $buffer;
+		}
+		// Vary: * means uncacheable.
+		if ( preg_match( '#^vary:\s*\*\s*$#i', $_pc_rh ) ) {
+			return $buffer;
+		}
+	}
+
 	if ( false === stripos( $buffer, '</html>' ) ) {
 		return $buffer;
 	}

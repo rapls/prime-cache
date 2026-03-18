@@ -63,10 +63,9 @@ class Prime_Cache_Media_Optimizer {
 				. '</div></div>';
 		}, $html );
 
-		// Inject event delegation script once (CSP-compatible, no inline handlers).
-		if ( false !== strpos( $html, 'pc-yt-wrap' ) && false === strpos( $html, 'pc-yt-init' ) ) {
-			$script = '<script id="pc-yt-init">document.addEventListener("click",function(e){var w=e.target.closest(".pc-yt-wrap[data-pc-yt-src]");if(w){w.innerHTML=\'<iframe src="\'+w.dataset.pcYtSrc+\'" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>\'}});</script>';
-			$html = str_replace( '</body>', $script . '</body>', $html );
+		// Enqueue external JS for YouTube click handling (CSP-compatible).
+		if ( false !== strpos( $html, 'pc-yt-wrap' ) ) {
+			add_action( 'wp_footer', array( $this, 'enqueue_yt_script' ), 99 );
 		}
 
 		return $html;
@@ -150,5 +149,13 @@ class Prime_Cache_Media_Optimizer {
 		$path = strtok( $path, '?' );
 		$real = realpath( $path );
 		return ( $real && 0 === strpos( $real, realpath( ABSPATH ) ) ) ? $real : false;
+	}
+
+	/**
+	 * Print YouTube click handler script in footer.
+	 */
+	public function enqueue_yt_script() {
+		$js_url = plugins_url( 'assets/pc-yt.js', dirname( __FILE__ ) );
+		echo '<script src="' . esc_url( $js_url ) . '" defer></script>' . "\n";
 	}
 }

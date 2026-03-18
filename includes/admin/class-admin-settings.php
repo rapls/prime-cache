@@ -85,7 +85,7 @@ class Prime_Cache_Admin_Settings {
 		// Schedule rewrite flush for next request (after new settings are active).
 		$old = prime_cache_get_settings();
 		if ( $s['rewrite_file_optimizer'] !== ( $old['rewrite_file_optimizer'] ?? false ) ) {
-			set_transient( 'prime_cache_flush_rewrite', 1, 60 );
+			update_option( 'prime_cache_flush_rewrite', 1, false );
 		}
 		$s['preload_enabled']       = ! empty( $input['preload_enabled'] );
 		$s['preload_homepage']      = ! empty( $input['preload_homepage'] );

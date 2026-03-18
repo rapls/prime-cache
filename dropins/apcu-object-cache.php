@@ -322,8 +322,11 @@ class WP_Object_Cache {
 
 	public function flush_group( $group ) {
 		$version_key = $this->key_salt . 'prime_cache_gv:' . $group;
-		$new_version = time();
-		apcu_store( $version_key, $new_version );
+		$new_version = apcu_inc( $version_key );
+		if ( false === $new_version ) {
+			$new_version = 1;
+			apcu_store( $version_key, $new_version );
+		}
 		$this->group_versions[ $group ] = $new_version;
 
 		// Clear local cache for this group.

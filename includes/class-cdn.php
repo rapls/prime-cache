@@ -59,6 +59,15 @@ class Prime_Cache_CDN {
 			return $html;
 		}
 
+		// Protect blocks where URL rewriting would cause breakage:
+		// inline JS, JSON-LD, CSS, templates. Replace with placeholders.
+		$cdn_placeholders = array();
+		$html = preg_replace_callback( '#<(?:script|style|template|noscript)[^>]*>.*?</(?:script|style|template|noscript)>#is', function( $m ) use ( &$cdn_placeholders ) {
+			$key = '<!--PC_CDN_PROTECT_' . count( $cdn_placeholders ) . '-->';
+			$cdn_placeholders[ $key ] = $m[0];
+			return $key;
+		}, $html );
+
 		// Match URLs starting with site URL or relative path containing include dirs.
 		$pattern = '#(?:(?:' . preg_quote( $site_url, '#' ) . ')|(?:(?:https?:)?//' . preg_quote( $this->site_host, '#' ) . '))(/(?:' . $dirs_pattern . ')/[^\s"\'>]+)#i';
 
@@ -103,9 +112,11 @@ class Prime_Cache_CDN {
 			$html = preg_replace_callback( $srcset_pattern, function( $m ) use ( $cdn_hosts, $host_count, &$i, $excludes, $scheme, $dirs_pattern ) {
 				$candidates = explode( ',', $m[2] );
 				$rewritten  = array();
+				// Use same CDN host for all candidates in this srcset attribute.
+				$srcset_cdn = $cdn_hosts[ $i % $host_count ];
+				$i++;
 				foreach ( $candidates as $candidate ) {
 					$candidate = trim( $candidate );
-					// Split "url descriptor" (e.g. "/img.jpg 2x" or "/img.jpg 768w").
 					$parts = preg_split( '#\s+#', $candidate, 2 );
 					$url   = $parts[0];
 					$desc  = isset( $parts[1] ) ? ' ' . $parts[1] : '';
@@ -119,15 +130,18 @@ class Prime_Cache_CDN {
 							}
 						}
 						if ( ! $skip ) {
-							$cdn = $cdn_hosts[ $i % $host_count ];
-							$i++;
-							$url = $scheme . '://' . $cdn . $url;
+							$url = $scheme . '://' . $srcset_cdn . $url;
 						}
 					}
 					$rewritten[] = $url . $desc;
 				}
 				return $m[1] . implode( ', ', $rewritten ) . $m[3];
 			}, $html );
+		}
+
+		// Restore protected blocks.
+		if ( ! empty( $cdn_placeholders ) ) {
+			$html = str_replace( array_keys( $cdn_placeholders ), array_values( $cdn_placeholders ), $html );
 		}
 
 		return $html;

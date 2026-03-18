@@ -87,9 +87,9 @@ class Prime_Cache_Preload {
 		if ( empty( $queue ) ) {
 			$urls = $this->collect_preload_urls();
 			if ( empty( $urls ) ) {
+				delete_transient( 'prime_cache_preload_lock' );
 				return;
 			}
-			// Filter exclusions once at queue creation.
 			$excludes = $this->parse_patterns( $this->settings['preload_excluded_uri'] );
 			$queue = array();
 			foreach ( $urls as $url ) {
@@ -99,6 +99,7 @@ class Prime_Cache_Preload {
 				}
 			}
 			if ( empty( $queue ) ) {
+				delete_transient( 'prime_cache_preload_lock' );
 				return;
 			}
 			update_option( 'prime_cache_preload_queue', $queue, false );

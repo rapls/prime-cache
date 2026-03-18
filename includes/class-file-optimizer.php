@@ -34,8 +34,8 @@ class Prime_Cache_File_Optimizer {
 		add_action( 'prime_cache_refresh_google_fonts', array( $this, 'cron_refresh_google_fonts' ) );
 
 		// Flush rewrite rules on next request after setting toggle (deferred from save).
-		if ( get_transient( 'prime_cache_flush_rewrite' ) ) {
-			delete_transient( 'prime_cache_flush_rewrite' );
+		if ( get_option( 'prime_cache_flush_rewrite' ) ) {
+			delete_option( 'prime_cache_flush_rewrite' );
 			add_action( 'init', function() { flush_rewrite_rules( false ); }, 99 );
 		}
 
@@ -1427,13 +1427,16 @@ JS;
 	// ── Query String Removal ─────────────────────────────────
 
 	private function strip_query_strings( $html ) {
-		$site_url = home_url();
-		// Only strip ?ver= from local CSS/JS URLs.
-		// Preserve other query params (loader, feature flags, signed tokens).
+		// Only strip ?ver= / ?v= from local CSS/JS URLs.
 		return preg_replace_callback(
-			'#((?:href|src)=["\'][^"\']+\.(css|js))\?(?:ver|v)=[^&"\']*(["\'])#i',
-			function( $m ) use ( $site_url ) {
-				return $m[1] . $m[3];
+			'#((?:href|src)=["\'])([^"\']+\.(css|js))\?(?:ver|v)=[^&"\']*(["\'])#i',
+			function( $m ) {
+				$url = $m[2];
+				// Only strip from local (relative or same-host) URLs.
+				if ( 0 === strpos( $url, '/' ) || $this->is_local_url( $url ) ) {
+					return $m[1] . $url . $m[4];
+				}
+				return $m[0]; // External — keep query string.
 			},
 			$html
 		);
