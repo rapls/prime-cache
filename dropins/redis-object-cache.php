@@ -169,12 +169,46 @@ class WP_Object_Cache {
 		}
 	}
 
+	/** @var array Group version cache. */
+	private $group_versions = array();
+	private $global_version = null;
+
 	private function derive_key( $key, $group = 'default' ) {
 		if ( empty( $group ) ) {
 			$group = 'default';
 		}
 		$prefix = in_array( $group, $this->global_groups, true ) ? '' : $this->blog_prefix;
-		return $this->key_prefix . $prefix . $group . ':' . $key;
+		$gv     = $this->get_global_version();
+		$grpv   = $this->get_group_version( $group );
+		return $this->key_prefix . $prefix . $gv . ':' . $group . ':' . $grpv . ':' . $key;
+	}
+
+	private function get_global_version() {
+		if ( null !== $this->global_version ) {
+			return $this->global_version;
+		}
+		$salt = defined( 'WP_CACHE_KEY_SALT' ) ? WP_CACHE_KEY_SALT : '';
+		try {
+			$ver = $this->redis->get( $salt . 'prime_cache_global_ver' );
+			$this->global_version = $ver ?: 0;
+		} catch ( Exception $e ) {
+			$this->global_version = 0;
+		}
+		return $this->global_version;
+	}
+
+	private function get_group_version( $group ) {
+		if ( isset( $this->group_versions[ $group ] ) ) {
+			return $this->group_versions[ $group ];
+		}
+		$salt = defined( 'WP_CACHE_KEY_SALT' ) ? WP_CACHE_KEY_SALT : '';
+		try {
+			$ver = $this->redis->get( $salt . 'prime_cache_gv:' . $group );
+			$this->group_versions[ $group ] = $ver ?: 0;
+		} catch ( Exception $e ) {
+			$this->group_versions[ $group ] = 0;
+		}
+		return $this->group_versions[ $group ];
 	}
 
 	private function enforce_ttl( $expire ) {
@@ -375,11 +409,10 @@ class WP_Object_Cache {
 			return false;
 		}
 
-		// Increment global version instead of flushDb() to avoid destroying
-		// other applications' cache sharing the same Redis database.
+		// Increment global version instead of flushDb().
 		try {
 			$ver_key = ( defined( 'WP_CACHE_KEY_SALT' ) ? WP_CACHE_KEY_SALT : '' ) . 'prime_cache_global_ver';
-			$this->redis->set( $ver_key, time() );
+			$this->global_version = $this->redis->incr( $ver_key );
 			return true;
 		} catch ( Exception $e ) {
 			return false;
@@ -396,11 +429,11 @@ class WP_Object_Cache {
 			return false;
 		}
 
-		// Use group versioning instead of SCAN+DEL to avoid O(n) cost.
+		// Use group versioning instead of SCAN+DEL (O(1) vs O(n)).
 		$salt = defined( 'WP_CACHE_KEY_SALT' ) ? WP_CACHE_KEY_SALT : '';
 		$ver_key = $salt . 'prime_cache_gv:' . $group;
 		try {
-			$this->redis->set( $ver_key, time() );
+			$this->group_versions[ $group ] = $this->redis->incr( $ver_key );
 		} catch ( Exception $e ) {
 			return false;
 		}

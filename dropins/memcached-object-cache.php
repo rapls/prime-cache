@@ -147,13 +147,26 @@ class WP_Object_Cache {
 	/** @var array Group version cache. */
 	private $group_versions = array();
 
+	private $global_version = null;
+
 	private function derive_key( $key, $group = 'default' ) {
 		if ( empty( $group ) ) {
 			$group = 'default';
 		}
 		$prefix  = in_array( $group, $this->global_groups, true ) ? '' : $this->blog_prefix;
+		$gv      = $this->get_global_version();
 		$version = $this->get_group_version( $group );
-		return $this->key_prefix . $prefix . $group . ':' . $version . ':' . $key;
+		return $this->key_prefix . $prefix . $gv . ':' . $group . ':' . $version . ':' . $key;
+	}
+
+	private function get_global_version() {
+		if ( null !== $this->global_version ) {
+			return $this->global_version;
+		}
+		$ver_key = $this->key_prefix . 'prime_cache_global_ver';
+		$ver = $this->mc->get( $ver_key );
+		$this->global_version = ( Memcached::RES_NOTFOUND !== $this->mc->getResultCode() ) ? $ver : 0;
+		return $this->global_version;
 	}
 
 	private function get_group_version( $group ) {
@@ -299,10 +312,15 @@ class WP_Object_Cache {
 
 	public function flush() {
 		$this->cache = array();
-		// Increment global version instead of mc->flush() to avoid destroying
-		// other applications' cache sharing the same Memcached cluster.
+		$this->group_versions = array();
 		$ver_key = $this->key_prefix . 'prime_cache_global_ver';
-		return $this->mc->set( $ver_key, time() );
+		$new_ver = $this->mc->increment( $ver_key );
+		if ( false === $new_ver ) {
+			$this->mc->set( $ver_key, 1 );
+			$new_ver = 1;
+		}
+		$this->global_version = $new_ver;
+		return true;
 	}
 
 	public function flush_runtime() {

@@ -73,8 +73,14 @@ class Prime_Cache_Preload {
 	 * Run a batch of preload requests.
 	 */
 	public function run_preload_batch() {
+		// Prevent concurrent execution (cron overlap, manual trigger overlap).
+		if ( get_transient( 'prime_cache_preload_lock' ) ) {
+			return;
+		}
+		set_transient( 'prime_cache_preload_lock', 1, 120 ); // 2-minute TTL.
+
 		$interval = max( 1, (int) $this->settings['preload_interval'] );
-		$limit    = 10; // Small batch — release PHP worker quickly, no sleep().
+		$limit    = 10;
 
 		// Use a persistent queue to avoid re-collecting URLs every batch.
 		$queue = get_option( 'prime_cache_preload_queue', array() );
@@ -150,6 +156,8 @@ class Prime_Cache_Preload {
 			// Queue exhausted — cleanup.
 			delete_option( 'prime_cache_preload_queue' );
 		}
+
+		delete_transient( 'prime_cache_preload_lock' );
 	}
 
 	/**

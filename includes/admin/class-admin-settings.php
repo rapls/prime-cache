@@ -82,10 +82,10 @@ class Prime_Cache_Admin_Settings {
 		$s['google_fonts_display']  = ! empty( $input['google_fonts_display'] );
 		$s['remove_query_strings']  = ! empty( $input['remove_query_strings'] );
 		$s['rewrite_file_optimizer'] = ! empty( $input['rewrite_file_optimizer'] );
-		// Flush rewrite rules when FO rewrite is toggled.
+		// Schedule rewrite flush for next request (after new settings are active).
 		$old = prime_cache_get_settings();
 		if ( $s['rewrite_file_optimizer'] !== ( $old['rewrite_file_optimizer'] ?? false ) ) {
-			flush_rewrite_rules( false );
+			set_transient( 'prime_cache_flush_rewrite', 1, 60 );
 		}
 		$s['preload_enabled']       = ! empty( $input['preload_enabled'] );
 		$s['preload_homepage']      = ! empty( $input['preload_homepage'] );

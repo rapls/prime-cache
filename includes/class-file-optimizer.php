@@ -33,6 +33,12 @@ class Prime_Cache_File_Optimizer {
 		add_action( 'prime_cache_refresh_local_analytics', array( $this, 'cron_refresh_local_analytics' ) );
 		add_action( 'prime_cache_refresh_google_fonts', array( $this, 'cron_refresh_google_fonts' ) );
 
+		// Flush rewrite rules on next request after setting toggle (deferred from save).
+		if ( get_transient( 'prime_cache_flush_rewrite' ) ) {
+			delete_transient( 'prime_cache_flush_rewrite' );
+			add_action( 'init', function() { flush_rewrite_rules( false ); }, 99 );
+		}
+
 		if ( ! $this->should_optimize() ) {
 			return;
 		}
@@ -1216,10 +1222,15 @@ JS;
 		}
 
 		// Schedule async download instead of blocking page generation.
-		// Store the URL to fetch in a transient for the cron handler.
-		if ( ! wp_next_scheduled( 'prime_cache_refresh_google_fonts' ) ) {
-			set_transient( 'prime_cache_gf_pending', $gf_url, HOUR_IN_SECONDS );
-			wp_schedule_single_event( time(), 'prime_cache_refresh_google_fonts' );
+		$pending = get_transient( 'prime_cache_gf_pending' );
+		$pending = is_array( $pending ) ? $pending : array();
+		$url_hash = md5( $gf_url );
+		if ( ! isset( $pending[ $url_hash ] ) ) {
+			$pending[ $url_hash ] = $gf_url;
+			set_transient( 'prime_cache_gf_pending', $pending, HOUR_IN_SECONDS );
+			if ( ! wp_next_scheduled( 'prime_cache_refresh_google_fonts' ) ) {
+				wp_schedule_single_event( time(), 'prime_cache_refresh_google_fonts' );
+			}
 		}
 
 		// If local file doesn't exist yet, return false (use original Google URL).
@@ -1368,18 +1379,24 @@ JS;
 	 * Cron handler: download Google Fonts CSS and font files asynchronously.
 	 */
 	public function cron_refresh_google_fonts() {
-		$gf_url = get_transient( 'prime_cache_gf_pending' );
-		if ( ! $gf_url ) {
+		$pending = get_transient( 'prime_cache_gf_pending' );
+		if ( ! is_array( $pending ) || empty( $pending ) ) {
 			return;
 		}
 		delete_transient( 'prime_cache_gf_pending' );
 
 		$fonts_dir = $this->cache_dir . 'fonts/';
 		$fonts_url = $this->cache_url . 'fonts/';
-		$hash      = md5( $gf_url );
-		$css_file  = $fonts_dir . $hash . '.css';
-
 		wp_mkdir_p( $fonts_dir );
+
+		foreach ( $pending as $url_hash => $gf_url ) {
+			$this->fetch_google_font_css( $gf_url, $fonts_dir, $fonts_url );
+		}
+	}
+
+	private function fetch_google_font_css( $gf_url, $fonts_dir, $fonts_url ) {
+		$hash     = md5( $gf_url );
+		$css_file = $fonts_dir . $hash . '.css';
 
 		$response = wp_remote_get( $gf_url, array(
 			'timeout'    => 15,
@@ -1411,16 +1428,12 @@ JS;
 
 	private function strip_query_strings( $html ) {
 		$site_url = home_url();
-		// Only strip query strings from local CSS/JS URLs.
-		// Preserve ?ver= etc. on external URLs (CDN signed URLs, third-party scripts).
+		// Only strip ?ver= from local CSS/JS URLs.
+		// Preserve other query params (loader, feature flags, signed tokens).
 		return preg_replace_callback(
-			'#(href|src)=["\']([^"\']+\.(css|js))\?[^"\']*["\']#i',
+			'#((?:href|src)=["\'][^"\']+\.(css|js))\?(?:ver|v)=[^&"\']*(["\'])#i',
 			function( $m ) use ( $site_url ) {
-				// Skip external URLs.
-				if ( 0 !== strpos( $m[2], '/' ) && 0 !== strpos( $m[2], $site_url ) ) {
-					return $m[0];
-				}
-				return $m[1] . '="' . $m[2] . '"';
+				return $m[1] . $m[3];
 			},
 			$html
 		);

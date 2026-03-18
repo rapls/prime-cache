@@ -66,13 +66,30 @@ class Prime_Cache_Cloudflare {
 		$zone = trim( $this->settings['cloudflare_zone_id'] );
 		$url  = self::API_BASE . 'zones/' . $zone . '/purge_cache';
 
-		wp_remote_request( $url, array(
+		$response = wp_remote_request( $url, array(
 			'method'    => 'POST',
 			'timeout'   => 10,
 			'sslverify' => true,
 			'headers'   => $this->get_headers(),
 			'body'      => wp_json_encode( array( 'purge_everything' => true ) ),
 		) );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+		if ( 200 !== $code || ( isset( $body['success'] ) && ! $body['success'] ) ) {
+			$error_msg = 'Cloudflare API error (HTTP ' . $code . ')';
+			if ( ! empty( $body['errors'][0]['message'] ) ) {
+				$error_msg = $body['errors'][0]['message'];
+			}
+			return new WP_Error( 'cloudflare_purge_failed', $error_msg );
+		}
+
+		return true;
 	}
 
 	/**

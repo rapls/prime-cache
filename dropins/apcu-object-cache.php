@@ -130,9 +130,20 @@ class WP_Object_Cache {
 		if ( empty( $group ) ) {
 			$group = 'default';
 		}
-		$prefix = in_array( $group, $this->global_groups, true ) ? '' : $this->blog_prefix;
+		$prefix  = in_array( $group, $this->global_groups, true ) ? '' : $this->blog_prefix;
+		$gv      = $this->get_global_version();
 		$version = $this->get_group_version( $group );
-		return $this->key_salt . $prefix . $group . ':' . $version . ':' . $key;
+		return $this->key_salt . $prefix . $gv . ':' . $group . ':' . $version . ':' . $key;
+	}
+
+	private function get_global_version() {
+		if ( isset( $this->global_version ) ) {
+			return $this->global_version;
+		}
+		$ver_key = $this->key_salt . 'prime_cache_global_ver';
+		$ver = apcu_fetch( $ver_key );
+		$this->global_version = ( false !== $ver ) ? $ver : 0;
+		return $this->global_version;
 	}
 
 	private function get_group_version( $group ) {
@@ -293,10 +304,14 @@ class WP_Object_Cache {
 	public function flush() {
 		$this->cache = array();
 		$this->group_versions = array();
-		// Increment global version instead of apcu_clear_cache() to avoid
-		// destroying other applications' cache in the same APCu pool.
+		// Increment global version instead of apcu_clear_cache().
 		$ver_key = $this->key_salt . 'prime_cache_global_ver';
-		apcu_store( $ver_key, time() );
+		$new_ver = apcu_inc( $ver_key );
+		if ( false === $new_ver ) {
+			apcu_store( $ver_key, 1 );
+			$new_ver = 1;
+		}
+		$this->global_version = $new_ver;
 		return true;
 	}
 
