@@ -204,10 +204,18 @@ class Prime_Cache_Preload {
 		// in the next batch and skipped if confirmed cached.
 		$unprocessed = ( $idx < $total ) ? array_slice( $queue, $idx ) : array();
 		$still_needed = array();
-		// Re-check attempted URLs — keep those not fully cached yet.
+		// Track which URLs are already queued to prevent duplicates.
+		$seen = array_flip( $deferred ); // Deferred URLs already accounted for.
+		foreach ( $unprocessed as $u ) {
+			$seen[ $u ] = true;
+		}
+		// Re-check attempted URLs — keep those not fully cached yet (skip deferred).
 		for ( $j = 0; $j < $idx; $j++ ) {
 			$u = $queue[ $j ];
-			$d_ok = ! $this->is_variant_cached( $u, false ) ? false : true;
+			if ( isset( $seen[ $u ] ) ) {
+				continue; // Already in deferred or unprocessed — no duplicate.
+			}
+			$d_ok = $this->is_variant_cached( $u, false );
 			$m_ok = $mobile_sep ? $this->is_variant_cached( $u, true ) : true;
 			if ( ! $d_ok || ! $m_ok ) {
 				$d_a = isset( $attempts[ $u ] ) ? ( is_array( $attempts[ $u ] ) ? $attempts[ $u ]['count'] : (int) $attempts[ $u ] ) : 0;
@@ -217,7 +225,7 @@ class Prime_Cache_Preload {
 				}
 			}
 		}
-		// Append deferred (cooldown) URLs to end so they don't block the front.
+		// Deferred URLs go to end of queue (cooldown — don't block front).
 		$remaining = array_merge( $still_needed, $unprocessed, $deferred );
 		update_option( 'prime_cache_preload_attempts', $attempts, false );
 

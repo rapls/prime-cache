@@ -1410,9 +1410,19 @@ JS;
 			return;
 		}
 
-		// Shuffle within same-attempt-count group to avoid option_id bias.
-		// Lighter than ORDER BY RAND() on large wp_options tables.
-		shuffle( $rows );
+		// Shuffle within same-attempt-count buckets to avoid option_id bias
+		// while preserving low-attempts-first priority.
+		$buckets = array();
+		foreach ( $rows as $row ) {
+			$a = isset( $row->attempts ) ? (int) $row->attempts : 0;
+			$buckets[ $a ][] = $row;
+		}
+		ksort( $buckets );
+		$rows = array();
+		foreach ( $buckets as $bucket ) {
+			shuffle( $bucket );
+			$rows = array_merge( $rows, $bucket );
+		}
 
 		$fonts_dir = $this->cache_dir . 'fonts/';
 		$fonts_url = $this->cache_url . 'fonts/';
@@ -1441,7 +1451,7 @@ JS;
 				delete_option( $attempt_key . '_time' );
 			} else {
 				update_option( $attempt_key, $url_attempts + 1, false );
-				update_option( $attempt_key . '_time', time(), false );
+				update_option( $attempt_key . '_time', (string) time(), false );
 			}
 		}
 
@@ -1486,9 +1496,9 @@ JS;
 			} elseif ( 0 === $created && $last_attempt > 0 && $last_attempt < $cutoff ) {
 				$is_stale = true; // Legacy format, last attempt > 24h ago.
 			} elseif ( 0 === $created && 0 === $last_attempt ) {
-				// No timestamps at all — migrate to JSON format instead of deleting.
-				$url = is_array( $data ) ? ( $data['url'] ?? $row->option_value ) : $row->option_value;
-				update_option( $row->option_name, wp_json_encode( array( 'url' => $url, 'created' => time() ) ), false );
+				// No timestamps at all (legacy or abandoned). Delete — if the URL is
+				// still needed, it will be re-queued on next page request.
+				$is_stale = true;
 			}
 
 			if ( $is_stale ) {
