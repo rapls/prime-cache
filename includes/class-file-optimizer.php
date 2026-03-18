@@ -624,7 +624,9 @@ class Prime_Cache_File_Optimizer {
 			return $html;
 		}
 
-		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '/';
+		// Strip query string from URI for cache key — tracking params (utm_*, fbclid)
+		// should not cause separate critical CSS files for the same page.
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? strtok( $_SERVER['REQUEST_URI'], '?' ) : '/';
 
 		// Collect CSS from all linked stylesheets (needed for both cache key and generation).
 		$all_css       = '';

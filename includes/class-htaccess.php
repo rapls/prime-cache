@@ -276,8 +276,8 @@ class Prime_Cache_Htaccess {
 			$v = preg_replace( '#[\x00\r\n]#', '', $v );
 			// Strip anything not in the safe set.
 			$v = preg_replace( '#[^a-zA-Z0-9.|^$_\-/]#', '', $v );
-			// Reject empty alternation branches (||) or trailing/leading pipe.
-			if ( '' === $v || preg_match( '#\|\||^\||^$#', $v ) ) return '';
+			// Reject empty alternation branches (||, leading |, trailing |).
+			if ( '' === $v || preg_match( '#\|\||^\||\|$|^$#', $v ) ) return '';
 			if ( false === @preg_match( '#' . $v . '#', '' ) ) return '';
 			return $v;
 		};

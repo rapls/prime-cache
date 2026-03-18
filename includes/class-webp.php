@@ -430,19 +430,34 @@ class Prime_Cache_WebP {
 			return $html;
 		}
 
-		return preg_replace_callback( '#<img\s[^>]+>#i', function( $m ) {
+		// Use a broader pattern to detect <img> tags and their surrounding context,
+		// so we can skip images already inside a <picture> element.
+		return preg_replace_callback( '#(?:<picture[^>]*>.*?)?<img\s[^>]+>(?:.*?</picture>)?#is', function( $m ) {
 			$tag = $m[0];
 
-			if ( ! preg_match( '#src=["\']([^"\']+\.(jpe?g|png))["\']#i', $tag, $src_m ) ) {
+			// Skip if this <img> is already inside a <picture> element.
+			if ( preg_match( '#<picture[\s>]#i', $tag ) ) {
+				return $tag;
+			}
+
+			// Extract just the <img> tag for processing.
+			if ( ! preg_match( '#(<img\s[^>]+>)#i', $tag, $img_m ) ) {
+				return $tag;
+			}
+			$tag = $img_m[1];
+
+			// Match src, supporting query strings (e.g. image.jpg?ver=1.2).
+			if ( ! preg_match( '#src=["\']([^"\'?]+\.(jpe?g|png))(\?[^"\']*)?["\']#i', $tag, $src_m ) ) {
 				return $tag;
 			}
 
 			$src     = $src_m[1];
+			$src_qs  = $src_m[3] ?? '';
 			$sources = '';
 
 			$has_srcset = preg_match( '#srcset=["\']([^"\']+)["\']#i', $tag, $ss_m );
 
-			// AVIF source (one <source> only — prefer srcset if available).
+			// AVIF source.
 			if ( $this->settings['avif_enabled'] && $this->variant_exists( $src, 'avif' ) ) {
 				if ( $has_srcset ) {
 					$avif_srcset = $this->rewrite_srcset( $ss_m[1], 'avif' );
@@ -450,11 +465,11 @@ class Prime_Cache_WebP {
 						$sources .= '<source srcset="' . esc_attr( $avif_srcset ) . '" type="image/avif">';
 					}
 				} else {
-					$sources .= '<source srcset="' . esc_url( $src . '.avif' ) . '" type="image/avif">';
+					$sources .= '<source srcset="' . esc_url( $src . '.avif' . $src_qs ) . '" type="image/avif">';
 				}
 			}
 
-			// WebP source (one <source> only — prefer srcset if available).
+			// WebP source.
 			if ( $this->settings['webp_enabled'] && $this->variant_exists( $src, 'webp' ) ) {
 				if ( $has_srcset ) {
 					$webp_srcset = $this->rewrite_srcset( $ss_m[1], 'webp' );
@@ -462,7 +477,7 @@ class Prime_Cache_WebP {
 						$sources .= '<source srcset="' . esc_attr( $webp_srcset ) . '" type="image/webp">';
 					}
 				} else {
-					$sources .= '<source srcset="' . esc_url( $src . '.webp' ) . '" type="image/webp">';
+					$sources .= '<source srcset="' . esc_url( $src . '.webp' . $src_qs ) . '" type="image/webp">';
 				}
 			}
 
@@ -479,9 +494,13 @@ class Prime_Cache_WebP {
 		$changed = false;
 		foreach ( $parts as &$part ) {
 			$part = trim( $part );
-			if ( preg_match( '#^(.+\.(jpe?g|png))\s*(.*)$#i', $part, $pm ) ) {
-				if ( $this->variant_exists( $pm[1], $format ) ) {
-					$part = $pm[1] . '.' . $format . ( $pm[3] ? ' ' . $pm[3] : '' );
+			// Match: URL(.jpg|.png) optionally with ?query, then optional descriptor (768w, 2x).
+			if ( preg_match( '#^(.+\.(jpe?g|png))(\?[^\s]*)?\s*(.*)$#i', $part, $pm ) ) {
+				$url_base = $pm[1];
+				$url_qs   = $pm[3] ?? '';
+				$desc     = $pm[4] ?? '';
+				if ( $this->variant_exists( $url_base, $format ) ) {
+					$part = $url_base . '.' . $format . $url_qs . ( $desc ? ' ' . $desc : '' );
 					$changed = true;
 				}
 			}
@@ -491,7 +510,9 @@ class Prime_Cache_WebP {
 	}
 
 	private function variant_exists( $url, $format ) {
-		$path = $this->url_to_path( $url );
+		// Strip query string before resolving to filesystem path.
+		$clean_url = strtok( $url, '?' );
+		$path = $this->url_to_path( $clean_url );
 		return $path && file_exists( $path . '.' . $format );
 	}
 
