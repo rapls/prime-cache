@@ -115,38 +115,52 @@ class Prime_Cache_Preload {
 		$total = count( $queue );
 		$idx   = 0;
 
-		while ( $idx < $total && $count < $limit ) {
-			$url = $queue[ $idx ];
+		$mobile_sep = ! empty( $this->settings['cache_mobile_separate'] );
 
-			// Skip already cached URLs.
-			if ( $this->is_url_cached( $url ) ) {
-				unset( $attempts[ $url ] );
+		while ( $idx < $total && $count < $limit ) {
+			$url        = $queue[ $idx ];
+			$mobile_key = $url . ':m';
+
+			// Check which variants still need warming.
+			$need_desktop = ! $this->is_variant_cached( $url, false );
+			$need_mobile  = $mobile_sep && ! $this->is_variant_cached( $url, true );
+
+			// Fully cached — skip permanently.
+			if ( ! $need_desktop && ! $need_mobile ) {
+				unset( $attempts[ $url ], $attempts[ $mobile_key ] );
 				$idx++;
 				continue;
 			}
 
-			// Drop URLs that failed too many times (uncacheable pages).
-			$desktop_attempts = isset( $attempts[ $url ] ) ? (int) $attempts[ $url ] : 0;
-			$mobile_key       = $url . ':m';
-			$mobile_attempts  = isset( $attempts[ $mobile_key ] ) ? (int) $attempts[ $mobile_key ] : 0;
-			if ( $desktop_attempts >= $max_attempts && ( empty( $this->settings['cache_mobile_separate'] ) || $mobile_attempts >= $max_attempts ) ) {
+			// Check per-variant attempt limits.
+			$d_attempts = isset( $attempts[ $url ] ) ? (int) $attempts[ $url ] : 0;
+			$m_attempts = isset( $attempts[ $mobile_key ] ) ? (int) $attempts[ $mobile_key ] : 0;
+
+			$d_exhausted = $d_attempts >= $max_attempts;
+			$m_exhausted = ! $mobile_sep || $m_attempts >= $max_attempts;
+
+			if ( $d_exhausted && $m_exhausted ) {
 				unset( $attempts[ $url ], $attempts[ $mobile_key ] );
 				$idx++;
-				continue;
+				continue; // Both variants exhausted — drop URL.
 			}
 
 			if ( ! $this->server_load_ok() ) {
 				break;
 			}
 
-			wp_remote_get( $url, array(
-				'timeout'   => 0.5,
-				'blocking'  => false,
-				'sslverify' => true,
-				'headers'   => array( 'X-Prime-Cache-Preload' => '1' ),
-			) );
+			// Only warm the variant that's actually missing.
+			if ( $need_desktop && ! $d_exhausted ) {
+				wp_remote_get( $url, array(
+					'timeout'   => 0.5,
+					'blocking'  => false,
+					'sslverify' => true,
+					'headers'   => array( 'X-Prime-Cache-Preload' => '1' ),
+				) );
+				$attempts[ $url ] = $d_attempts + 1;
+			}
 
-			if ( ! empty( $this->settings['cache_mobile_separate'] ) ) {
+			if ( $need_mobile && ! $m_exhausted ) {
 				wp_remote_get( $url, array(
 					'timeout'    => 0.5,
 					'blocking'   => false,
@@ -154,12 +168,9 @@ class Prime_Cache_Preload {
 					'user-agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
 					'headers'    => array( 'X-Prime-Cache-Preload' => '1' ),
 				) );
+				$attempts[ $mobile_key ] = $m_attempts + 1;
 			}
 
-			$attempts[ $url ] = $desktop_attempts + 1;
-			if ( ! empty( $this->settings['cache_mobile_separate'] ) ) {
-				$attempts[ $mobile_key ] = $mobile_attempts + 1;
-			}
 			$count++;
 			$idx++;
 		}
@@ -324,6 +335,45 @@ class Prime_Cache_Preload {
 	/**
 	 * Check if a URL is already cached.
 	 */
+	/**
+	 * Check if a specific variant (desktop or mobile) is cached.
+	 */
+	private function is_variant_cached( $url, $is_mobile = false ) {
+		$dir = Prime_Cache_Storage::get_cache_dir( $url );
+		if ( ! is_dir( $dir ) ) {
+			return false;
+		}
+
+		$parsed = wp_parse_url( $url );
+		$is_ssl = isset( $parsed['scheme'] ) && 'https' === $parsed['scheme'];
+		$s      = $this->settings;
+
+		$qs_suffix = '';
+		if ( ! empty( $parsed['query'] ) ) {
+			parse_str( $parsed['query'], $qs_params );
+			$ignored   = array_filter( array_map( 'trim', explode( ',', $s['cache_ignore_qs'] ?? '' ) ) );
+			$cached_qs = array_filter( array_map( 'trim', explode( ',', $s['cache_query_strings'] ?? '' ) ) );
+			$remaining = array_diff_key( $qs_params, array_flip( $ignored ) );
+			if ( ! empty( $remaining ) ) {
+				if ( empty( $cached_qs ) ) return false;
+				$to_cache = array_intersect_key( $remaining, array_flip( $cached_qs ) );
+				$unknown  = array_diff_key( $remaining, $to_cache );
+				if ( ! empty( $unknown ) ) return false;
+				if ( ! empty( $to_cache ) ) {
+					ksort( $to_cache );
+					$qs_suffix = '-qs_' . substr( md5( http_build_query( $to_cache ) ), 0, 8 );
+				}
+			}
+		}
+
+		$base = 'index';
+		if ( $is_ssl ) $base .= '-https';
+		if ( $is_mobile ) $base .= '-mobile';
+		$base .= $qs_suffix . '.html';
+
+		return is_readable( $dir . $base );
+	}
+
 	private function is_url_cached( $url ) {
 		// When vary cookies are active, preload can only warm the default (no-cookie)
 		// variant. Don't claim "fully cached" — always allow preload to run for the

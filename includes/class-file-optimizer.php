@@ -1393,11 +1393,32 @@ JS;
 
 		foreach ( $rows as $row ) {
 			$gf_url = $row->option_value;
+
+			// Track attempts — drop after 5 failures to prevent permanent queue clog.
+			$attempt_key = $row->option_name . '_attempts';
+			$url_attempts = (int) get_option( $attempt_key, 0 );
+
+			if ( $url_attempts >= 5 ) {
+				delete_option( $row->option_name );
+				delete_option( $attempt_key );
+				continue;
+			}
+
 			$ok = $this->fetch_google_font_css( $gf_url, $fonts_dir, $fonts_url );
-			// Only delete on success — failed URLs stay for next cron run.
 			if ( false !== $ok ) {
 				delete_option( $row->option_name );
+				delete_option( $attempt_key );
+			} else {
+				update_option( $attempt_key, $url_attempts + 1, false );
 			}
+		}
+
+		// Re-schedule if more pending URLs remain.
+		$still_pending = (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%' AND option_name NOT LIKE '%\_attempts'"
+		);
+		if ( $still_pending > 0 && ! wp_next_scheduled( 'prime_cache_refresh_google_fonts' ) ) {
+			wp_schedule_single_event( time() + 30, 'prime_cache_refresh_google_fonts' );
 		}
 	}
 
