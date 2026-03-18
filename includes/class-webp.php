@@ -430,21 +430,17 @@ class Prime_Cache_WebP {
 			return $html;
 		}
 
-		// Use a broader pattern to detect <img> tags and their surrounding context,
-		// so we can skip images already inside a <picture> element.
-		return preg_replace_callback( '#(?:<picture[^>]*>.*?)?<img\s[^>]+>(?:.*?</picture>)?#is', function( $m ) {
+		// Protect existing <picture> elements from being double-wrapped.
+		// Replace them with placeholders, process standalone <img> tags, then restore.
+		$placeholders = array();
+		$html = preg_replace_callback( '#<picture[^>]*>.*?</picture>#is', function( $m ) use ( &$placeholders ) {
+			$key = '<!--PC_PICTURE_' . count( $placeholders ) . '-->';
+			$placeholders[ $key ] = $m[0];
+			return $key;
+		}, $html );
+
+		$html = preg_replace_callback( '#<img\s[^>]+>#i', function( $m ) {
 			$tag = $m[0];
-
-			// Skip if this <img> is already inside a <picture> element.
-			if ( preg_match( '#<picture[\s>]#i', $tag ) ) {
-				return $tag;
-			}
-
-			// Extract just the <img> tag for processing.
-			if ( ! preg_match( '#(<img\s[^>]+>)#i', $tag, $img_m ) ) {
-				return $tag;
-			}
-			$tag = $img_m[1];
 
 			// Match src, supporting query strings (e.g. image.jpg?ver=1.2).
 			if ( ! preg_match( '#src=["\']([^"\'?]+\.(jpe?g|png))(\?[^"\']*)?["\']#i', $tag, $src_m ) ) {
@@ -487,6 +483,13 @@ class Prime_Cache_WebP {
 
 			return '<picture>' . $sources . $tag . '</picture>';
 		}, $html );
+
+		// Restore protected <picture> elements.
+		if ( ! empty( $placeholders ) ) {
+			$html = str_replace( array_keys( $placeholders ), array_values( $placeholders ), $html );
+		}
+
+		return $html;
 	}
 
 	private function rewrite_srcset( $srcset, $format ) {

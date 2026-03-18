@@ -89,6 +89,8 @@ class Prime_Cache_Admin_Settings {
 		$s['preload_sitemap_enabled'] = ! empty( $input['preload_sitemap_enabled'] );
 		$s['preload_sitemap']       = esc_url_raw( $input['preload_sitemap'] ?? '' );
 		$s['preload_interval']      = isset( $input['preload_interval'] ) ? max( 1, (int) $input['preload_interval'] ) : 2;
+		$s['preload_max_posts']     = isset( $input['preload_max_posts'] ) ? max( 50, min( 5000, (int) $input['preload_max_posts'] ) ) : 500;
+		$s['preload_max_terms']     = isset( $input['preload_max_terms'] ) ? max( 50, min( 2000, (int) $input['preload_max_terms'] ) ) : 200;
 		$s['preload_excluded_uri']  = sanitize_textarea_field( $input['preload_excluded_uri'] ?? '' );
 		$s['preload_links']         = ! empty( $input['preload_links'] );
 		$s['preload_fonts']         = ! empty( $input['preload_fonts'] );
@@ -1333,7 +1335,7 @@ class Prime_Cache_Admin_Settings {
 	private function tab_preload( $settings ) {
 		$vis = array(
 			'preload_enabled','preload_homepage','preload_public_posts','preload_public_tax',
-			'preload_sitemap_enabled','preload_sitemap','preload_interval','preload_excluded_uri',
+			'preload_sitemap_enabled','preload_sitemap','preload_interval','preload_max_posts','preload_max_terms','preload_excluded_uri',
 			'preload_links','speculation_rules','preload_fonts','lcp_optimization','lcp_excluded','preload_resources','prefetch_dns','preconnect',
 		);
 		?>
@@ -1358,8 +1360,20 @@ class Prime_Cache_Admin_Settings {
 				}
 			?></small></span></label>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[preload_homepage]" value="1" <?php checked( $settings['preload_homepage'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Preload Homepage', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Include the front page, posts page, and home URL in the preload queue.', 'prime-cache' ); ?></small></span></label>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[preload_public_posts]" value="1" <?php checked( $settings['preload_public_posts'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Preload Public Posts', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Preload all published posts, pages, and custom post types (up to 500, most recently modified first).', 'prime-cache' ); ?></small></span></label>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[preload_public_tax]" value="1" <?php checked( $settings['preload_public_tax'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Preload Taxonomies', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Preload category, tag, and custom taxonomy archive pages (up to 200 terms).', 'prime-cache' ); ?></small></span></label>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[preload_public_posts]" value="1" <?php checked( $settings['preload_public_posts'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Preload Public Posts', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Preload published posts, pages, and custom post types (most recently modified first).', 'prime-cache' ); ?></small></span></label>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[preload_public_tax]" value="1" <?php checked( $settings['preload_public_tax'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Preload Taxonomies', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Preload category, tag, and custom taxonomy archive pages.', 'prime-cache' ); ?></small></span></label>
+
+				<div class="pc-field" style="display:flex;gap:16px;flex-wrap:wrap">
+					<div>
+						<label class="pc-lbl"><?php esc_html_e( 'Max Posts', 'prime-cache' ); ?></label>
+						<input type="number" name="prime_cache_settings[preload_max_posts]" value="<?php echo esc_attr( $settings['preload_max_posts'] ); ?>" min="50" max="5000" class="pc-inp" style="width:100px">
+					</div>
+					<div>
+						<label class="pc-lbl"><?php esc_html_e( 'Max Terms', 'prime-cache' ); ?></label>
+						<input type="number" name="prime_cache_settings[preload_max_terms]" value="<?php echo esc_attr( $settings['preload_max_terms'] ); ?>" min="50" max="2000" class="pc-inp" style="width:100px">
+					</div>
+				</div>
+				<p class="pc-help"><?php esc_html_e( 'Maximum number of posts and taxonomy terms to include in each preload cycle. Higher values warm more pages but take longer to complete.', 'prime-cache' ); ?></p>
 
 				<div class="pc-field">
 					<label class="pc-lbl"><?php esc_html_e( 'Preloader Request Interval (seconds)', 'prime-cache' ); ?></label>

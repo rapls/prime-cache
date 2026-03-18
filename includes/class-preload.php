@@ -184,10 +184,11 @@ class Prime_Cache_Preload {
 		// Public posts.
 		if ( $s['preload_public_posts'] ) {
 			$post_types = get_post_types( array( 'public' => true ), 'names' );
+			$max_posts = isset( $s['preload_max_posts'] ) ? (int) $s['preload_max_posts'] : 500;
 			$posts = get_posts( array(
 				'post_type'      => $post_types,
 				'post_status'    => 'publish',
-				'posts_per_page' => 500,
+				'posts_per_page' => $max_posts,
 				'fields'         => 'ids',
 				'orderby'        => 'modified',
 				'order'          => 'DESC',
@@ -200,10 +201,11 @@ class Prime_Cache_Preload {
 		// Public taxonomies.
 		if ( $s['preload_public_tax'] ) {
 			$taxonomies = get_taxonomies( array( 'public' => true ), 'names' );
+			$max_terms = isset( $s['preload_max_terms'] ) ? (int) $s['preload_max_terms'] : 200;
 			$terms = get_terms( array(
 				'taxonomy'   => $taxonomies,
 				'hide_empty' => true,
-				'number'     => 200,
+				'number'     => $max_terms,
 			) );
 			if ( ! is_wp_error( $terms ) ) {
 				foreach ( $terms as $term ) {

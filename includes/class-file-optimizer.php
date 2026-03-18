@@ -56,6 +56,41 @@ class Prime_Cache_File_Optimizer {
 	}
 
 	/**
+	 * Get a normalized cache URI aligned with page cache query handling.
+	 *
+	 * - Strips cache_ignore_qs params (utm_*, fbclid, etc.)
+	 * - Keeps cache_query_strings params as part of the key
+	 * - Drops unknown params entirely
+	 *
+	 * @return string Normalized URI for use as cache key component.
+	 */
+	private function get_normalized_cache_uri() {
+		$uri  = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '/';
+		$path = strtok( $uri, '?' );
+
+		if ( empty( $_GET ) ) {
+			return $path;
+		}
+
+		$s          = $this->settings;
+		$ignored    = array_filter( array_map( 'trim', explode( ',', $s['cache_ignore_qs'] ?? '' ) ) );
+		$cached_qs  = array_filter( array_map( 'trim', explode( ',', $s['cache_query_strings'] ?? '' ) ) );
+		$remaining  = array_diff_key( $_GET, array_flip( $ignored ) );
+
+		if ( empty( $remaining ) || empty( $cached_qs ) ) {
+			return $path; // No cacheable query params — use path only.
+		}
+
+		$to_cache = array_intersect_key( $remaining, array_flip( $cached_qs ) );
+		if ( empty( $to_cache ) ) {
+			return $path;
+		}
+
+		ksort( $to_cache );
+		return $path . '?qs_' . substr( md5( http_build_query( $to_cache ) ), 0, 8 );
+	}
+
+	/**
 	 * Whether optimization should run on this request.
 	 */
 	private function should_optimize() {
@@ -487,9 +522,8 @@ class Prime_Cache_File_Optimizer {
 				continue;
 			}
 
-			// UCSS cache key: URL-specific to prevent CSS mismatch between pages
-			// with different HTML structure (blocks, CTAs, layouts) within the same type.
-			$ucss_uri = isset( $_SERVER['REQUEST_URI'] ) ? strtok( $_SERVER['REQUEST_URI'], '?' ) : '/';
+			// UCSS cache key: URL-specific, aligned with page cache query normalization.
+			$ucss_uri = $this->get_normalized_cache_uri();
 			$hash     = md5( 'ucss_' . $href . filemtime( $path ) . $ucss_uri );
 			$out     = $this->cache_dir . 'ucss/' . $hash . '.css';
 			$out_url = $this->cache_url . 'ucss/' . $hash . '.css';
@@ -624,9 +658,8 @@ class Prime_Cache_File_Optimizer {
 			return $html;
 		}
 
-		// Strip query string from URI for cache key — tracking params (utm_*, fbclid)
-		// should not cause separate critical CSS files for the same page.
-		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? strtok( $_SERVER['REQUEST_URI'], '?' ) : '/';
+		// Normalized URI aligned with page cache query handling.
+		$request_uri = $this->get_normalized_cache_uri();
 
 		// Collect CSS from all linked stylesheets (needed for both cache key and generation).
 		$all_css       = '';
@@ -647,9 +680,20 @@ class Prime_Cache_File_Optimizer {
 			}
 		}
 
-		// Include CSS filemtimes in cache key so theme/plugin CSS updates invalidate critical CSS.
-		$hash      = md5( 'ccss_' . $request_uri . $css_filetimes );
-		$ccss_file = $this->cache_dir . 'ccss/' . $hash . '.css';
+		// Also collect inline <style> blocks BEFORE cache check so their hash
+		// is included in the cache key (inline CSS changes must invalidate cache).
+		$inline_css = '';
+		if ( preg_match_all( '#<style[^>]*>(.*?)</style>#si', $html, $styles ) ) {
+			foreach ( $styles[1] as $inline ) {
+				$inline_css .= $inline . "\n";
+			}
+		}
+		$all_css .= $inline_css;
+
+		// Cache key includes: URI, external CSS filemtimes, and inline CSS hash.
+		$inline_hash = $inline_css ? md5( $inline_css ) : '';
+		$hash        = md5( 'ccss_' . $request_uri . $css_filetimes . $inline_hash );
+		$ccss_file   = $this->cache_dir . 'ccss/' . $hash . '.css';
 
 		// Check cache.
 		if ( file_exists( $ccss_file ) ) {
@@ -658,13 +702,6 @@ class Prime_Cache_File_Optimizer {
 				$this->settings['critical_css'] = $critical;
 			}
 			return $html;
-		}
-
-		// Also collect inline <style> blocks.
-		if ( preg_match_all( '#<style[^>]*>(.*?)</style>#si', $html, $styles ) ) {
-			foreach ( $styles[1] as $inline ) {
-				$all_css .= $inline . "\n";
-			}
 		}
 
 		if ( empty( $all_css ) ) {
