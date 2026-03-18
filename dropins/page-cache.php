@@ -316,8 +316,23 @@ if ( is_readable( $_pc_cache_file ) ) {
 		}
 	}
 
+	// Restore meta headers FIRST — needed for both 304 and 200 responses.
+	if ( $_pc_meta && ! empty( $_pc_meta['headers'] ) ) {
+		foreach ( $_pc_meta['headers'] as $_pc_header ) {
+			$_pc_replace = true;
+			if ( 0 === strncasecmp( $_pc_header, 'Link:', 5 ) || 0 === strncasecmp( $_pc_header, 'X-', 2 ) ) {
+				$_pc_replace = false;
+			}
+			header( $_pc_header, $_pc_replace );
+		}
+	}
+	if ( $_pc_meta && 200 !== $_pc_original_status ) {
+		http_response_code( $_pc_original_status );
+	}
+
+	header( 'Last-Modified: ' . gmdate( 'D, d M Y H:i:s', $_pc_modified_time ) . ' GMT' );
+
 	// HTTP 304 Not Modified — only for 200 responses.
-	// Non-200 (e.g. cached 404) should always return their full body + status.
 	if ( 200 === $_pc_original_status && ! empty( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
 		$_pc_since = strtotime( $_SERVER['HTTP_IF_MODIFIED_SINCE'] );
 		if ( $_pc_since && $_pc_since >= $_pc_modified_time ) {
@@ -328,24 +343,6 @@ if ( is_readable( $_pc_cache_file ) ) {
 		}
 	}
 
-	// Restore meta headers and status code.
-	if ( $_pc_meta ) {
-		if ( ! empty( $_pc_meta['headers'] ) ) {
-			foreach ( $_pc_meta['headers'] as $_pc_header ) {
-				// Link and X- headers can appear multiple times — use replace=false.
-				$_pc_replace = true;
-				if ( 0 === strncasecmp( $_pc_header, 'Link:', 5 ) || 0 === strncasecmp( $_pc_header, 'X-', 2 ) ) {
-					$_pc_replace = false;
-				}
-				header( $_pc_header, $_pc_replace );
-			}
-		}
-		if ( 200 !== $_pc_original_status ) {
-			http_response_code( $_pc_original_status );
-		}
-	}
-
-	header( 'Last-Modified: ' . gmdate( 'D, d M Y H:i:s', $_pc_modified_time ) . ' GMT' );
 	header( 'X-Prime-Cache: HIT' );
 
 	// Tell upstream caches (CDN, reverse proxy) that content varies by cookie
@@ -363,6 +360,7 @@ if ( is_readable( $_pc_cache_file ) ) {
 	if ( $_pc_accept_gzip && is_readable( $_pc_gz_file ) ) {
 		header( 'Vary: Accept-Encoding', false );
 		header( 'Content-Encoding: gzip' );
+		header( 'Content-Length: ' . filesize( $_pc_gz_file ) );
 		if ( ! $_pc_is_head ) {
 			readfile( $_pc_gz_file );
 		}

@@ -1221,15 +1221,12 @@ JS;
 			return $css_url;
 		}
 
-		// Schedule async download. Use a short lock to avoid repeated transient
-		// writes under concurrent traffic before cron runs.
-		$lock_key = 'prime_cache_gf_lock_' . md5( $gf_url );
-		if ( ! get_transient( $lock_key ) ) {
-			set_transient( $lock_key, 1, 300 ); // 5-minute dedup window.
-			$pending = get_transient( 'prime_cache_gf_pending' );
-			$pending = is_array( $pending ) ? $pending : array();
-			$pending[ md5( $gf_url ) ] = $gf_url;
-			set_transient( 'prime_cache_gf_pending', $pending, HOUR_IN_SECONDS );
+		// Schedule async download. Use individual option keys per URL hash to
+		// avoid read-modify-write race on a shared pending array.
+		$url_hash   = md5( $gf_url );
+		$option_key = 'prime_cache_gf_' . $url_hash;
+		if ( false === get_option( $option_key ) ) {
+			update_option( $option_key, $gf_url, false );
 			if ( ! wp_next_scheduled( 'prime_cache_refresh_google_fonts' ) ) {
 				wp_schedule_single_event( time(), 'prime_cache_refresh_google_fonts' );
 			}
@@ -1381,18 +1378,26 @@ JS;
 	 * Cron handler: download Google Fonts CSS and font files asynchronously.
 	 */
 	public function cron_refresh_google_fonts() {
-		$pending = get_transient( 'prime_cache_gf_pending' );
-		if ( ! is_array( $pending ) || empty( $pending ) ) {
+		global $wpdb;
+		// Find all pending Google Font URLs stored as individual options.
+		$rows = $wpdb->get_results(
+			"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%' LIMIT 20"
+		);
+		if ( empty( $rows ) ) {
 			return;
 		}
-		delete_transient( 'prime_cache_gf_pending' );
 
 		$fonts_dir = $this->cache_dir . 'fonts/';
 		$fonts_url = $this->cache_url . 'fonts/';
 		wp_mkdir_p( $fonts_dir );
 
-		foreach ( $pending as $url_hash => $gf_url ) {
-			$this->fetch_google_font_css( $gf_url, $fonts_dir, $fonts_url );
+		foreach ( $rows as $row ) {
+			$gf_url = $row->option_value;
+			$ok = $this->fetch_google_font_css( $gf_url, $fonts_dir, $fonts_url );
+			// Only delete on success — failed URLs stay for next cron run.
+			if ( false !== $ok ) {
+				delete_option( $row->option_name );
+			}
 		}
 	}
 
@@ -1406,12 +1411,12 @@ JS;
 		) );
 
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return;
+			return false;
 		}
 
 		$css = wp_remote_retrieve_body( $response );
 		if ( empty( $css ) ) {
-			return;
+			return false;
 		}
 
 		$css = preg_replace_callback( '#url\(\s*(?P<url>https?://fonts\.gstatic\.com/[^\s\)]+)\s*\)#i', function( $m ) use ( $fonts_dir, $fonts_url ) {

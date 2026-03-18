@@ -108,6 +108,7 @@ class Prime_Cache_Preload {
 		}
 
 		// Track per-URL attempt counts to avoid infinite retry on uncacheable URLs.
+		// Uses 'url' for desktop and 'url:m' for mobile to track separately.
 		$attempts = get_option( 'prime_cache_preload_attempts', array() );
 		$max_attempts = 3;
 		$count = 0;
@@ -125,11 +126,13 @@ class Prime_Cache_Preload {
 			}
 
 			// Drop URLs that failed too many times (uncacheable pages).
-			$url_attempts = isset( $attempts[ $url ] ) ? (int) $attempts[ $url ] : 0;
-			if ( $url_attempts >= $max_attempts ) {
-				unset( $attempts[ $url ] );
+			$desktop_attempts = isset( $attempts[ $url ] ) ? (int) $attempts[ $url ] : 0;
+			$mobile_key       = $url . ':m';
+			$mobile_attempts  = isset( $attempts[ $mobile_key ] ) ? (int) $attempts[ $mobile_key ] : 0;
+			if ( $desktop_attempts >= $max_attempts && ( empty( $this->settings['cache_mobile_separate'] ) || $mobile_attempts >= $max_attempts ) ) {
+				unset( $attempts[ $url ], $attempts[ $mobile_key ] );
 				$idx++;
-				continue; // Skip permanently — won't retry.
+				continue;
 			}
 
 			if ( ! $this->server_load_ok() ) {
@@ -153,7 +156,10 @@ class Prime_Cache_Preload {
 				) );
 			}
 
-			$attempts[ $url ] = $url_attempts + 1;
+			$attempts[ $url ] = $desktop_attempts + 1;
+			if ( ! empty( $this->settings['cache_mobile_separate'] ) ) {
+				$attempts[ $mobile_key ] = $mobile_attempts + 1;
+			}
 			$count++;
 			$idx++;
 		}
