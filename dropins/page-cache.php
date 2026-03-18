@@ -63,12 +63,24 @@ if ( empty( $prime_cache_config['cache_enabled'] ) ) {
  *
  * @param string $type 'hit' or 'miss'.
  */
+$_pc_deferred_stat = null;
+
 function _prime_cache_record_stat( $type ) {
-	// 1/10 sampling to reduce I/O overhead on high-traffic sites.
-	// Stats are approximate; multiply displayed values by sample rate.
+	global $_pc_deferred_stat;
+	// 1/10 sampling to reduce I/O. Stats are approximate.
 	if ( mt_rand( 1, 10 ) !== 1 ) {
 		return;
 	}
+	// Defer write to shutdown — keeps it off the critical TTFB path.
+	if ( null === $_pc_deferred_stat ) {
+		register_shutdown_function( '_prime_cache_flush_stat' );
+	}
+	$_pc_deferred_stat = $type;
+}
+
+function _prime_cache_flush_stat() {
+	global $_pc_deferred_stat;
+	if ( ! $_pc_deferred_stat ) return;
 
 	$stats_file = PRIME_CACHE_CACHE_DIR . 'stats.json';
 	$stats      = array( 'hit' => 0, 'miss' => 0, 'since' => time() );
@@ -83,8 +95,7 @@ function _prime_cache_record_stat( $type ) {
 				$stats = $current_data;
 			}
 		}
-		// Increment by sample rate (10) to approximate real count.
-		$stats[ $type ] = isset( $stats[ $type ] ) ? $stats[ $type ] + 10 : 10;
+		$stats[ $_pc_deferred_stat ] = isset( $stats[ $_pc_deferred_stat ] ) ? $stats[ $_pc_deferred_stat ] + 10 : 10;
 		ftruncate( $fp, 0 );
 		fseek( $fp, 0 );
 		fwrite( $fp, json_encode( $stats ) );

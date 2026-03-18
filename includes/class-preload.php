@@ -149,10 +149,12 @@ class Prime_Cache_Preload {
 				continue;
 			}
 
-			// Exponential backoff: 5s, 30s, 300s per attempt.
+			// Exponential backoff with jitter to prevent synchronized retry spikes.
 			$backoffs = array( 5, 30, 300 );
-			$d_cooldown = isset( $backoffs[ $d_info['count'] ] ) ? $backoffs[ $d_info['count'] ] : 300;
-			$m_cooldown = isset( $backoffs[ $m_info['count'] ] ) ? $backoffs[ $m_info['count'] ] : 300;
+			$d_base = isset( $backoffs[ $d_info['count'] ] ) ? $backoffs[ $d_info['count'] ] : 300;
+			$m_base = isset( $backoffs[ $m_info['count'] ] ) ? $backoffs[ $m_info['count'] ] : 300;
+			$d_cooldown = $d_base + mt_rand( 0, (int) ( $d_base * 0.3 ) );
+			$m_cooldown = $m_base + mt_rand( 0, (int) ( $m_base * 0.3 ) );
 			$d_ready = ( $now - $d_info['time'] ) >= $d_cooldown;
 			$m_ready = ( $now - $m_info['time'] ) >= $m_cooldown;
 

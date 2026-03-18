@@ -1394,7 +1394,7 @@ JS;
 			 LEFT JOIN {$wpdb->options} a ON a.option_name = CONCAT(o.option_name, '_attempts')
 			 WHERE o.option_name LIKE 'prime\_cache\_gf\_%'
 			   AND o.option_name NOT LIKE '%\_attempts'
-			 ORDER BY attempts ASC, o.option_id ASC
+			 ORDER BY attempts ASC, RAND()
 			 LIMIT 20"
 		);
 		if ( empty( $rows ) ) {
