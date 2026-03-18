@@ -98,26 +98,22 @@ class Prime_Cache_Preload {
 			update_option( 'prime_cache_preload_queue', $queue, false );
 		}
 
-		$count     = 0;
-		$remaining = array();
-		$started   = false;
+		$count = 0;
+		$total = count( $queue );
+		$idx   = 0;
 
-		foreach ( $queue as $url ) {
-			if ( $count >= $limit ) {
-				$remaining[] = $url;
-				continue; // Collect remaining URLs for next batch.
-			}
+		while ( $idx < $total && $count < $limit ) {
+			$url = $queue[ $idx ];
 
-			// Skip already cached URLs.
+			// Skip already cached URLs — advance past them.
 			if ( $this->is_url_cached( $url ) ) {
+				$idx++;
 				continue;
 			}
 
-			// Check server load.
+			// Check server load before sending request.
 			if ( ! $this->server_load_ok() ) {
-				// Put this URL and all remaining back in the queue.
-				$remaining = array_merge( array( $url ), $remaining );
-				break;
+				break; // Keep current $idx and everything after in queue.
 			}
 
 			// Non-blocking request to warm desktop cache.
@@ -140,8 +136,11 @@ class Prime_Cache_Preload {
 			}
 
 			$count++;
-			$started = true;
+			$idx++;
 		}
+
+		// Keep all URLs from current position onward for the next batch.
+		$remaining = ( $idx < $total ) ? array_slice( $queue, $idx ) : array();
 
 		if ( ! empty( $remaining ) ) {
 			update_option( 'prime_cache_preload_queue', array_values( $remaining ), false );

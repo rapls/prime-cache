@@ -262,6 +262,12 @@ class Prime_Cache_Admin_Settings {
 			set_transient( 'prime_cache_env_warnings', $warnings, 60 );
 		}
 
+		// Pre-fetch local analytics on save so files are ready immediately.
+		if ( ! empty( $s['local_analytics'] ) && class_exists( 'Prime_Cache_File_Optimizer' ) ) {
+			$fo = new Prime_Cache_File_Optimizer();
+			$fo->cron_refresh_local_analytics();
+		}
+
 		return $s;
 	}
 

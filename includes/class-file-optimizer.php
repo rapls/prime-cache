@@ -366,7 +366,7 @@ class Prime_Cache_File_Optimizer {
 		$css = $this->minify_css_content( $css );
 
 		wp_mkdir_p( dirname( $out ) );
-		file_put_contents( $out, $css ); // phpcs:ignore
+		self::atomic_write( $out, $css );
 
 		return $out_url;
 	}
@@ -422,7 +422,7 @@ class Prime_Cache_File_Optimizer {
 		$out_url = $this->cache_url . 'css/' . $hash . '.css';
 
 		wp_mkdir_p( dirname( $out ) );
-		file_put_contents( $out, $contents ); // phpcs:ignore
+		self::atomic_write( $out, $contents );
 
 		$combined_tag = '<link rel="stylesheet" href="' . esc_url( $out_url ) . '">';
 		$pos = strpos( $html, $first_tag ); if ( false !== $pos ) { $html = substr_replace( $html, $combined_tag, $pos, strlen( $first_tag ) ); }
@@ -508,7 +508,7 @@ class Prime_Cache_File_Optimizer {
 				$cleaned = $this->filter_used_rules( $css, $body_html, $safelist );
 
 				wp_mkdir_p( dirname( $out ) );
-				file_put_contents( $out, $cleaned ); // phpcs:ignore
+				self::atomic_write( $out, $cleaned );
 			}
 
 			$html = str_replace( $href, $out_url, $html );
@@ -715,7 +715,7 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		wp_mkdir_p( dirname( $ccss_file ) );
-		file_put_contents( $ccss_file, $critical ); // phpcs:ignore
+		self::atomic_write( $ccss_file, $critical );
 
 		$this->settings['critical_css'] = $critical;
 
@@ -893,7 +893,7 @@ class Prime_Cache_File_Optimizer {
 		$out_url = $this->cache_url . 'js/' . $hash . '.js';
 
 		wp_mkdir_p( dirname( $out ) );
-		file_put_contents( $out, $contents ); // phpcs:ignore
+		self::atomic_write( $out, $contents );
 
 		$combined_tag = '<script src="' . esc_url( $out_url ) . '"></script>';
 		$pos = strpos( $html, $first_tag ); if ( false !== $pos ) { $html = substr_replace( $html, $combined_tag, $pos, strlen( $first_tag ) ); }
@@ -927,7 +927,7 @@ class Prime_Cache_File_Optimizer {
 
 		$js = $this->minify_js_content( $js );
 		wp_mkdir_p( dirname( $out ) );
-		file_put_contents( $out, $js ); // phpcs:ignore
+		self::atomic_write( $out, $js );
 
 		return $out_url;
 	}
@@ -1107,7 +1107,7 @@ JS;
 			$css = preg_replace( '#(\{[^}]*)(})#', '$1font-display:swap;$2', $css );
 		}
 
-		file_put_contents( $css_file, $css ); // phpcs:ignore
+		self::atomic_write( $css_file, $css );
 
 		return $css_url;
 	}
@@ -1142,7 +1142,7 @@ JS;
 			return false;
 		}
 
-		file_put_contents( $path, $body ); // phpcs:ignore
+		self::atomic_write( $path, $body );
 
 		return $url;
 	}
@@ -1200,11 +1200,15 @@ JS;
 	 * Cron handler: refresh local analytics files asynchronously.
 	 */
 	public function cron_refresh_local_analytics() {
-		$cache_dir = $this->cache_dir;
+		// Must match the subdirectory used in localize_analytics().
+		$cache_dir = $this->cache_dir . 'analytics/';
 		$scripts = array(
 			'gtag'      => array( 'https://www.googletagmanager.com/gtag/js', 'gtag.js' ),
 			'analytics' => array( 'https://www.google-analytics.com/analytics.js', 'analytics.js' ),
+			'gtm'       => array( 'https://www.googletagmanager.com/gtm.js', 'gtm.js' ),
 		);
+
+		wp_mkdir_p( $cache_dir );
 
 		foreach ( $scripts as $info ) {
 			$local_path = $cache_dir . $info[1];
@@ -1215,11 +1219,31 @@ JS;
 			if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
 				$body = wp_remote_retrieve_body( $response );
 				if ( ! empty( $body ) ) {
-					wp_mkdir_p( $cache_dir );
-					file_put_contents( $local_path, $body ); // phpcs:ignore
+					// Atomic write.
+					$tmp = $local_path . '.tmp.' . getmypid();
+					if ( false !== file_put_contents( $tmp, $body ) ) { // phpcs:ignore
+						if ( ! rename( $tmp, $local_path ) ) { // phpcs:ignore
+							@unlink( $tmp );
+						}
+					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * Atomic file write: temp file + rename to prevent serving partial files.
+	 */
+	private static function atomic_write( $path, $content ) {
+		$tmp = $path . '.tmp.' . getmypid();
+		if ( false === file_put_contents( $tmp, $content ) ) { // phpcs:ignore
+			return false;
+		}
+		if ( ! rename( $tmp, $path ) ) { // phpcs:ignore
+			@unlink( $tmp );
+			return false;
+		}
+		return true;
 	}
 
 	// ── Query String Removal ─────────────────────────────────
