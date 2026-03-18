@@ -332,18 +332,23 @@ if ( is_readable( $_pc_cache_file ) ) {
 
 	header( 'Last-Modified: ' . gmdate( 'D, d M Y H:i:s', $_pc_modified_time ) . ' GMT' );
 
-	// Vary headers BEFORE 304 — must be consistent with 200 responses.
+	// All Vary headers BEFORE 304 — must be consistent with 200 responses.
 	if ( ! empty( $prime_cache_config['cache_vary_cookies'] ) ) {
 		header( 'Vary: Cookie', false );
 	}
+	if ( ! empty( $prime_cache_config['gzip_compression'] ) ) {
+		header( 'Vary: Accept-Encoding', false );
+	}
 
 	// HTTP 304 Not Modified — only for 200 responses.
+	// All cache-semantics headers (Vary, Last-Modified, meta) are already set above.
 	if ( 200 === $_pc_original_status && ! empty( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
 		$_pc_since = strtotime( $_SERVER['HTTP_IF_MODIFIED_SINCE'] );
 		if ( $_pc_since && $_pc_since >= $_pc_modified_time ) {
 			header( $_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified', true, 304 );
 			header( 'Cache-Control: no-cache, must-revalidate' );
 			header( 'X-Prime-Cache: HIT-304' );
+			_prime_cache_record_stat( 'hit' );
 			exit;
 		}
 	}
@@ -357,7 +362,6 @@ if ( is_readable( $_pc_cache_file ) ) {
 	$_pc_gz_file     = $_pc_cache_dir . _prime_cache_get_filename( $_pc_is_ssl, $_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], true, $_pc_vary_suffix, $_pc_qs_suffix );
 
 	if ( $_pc_accept_gzip && is_readable( $_pc_gz_file ) ) {
-		header( 'Vary: Accept-Encoding', false );
 		header( 'Content-Encoding: gzip' );
 		header( 'Content-Length: ' . filesize( $_pc_gz_file ) );
 		if ( ! $_pc_is_head ) {

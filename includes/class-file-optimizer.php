@@ -1380,8 +1380,16 @@ JS;
 	public function cron_refresh_google_fonts() {
 		global $wpdb;
 		// Find pending Google Font URL options (exclude attempt counters).
+		// LEFT JOIN attempt counters to prioritize URLs with fewer failures.
 		$rows = $wpdb->get_results(
-			"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%' AND option_name NOT LIKE '%\_attempts' ORDER BY option_id ASC LIMIT 20"
+			"SELECT o.option_name, o.option_value,
+			        COALESCE(a.option_value, 0) AS attempts
+			 FROM {$wpdb->options} o
+			 LEFT JOIN {$wpdb->options} a ON a.option_name = CONCAT(o.option_name, '_attempts')
+			 WHERE o.option_name LIKE 'prime\_cache\_gf\_%'
+			   AND o.option_name NOT LIKE '%\_attempts'
+			 ORDER BY attempts ASC, o.option_id ASC
+			 LIMIT 20"
 		);
 		if ( empty( $rows ) ) {
 			return;
