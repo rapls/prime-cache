@@ -475,7 +475,7 @@ class Prime_Cache_WebP {
 					if ( $avif_srcset ) {
 						$sources .= '<source srcset="' . esc_attr( $avif_srcset ) . '"' . $sizes_attr . ' type="image/avif">';
 					} else {
-						$sources .= '<source srcset="' . esc_url( $src . '.avif' . $src_qs ) . '" type="image/avif">';
+						$sources .= '<source srcset="' . esc_url( $src . '.avif' . $src_qs ) . '"' . $sizes_attr . ' type="image/avif">';
 					}
 				} else {
 					$sources .= '<source srcset="' . esc_url( $src . '.avif' . $src_qs ) . '" type="image/avif">';
@@ -489,7 +489,7 @@ class Prime_Cache_WebP {
 					if ( $webp_srcset ) {
 						$sources .= '<source srcset="' . esc_attr( $webp_srcset ) . '"' . $sizes_attr . ' type="image/webp">';
 					} else {
-						$sources .= '<source srcset="' . esc_url( $src . '.webp' . $src_qs ) . '" type="image/webp">';
+						$sources .= '<source srcset="' . esc_url( $src . '.webp' . $src_qs ) . '"' . $sizes_attr . ' type="image/webp">';
 					}
 				} else {
 					$sources .= '<source srcset="' . esc_url( $src . '.webp' . $src_qs ) . '" type="image/webp">';

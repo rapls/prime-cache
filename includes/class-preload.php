@@ -811,16 +811,25 @@ class Prime_Cache_Preload {
 		$type_attr   = '';
 
 		// Check if LCP image is inside a <picture> element.
-		// Search backward from LCP position for the nearest <picture> opening tag.
+		// Find the complete <picture>...</picture> block containing this <img>.
 		$picture_block = '';
+		$best_source   = null;
+		$best_type     = '';
 		if ( false !== $lcp_pos ) {
 			$search_start = max( 0, $lcp_pos - 3000 );
 			$prefix       = substr( $html, $search_start, $lcp_pos - $search_start );
-			$pic_open     = strrpos( $prefix, '<picture' );
-			if ( false !== $pic_open ) {
-				$between = substr( $prefix, $pic_open );
+			$pic_open_rel = strrpos( $prefix, '<picture' );
+			if ( false !== $pic_open_rel ) {
+				$between = substr( $prefix, $pic_open_rel );
 				if ( false === stripos( $between, '</picture>' ) ) {
-					$picture_block = $between;
+					// Find </picture> after the <img> to get the complete block.
+					$pic_close = stripos( $html, '</picture>', $lcp_pos );
+					if ( false !== $pic_close ) {
+						$abs_open      = $search_start + $pic_open_rel;
+						$picture_block = substr( $html, $abs_open, $pic_close + 10 - $abs_open );
+					} else {
+						$picture_block = $between;
+					}
 				}
 			}
 		}
