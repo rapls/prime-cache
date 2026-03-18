@@ -66,6 +66,7 @@ class Prime_Cache_Preload {
 		// Clear existing schedule, queue, and stale lock.
 		wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
 		delete_option( 'prime_cache_preload_queue' );
+		delete_option( 'prime_cache_preload_attempts' );
 		delete_transient( 'prime_cache_preload_lock' );
 		wp_schedule_single_event( time() + 5, 'prime_cache_preload_batch' );
 	}
@@ -106,25 +107,35 @@ class Prime_Cache_Preload {
 			update_option( 'prime_cache_preload_queue', $queue, false );
 		}
 
-		$count     = 0;
-		$total     = count( $queue );
-		$idx       = 0;
-		$attempted = array(); // URLs we tried this batch — verify next batch via is_url_cached().
+		// Track per-URL attempt counts to avoid infinite retry on uncacheable URLs.
+		$attempts = get_option( 'prime_cache_preload_attempts', array() );
+		$max_attempts = 3;
+		$count = 0;
+		$total = count( $queue );
+		$idx   = 0;
 
 		while ( $idx < $total && $count < $limit ) {
 			$url = $queue[ $idx ];
 
-			// Skip already cached URLs — advance past them permanently.
+			// Skip already cached URLs.
 			if ( $this->is_url_cached( $url ) ) {
+				unset( $attempts[ $url ] );
 				$idx++;
 				continue;
+			}
+
+			// Drop URLs that failed too many times (uncacheable pages).
+			$url_attempts = isset( $attempts[ $url ] ) ? (int) $attempts[ $url ] : 0;
+			if ( $url_attempts >= $max_attempts ) {
+				unset( $attempts[ $url ] );
+				$idx++;
+				continue; // Skip permanently — won't retry.
 			}
 
 			if ( ! $this->server_load_ok() ) {
 				break;
 			}
 
-			// Non-blocking request to warm desktop cache.
 			wp_remote_get( $url, array(
 				'timeout'   => 0.5,
 				'blocking'  => false,
@@ -142,17 +153,13 @@ class Prime_Cache_Preload {
 				) );
 			}
 
-			$attempted[] = $url;
+			$attempts[ $url ] = $url_attempts + 1;
 			$count++;
 			$idx++;
 		}
 
-		// Keep attempted URLs in queue — they'll be confirmed via is_url_cached()
-		// in the next batch. Only permanently remove URLs that are confirmed cached.
 		$remaining = ( $idx < $total ) ? array_slice( $queue, $idx ) : array();
-		// Re-prepend attempted URLs that aren't yet confirmed cached.
-		// They'll be skipped by is_url_cached() next batch if they succeeded.
-		$remaining = array_merge( $attempted, $remaining );
+		update_option( 'prime_cache_preload_attempts', $attempts, false );
 
 		if ( ! empty( $remaining ) ) {
 			update_option( 'prime_cache_preload_queue', array_values( $remaining ), false );
@@ -161,6 +168,7 @@ class Prime_Cache_Preload {
 		} else {
 			// Queue exhausted — cleanup.
 			delete_option( 'prime_cache_preload_queue' );
+			delete_option( 'prime_cache_preload_attempts' );
 		}
 
 		delete_transient( 'prime_cache_preload_lock' );

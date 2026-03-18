@@ -106,6 +106,8 @@ if ( is_dir( $fo_dir ) ) {
 // Remove stats, preload queue, and image optimization metadata.
 delete_option( 'prime_cache_stats' );
 delete_option( 'prime_cache_preload_queue' );
+delete_option( 'prime_cache_preload_attempts' );
+delete_option( 'prime_cache_flush_rewrite' );
 delete_option( 'prime_cache_img_stats' );
 global $wpdb;
 $wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_prime_cache_img_opt' ) );

@@ -337,19 +337,17 @@ class WP_Object_Cache {
 		$version_key = $this->key_prefix . 'prime_cache_gv:' . $group;
 		$new_version = $this->mc->increment( $version_key );
 		if ( false === $new_version ) {
-			// Key doesn't exist yet — create with add() then increment.
 			$this->mc->add( $version_key, 0 );
 			$new_version = $this->mc->increment( $version_key );
 			if ( false === $new_version ) {
-				$new_version = 1;
-				$this->mc->set( $version_key, $new_version );
+				return false; // Memcached connection issue.
 			}
 		}
 		$this->group_versions[ $group ] = $new_version;
 
 		// Clear local in-memory cache for this group.
 		foreach ( array_keys( $this->cache ) as $cached_key ) {
-			if ( preg_match( '#(?:^|:)' . preg_quote( $group, '#' ) . ':#', $cached_key ) ) {
+			if ( false !== strpos( $cached_key, ':' . $group . ':' ) ) {
 				unset( $this->cache[ $cached_key ] );
 			}
 		}

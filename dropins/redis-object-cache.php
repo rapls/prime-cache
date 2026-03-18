@@ -440,7 +440,7 @@ class WP_Object_Cache {
 
 		// Clear local runtime cache for this group.
 		foreach ( array_keys( $this->cache ) as $cached_key ) {
-			if ( preg_match( '#(?:^|:)' . preg_quote( $group, '#' ) . ':#', $cached_key ) ) {
+			if ( false !== strpos( $cached_key, ':' . $group . ':' ) ) {
 				unset( $this->cache[ $cached_key ] );
 			}
 		}

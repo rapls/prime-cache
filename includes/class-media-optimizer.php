@@ -22,6 +22,11 @@ class Prime_Cache_Media_Optimizer {
 				ob_start( array( $this, 'process' ) );
 			}, 4 );
 		}
+
+		// Enqueue YouTube click handler upfront (not in buffer callback).
+		if ( $this->settings['youtube_thumbnail'] ) {
+			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_yt_script' ) );
+		}
 	}
 
 	public function process( $html ) {
@@ -62,11 +67,6 @@ class Prime_Cache_Media_Optimizer {
 				. '<svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>'
 				. '</div></div>';
 		}, $html );
-
-		// Enqueue external JS for YouTube click handling (CSP-compatible).
-		if ( false !== strpos( $html, 'pc-yt-wrap' ) ) {
-			add_action( 'wp_footer', array( $this, 'enqueue_yt_script' ), 99 );
-		}
 
 		return $html;
 	}

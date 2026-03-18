@@ -360,20 +360,19 @@ if ( is_readable( $_pc_cache_file ) ) {
 	$_pc_accept_gzip = isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && strpos( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) !== false;
 	$_pc_gz_file     = $_pc_cache_dir . _prime_cache_get_filename( $_pc_is_ssl, $_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], true, $_pc_vary_suffix, $_pc_qs_suffix );
 
-	// HEAD requests: return headers only (no body).
-	if ( $_pc_is_head ) {
-		header( 'Content-Length: ' . filesize( $_pc_cache_file ) );
-		exit;
-	}
-
 	if ( $_pc_accept_gzip && is_readable( $_pc_gz_file ) ) {
 		header( 'Vary: Accept-Encoding', false );
 		header( 'Content-Encoding: gzip' );
-		readfile( $_pc_gz_file );
+		if ( ! $_pc_is_head ) {
+			readfile( $_pc_gz_file );
+		}
 		exit;
 	}
 
-	readfile( $_pc_cache_file );
+	header( 'Content-Length: ' . filesize( $_pc_cache_file ) );
+	if ( ! $_pc_is_head ) {
+		readfile( $_pc_cache_file );
+	}
 	exit;
 
 	} // end lifespan check
@@ -546,9 +545,9 @@ ob_start( function ( $buffer ) {
 			}
 		}
 
-		// If status is non-200 (e.g. 404) and meta failed, roll back the HTML file
-		// to prevent serving error-page content with a 200 status on next HIT.
-		if ( ! $meta_ok && 200 !== $_pc_current_status ) {
+		// If meta failed, roll back the HTML file. Without meta, security headers
+		// (CSP, CORS, etc.) would be missing on HIT, and non-200 status would be lost.
+		if ( ! $meta_ok ) {
 			@unlink( $filepath );
 			// Also remove gzip variant if it was written.
 			if ( isset( $gz_filepath ) ) {

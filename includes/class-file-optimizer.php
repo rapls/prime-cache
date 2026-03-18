@@ -1221,12 +1221,14 @@ JS;
 			return $css_url;
 		}
 
-		// Schedule async download instead of blocking page generation.
-		$pending = get_transient( 'prime_cache_gf_pending' );
-		$pending = is_array( $pending ) ? $pending : array();
-		$url_hash = md5( $gf_url );
-		if ( ! isset( $pending[ $url_hash ] ) ) {
-			$pending[ $url_hash ] = $gf_url;
+		// Schedule async download. Use a short lock to avoid repeated transient
+		// writes under concurrent traffic before cron runs.
+		$lock_key = 'prime_cache_gf_lock_' . md5( $gf_url );
+		if ( ! get_transient( $lock_key ) ) {
+			set_transient( $lock_key, 1, 300 ); // 5-minute dedup window.
+			$pending = get_transient( 'prime_cache_gf_pending' );
+			$pending = is_array( $pending ) ? $pending : array();
+			$pending[ md5( $gf_url ) ] = $gf_url;
 			set_transient( 'prime_cache_gf_pending', $pending, HOUR_IN_SECONDS );
 			if ( ! wp_next_scheduled( 'prime_cache_refresh_google_fonts' ) ) {
 				wp_schedule_single_event( time(), 'prime_cache_refresh_google_fonts' );
