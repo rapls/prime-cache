@@ -1232,7 +1232,7 @@ JS;
 		$url_hash   = md5( $gf_url );
 		$option_key = 'prime_cache_gf_' . $url_hash;
 		if ( false === get_option( $option_key ) ) {
-			update_option( $option_key, $gf_url, false );
+			update_option( $option_key, wp_json_encode( array( 'url' => $gf_url, 'created' => time() ) ), false );
 			if ( ! wp_next_scheduled( 'prime_cache_refresh_google_fonts' ) ) {
 				wp_schedule_single_event( time(), 'prime_cache_refresh_google_fonts' );
 			}
@@ -1394,42 +1394,65 @@ JS;
 			 LEFT JOIN {$wpdb->options} a ON a.option_name = CONCAT(o.option_name, '_attempts')
 			 WHERE o.option_name LIKE 'prime\_cache\_gf\_%'
 			   AND o.option_name NOT LIKE '%\_attempts'
-			 ORDER BY attempts ASC, RAND()
+			   AND o.option_name NOT LIKE '%\_time'
+			 ORDER BY attempts ASC, o.option_id ASC
 			 LIMIT 20"
 		);
 		if ( empty( $rows ) ) {
 			return;
 		}
 
+		// Shuffle within same-attempt-count group to avoid option_id bias.
+		// Lighter than ORDER BY RAND() on large wp_options tables.
+		shuffle( $rows );
+
 		$fonts_dir = $this->cache_dir . 'fonts/';
 		$fonts_url = $this->cache_url . 'fonts/';
 		wp_mkdir_p( $fonts_dir );
 
-		foreach ( $rows as $row ) {
-			$gf_url = $row->option_value;
+		$now = time();
+		$backoff_seconds = array( 0, 30, 300, 1800, 3600 ); // Escalating backoff.
 
-			// Track attempts — drop after 5 failures to prevent permanent queue clog.
-			$attempt_key = $row->option_name . '_attempts';
+		foreach ( $rows as $row ) {
+			// Parse pending value (new format: JSON with url + created).
+			$data = json_decode( $row->option_value, true );
+			if ( is_array( $data ) && isset( $data['url'] ) ) {
+				$gf_url = $data['url'];
+			} else {
+				$gf_url = $row->option_value; // Legacy: plain URL string.
+			}
+
+			$attempt_key  = $row->option_name . '_attempts';
 			$url_attempts = (int) get_option( $attempt_key, 0 );
 
+			// Drop after 5 failures.
 			if ( $url_attempts >= 5 ) {
 				delete_option( $row->option_name );
 				delete_option( $attempt_key );
 				continue;
 			}
 
+			// Backoff: skip if too soon since last attempt.
+			$backoff = isset( $backoff_seconds[ $url_attempts ] ) ? $backoff_seconds[ $url_attempts ] : 3600;
+			$last_attempt = (int) get_option( $attempt_key . '_time', 0 );
+			if ( $last_attempt && ( $now - $last_attempt ) < $backoff ) {
+				continue; // Not ready yet — skip to next URL.
+			}
+
 			$ok = $this->fetch_google_font_css( $gf_url, $fonts_dir, $fonts_url );
 			if ( false !== $ok ) {
 				delete_option( $row->option_name );
 				delete_option( $attempt_key );
+				delete_option( $attempt_key . '_time' );
 			} else {
 				update_option( $attempt_key, $url_attempts + 1, false );
+				update_option( $attempt_key . '_time', $now, false );
 			}
 		}
 
 		// Re-schedule if more pending URLs remain.
 		$still_pending = (int) $wpdb->get_var(
-			"SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%' AND option_name NOT LIKE '%\_attempts' LIMIT 1"
+			"SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%' AND option_name NOT LIKE '%\_attempts' AND option_name NOT LIKE '%\_time'"
 		);
 		if ( $still_pending > 0 && ! wp_next_scheduled( 'prime_cache_refresh_google_fonts' ) ) {
 			wp_schedule_single_event( time() + 30, 'prime_cache_refresh_google_fonts' );
@@ -1438,13 +1461,30 @@ JS;
 
 	/**
 	 * Daily cleanup of stale Google Fonts pending options.
+	 * Only deletes options created more than 24 hours ago.
 	 */
 	public function cleanup_stale_gf_options() {
 		global $wpdb;
-		// Delete all pending GF options (URL + attempts) older than 24 hours.
-		$wpdb->query(
-			"DELETE FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%'"
+		$cutoff = time() - DAY_IN_SECONDS;
+
+		$rows = $wpdb->get_results(
+			"SELECT option_name, option_value FROM {$wpdb->options}
+			 WHERE option_name LIKE 'prime\_cache\_gf\_%'
+			   AND option_name NOT LIKE '%\_attempts'
+			   AND option_name NOT LIKE '%\_time'"
 		);
+
+		foreach ( $rows as $row ) {
+			$data = json_decode( $row->option_value, true );
+			$created = is_array( $data ) && isset( $data['created'] ) ? (int) $data['created'] : 0;
+
+			// Delete if created > 24h ago, or if no timestamp (legacy format).
+			if ( 0 === $created || $created < $cutoff ) {
+				delete_option( $row->option_name );
+				delete_option( $row->option_name . '_attempts' );
+				delete_option( $row->option_name . '_attempts_time' );
+			}
+		}
 	}
 
 	private function fetch_google_font_css( $gf_url, $fonts_dir, $fonts_url ) {
