@@ -158,15 +158,14 @@ class Prime_Cache_Cloudflare {
 		$urls = array_unique( self::$queued_urls );
 		self::$queued_urls = array();
 
-		// For small batches, purge inline. For larger sets, defer to cron
-		// to avoid blocking the shutdown path with multiple API calls.
-		if ( count( $urls ) <= 30 ) {
-			$this->purge_urls( $urls );
-		} else {
-			set_transient( 'prime_cache_cf_deferred_purge', $urls, 300 );
-			if ( ! wp_next_scheduled( 'prime_cache_cf_deferred_purge' ) ) {
-				wp_schedule_single_event( time(), 'prime_cache_cf_deferred_purge' );
-			}
+		// Always defer to cron — avoids blocking shutdown with sync API calls.
+		// Merge with any existing pending URLs to prevent overwrite.
+		$existing = get_option( 'prime_cache_cf_purge_queue', array() );
+		$merged   = array_unique( array_merge( $existing, $urls ) );
+		update_option( 'prime_cache_cf_purge_queue', $merged, false );
+
+		if ( ! wp_next_scheduled( 'prime_cache_cf_deferred_purge' ) ) {
+			wp_schedule_single_event( time(), 'prime_cache_cf_deferred_purge' );
 		}
 	}
 
@@ -174,9 +173,9 @@ class Prime_Cache_Cloudflare {
 	 * Cron handler for deferred Cloudflare purge.
 	 */
 	public function run_deferred_purge() {
-		$urls = get_transient( 'prime_cache_cf_deferred_purge' );
-		if ( ! empty( $urls ) && is_array( $urls ) ) {
-			delete_transient( 'prime_cache_cf_deferred_purge' );
+		$urls = get_option( 'prime_cache_cf_purge_queue', array() );
+		if ( ! empty( $urls ) ) {
+			delete_option( 'prime_cache_cf_purge_queue' );
 			$this->purge_urls( $urls );
 		}
 	}

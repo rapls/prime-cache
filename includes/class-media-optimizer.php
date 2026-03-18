@@ -104,7 +104,7 @@ class Prime_Cache_Media_Optimizer {
 				$add .= ' height="' . (int) $dims[1] . '"';
 			}
 
-			return str_replace( '<img ', '<img' . $add . ' ', $tag );
+			return preg_replace( '#^(<img)\b#i', '$1' . $add, $tag );
 		}, $html );
 	}
 

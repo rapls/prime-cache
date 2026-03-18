@@ -1286,7 +1286,7 @@ class Prime_Cache_Admin_Settings {
 	/* ── tab: cdn ─────────────────────────────────────────── */
 
 	private function tab_cdn( $settings ) {
-		$vis = array( 'cdn_enabled','cdn_hostname','cdn_include_dirs','cdn_exclude','cdn_relative','cloudflare_enabled','cloudflare_email','cloudflare_api_key','cloudflare_zone_id' );
+		$vis = array( 'cdn_enabled','cdn_hostname','cdn_include_dirs','cdn_exclude','cdn_relative','cloudflare_enabled','cloudflare_email','cloudflare_api_key','cloudflare_auth_mode','cloudflare_zone_id' );
 		?>
 		<h2 class="pc-title"><?php esc_html_e( 'CDN', 'prime-cache' ); ?></h2>
 		<form method="post" action="options.php">
@@ -1325,10 +1325,17 @@ class Prime_Cache_Admin_Settings {
 					<p class="pc-help"><?php esc_html_e( 'Find this in Cloudflare dashboard > your domain > Overview (right sidebar).', 'prime-cache' ); ?></p>
 				</div>
 				<div class="pc-field">
+					<label class="pc-lbl"><?php esc_html_e( 'Authentication Method', 'prime-cache' ); ?></label>
+					<select name="prime_cache_settings[cloudflare_auth_mode]" class="pc-sel" style="width:220px">
+						<option value="token" <?php selected( $settings['cloudflare_auth_mode'] ?? 'token', 'token' ); ?>><?php esc_html_e( 'API Token (recommended)', 'prime-cache' ); ?></option>
+						<option value="global_key" <?php selected( $settings['cloudflare_auth_mode'] ?? 'token', 'global_key' ); ?>><?php esc_html_e( 'Global API Key + Email', 'prime-cache' ); ?></option>
+					</select>
+				</div>
+				<div class="pc-field">
 					<label class="pc-lbl"><?php esc_html_e( 'API Token or Global API Key', 'prime-cache' ); ?></label>
-					<input type="text" name="prime_cache_settings[cloudflare_api_key]" value="<?php echo esc_attr( $settings['cloudflare_api_key'] ); ?>" class="pc-ta" style="font-family:monospace" placeholder="API Token (recommended) or Global API Key"
+					<input type="text" name="prime_cache_settings[cloudflare_api_key]" value="<?php echo esc_attr( $settings['cloudflare_api_key'] ); ?>" class="pc-ta" style="font-family:monospace" placeholder="<?php echo 'global_key' === ( $settings['cloudflare_auth_mode'] ?? 'token' ) ? 'Global API Key' : 'API Token'; ?>"
 						<?php echo defined( 'PRIME_CACHE_CF_API_TOKEN' ) ? 'disabled' : ''; ?>>
-					<p class="pc-help"><?php esc_html_e( 'API Token (recommended): Create a custom token with "Zone > Cache Purge > Purge" permission. Or use Global API Key with the email below. Can also be set via PRIME_CACHE_CF_API_TOKEN constant.', 'prime-cache' ); ?></p>
+					<p class="pc-help"><?php esc_html_e( 'API Token: Create a custom token with "Zone > Cache Purge > Purge" permission. Global API Key: Use with the email address below. Can also be set via PRIME_CACHE_CF_API_TOKEN constant.', 'prime-cache' ); ?></p>
 				</div>
 				<div class="pc-field">
 					<label class="pc-lbl"><?php esc_html_e( 'Cloudflare Account Email', 'prime-cache' ); ?></label>

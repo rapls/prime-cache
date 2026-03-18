@@ -348,7 +348,7 @@ class Prime_Cache_Preload {
 			return array();
 		}
 
-		$response = wp_remote_get( $sitemap_url, array( 'timeout' => 15, 'sslverify' => true ) );
+		$response = wp_remote_get( $sitemap_url, array( 'timeout' => 15, 'sslverify' => true, 'limit_response_size' => 5 * 1024 * 1024 ) );
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return array();
 		}

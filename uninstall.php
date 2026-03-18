@@ -105,6 +105,7 @@ if ( is_dir( $fo_dir ) ) {
 
 // Remove stats, preload queue, and image optimization metadata.
 delete_option( 'prime_cache_stats' );
+delete_option( 'prime_cache_cf_purge_queue' );
 delete_option( 'prime_cache_preload_queue' );
 delete_option( 'prime_cache_preload_attempts' );
 delete_option( 'prime_cache_flush_rewrite' );

@@ -29,7 +29,7 @@ class Prime_Cache_Storage {
 	 * Matches the logic in dropins/page-cache.php _prime_cache_get_filename().
 	 *
 	 * @param bool   $is_ssl       Whether the request is HTTPS.
-	 * @param bool   $is_mobile    Whether to add -mobile suffix (caller must check cache_mobile_separate).
+	 * @param bool   $is_mobile    Whether to add -mobile suffix. Only pass true when cache_mobile_separate is enabled.
 	 * @param bool   $gzip         Whether to add .gz extension.
 	 * @param string $vary_suffix  Vary cookie suffix (e.g. '-vc_abc12345').
 	 * @param string $qs_suffix    Query string suffix (e.g. '-qs_def67890').
@@ -189,6 +189,7 @@ class Prime_Cache_Storage {
 
 		$result = self::delete_directory_files( $dir );
 
+		delete_transient( 'prime_cache_dir_stats' );
 		do_action( 'prime_cache_url_purged', $url );
 
 		return $result;

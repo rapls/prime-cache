@@ -133,8 +133,9 @@ class Prime_Cache_Database_Optimizer {
 				'%' . $wpdb->esc_like( '_transient_' ) . '%'
 			) ),
 			'tables'             => (int) $wpdb->get_var( $wpdb->prepare(
-				"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND data_free > 0",
-				DB_NAME
+				"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND table_name LIKE %s AND data_free > 0",
+				DB_NAME,
+				$wpdb->esc_like( $wpdb->prefix ) . '%'
 			) ),
 		);
 	}
@@ -241,10 +242,11 @@ class Prime_Cache_Database_Optimizer {
 
 	private function optimize_tables() {
 		global $wpdb;
-		// Include all engines with fragmentation (InnoDB + MyISAM).
+		// Include WP-prefixed tables with fragmentation (InnoDB + MyISAM).
 		$tables = $wpdb->get_col( $wpdb->prepare(
-			"SELECT table_name FROM information_schema.tables WHERE table_schema = %s AND data_free > 0",
-			DB_NAME
+			"SELECT table_name FROM information_schema.tables WHERE table_schema = %s AND table_name LIKE %s AND data_free > 0",
+			DB_NAME,
+			$wpdb->esc_like( $wpdb->prefix ) . '%'
 		) );
 
 		foreach ( $tables as $table ) {
