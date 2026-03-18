@@ -398,9 +398,13 @@ class Prime_Cache_WebP {
 				$changed = false;
 				foreach ( $parts as &$part ) {
 					$part = trim( $part );
-					if ( preg_match( '#^(.+\.(jpe?g|png))\s*(.*)$#i', $part, $pm ) ) {
-						if ( $this->variant_exists( $pm[1], $target_ext ) ) {
-							$part = $pm[1] . '.' . $target_ext . ( $pm[3] ? ' ' . $pm[3] : '' );
+					// Match URL(.jpg|.png) with optional ?query, then optional descriptor.
+					if ( preg_match( '#^(.+\.(jpe?g|png))(\?[^\s]*)?\s*(.*)$#i', $part, $pm ) ) {
+						$url_base = $pm[1];
+						$url_qs   = $pm[3] ?? '';
+						$desc     = $pm[4] ?? '';
+						if ( $this->variant_exists( $url_base, $target_ext ) ) {
+							$part = $url_base . '.' . $target_ext . $url_qs . ( $desc ? ' ' . $desc : '' );
 							$changed = true;
 						}
 					}
@@ -433,7 +437,7 @@ class Prime_Cache_WebP {
 		// Protect blocks that should not be processed: existing <picture> elements,
 		// <template>, <script>, and <noscript> blocks. Replace with placeholders.
 		$placeholders = array();
-		$html = preg_replace_callback( '#<(?:picture|template|script|noscript)[^>]*>.*?</(?:picture|template|script|noscript)>#is', function( $m ) use ( &$placeholders ) {
+		$html = preg_replace_callback( '#<(?:picture|template|script|noscript|style)[^>]*>.*?</(?:picture|template|script|noscript|style)>#is', function( $m ) use ( &$placeholders ) {
 			$key = '<!--PC_PROTECT_' . count( $placeholders ) . '-->';
 			$placeholders[ $key ] = $m[0];
 			return $key;

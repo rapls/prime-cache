@@ -823,14 +823,27 @@ class Prime_Cache_Preload {
 			}
 		}
 
-		// Support srcset — preload with imagesrcset if available.
+		// Support srcset — use the same <source> element that provided the href,
+		// so imagesrcset matches the preloaded format (AVIF/WebP, not fallback JPEG).
 		$preload_tag = '<link rel="preload" as="image" href="' . esc_url( $preload_src ) . '"' . $type_attr;
 
-		if ( preg_match( '#srcset=["\']([^"\']+)["\']#i', $lcp_tag, $srcset_m ) ) {
-			$preload_tag .= ' imagesrcset="' . esc_attr( $srcset_m[1] ) . '"';
-			if ( preg_match( '#sizes=["\']([^"\']+)["\']#i', $lcp_tag, $sizes_m ) ) {
-				$preload_tag .= ' imagesizes="' . esc_attr( $sizes_m[1] ) . '"';
+		$srcset_source = '';
+		if ( false !== $lcp_pos && ! empty( $type_attr ) ) {
+			// Try to get srcset from the same <source> element we used for href.
+			$source_pattern = '#<source\s[^>]*srcset=["\']([^"\']+)["\'][^>]*' . preg_quote( trim( $type_attr ), '#' ) . '#i';
+			if ( preg_match( $source_pattern, $before, $ss_m ) ) {
+				$srcset_source = $ss_m[1];
 			}
+		}
+
+		if ( $srcset_source ) {
+			$preload_tag .= ' imagesrcset="' . esc_attr( $srcset_source ) . '"';
+		} elseif ( preg_match( '#srcset=["\']([^"\']+)["\']#i', $lcp_tag, $srcset_m ) ) {
+			$preload_tag .= ' imagesrcset="' . esc_attr( $srcset_m[1] ) . '"';
+		}
+
+		if ( preg_match( '#sizes=["\']([^"\']+)["\']#i', $lcp_tag, $sizes_m ) ) {
+			$preload_tag .= ' imagesizes="' . esc_attr( $sizes_m[1] ) . '"';
 		}
 
 		$preload_tag .= ' fetchpriority="high">';
