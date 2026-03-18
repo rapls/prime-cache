@@ -63,9 +63,10 @@ class Prime_Cache_Preload {
 	 * Schedule the preload batch to start.
 	 */
 	public function schedule_preload() {
-		// Clear existing schedule and queue so URLs are re-collected fresh.
+		// Clear existing schedule, queue, and stale lock.
 		wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
 		delete_option( 'prime_cache_preload_queue' );
+		delete_transient( 'prime_cache_preload_lock' );
 		wp_schedule_single_event( time() + 5, 'prime_cache_preload_batch' );
 	}
 
@@ -105,22 +106,22 @@ class Prime_Cache_Preload {
 			update_option( 'prime_cache_preload_queue', $queue, false );
 		}
 
-		$count = 0;
-		$total = count( $queue );
-		$idx   = 0;
+		$count     = 0;
+		$total     = count( $queue );
+		$idx       = 0;
+		$attempted = array(); // URLs we tried this batch — verify next batch via is_url_cached().
 
 		while ( $idx < $total && $count < $limit ) {
 			$url = $queue[ $idx ];
 
-			// Skip already cached URLs — advance past them.
+			// Skip already cached URLs — advance past them permanently.
 			if ( $this->is_url_cached( $url ) ) {
 				$idx++;
 				continue;
 			}
 
-			// Check server load before sending request.
 			if ( ! $this->server_load_ok() ) {
-				break; // Keep current $idx and everything after in queue.
+				break;
 			}
 
 			// Non-blocking request to warm desktop cache.
@@ -131,7 +132,6 @@ class Prime_Cache_Preload {
 				'headers'   => array( 'X-Prime-Cache-Preload' => '1' ),
 			) );
 
-			// If mobile separate is enabled, also warm the mobile variant.
 			if ( ! empty( $this->settings['cache_mobile_separate'] ) ) {
 				wp_remote_get( $url, array(
 					'timeout'    => 0.5,
@@ -142,12 +142,17 @@ class Prime_Cache_Preload {
 				) );
 			}
 
+			$attempted[] = $url;
 			$count++;
 			$idx++;
 		}
 
-		// Keep all URLs from current position onward for the next batch.
+		// Keep attempted URLs in queue — they'll be confirmed via is_url_cached()
+		// in the next batch. Only permanently remove URLs that are confirmed cached.
 		$remaining = ( $idx < $total ) ? array_slice( $queue, $idx ) : array();
+		// Re-prepend attempted URLs that aren't yet confirmed cached.
+		// They'll be skipped by is_url_cached() next batch if they succeeded.
+		$remaining = array_merge( $attempted, $remaining );
 
 		if ( ! empty( $remaining ) ) {
 			update_option( 'prime_cache_preload_queue', array_values( $remaining ), false );

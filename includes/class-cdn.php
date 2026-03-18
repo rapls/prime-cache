@@ -121,16 +121,25 @@ class Prime_Cache_CDN {
 					$url   = $parts[0];
 					$desc  = isset( $parts[1] ) ? ' ' . $parts[1] : '';
 
+					// Check both relative and absolute same-host URLs.
+					$rewrite_url = false;
 					if ( preg_match( '#^/(?:' . $dirs_pattern . ')/#i', $url ) ) {
+						$rewrite_url = $url; // Relative path.
+					} elseif ( 0 === strpos( $url, $site_url . '/' ) ) {
+						// Absolute same-host — extract path portion.
+						$rewrite_url = substr( $url, strlen( $site_url ) );
+					}
+
+					if ( $rewrite_url ) {
 						$skip = false;
 						foreach ( $excludes as $ex ) {
-							if ( ! empty( $ex ) && false !== stripos( $url, $ex ) ) {
+							if ( ! empty( $ex ) && false !== stripos( $rewrite_url, $ex ) ) {
 								$skip = true;
 								break;
 							}
 						}
 						if ( ! $skip ) {
-							$url = $scheme . '://' . $srcset_cdn . $url;
+							$url = $scheme . '://' . $srcset_cdn . $rewrite_url;
 						}
 					}
 					$rewritten[] = $url . $desc;

@@ -97,6 +97,12 @@ if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || 'GET' !== $_SERVER['REQUEST_METHOD
 	return;
 }
 
+// Never cache authenticated requests (Basic Auth, Bearer tokens, Digest).
+if ( ! empty( $_SERVER['HTTP_AUTHORIZATION'] ) || ! empty( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] )
+	|| ! empty( $_SERVER['PHP_AUTH_USER'] ) || ! empty( $_SERVER['PHP_AUTH_DIGEST'] ) ) {
+	return;
+}
+
 $_pc_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
 
 // Skip admin, login, cron, xmlrpc.

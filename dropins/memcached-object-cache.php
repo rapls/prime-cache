@@ -333,8 +333,13 @@ class WP_Object_Cache {
 		$version_key = $this->key_prefix . 'prime_cache_gv:' . $group;
 		$new_version = $this->mc->increment( $version_key );
 		if ( false === $new_version ) {
-			$new_version = time();
-			$this->mc->set( $version_key, $new_version );
+			// Key doesn't exist yet — create with add() then increment.
+			$this->mc->add( $version_key, 0 );
+			$new_version = $this->mc->increment( $version_key );
+			if ( false === $new_version ) {
+				$new_version = 1;
+				$this->mc->set( $version_key, $new_version );
+			}
 		}
 		$this->group_versions[ $group ] = $new_version;
 
