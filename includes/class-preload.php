@@ -835,54 +835,38 @@ class Prime_Cache_Preload {
 		}
 
 		// Extract best <source> from the picture block (attribute-order independent).
+		$has_art_direction = false;
 		if ( ! empty( $picture_block ) ) {
-			// Collect all <source> tags, then check each for type and srcset.
 			if ( preg_match_all( '#<source\s[^>]+>#i', $picture_block, $source_tags ) ) {
-				$best_source = null;
-				$best_type   = '';
+				// Check if any source has media= (art-direction pattern).
 				foreach ( $source_tags[0] as $source_tag ) {
-					// Skip sources with media conditions — we can't determine which
-					// applies without knowing viewport, so only preload unconditional sources.
 					if ( preg_match( '#\bmedia\s*=#i', $source_tag ) ) {
-						continue;
-					}
-					$s_type = '';
-					if ( preg_match( '#type=["\']([^"\']+)["\']#i', $source_tag, $tm ) ) {
-						$s_type = strtolower( $tm[1] );
-					}
-					if ( 'image/avif' === $s_type && ! $best_source ) {
-						$best_source = $source_tag;
-						$best_type   = $s_type;
-					} elseif ( 'image/webp' === $s_type && 'image/avif' !== $best_type ) {
-						$best_source = $source_tag;
-						$best_type   = $s_type;
+						$has_art_direction = true;
+						break;
 					}
 				}
-				if ( $best_source && preg_match( '#srcset=["\']([^"\']+)["\']#i', $best_source, $bs_m ) ) {
-					// Pick the largest candidate from srcset for preload href.
-					// strtok would always pick the first (often smallest) candidate.
-					$candidates = explode( ',', $bs_m[1] );
-					$best_url   = '';
-					$best_w     = 0;
-					foreach ( $candidates as $cand ) {
-						$cand  = trim( $cand );
-						$parts = preg_split( '#\s+#', $cand, 2 );
-						$url   = $parts[0];
-						$desc  = $parts[1] ?? '';
-						// Parse width descriptor (e.g. 1536w).
-						$w = 0;
-						if ( preg_match( '#(\d+)w$#', $desc, $wm ) ) {
-							$w = (int) $wm[1];
-						} elseif ( preg_match( '#(\d+(?:\.\d+)?)x$#', $desc, $xm ) ) {
-							$w = (int) ( (float) $xm[1] * 1000 ); // Normalize x to comparable value.
+
+				// Art-direction <picture>: skip preload entirely — PHP can't determine
+				// which media condition applies without knowing viewport/device.
+				if ( ! $has_art_direction ) {
+					foreach ( $source_tags[0] as $source_tag ) {
+						$s_type = '';
+						if ( preg_match( '#type=["\']([^"\']+)["\']#i', $source_tag, $tm ) ) {
+							$s_type = strtolower( $tm[1] );
 						}
-						if ( $w > $best_w || empty( $best_url ) ) {
-							$best_url = $url;
-							$best_w   = $w;
+						if ( 'image/avif' === $s_type && ! $best_source ) {
+							$best_source = $source_tag;
+							$best_type   = $s_type;
+						} elseif ( 'image/webp' === $s_type && 'image/avif' !== $best_type ) {
+							$best_source = $source_tag;
+							$best_type   = $s_type;
 						}
 					}
-					$preload_src = $best_url ?: strtok( $bs_m[1], ' ' );
-					$type_attr   = ' type="' . $best_type . '"';
+					if ( $best_source && preg_match( '#srcset=["\']([^"\']+)["\']#i', $best_source, $bs_m ) ) {
+						// Use <img src> as href fallback — let imagesrcset handle candidate
+						// selection. This avoids preloading an overly large or small candidate.
+						$type_attr = ' type="' . $best_type . '"';
+					}
 				}
 			}
 		}

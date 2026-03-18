@@ -629,13 +629,35 @@ class Prime_Cache_File_Optimizer {
 	 * @return array Individual selectors.
 	 */
 	private function split_selectors( $raw ) {
-		$result = array();
-		$depth  = 0;
-		$start  = 0;
-		$len    = strlen( $raw );
+		$result   = array();
+		$depth    = 0;
+		$start    = 0;
+		$len      = strlen( $raw );
+		$in_quote = false;
+		$quote_ch = '';
 
 		for ( $i = 0; $i < $len; $i++ ) {
 			$ch = $raw[ $i ];
+
+			// Handle escape sequences (e.g. \, inside selectors).
+			if ( '\\' === $ch ) {
+				$i++; // Skip next character.
+				continue;
+			}
+
+			// Handle quoted strings (attribute selectors like [data-x="a,b"]).
+			if ( $in_quote ) {
+				if ( $ch === $quote_ch ) {
+					$in_quote = false;
+				}
+				continue;
+			}
+			if ( '"' === $ch || "'" === $ch ) {
+				$in_quote = true;
+				$quote_ch = $ch;
+				continue;
+			}
+
 			if ( '(' === $ch || '[' === $ch ) {
 				$depth++;
 			} elseif ( ')' === $ch || ']' === $ch ) {
@@ -734,12 +756,15 @@ class Prime_Cache_File_Optimizer {
 
 		// Lightweight inline <style> fingerprint for cache key.
 		// Only compute crc32+length per block — defer full concatenation to cache MISS.
-		$inline_fingerprint = '';
+		$inline_fingerprint   = '';
 		$inline_style_matches = array();
-		if ( preg_match_all( '#<style[^>]*>(.*?)</style>#si', $html, $styles ) ) {
-			$inline_style_matches = $styles[1];
-			foreach ( $inline_style_matches as $inline ) {
-				$inline_fingerprint .= crc32( $inline ) . ':' . strlen( $inline ) . '|';
+		// Quick check: skip expensive regex if no <style> tags exist at all.
+		if ( false !== stripos( $html, '<style' ) ) {
+			if ( preg_match_all( '#<style[^>]*>(.*?)</style>#si', $html, $styles ) ) {
+				$inline_style_matches = $styles[1];
+				foreach ( $inline_style_matches as $inline ) {
+					$inline_fingerprint .= crc32( $inline ) . ':' . strlen( $inline ) . '|';
+				}
 			}
 		}
 
