@@ -755,12 +755,14 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		// Lightweight inline <style> fingerprint for cache key.
-		// Only compute crc32+length per block — defer full concatenation to cache MISS.
+		// Only scan <head> section for inline styles (above-the-fold relevant).
+		// Body styles don't affect critical CSS selection and are much larger on builder pages.
 		$inline_fingerprint   = '';
 		$inline_style_matches = array();
-		// Quick check: skip expensive regex if no <style> tags exist at all.
-		if ( false !== stripos( $html, '<style' ) ) {
-			if ( preg_match_all( '#<style[^>]*>(.*?)</style>#si', $html, $styles ) ) {
+		$head_end = stripos( $html, '</head>' );
+		$head_html = $head_end ? substr( $html, 0, $head_end ) : $html;
+		if ( false !== stripos( $head_html, '<style' ) ) {
+			if ( preg_match_all( '#<style[^>]*>(.*?)</style>#si', $head_html, $styles ) ) {
 				$inline_style_matches = $styles[1];
 				foreach ( $inline_style_matches as $inline ) {
 					$inline_fingerprint .= crc32( $inline ) . ':' . strlen( $inline ) . '|';
@@ -789,9 +791,12 @@ class Prime_Cache_File_Optimizer {
 				$all_css .= $this->rebase_css_urls( $css, $path ) . "\n";
 			}
 		}
-		// Concatenate inline CSS (deferred from fingerprint phase).
-		foreach ( $inline_style_matches as $inline ) {
-			$all_css .= $inline . "\n";
+		// Concatenate ALL inline CSS (head + body) for critical extraction.
+		// Head styles were captured in fingerprint phase; now also grab body styles.
+		if ( preg_match_all( '#<style[^>]*>(.*?)</style>#si', $html, $all_styles ) ) {
+			foreach ( $all_styles[1] as $inline ) {
+				$all_css .= $inline . "\n";
+			}
 		}
 
 		if ( empty( $all_css ) ) {

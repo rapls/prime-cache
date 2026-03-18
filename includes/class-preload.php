@@ -866,10 +866,14 @@ class Prime_Cache_Preload {
 							$best_type   = $s_type;
 						}
 					}
-					// Update href to match the source series (avoid href=jpg + type=avif mismatch).
+					// Set type to match the source series. href stays as <img src> (the
+					// format-agnostic fallback) while imagesrcset carries the actual
+					// next-gen candidates for the browser to pick from.
 					if ( $best_source && preg_match( '#srcset=["\']([^"\']+)["\']#i', $best_source, $bs_m ) ) {
-						$preload_src = strtok( $bs_m[1], ' ' ); // First candidate as href.
-						$type_attr   = ' type="' . $best_type . '"';
+						$type_attr = ' type="' . $best_type . '"';
+						// href = first srcset candidate to match the type attribute.
+						// This ensures href and type are the same format series.
+						$preload_src = strtok( $bs_m[1], ' ' );
 					}
 				}
 			}
