@@ -696,13 +696,13 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		// Lightweight inline <style> fingerprint for cache key.
-		// Use crc32 of each block's length to avoid full content concatenation on HIT path.
+		// Only compute crc32+length per block — defer full concatenation to cache MISS.
 		$inline_fingerprint = '';
-		$inline_css         = '';
+		$inline_style_matches = array();
 		if ( preg_match_all( '#<style[^>]*>(.*?)</style>#si', $html, $styles ) ) {
-			foreach ( $styles[1] as $inline ) {
+			$inline_style_matches = $styles[1];
+			foreach ( $inline_style_matches as $inline ) {
 				$inline_fingerprint .= crc32( $inline ) . ':' . strlen( $inline ) . '|';
-				$inline_css .= $inline . "\n";
 			}
 		}
 
@@ -727,7 +727,10 @@ class Prime_Cache_File_Optimizer {
 				$all_css .= $this->rebase_css_urls( $css, $path ) . "\n";
 			}
 		}
-		$all_css .= $inline_css;
+		// Concatenate inline CSS (deferred from fingerprint phase).
+		foreach ( $inline_style_matches as $inline ) {
+			$all_css .= $inline . "\n";
+		}
 
 		if ( empty( $all_css ) ) {
 			return $html;

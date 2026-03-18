@@ -795,45 +795,59 @@ class Prime_Cache_Preload {
 			return $html;
 		}
 
-		// Add fetchpriority="high" and remove loading="lazy" from LCP image.
+		// Replace ONLY the first occurrence of the LCP tag (not all identical tags).
 		$new_lcp = $lcp_tag;
 		$new_lcp = preg_replace( '#\s*loading=["\'][^"\']*["\']#i', '', $new_lcp );
 		$new_lcp = preg_replace( '#\s*fetchpriority=["\'][^"\']*["\']#i', '', $new_lcp );
 		$new_lcp = str_replace( '<img ', '<img fetchpriority="high" ', $new_lcp );
 
-		$html = str_replace( $lcp_tag, $new_lcp, $html );
+		$lcp_pos = strpos( $html, $lcp_tag );
+		if ( false !== $lcp_pos ) {
+			$html = substr_replace( $html, $new_lcp, $lcp_pos, strlen( $lcp_tag ) );
+		}
 
 		// Inject <link rel="preload"> for LCP image in head.
-		// If the <img> is inside a <picture> with <source> elements, preload the
-		// best available format (AVIF > WebP > original) for maximum LCP benefit.
 		$preload_src = $lcp_src;
 		$type_attr   = '';
 
-		// Check if LCP image is inside a <picture> element and extract <source>.
-		// Find the enclosing <picture>...</picture> block instead of fixed char window.
-		$lcp_pos = strpos( $html, $new_lcp );
-		$before  = '';
+		// Check if LCP image is inside a <picture> element.
+		// Search backward from LCP position for the nearest <picture> opening tag.
+		$picture_block = '';
 		if ( false !== $lcp_pos ) {
-			// Search backward for the nearest <picture> opening tag.
-			$search_start = max( 0, $lcp_pos - 2000 );
+			$search_start = max( 0, $lcp_pos - 3000 );
 			$prefix       = substr( $html, $search_start, $lcp_pos - $search_start );
 			$pic_open     = strrpos( $prefix, '<picture' );
 			if ( false !== $pic_open ) {
-				// Verify there's no </picture> between the opening and the <img>.
 				$between = substr( $prefix, $pic_open );
 				if ( false === stripos( $between, '</picture>' ) ) {
-					$before = $between;
+					$picture_block = $between;
 				}
 			}
 		}
-		if ( ! empty( $before ) ) {
-			// Prefer AVIF, then WebP.
-			if ( preg_match( '#<source\s[^>]*srcset=["\']([^"\']+)["\'][^>]*type=["\']image/avif["\']#i', $before, $avif_m ) ) {
-				$preload_src = strtok( $avif_m[1], ' ' ); // First candidate from srcset.
-				$type_attr = ' type="image/avif"';
-			} elseif ( preg_match( '#<source\s[^>]*srcset=["\']([^"\']+)["\'][^>]*type=["\']image/webp["\']#i', $before, $webp_m ) ) {
-				$preload_src = strtok( $webp_m[1], ' ' );
-				$type_attr = ' type="image/webp"';
+
+		// Extract best <source> from the picture block (attribute-order independent).
+		if ( ! empty( $picture_block ) ) {
+			// Collect all <source> tags, then check each for type and srcset.
+			if ( preg_match_all( '#<source\s[^>]+>#i', $picture_block, $source_tags ) ) {
+				$best_source = null;
+				$best_type   = '';
+				foreach ( $source_tags[0] as $source_tag ) {
+					$s_type = '';
+					if ( preg_match( '#type=["\']([^"\']+)["\']#i', $source_tag, $tm ) ) {
+						$s_type = strtolower( $tm[1] );
+					}
+					if ( 'image/avif' === $s_type && ! $best_source ) {
+						$best_source = $source_tag;
+						$best_type   = $s_type;
+					} elseif ( 'image/webp' === $s_type && 'image/avif' !== $best_type ) {
+						$best_source = $source_tag;
+						$best_type   = $s_type;
+					}
+				}
+				if ( $best_source && preg_match( '#srcset=["\']([^"\']+)["\']#i', $best_source, $bs_m ) ) {
+					$preload_src = strtok( $bs_m[1], ' ' );
+					$type_attr   = ' type="' . $best_type . '"';
+				}
 			}
 		}
 
@@ -845,25 +859,24 @@ class Prime_Cache_Preload {
 			}
 		}
 
-		// Support srcset — use the same <source> element that provided the href,
-		// so imagesrcset matches the preloaded format (AVIF/WebP, not fallback JPEG).
+		// Build preload tag with srcset/sizes from the same source element.
 		$preload_tag = '<link rel="preload" as="image" href="' . esc_url( $preload_src ) . '"' . $type_attr;
 
-		$srcset_source = '';
-		if ( false !== $lcp_pos && ! empty( $type_attr ) ) {
-			// Try to get srcset from the same <source> element we used for href.
-			$source_pattern = '#<source\s[^>]*srcset=["\']([^"\']+)["\'][^>]*' . preg_quote( trim( $type_attr ), '#' ) . '#i';
-			if ( preg_match( $source_pattern, $before, $ss_m ) ) {
-				$srcset_source = $ss_m[1];
+		$srcset_val = '';
+		$sizes_val  = '';
+		if ( ! empty( $best_source ) ) {
+			if ( preg_match( '#srcset=["\']([^"\']+)["\']#i', $best_source, $ss_m ) ) {
+				$srcset_val = $ss_m[1];
+			}
+			if ( preg_match( '#sizes=["\']([^"\']+)["\']#i', $best_source, $sz_m ) ) {
+				$sizes_val = $sz_m[1];
 			}
 		}
 
-		if ( $srcset_source ) {
-			$preload_tag .= ' imagesrcset="' . esc_attr( $srcset_source ) . '"';
-			// Try to get sizes from the same <source> element first.
-			$source_sizes_pattern = '#<source\s[^>]*sizes=["\']([^"\']+)["\'][^>]*' . preg_quote( trim( $type_attr ), '#' ) . '#i';
-			if ( preg_match( $source_sizes_pattern, $before, $sz_m ) ) {
-				$preload_tag .= ' imagesizes="' . esc_attr( $sz_m[1] ) . '"';
+		if ( $srcset_val ) {
+			$preload_tag .= ' imagesrcset="' . esc_attr( $srcset_val ) . '"';
+			if ( $sizes_val ) {
+				$preload_tag .= ' imagesizes="' . esc_attr( $sizes_val ) . '"';
 			} elseif ( preg_match( '#sizes=["\']([^"\']+)["\']#i', $lcp_tag, $sizes_m ) ) {
 				$preload_tag .= ' imagesizes="' . esc_attr( $sizes_m[1] ) . '"';
 			}
