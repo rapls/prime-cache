@@ -463,6 +463,9 @@ class Prime_Cache_WebP {
 					$avif_srcset = $this->rewrite_srcset( $ss_m[1], 'avif' );
 					if ( $avif_srcset ) {
 						$sources .= '<source srcset="' . esc_attr( $avif_srcset ) . '" type="image/avif">';
+					} else {
+						// Srcset candidates don't have variants yet — fall back to base src.
+						$sources .= '<source srcset="' . esc_url( $src . '.avif' . $src_qs ) . '" type="image/avif">';
 					}
 				} else {
 					$sources .= '<source srcset="' . esc_url( $src . '.avif' . $src_qs ) . '" type="image/avif">';
@@ -475,6 +478,8 @@ class Prime_Cache_WebP {
 					$webp_srcset = $this->rewrite_srcset( $ss_m[1], 'webp' );
 					if ( $webp_srcset ) {
 						$sources .= '<source srcset="' . esc_attr( $webp_srcset ) . '" type="image/webp">';
+					} else {
+						$sources .= '<source srcset="' . esc_url( $src . '.webp' . $src_qs ) . '" type="image/webp">';
 					}
 				} else {
 					$sources .= '<source srcset="' . esc_url( $src . '.webp' . $src_qs ) . '" type="image/webp">';

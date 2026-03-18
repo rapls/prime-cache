@@ -312,15 +312,23 @@ class Prime_Cache_Preload {
 		$is_ssl = isset( $parsed['scheme'] ) && 'https' === $parsed['scheme'];
 		$s      = $this->settings;
 
-		// Build query-string suffix (same logic as dropin).
+		// Build query-string suffix (aligned with dropin logic).
 		$qs_suffix = '';
 		if ( ! empty( $parsed['query'] ) ) {
 			parse_str( $parsed['query'], $qs_params );
 			$ignored   = array_filter( array_map( 'trim', explode( ',', $s['cache_ignore_qs'] ?? '' ) ) );
 			$cached_qs = array_filter( array_map( 'trim', explode( ',', $s['cache_query_strings'] ?? '' ) ) );
 			$remaining = array_diff_key( $qs_params, array_flip( $ignored ) );
-			if ( ! empty( $remaining ) && ! empty( $cached_qs ) ) {
+
+			if ( ! empty( $remaining ) ) {
+				if ( empty( $cached_qs ) ) {
+					return false; // Unknown params, no whitelist — page cache skips.
+				}
 				$to_cache = array_intersect_key( $remaining, array_flip( $cached_qs ) );
+				$unknown  = array_diff_key( $remaining, $to_cache );
+				if ( ! empty( $unknown ) ) {
+					return false; // Has params not in ignore or cache list.
+				}
 				if ( ! empty( $to_cache ) ) {
 					ksort( $to_cache );
 					$qs_suffix = '-qs_' . substr( md5( http_build_query( $to_cache ) ), 0, 8 );
@@ -838,12 +846,18 @@ class Prime_Cache_Preload {
 
 		if ( $srcset_source ) {
 			$preload_tag .= ' imagesrcset="' . esc_attr( $srcset_source ) . '"';
+			// Try to get sizes from the same <source> element first.
+			$source_sizes_pattern = '#<source\s[^>]*sizes=["\']([^"\']+)["\'][^>]*' . preg_quote( trim( $type_attr ), '#' ) . '#i';
+			if ( preg_match( $source_sizes_pattern, $before, $sz_m ) ) {
+				$preload_tag .= ' imagesizes="' . esc_attr( $sz_m[1] ) . '"';
+			} elseif ( preg_match( '#sizes=["\']([^"\']+)["\']#i', $lcp_tag, $sizes_m ) ) {
+				$preload_tag .= ' imagesizes="' . esc_attr( $sizes_m[1] ) . '"';
+			}
 		} elseif ( preg_match( '#srcset=["\']([^"\']+)["\']#i', $lcp_tag, $srcset_m ) ) {
 			$preload_tag .= ' imagesrcset="' . esc_attr( $srcset_m[1] ) . '"';
-		}
-
-		if ( preg_match( '#sizes=["\']([^"\']+)["\']#i', $lcp_tag, $sizes_m ) ) {
-			$preload_tag .= ' imagesizes="' . esc_attr( $sizes_m[1] ) . '"';
+			if ( preg_match( '#sizes=["\']([^"\']+)["\']#i', $lcp_tag, $sizes_m ) ) {
+				$preload_tag .= ' imagesizes="' . esc_attr( $sizes_m[1] ) . '"';
+			}
 		}
 
 		$preload_tag .= ' fetchpriority="high">';
