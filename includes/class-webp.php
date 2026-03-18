@@ -446,6 +446,11 @@ class Prime_Cache_WebP {
 		$html = preg_replace_callback( '#<img\s[^>]+>#i', function( $m ) {
 			$tag = $m[0];
 
+			// Skip data URIs, template bindings, and placeholder images.
+			if ( preg_match( '#src=["\']data:|src=["\']{{|src=["\']$|data-skip-webp#i', $tag ) ) {
+				return $tag;
+			}
+
 			// Match src, supporting query strings (e.g. image.jpg?ver=1.2).
 			if ( ! preg_match( '#src=["\']([^"\'?]+\.(jpe?g|png))(\?[^"\']*)?["\']#i', $tag, $src_m ) ) {
 				return $tag;
@@ -456,15 +461,20 @@ class Prime_Cache_WebP {
 			$sources = '';
 
 			$has_srcset = preg_match( '#srcset=["\']([^"\']+)["\']#i', $tag, $ss_m );
+			// Carry over sizes from <img> to <source> so browsers select the right
+			// candidate from width-descriptor srcsets (e.g. 768w, 1536w).
+			$sizes_attr = '';
+			if ( preg_match( '#sizes=["\']([^"\']+)["\']#i', $tag, $sz_m ) ) {
+				$sizes_attr = ' sizes="' . esc_attr( $sz_m[1] ) . '"';
+			}
 
 			// AVIF source.
 			if ( $this->settings['avif_enabled'] && $this->variant_exists( $src, 'avif' ) ) {
 				if ( $has_srcset ) {
 					$avif_srcset = $this->rewrite_srcset( $ss_m[1], 'avif' );
 					if ( $avif_srcset ) {
-						$sources .= '<source srcset="' . esc_attr( $avif_srcset ) . '" type="image/avif">';
+						$sources .= '<source srcset="' . esc_attr( $avif_srcset ) . '"' . $sizes_attr . ' type="image/avif">';
 					} else {
-						// Srcset candidates don't have variants yet — fall back to base src.
 						$sources .= '<source srcset="' . esc_url( $src . '.avif' . $src_qs ) . '" type="image/avif">';
 					}
 				} else {
@@ -477,7 +487,7 @@ class Prime_Cache_WebP {
 				if ( $has_srcset ) {
 					$webp_srcset = $this->rewrite_srcset( $ss_m[1], 'webp' );
 					if ( $webp_srcset ) {
-						$sources .= '<source srcset="' . esc_attr( $webp_srcset ) . '" type="image/webp">';
+						$sources .= '<source srcset="' . esc_attr( $webp_srcset ) . '"' . $sizes_attr . ' type="image/webp">';
 					} else {
 						$sources .= '<source srcset="' . esc_url( $src . '.webp' . $src_qs ) . '" type="image/webp">';
 					}

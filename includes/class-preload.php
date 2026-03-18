@@ -809,10 +809,24 @@ class Prime_Cache_Preload {
 		$preload_src = $lcp_src;
 		$type_attr   = '';
 
-		// Check for nearby <source> elements (picture mode).
+		// Check if LCP image is inside a <picture> element and extract <source>.
+		// Find the enclosing <picture>...</picture> block instead of fixed char window.
 		$lcp_pos = strpos( $html, $new_lcp );
+		$before  = '';
 		if ( false !== $lcp_pos ) {
-			$before = substr( $html, max( 0, $lcp_pos - 500 ), 500 );
+			// Search backward for the nearest <picture> opening tag.
+			$search_start = max( 0, $lcp_pos - 2000 );
+			$prefix       = substr( $html, $search_start, $lcp_pos - $search_start );
+			$pic_open     = strrpos( $prefix, '<picture' );
+			if ( false !== $pic_open ) {
+				// Verify there's no </picture> between the opening and the <img>.
+				$between = substr( $prefix, $pic_open );
+				if ( false === stripos( $between, '</picture>' ) ) {
+					$before = $between;
+				}
+			}
+		}
+		if ( ! empty( $before ) ) {
 			// Prefer AVIF, then WebP.
 			if ( preg_match( '#<source\s[^>]*srcset=["\']([^"\']+)["\'][^>]*type=["\']image/avif["\']#i', $before, $avif_m ) ) {
 				$preload_src = strtok( $avif_m[1], ' ' ); // First candidate from srcset.

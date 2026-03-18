@@ -695,15 +695,18 @@ class Prime_Cache_File_Optimizer {
 			}
 		}
 
-		// Inline <style> hash for cache key (lightweight — just hashing, not full processing).
-		$inline_css = '';
+		// Lightweight inline <style> fingerprint for cache key.
+		// Use crc32 of each block's length to avoid full content concatenation on HIT path.
+		$inline_fingerprint = '';
+		$inline_css         = '';
 		if ( preg_match_all( '#<style[^>]*>(.*?)</style>#si', $html, $styles ) ) {
 			foreach ( $styles[1] as $inline ) {
+				$inline_fingerprint .= crc32( $inline ) . ':' . strlen( $inline ) . '|';
 				$inline_css .= $inline . "\n";
 			}
 		}
 
-		$inline_hash = $inline_css ? md5( $inline_css ) : '';
+		$inline_hash = $inline_fingerprint ? md5( $inline_fingerprint ) : '';
 		$hash        = md5( 'ccss_' . $request_uri . $css_filetimes . $inline_hash );
 		$ccss_file   = $this->cache_dir . 'ccss/' . $hash . '.css';
 

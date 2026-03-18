@@ -880,8 +880,8 @@ class Prime_Cache_Admin_Settings {
 					<div class="pc-radio-sub" id="pc-ucss-sub" style="<?php echo 'remove_unused_css' === $method ? '' : 'display:none;'; ?>">
 						<div class="pc-field">
 							<label class="pc-lbl"><?php esc_html_e( 'CSS Safelist', 'prime-cache' ); ?></label>
-							<textarea name="prime_cache_settings[ucss_safelist]" rows="4" class="pc-ta" placeholder="/wp-content/plugins/some-plugin/(.*).css&#10;.css-class&#10;#css_id&#10;tag"><?php echo esc_textarea( $settings['ucss_safelist'] ); ?></textarea>
-							<p class="pc-help"><?php esc_html_e( 'Specify CSS filenames, IDs or classes that should not be removed (one per line). Supports file path patterns, .class-name, #id, and tag selectors.', 'prime-cache' ); ?></p>
+							<textarea name="prime_cache_settings[ucss_safelist]" rows="4" class="pc-ta" placeholder="/wp-content/plugins/some-plugin/(.*).css&#10;.btn&#10;.modal&#10;.dropdown&#10;#main-menu"><?php echo esc_textarea( $settings['ucss_safelist'] ); ?></textarea>
+							<p class="pc-help"><?php esc_html_e( 'CSS selectors and file patterns that should never be removed (one per line). Add selectors for elements that appear via JavaScript interaction (modals, dropdowns, tabs, accordions), AJAX-loaded content, or hover/focus states. Common examples: .modal, .dropdown-menu, .tab-content, .accordion, .wp-block-*.', 'prime-cache' ); ?></p>
 						</div>
 					</div>
 
