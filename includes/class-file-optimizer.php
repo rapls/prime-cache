@@ -1512,6 +1512,14 @@ JS;
 				delete_option( $row->option_name . '_attempts_time' );
 			}
 		}
+
+		// If pending entries remain after cleanup, ensure the processing cron is scheduled.
+		$still = (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%' AND option_name NOT LIKE '%\_attempts' AND option_name NOT LIKE '%\_time'"
+		);
+		if ( $still > 0 && ! wp_next_scheduled( 'prime_cache_refresh_google_fonts' ) ) {
+			wp_schedule_single_event( time() + 60, 'prime_cache_refresh_google_fonts' );
+		}
 	}
 
 	private function fetch_google_font_css( $gf_url, $fonts_dir, $fonts_url ) {

@@ -112,25 +112,29 @@ class Prime_Cache_Preload {
 		$attempts = get_option( 'prime_cache_preload_attempts', array() );
 		$max_attempts = 3;
 		$now = time();
-		$count    = 0;
-		$total    = count( $queue );
-		$idx      = 0;
-		$deferred = array(); // URLs in cooldown — move to end of queue.
+		$deferred = array();
 
-		$mobile_sep = ! empty( $this->settings['cache_mobile_separate'] );
-
-		while ( $idx < $total && $count < $limit ) {
-			$url        = $queue[ $idx ];
-			$mobile_key = $url . ':m';
-
-			// Quick check: skip if we know this URL isn't eligible yet.
+		// Pre-filter: separate URLs that are still in cooldown before the main loop.
+		// This avoids iterating through cooldown URLs in the batch loop entirely.
+		$eligible = array();
+		foreach ( $queue as $url ) {
 			$next_key = $url . ':next';
 			if ( isset( $attempts[ $next_key ] ) && $now < (int) $attempts[ $next_key ] ) {
 				$deferred[] = $url;
-				$idx++;
-				continue;
+			} else {
+				unset( $attempts[ $next_key ] );
+				$eligible[] = $url;
 			}
-			unset( $attempts[ $next_key ] ); // Clear — will be re-evaluated below.
+		}
+
+		$count      = 0;
+		$total      = count( $eligible );
+		$idx        = 0;
+		$mobile_sep = ! empty( $this->settings['cache_mobile_separate'] );
+
+		while ( $idx < $total && $count < $limit ) {
+			$url        = $eligible[ $idx ];
+			$mobile_key = $url . ':m';
 
 			// Check which variants still need warming.
 			$need_desktop = ! $this->is_variant_cached( $url, false );
@@ -215,7 +219,7 @@ class Prime_Cache_Preload {
 		// Build remaining queue: keep URLs that were attempted but may not yet be
 		// cached (non-blocking request). They'll be verified via is_variant_cached()
 		// in the next batch and skipped if confirmed cached.
-		$unprocessed = ( $idx < $total ) ? array_slice( $queue, $idx ) : array();
+		$unprocessed = ( $idx < $total ) ? array_slice( $eligible, $idx ) : array();
 		$still_needed = array();
 		// Track which URLs are already queued to prevent duplicates.
 		$seen = array_flip( $deferred ); // Deferred URLs already accounted for.
@@ -224,7 +228,7 @@ class Prime_Cache_Preload {
 		}
 		// Re-check attempted URLs — keep those not fully cached yet (skip deferred).
 		for ( $j = 0; $j < $idx; $j++ ) {
-			$u = $queue[ $j ];
+			$u = $eligible[ $j ];
 			if ( isset( $seen[ $u ] ) ) {
 				continue; // Already in deferred or unprocessed — no duplicate.
 			}
