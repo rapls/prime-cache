@@ -157,12 +157,9 @@ class Prime_Cache_Cloudflare {
 
 		$urls = array_unique( self::$queued_urls );
 
-		// If many URLs, just purge everything.
-		if ( count( $urls ) > 30 ) {
-			$this->purge_everything();
-		} else {
-			$this->purge_urls( $urls );
-		}
+		// Always use batched per-URL purge (30 per API call) instead of
+		// purge_everything(), which destroys the entire zone cache.
+		$this->purge_urls( $urls );
 
 		self::$queued_urls = array();
 	}

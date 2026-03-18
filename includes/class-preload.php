@@ -353,8 +353,9 @@ class Prime_Cache_Preload {
 			return array();
 		}
 
+		// Limit sitemap size to 5MB to prevent memory exhaustion.
 		$body = wp_remote_retrieve_body( $response );
-		if ( empty( $body ) ) {
+		if ( empty( $body ) || strlen( $body ) > 5 * 1024 * 1024 ) {
 			return array();
 		}
 

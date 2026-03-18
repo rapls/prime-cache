@@ -133,7 +133,7 @@ class Prime_Cache_Database_Optimizer {
 				'%' . $wpdb->esc_like( '_transient_' ) . '%'
 			) ),
 			'tables'             => (int) $wpdb->get_var( $wpdb->prepare(
-				"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND Engine <> 'InnoDB' AND data_free > 0",
+				"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND data_free > 0",
 				DB_NAME
 			) ),
 		);

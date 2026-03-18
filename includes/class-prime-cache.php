@@ -831,7 +831,16 @@ class Prime_Cache {
 		}
 
 		$settings = get_option( 'prime_cache_settings', array() );
-		$data     = wp_json_encode( $settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+
+		// Mask sensitive API keys/secrets before export.
+		$sensitive_keys = array( 'cloudflare_api_key', 'cloudflare_email', 'sucuri_api_key' );
+		foreach ( $sensitive_keys as $sk ) {
+			if ( ! empty( $settings[ $sk ] ) ) {
+				$settings[ $sk ] = ''; // Empty — import will preserve existing value.
+			}
+		}
+
+		$data = wp_json_encode( $settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
 
 		header( 'Content-Type: application/json' );
 		header( 'Content-Disposition: attachment; filename="prime-cache-settings-' . gmdate( 'Y-m-d' ) . '.json"' );
@@ -963,6 +972,12 @@ class Prime_Cache {
 
 		foreach ( $iterator as $item ) {
 			if ( ! $item->isFile() ) {
+				continue;
+			}
+
+			// Skip stats.json and debug.log — only clean cache content files.
+			$basename = $item->getBasename();
+			if ( 'stats.json' === $basename || 'debug.log' === $basename ) {
 				continue;
 			}
 

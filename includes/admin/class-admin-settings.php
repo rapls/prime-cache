@@ -282,10 +282,16 @@ class Prime_Cache_Admin_Settings {
 	/* ── helpers ───────────────────────────────────────────── */
 
 	private function get_cache_stats() {
+		// Cache stats in a short transient to avoid full directory scan on every page load.
+		$cached = get_transient( 'prime_cache_dir_stats' );
+		if ( false !== $cached ) {
+			return $cached;
+		}
 		$r = array( 'files' => 0, 'size' => 0 );
 		if ( ! is_dir( PRIME_CACHE_CACHE_DIR ) ) return $r;
 		$it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( PRIME_CACHE_CACHE_DIR, RecursiveDirectoryIterator::SKIP_DOTS ) );
 		foreach ( $it as $f ) { if ( $f->isFile() && 'html' === $f->getExtension() ) $r['files']++; if ( $f->isFile() ) $r['size'] += $f->getSize(); }
+		set_transient( 'prime_cache_dir_stats', $r, 60 );
 		return $r;
 	}
 	private function get_hit_stats() {
@@ -321,7 +327,7 @@ class Prime_Cache_Admin_Settings {
 		return $s;
 	}
 	/**
-	 * Sanitize a regex pattern field — validate syntax and reject dangerous patterns.
+	 * Sanitize a simple pattern field (pipe-separated substrings with . ^ $ as wildcards).
 	 */
 	private function sanitize_regex_field( $value ) {
 		$value = sanitize_textarea_field( $value );
@@ -1388,7 +1394,7 @@ class Prime_Cache_Admin_Settings {
 				<div class="pc-field">
 					<label class="pc-lbl"><?php esc_html_e( 'Preload Excluded URLs', 'prime-cache' ); ?></label>
 					<textarea name="prime_cache_settings[preload_excluded_uri]" rows="3" class="pc-ta" placeholder="/sample-page/&#10;/private-area/(.*)"><?php echo esc_textarea( $settings['preload_excluded_uri'] ); ?></textarea>
-					<p class="pc-help"><?php esc_html_e( 'URL path patterns to skip during preloading (one per line). Supports regex. These pages will not be crawled by the preloader.', 'prime-cache' ); ?></p>
+					<p class="pc-help"><?php esc_html_e( 'URL path patterns to skip during preloading (one per line). Supports simple patterns with pipe (|) for alternatives. These pages will not be crawled by the preloader.', 'prime-cache' ); ?></p>
 				</div>
 			</div>
 

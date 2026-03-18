@@ -204,8 +204,8 @@ class Prime_Cache_Config {
 		$lines[] = '';
 
 		foreach ( $settings as $key => $value ) {
-			// Validate key: only lowercase letters and underscores allowed.
-			if ( ! preg_match( '#^[a-z_]+$#', $key ) ) {
+			// Validate key: lowercase letters, digits, and underscores allowed.
+			if ( ! preg_match( '#^[a-z0-9_]+$#', $key ) ) {
 				continue;
 			}
 			if ( is_bool( $value ) ) {

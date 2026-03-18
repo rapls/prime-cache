@@ -70,7 +70,8 @@ class Prime_Cache_LazyLoad {
 					return $tag;
 				}
 
-				return str_replace( '<img ', '<img loading="lazy" ', $tag );
+				// Use regex insertion to handle <img\n or <img\t variations.
+				return preg_replace( '#^(<img)\b#i', '$1 loading="lazy"', $tag );
 			}, $html );
 		}
 
@@ -87,7 +88,7 @@ class Prime_Cache_LazyLoad {
 					return $tag;
 				}
 
-				return str_replace( '<iframe ', '<iframe loading="lazy" ', $tag );
+				return preg_replace( '#^(<iframe)\b#i', '$1 loading="lazy"', $tag );
 			}, $html );
 		}
 
@@ -96,10 +97,15 @@ class Prime_Cache_LazyLoad {
 			$html = preg_replace_callback( '#<video\s[^>]+>#i', function( $m ) use ( $excludes ) {
 				$tag = $m[0];
 
+				// Apply exclusion patterns to videos too.
+				if ( $this->is_excluded( $tag, $excludes ) ) {
+					return $tag;
+				}
+
 				if ( preg_match( '#preload\s*=\s*["\']auto["\']#i', $tag ) ) {
 					$tag = preg_replace( '#preload\s*=\s*["\']auto["\']#i', 'preload="none"', $tag );
 				} elseif ( false === stripos( $tag, 'preload' ) ) {
-					$tag = str_replace( '<video ', '<video preload="none" ', $tag );
+					$tag = preg_replace( '#^(<video)\b#i', '$1 preload="none"', $tag );
 				}
 
 				return $tag;
