@@ -841,6 +841,11 @@ class Prime_Cache_Preload {
 				$best_source = null;
 				$best_type   = '';
 				foreach ( $source_tags[0] as $source_tag ) {
+					// Skip sources with media conditions — we can't determine which
+					// applies without knowing viewport, so only preload unconditional sources.
+					if ( preg_match( '#\bmedia\s*=#i', $source_tag ) ) {
+						continue;
+					}
 					$s_type = '';
 					if ( preg_match( '#type=["\']([^"\']+)["\']#i', $source_tag, $tm ) ) {
 						$s_type = strtolower( $tm[1] );
@@ -854,7 +859,29 @@ class Prime_Cache_Preload {
 					}
 				}
 				if ( $best_source && preg_match( '#srcset=["\']([^"\']+)["\']#i', $best_source, $bs_m ) ) {
-					$preload_src = strtok( $bs_m[1], ' ' );
+					// Pick the largest candidate from srcset for preload href.
+					// strtok would always pick the first (often smallest) candidate.
+					$candidates = explode( ',', $bs_m[1] );
+					$best_url   = '';
+					$best_w     = 0;
+					foreach ( $candidates as $cand ) {
+						$cand  = trim( $cand );
+						$parts = preg_split( '#\s+#', $cand, 2 );
+						$url   = $parts[0];
+						$desc  = $parts[1] ?? '';
+						// Parse width descriptor (e.g. 1536w).
+						$w = 0;
+						if ( preg_match( '#(\d+)w$#', $desc, $wm ) ) {
+							$w = (int) $wm[1];
+						} elseif ( preg_match( '#(\d+(?:\.\d+)?)x$#', $desc, $xm ) ) {
+							$w = (int) ( (float) $xm[1] * 1000 ); // Normalize x to comparable value.
+						}
+						if ( $w > $best_w || empty( $best_url ) ) {
+							$best_url = $url;
+							$best_w   = $w;
+						}
+					}
+					$preload_src = $best_url ?: strtok( $bs_m[1], ' ' );
 					$type_attr   = ' type="' . $best_type . '"';
 				}
 			}

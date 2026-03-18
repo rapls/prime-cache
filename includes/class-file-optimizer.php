@@ -598,7 +598,7 @@ class Prime_Cache_File_Optimizer {
 				continue;
 			}
 
-			$selectors = array_map( 'trim', explode( ',', $selectors_raw ) );
+			$selectors = $this->split_selectors( $selectors_raw );
 			$keep      = false;
 
 			foreach ( $selectors as $sel ) {
@@ -619,6 +619,43 @@ class Prime_Cache_File_Optimizer {
 	/**
 	 * Check if a CSS selector matches anything in the page HTML.
 	 */
+	/**
+	 * Split CSS selector list by top-level commas only.
+	 *
+	 * Respects parentheses depth so :is(.a, .b) and :not(.x, .y) are not
+	 * broken apart by the comma inside the pseudo-class.
+	 *
+	 * @param string $raw Raw selector string.
+	 * @return array Individual selectors.
+	 */
+	private function split_selectors( $raw ) {
+		$result = array();
+		$depth  = 0;
+		$start  = 0;
+		$len    = strlen( $raw );
+
+		for ( $i = 0; $i < $len; $i++ ) {
+			$ch = $raw[ $i ];
+			if ( '(' === $ch || '[' === $ch ) {
+				$depth++;
+			} elseif ( ')' === $ch || ']' === $ch ) {
+				$depth = max( 0, $depth - 1 );
+			} elseif ( ',' === $ch && 0 === $depth ) {
+				$sel = trim( substr( $raw, $start, $i - $start ) );
+				if ( '' !== $sel ) {
+					$result[] = $sel;
+				}
+				$start = $i + 1;
+			}
+		}
+		$last = trim( substr( $raw, $start ) );
+		if ( '' !== $last ) {
+			$result[] = $last;
+		}
+
+		return $result;
+	}
+
 	private function selector_used_in_html( $selector, $html, $safelist ) {
 		// Always keep safelisted patterns.
 		foreach ( $safelist as $safe ) {
