@@ -316,8 +316,12 @@ class WP_Object_Cache {
 		$ver_key = $this->key_prefix . 'prime_cache_global_ver';
 		$new_ver = $this->mc->increment( $ver_key );
 		if ( false === $new_ver ) {
-			$this->mc->set( $ver_key, 1 );
-			$new_ver = 1;
+			// Key doesn't exist — create then increment for atomic counter.
+			$this->mc->add( $ver_key, 0 );
+			$new_ver = $this->mc->increment( $ver_key );
+			if ( false === $new_ver ) {
+				return false; // Memcached connection issue.
+			}
 		}
 		$this->global_version = $new_ver;
 		return true;
@@ -345,7 +349,7 @@ class WP_Object_Cache {
 
 		// Clear local in-memory cache for this group.
 		foreach ( array_keys( $this->cache ) as $cached_key ) {
-			if ( false !== strpos( $cached_key, $group . ':' ) ) {
+			if ( preg_match( '#(?:^|:)' . preg_quote( $group, '#' ) . ':#', $cached_key ) ) {
 				unset( $this->cache[ $cached_key ] );
 			}
 		}

@@ -92,10 +92,11 @@ function _prime_cache_record_stat( $type ) {
 
 // ----- Early Request Tests (no WordPress functions) -----
 
-// Only GET requests.
-if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || 'GET' !== $_SERVER['REQUEST_METHOD'] ) {
+// Only GET and HEAD requests.
+if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || ! in_array( $_SERVER['REQUEST_METHOD'], array( 'GET', 'HEAD' ), true ) ) {
 	return;
 }
+$_pc_is_head = 'HEAD' === $_SERVER['REQUEST_METHOD'];
 
 // Never cache authenticated requests (Basic Auth, Bearer tokens, Digest).
 if ( ! empty( $_SERVER['HTTP_AUTHORIZATION'] ) || ! empty( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] )
@@ -347,14 +348,26 @@ if ( is_readable( $_pc_cache_file ) ) {
 	header( 'Last-Modified: ' . gmdate( 'D, d M Y H:i:s', $_pc_modified_time ) . ' GMT' );
 	header( 'X-Prime-Cache: HIT' );
 
+	// Tell upstream caches (CDN, reverse proxy) that content varies by cookie
+	// when cache_vary_cookies is active, preventing content mixing.
+	if ( ! empty( $prime_cache_config['cache_vary_cookies'] ) ) {
+		header( 'Vary: Cookie', false );
+	}
+
 	_prime_cache_record_stat( 'hit' );
 
 	// Serve gzip version if available and accepted.
 	$_pc_accept_gzip = isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && strpos( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) !== false;
 	$_pc_gz_file     = $_pc_cache_dir . _prime_cache_get_filename( $_pc_is_ssl, $_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], true, $_pc_vary_suffix, $_pc_qs_suffix );
 
+	// HEAD requests: return headers only (no body).
+	if ( $_pc_is_head ) {
+		header( 'Content-Length: ' . filesize( $_pc_cache_file ) );
+		exit;
+	}
+
 	if ( $_pc_accept_gzip && is_readable( $_pc_gz_file ) ) {
-		header( 'Vary: Accept-Encoding' );
+		header( 'Vary: Accept-Encoding', false );
 		header( 'Content-Encoding: gzip' );
 		readfile( $_pc_gz_file );
 		exit;
@@ -513,8 +526,9 @@ ob_start( function ( $buffer ) {
 	$meta_headers       = array();
 	if ( ! empty( $headers_list_raw ) ) {
 		foreach ( $headers_list_raw as $header ) {
-			// Only preserve Content-Type and custom headers, not cache control.
-			if ( preg_match( '#^(Content-Type|X-|Link)#i', $header ) ) {
+			// Preserve Content-Type, security headers, custom headers, and Link.
+			// Excludes Set-Cookie, Cache-Control, Pragma (already checked above).
+			if ( preg_match( '#^(Content-Type|Content-Security-Policy|Referrer-Policy|Permissions-Policy|Cross-Origin-|X-Frame-Options|X-Content-Type-Options|X-|Link)#i', $header ) ) {
 				$meta_headers[] = $header;
 			}
 		}

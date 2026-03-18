@@ -155,7 +155,12 @@ class Prime_Cache_Media_Optimizer {
 	 * Print YouTube click handler script in footer.
 	 */
 	public function enqueue_yt_script() {
-		$js_url = plugins_url( 'assets/pc-yt.js', dirname( __FILE__ ) );
-		echo '<script src="' . esc_url( $js_url ) . '" defer></script>' . "\n";
+		wp_enqueue_script(
+			'pc-yt',
+			plugins_url( 'assets/pc-yt.js', dirname( __FILE__ ) ),
+			array(),
+			PRIME_CACHE_VERSION,
+			array( 'strategy' => 'defer', 'in_footer' => true )
+		);
 	}
 }

@@ -109,7 +109,7 @@ class Prime_Cache_CDN {
 
 			// Handle srcset separately — may contain multiple comma-separated candidates.
 			$srcset_pattern = '#(srcset\s*=\s*["\'])([^"\']+)(["\'])#i';
-			$html = preg_replace_callback( $srcset_pattern, function( $m ) use ( $cdn_hosts, $host_count, &$i, $excludes, $scheme, $dirs_pattern ) {
+			$html = preg_replace_callback( $srcset_pattern, function( $m ) use ( $cdn_hosts, $host_count, &$i, $excludes, $scheme, $dirs_pattern, $site_url ) {
 				$candidates = explode( ',', $m[2] );
 				$rewritten  = array();
 				// Use same CDN host for all candidates in this srcset attribute.
