@@ -123,6 +123,15 @@ class Prime_Cache_Preload {
 			$url        = $queue[ $idx ];
 			$mobile_key = $url . ':m';
 
+			// Quick check: skip if we know this URL isn't eligible yet.
+			$next_key = $url . ':next';
+			if ( isset( $attempts[ $next_key ] ) && $now < (int) $attempts[ $next_key ] ) {
+				$deferred[] = $url;
+				$idx++;
+				continue;
+			}
+			unset( $attempts[ $next_key ] ); // Clear — will be re-evaluated below.
+
 			// Check which variants still need warming.
 			$need_desktop = ! $this->is_variant_cached( $url, false );
 			$need_mobile  = $mobile_sep && ! $this->is_variant_cached( $url, true );
@@ -189,7 +198,11 @@ class Prime_Cache_Preload {
 			}
 
 			if ( ! $sent ) {
-				// Both variants in cooldown — move to end of queue.
+				// Both variants in cooldown — move to end of queue and record
+				// next eligible time so future batches can skip quickly.
+				$next_d = $d_info['time'] + $d_cooldown;
+				$next_m = $m_info['time'] + $m_cooldown;
+				$attempts[ $url . ':next' ] = max( $next_d, $next_m );
 				$deferred[] = $url;
 				$idx++;
 				continue;

@@ -1496,10 +1496,14 @@ JS;
 			} elseif ( 0 === $created && $last_attempt > 0 && $last_attempt < $cutoff ) {
 				$is_stale = true; // Legacy format, last attempt > 24h ago.
 			} elseif ( 0 === $created && 0 === $last_attempt ) {
-				// No timestamps (legacy or abandoned). Stamp it now — if still
-				// unclaimed after 24h, the next cleanup will delete it.
+				// One-time migration: stamp created=now. After this, the entry has
+				// created > 0 so future cleanups use the created < cutoff path.
+				// If still unprocessed after 24h, the next cleanup deletes it.
 				$url = ( is_array( $data ) && isset( $data['url'] ) ) ? $data['url'] : $row->option_value;
-				update_option( $row->option_name, wp_json_encode( array( 'url' => $url, 'created' => time() ) ), false );
+				update_option( $row->option_name, wp_json_encode( array(
+					'url'     => $url,
+					'created' => time(),
+				) ), false );
 			}
 
 			if ( $is_stale ) {
