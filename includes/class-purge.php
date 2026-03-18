@@ -253,6 +253,7 @@ class Prime_Cache_Purge {
 		if ( $host ) {
 			Prime_Cache_Storage::delete_host( $host );
 		}
+		delete_transient( 'prime_cache_dir_stats' );
 		do_action( 'prime_cache_after_purge_all' );
 	}
 

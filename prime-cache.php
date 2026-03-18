@@ -154,6 +154,7 @@ function prime_cache_get_settings( $force = false ) {
 		'cloudflare_enabled'    => false,
 		'cloudflare_email'      => '',
 		'cloudflare_api_key'    => '',
+		'cloudflare_auth_mode'  => 'token',
 		'cloudflare_zone_id'    => '',
 		'img_conversion_enabled' => false,
 		'webp_enabled'          => false,

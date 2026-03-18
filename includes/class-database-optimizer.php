@@ -241,8 +241,9 @@ class Prime_Cache_Database_Optimizer {
 
 	private function optimize_tables() {
 		global $wpdb;
+		// Include all engines with fragmentation (InnoDB + MyISAM).
 		$tables = $wpdb->get_col( $wpdb->prepare(
-			"SELECT table_name FROM information_schema.tables WHERE table_schema = %s AND Engine <> 'InnoDB' AND data_free > 0",
+			"SELECT table_name FROM information_schema.tables WHERE table_schema = %s AND data_free > 0",
 			DB_NAME
 		) );
 

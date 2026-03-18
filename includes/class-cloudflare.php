@@ -25,6 +25,7 @@ class Prime_Cache_Cloudflare {
 		// Debounced purge on individual URL clear.
 		add_action( 'prime_cache_url_purged', array( $this, 'queue_url' ) );
 		add_action( 'shutdown', array( $this, 'flush_queued_urls' ) );
+		add_action( 'prime_cache_cf_deferred_purge', array( $this, 'run_deferred_purge' ) );
 	}
 
 	private function is_enabled() {
@@ -45,15 +46,14 @@ class Prime_Cache_Cloudflare {
 			return $headers;
 		}
 
-		$key = trim( $this->settings['cloudflare_api_key'] );
+		$key  = trim( $this->settings['cloudflare_api_key'] );
+		$mode = $this->settings['cloudflare_auth_mode'] ?? 'token';
 
-		// Bearer token format (starts with a long string without @).
-		if ( strlen( $key ) > 37 && false === strpos( $key, '@' ) ) {
-			$headers['Authorization'] = 'Bearer ' . $key;
-		} else {
-			// Global API Key + Email format.
+		if ( 'global_key' === $mode ) {
 			$headers['X-Auth-Key']   = $key;
 			$headers['X-Auth-Email'] = trim( $this->settings['cloudflare_email'] );
+		} else {
+			$headers['Authorization'] = 'Bearer ' . $key;
 		}
 
 		return $headers;
@@ -156,11 +156,28 @@ class Prime_Cache_Cloudflare {
 		}
 
 		$urls = array_unique( self::$queued_urls );
-
-		// Always use batched per-URL purge (30 per API call) instead of
-		// purge_everything(), which destroys the entire zone cache.
-		$this->purge_urls( $urls );
-
 		self::$queued_urls = array();
+
+		// For small batches, purge inline. For larger sets, defer to cron
+		// to avoid blocking the shutdown path with multiple API calls.
+		if ( count( $urls ) <= 30 ) {
+			$this->purge_urls( $urls );
+		} else {
+			set_transient( 'prime_cache_cf_deferred_purge', $urls, 300 );
+			if ( ! wp_next_scheduled( 'prime_cache_cf_deferred_purge' ) ) {
+				wp_schedule_single_event( time(), 'prime_cache_cf_deferred_purge' );
+			}
+		}
+	}
+
+	/**
+	 * Cron handler for deferred Cloudflare purge.
+	 */
+	public function run_deferred_purge() {
+		$urls = get_transient( 'prime_cache_cf_deferred_purge' );
+		if ( ! empty( $urls ) && is_array( $urls ) ) {
+			delete_transient( 'prime_cache_cf_deferred_purge' );
+			$this->purge_urls( $urls );
+		}
 	}
 }

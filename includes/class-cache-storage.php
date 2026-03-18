@@ -29,7 +29,7 @@ class Prime_Cache_Storage {
 	 * Matches the logic in dropins/page-cache.php _prime_cache_get_filename().
 	 *
 	 * @param bool   $is_ssl       Whether the request is HTTPS.
-	 * @param bool   $is_mobile    Whether the request is from a mobile device.
+	 * @param bool   $is_mobile    Whether to add -mobile suffix (caller must check cache_mobile_separate).
 	 * @param bool   $gzip         Whether to add .gz extension.
 	 * @param string $vary_suffix  Vary cookie suffix (e.g. '-vc_abc12345').
 	 * @param string $qs_suffix    Query string suffix (e.g. '-qs_def67890').

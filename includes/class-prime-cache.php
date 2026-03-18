@@ -766,11 +766,18 @@ class Prime_Cache {
 		$total = $hs['hit'] + $hs['miss'];
 		$rate  = $total > 0 ? round( ( $hs['hit'] / $total ) * 100, 1 ) : 0;
 
-		$files = 0; $size = 0;
-		if ( is_dir( PRIME_CACHE_CACHE_DIR ) ) {
-			$it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( PRIME_CACHE_CACHE_DIR, RecursiveDirectoryIterator::SKIP_DOTS ) );
-			foreach ( $it as $f ) { if ( $f->isFile() && 'html' === $f->getExtension() ) $files++; if ( $f->isFile() ) $size += $f->getSize(); }
+		// Use cached stats to avoid full directory scan on every dashboard load.
+		$dir_stats = get_transient( 'prime_cache_dir_stats' );
+		if ( false === $dir_stats ) {
+			$dir_stats = array( 'files' => 0, 'size' => 0 );
+			if ( is_dir( PRIME_CACHE_CACHE_DIR ) ) {
+				$it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( PRIME_CACHE_CACHE_DIR, RecursiveDirectoryIterator::SKIP_DOTS ) );
+				foreach ( $it as $f ) { if ( $f->isFile() && 'html' === $f->getExtension() ) $dir_stats['files']++; if ( $f->isFile() ) $dir_stats['size'] += $f->getSize(); }
+			}
+			set_transient( 'prime_cache_dir_stats', $dir_stats, 60 );
 		}
+		$files = $dir_stats['files'];
+		$size  = $dir_stats['size'];
 
 		$s  = prime_cache_get_settings();
 		$oc = Prime_Cache_Config::get_active_object_cache();
@@ -833,7 +840,8 @@ class Prime_Cache {
 		$settings = get_option( 'prime_cache_settings', array() );
 
 		// Mask sensitive API keys/secrets before export.
-		$sensitive_keys = array( 'cloudflare_api_key', 'cloudflare_email', 'sucuri_api_key' );
+		// Mask API keys/secrets (not email — it's configuration, not a secret).
+		$sensitive_keys = array( 'cloudflare_api_key', 'sucuri_api_key' );
 		foreach ( $sensitive_keys as $sk ) {
 			if ( ! empty( $settings[ $sk ] ) ) {
 				$settings[ $sk ] = ''; // Empty — import will preserve existing value.
@@ -908,6 +916,15 @@ class Prime_Cache {
 		if ( ! is_array( $data ) ) {
 			wp_safe_redirect( $error_url );
 			exit;
+		}
+
+		// Preserve existing sensitive keys if import has them empty (masked export).
+		$current  = prime_cache_get_settings();
+		$preserve = array( 'cloudflare_api_key', 'sucuri_api_key' );
+		foreach ( $preserve as $pk ) {
+			if ( isset( $data[ $pk ] ) && '' === $data[ $pk ] && ! empty( $current[ $pk ] ) ) {
+				$data[ $pk ] = $current[ $pk ];
+			}
 		}
 
 		// Sanitize imported data through the same pipeline as normal saves.

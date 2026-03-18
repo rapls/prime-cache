@@ -128,6 +128,7 @@ class Prime_Cache_Admin_Settings {
 		$s['cloudflare_enabled']    = ! empty( $input['cloudflare_enabled'] );
 		$s['cloudflare_email']      = sanitize_email( $input['cloudflare_email'] ?? '' );
 		$s['cloudflare_api_key']    = sanitize_text_field( $input['cloudflare_api_key'] ?? '' );
+		$s['cloudflare_auth_mode']  = in_array( $input['cloudflare_auth_mode'] ?? '', array( 'token', 'global_key' ), true ) ? $input['cloudflare_auth_mode'] : 'token';
 		$s['cloudflare_zone_id']    = sanitize_text_field( $input['cloudflare_zone_id'] ?? '' );
 		$s['browser_cache']         = ! empty( $input['browser_cache'] );
 		$s['browser_cache_css_js']  = isset( $input['browser_cache_css_js'] ) ? max( 0, (int) $input['browser_cache_css_js'] ) : 31536000;
