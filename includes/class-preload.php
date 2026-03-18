@@ -835,10 +835,11 @@ class Prime_Cache_Preload {
 		}
 
 		// Extract best <source> from the picture block (attribute-order independent).
-		$has_art_direction = false;
+		$skip_preload = false;
 		if ( ! empty( $picture_block ) ) {
 			if ( preg_match_all( '#<source\s[^>]+>#i', $picture_block, $source_tags ) ) {
 				// Check if any source has media= (art-direction pattern).
+				$has_art_direction = false;
 				foreach ( $source_tags[0] as $source_tag ) {
 					if ( preg_match( '#\bmedia\s*=#i', $source_tag ) ) {
 						$has_art_direction = true;
@@ -846,9 +847,12 @@ class Prime_Cache_Preload {
 					}
 				}
 
-				// Art-direction <picture>: skip preload entirely — PHP can't determine
-				// which media condition applies without knowing viewport/device.
-				if ( ! $has_art_direction ) {
+				if ( $has_art_direction ) {
+					// Art-direction <picture>: skip preload entirely.
+					// PHP can't determine which media query applies without viewport info.
+					$skip_preload = true;
+				} else {
+					// Non-art-direction: find best next-gen source (AVIF > WebP).
 					foreach ( $source_tags[0] as $source_tag ) {
 						$s_type = '';
 						if ( preg_match( '#type=["\']([^"\']+)["\']#i', $source_tag, $tm ) ) {
@@ -862,54 +866,55 @@ class Prime_Cache_Preload {
 							$best_type   = $s_type;
 						}
 					}
+					// Update href to match the source series (avoid href=jpg + type=avif mismatch).
 					if ( $best_source && preg_match( '#srcset=["\']([^"\']+)["\']#i', $best_source, $bs_m ) ) {
-						// Use <img src> as href fallback — let imagesrcset handle candidate
-						// selection. This avoids preloading an overly large or small candidate.
-						$type_attr = ' type="' . $best_type . '"';
+						$preload_src = strtok( $bs_m[1], ' ' ); // First candidate as href.
+						$type_attr   = ' type="' . $best_type . '"';
 					}
 				}
 			}
 		}
 
-		if ( empty( $type_attr ) ) {
-			if ( preg_match( '#\.(webp)$#i', strtok( $preload_src, '?' ) ) ) {
-				$type_attr = ' type="image/webp"';
-			} elseif ( preg_match( '#\.(avif)$#i', strtok( $preload_src, '?' ) ) ) {
-				$type_attr = ' type="image/avif"';
+		if ( ! $skip_preload ) {
+			if ( empty( $type_attr ) ) {
+				if ( preg_match( '#\.(webp)$#i', strtok( $preload_src, '?' ) ) ) {
+					$type_attr = ' type="image/webp"';
+				} elseif ( preg_match( '#\.(avif)$#i', strtok( $preload_src, '?' ) ) ) {
+					$type_attr = ' type="image/avif"';
+				}
 			}
+
+			$preload_tag = '<link rel="preload" as="image" href="' . esc_url( $preload_src ) . '"' . $type_attr;
+
+			// Add imagesrcset/imagesizes from the same source, or fall back to <img>.
+			$srcset_val = '';
+			$sizes_val  = '';
+			if ( ! empty( $best_source ) ) {
+				if ( preg_match( '#srcset=["\']([^"\']+)["\']#i', $best_source, $ss_m ) ) {
+					$srcset_val = $ss_m[1];
+				}
+				if ( preg_match( '#sizes=["\']([^"\']+)["\']#i', $best_source, $sz_m ) ) {
+					$sizes_val = $sz_m[1];
+				}
+			}
+
+			if ( $srcset_val ) {
+				$preload_tag .= ' imagesrcset="' . esc_attr( $srcset_val ) . '"';
+				if ( $sizes_val ) {
+					$preload_tag .= ' imagesizes="' . esc_attr( $sizes_val ) . '"';
+				} elseif ( preg_match( '#sizes=["\']([^"\']+)["\']#i', $lcp_tag, $sizes_m ) ) {
+					$preload_tag .= ' imagesizes="' . esc_attr( $sizes_m[1] ) . '"';
+				}
+			} elseif ( preg_match( '#srcset=["\']([^"\']+)["\']#i', $lcp_tag, $srcset_m ) ) {
+				$preload_tag .= ' imagesrcset="' . esc_attr( $srcset_m[1] ) . '"';
+				if ( preg_match( '#sizes=["\']([^"\']+)["\']#i', $lcp_tag, $sizes_m ) ) {
+					$preload_tag .= ' imagesizes="' . esc_attr( $sizes_m[1] ) . '"';
+				}
+			}
+
+			$preload_tag .= ' fetchpriority="high">';
+			$html = str_replace( '</head>', $preload_tag . "\n</head>", $html );
 		}
-
-		// Build preload tag with srcset/sizes from the same source element.
-		$preload_tag = '<link rel="preload" as="image" href="' . esc_url( $preload_src ) . '"' . $type_attr;
-
-		$srcset_val = '';
-		$sizes_val  = '';
-		if ( ! empty( $best_source ) ) {
-			if ( preg_match( '#srcset=["\']([^"\']+)["\']#i', $best_source, $ss_m ) ) {
-				$srcset_val = $ss_m[1];
-			}
-			if ( preg_match( '#sizes=["\']([^"\']+)["\']#i', $best_source, $sz_m ) ) {
-				$sizes_val = $sz_m[1];
-			}
-		}
-
-		if ( $srcset_val ) {
-			$preload_tag .= ' imagesrcset="' . esc_attr( $srcset_val ) . '"';
-			if ( $sizes_val ) {
-				$preload_tag .= ' imagesizes="' . esc_attr( $sizes_val ) . '"';
-			} elseif ( preg_match( '#sizes=["\']([^"\']+)["\']#i', $lcp_tag, $sizes_m ) ) {
-				$preload_tag .= ' imagesizes="' . esc_attr( $sizes_m[1] ) . '"';
-			}
-		} elseif ( preg_match( '#srcset=["\']([^"\']+)["\']#i', $lcp_tag, $srcset_m ) ) {
-			$preload_tag .= ' imagesrcset="' . esc_attr( $srcset_m[1] ) . '"';
-			if ( preg_match( '#sizes=["\']([^"\']+)["\']#i', $lcp_tag, $sizes_m ) ) {
-				$preload_tag .= ' imagesizes="' . esc_attr( $sizes_m[1] ) . '"';
-			}
-		}
-
-		$preload_tag .= ' fetchpriority="high">';
-
-		$html = str_replace( '</head>', $preload_tag . "\n</head>", $html );
 
 		return $html;
 	}
