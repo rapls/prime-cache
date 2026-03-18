@@ -112,9 +112,10 @@ class Prime_Cache_Preload {
 		$attempts = get_option( 'prime_cache_preload_attempts', array() );
 		$max_attempts = 3;
 		$now = time();
-		$count = 0;
-		$total = count( $queue );
-		$idx   = 0;
+		$count    = 0;
+		$total    = count( $queue );
+		$idx      = 0;
+		$deferred = array(); // URLs in cooldown — move to end of queue.
 
 		$mobile_sep = ! empty( $this->settings['cache_mobile_separate'] );
 
@@ -188,7 +189,8 @@ class Prime_Cache_Preload {
 			}
 
 			if ( ! $sent ) {
-				// Both variants in cooldown — skip this URL for now.
+				// Both variants in cooldown — move to end of queue.
+				$deferred[] = $url;
 				$idx++;
 				continue;
 			}
@@ -215,7 +217,8 @@ class Prime_Cache_Preload {
 				}
 			}
 		}
-		$remaining = array_merge( $still_needed, $unprocessed );
+		// Append deferred (cooldown) URLs to end so they don't block the front.
+		$remaining = array_merge( $still_needed, $unprocessed, $deferred );
 		update_option( 'prime_cache_preload_attempts', $attempts, false );
 
 		if ( ! empty( $remaining ) ) {

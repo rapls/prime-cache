@@ -1385,19 +1385,27 @@ JS;
 	 */
 	public function cron_refresh_google_fonts() {
 		global $wpdb;
-		// Find pending Google Font URL options (exclude attempt counters).
-		// LEFT JOIN attempt counters to prioritize URLs with fewer failures.
-		$rows = $wpdb->get_results(
+		// Find pending Google Font URL options, excluding those still in backoff.
+		$now = time();
+		$rows = $wpdb->get_results( $wpdb->prepare(
 			"SELECT o.option_name, o.option_value,
 			        COALESCE(a.option_value, 0) AS attempts
 			 FROM {$wpdb->options} o
 			 LEFT JOIN {$wpdb->options} a ON a.option_name = CONCAT(o.option_name, '_attempts')
+			 LEFT JOIN {$wpdb->options} t ON t.option_name = CONCAT(o.option_name, '_attempts_time')
 			 WHERE o.option_name LIKE 'prime\_cache\_gf\_%'
-			   AND o.option_name NOT LIKE '%\_attempts'
-			   AND o.option_name NOT LIKE '%\_time'
+			   AND o.option_name NOT LIKE '%%\_attempts'
+			   AND o.option_name NOT LIKE '%%\_time'
+			   AND (t.option_value IS NULL OR (%d - CAST(t.option_value AS UNSIGNED)) > CASE
+			     WHEN COALESCE(a.option_value, 0) = 0 THEN 0
+			     WHEN COALESCE(a.option_value, 0) = 1 THEN 30
+			     WHEN COALESCE(a.option_value, 0) = 2 THEN 300
+			     ELSE 1800
+			   END)
 			 ORDER BY attempts ASC, o.option_id ASC
-			 LIMIT 20"
-		);
+			 LIMIT 20",
+			$now
+		) );
 		if ( empty( $rows ) ) {
 			return;
 		}
@@ -1410,35 +1418,22 @@ JS;
 		$fonts_url = $this->cache_url . 'fonts/';
 		wp_mkdir_p( $fonts_dir );
 
-		$now = time();
-		$backoff_seconds = array( 0, 30, 300, 1800, 3600 ); // Escalating backoff.
-
 		foreach ( $rows as $row ) {
-			// Parse pending value (new format: JSON with url + created).
 			$data = json_decode( $row->option_value, true );
-			if ( is_array( $data ) && isset( $data['url'] ) ) {
-				$gf_url = $data['url'];
-			} else {
-				$gf_url = $row->option_value; // Legacy: plain URL string.
-			}
+			$gf_url = ( is_array( $data ) && isset( $data['url'] ) ) ? $data['url'] : $row->option_value;
 
 			$attempt_key  = $row->option_name . '_attempts';
-			$url_attempts = (int) get_option( $attempt_key, 0 );
+			$url_attempts = (int) ( $row->attempts ?? get_option( $attempt_key, 0 ) );
 
 			// Drop after 5 failures.
 			if ( $url_attempts >= 5 ) {
 				delete_option( $row->option_name );
 				delete_option( $attempt_key );
+				delete_option( $attempt_key . '_time' );
 				continue;
 			}
 
-			// Backoff: skip if too soon since last attempt.
-			$backoff = isset( $backoff_seconds[ $url_attempts ] ) ? $backoff_seconds[ $url_attempts ] : 3600;
-			$last_attempt = (int) get_option( $attempt_key . '_time', 0 );
-			if ( $last_attempt && ( $now - $last_attempt ) < $backoff ) {
-				continue; // Not ready yet — skip to next URL.
-			}
-
+			// Backoff is enforced in the SQL WHERE clause — URLs here are ready.
 			$ok = $this->fetch_google_font_css( $gf_url, $fonts_dir, $fonts_url );
 			if ( false !== $ok ) {
 				delete_option( $row->option_name );
@@ -1446,7 +1441,7 @@ JS;
 				delete_option( $attempt_key . '_time' );
 			} else {
 				update_option( $attempt_key, $url_attempts + 1, false );
-				update_option( $attempt_key . '_time', $now, false );
+				update_option( $attempt_key . '_time', time(), false );
 			}
 		}
 
@@ -1461,7 +1456,11 @@ JS;
 
 	/**
 	 * Daily cleanup of stale Google Fonts pending options.
-	 * Only deletes options created more than 24 hours ago.
+	 *
+	 * Deletes pending URLs where:
+	 * - created timestamp is older than 24 hours, OR
+	 * - last_attempt is older than 24 hours (for legacy entries without created), OR
+	 * - no timestamp AND no recent attempt (truly abandoned)
 	 */
 	public function cleanup_stale_gf_options() {
 		global $wpdb;
@@ -1475,11 +1474,24 @@ JS;
 		);
 
 		foreach ( $rows as $row ) {
-			$data = json_decode( $row->option_value, true );
+			$data    = json_decode( $row->option_value, true );
 			$created = is_array( $data ) && isset( $data['created'] ) ? (int) $data['created'] : 0;
 
-			// Delete if created > 24h ago, or if no timestamp (legacy format).
-			if ( 0 === $created || $created < $cutoff ) {
+			// Check last_attempt_time for legacy entries without created timestamp.
+			$last_attempt = (int) get_option( $row->option_name . '_attempts_time', 0 );
+
+			$is_stale = false;
+			if ( $created > 0 && $created < $cutoff ) {
+				$is_stale = true; // Created > 24h ago.
+			} elseif ( 0 === $created && $last_attempt > 0 && $last_attempt < $cutoff ) {
+				$is_stale = true; // Legacy format, last attempt > 24h ago.
+			} elseif ( 0 === $created && 0 === $last_attempt ) {
+				// No timestamps at all — migrate to JSON format instead of deleting.
+				$url = is_array( $data ) ? ( $data['url'] ?? $row->option_value ) : $row->option_value;
+				update_option( $row->option_name, wp_json_encode( array( 'url' => $url, 'created' => time() ) ), false );
+			}
+
+			if ( $is_stale ) {
 				delete_option( $row->option_name );
 				delete_option( $row->option_name . '_attempts' );
 				delete_option( $row->option_name . '_attempts_time' );
