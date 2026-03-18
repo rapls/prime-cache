@@ -430,11 +430,11 @@ class Prime_Cache_WebP {
 			return $html;
 		}
 
-		// Protect existing <picture> elements from being double-wrapped.
-		// Replace them with placeholders, process standalone <img> tags, then restore.
+		// Protect blocks that should not be processed: existing <picture> elements,
+		// <template>, <script>, and <noscript> blocks. Replace with placeholders.
 		$placeholders = array();
-		$html = preg_replace_callback( '#<picture[^>]*>.*?</picture>#is', function( $m ) use ( &$placeholders ) {
-			$key = '<!--PC_PICTURE_' . count( $placeholders ) . '-->';
+		$html = preg_replace_callback( '#<(?:picture|template|script|noscript)[^>]*>.*?</(?:picture|template|script|noscript)>#is', function( $m ) use ( &$placeholders ) {
+			$key = '<!--PC_PROTECT_' . count( $placeholders ) . '-->';
 			$placeholders[ $key ] = $m[0];
 			return $key;
 		}, $html );

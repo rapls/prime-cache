@@ -118,7 +118,7 @@ class Prime_Cache_Preload {
 
 			// Non-blocking request to warm desktop cache.
 			wp_remote_get( $url, array(
-				'timeout'   => 0.01,
+				'timeout'   => 0.5,
 				'blocking'  => false,
 				'sslverify' => true,
 				'headers'   => array( 'X-Prime-Cache-Preload' => '1' ),
@@ -127,7 +127,7 @@ class Prime_Cache_Preload {
 			// If mobile separate is enabled, also warm the mobile variant.
 			if ( ! empty( $this->settings['cache_mobile_separate'] ) ) {
 				wp_remote_get( $url, array(
-					'timeout'    => 0.01,
+					'timeout'    => 0.5,
 					'blocking'   => false,
 					'sslverify'  => true,
 					'user-agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
@@ -796,15 +796,35 @@ class Prime_Cache_Preload {
 		$html = str_replace( $lcp_tag, $new_lcp, $html );
 
 		// Inject <link rel="preload"> for LCP image in head.
-		$type_attr = '';
-		if ( preg_match( '#\.(webp)$#i', strtok( $lcp_src, '?' ) ) ) {
-			$type_attr = ' type="image/webp"';
-		} elseif ( preg_match( '#\.(avif)$#i', strtok( $lcp_src, '?' ) ) ) {
-			$type_attr = ' type="image/avif"';
+		// If the <img> is inside a <picture> with <source> elements, preload the
+		// best available format (AVIF > WebP > original) for maximum LCP benefit.
+		$preload_src = $lcp_src;
+		$type_attr   = '';
+
+		// Check for nearby <source> elements (picture mode).
+		$lcp_pos = strpos( $html, $new_lcp );
+		if ( false !== $lcp_pos ) {
+			$before = substr( $html, max( 0, $lcp_pos - 500 ), 500 );
+			// Prefer AVIF, then WebP.
+			if ( preg_match( '#<source\s[^>]*srcset=["\']([^"\']+)["\'][^>]*type=["\']image/avif["\']#i', $before, $avif_m ) ) {
+				$preload_src = strtok( $avif_m[1], ' ' ); // First candidate from srcset.
+				$type_attr = ' type="image/avif"';
+			} elseif ( preg_match( '#<source\s[^>]*srcset=["\']([^"\']+)["\'][^>]*type=["\']image/webp["\']#i', $before, $webp_m ) ) {
+				$preload_src = strtok( $webp_m[1], ' ' );
+				$type_attr = ' type="image/webp"';
+			}
+		}
+
+		if ( empty( $type_attr ) ) {
+			if ( preg_match( '#\.(webp)$#i', strtok( $preload_src, '?' ) ) ) {
+				$type_attr = ' type="image/webp"';
+			} elseif ( preg_match( '#\.(avif)$#i', strtok( $preload_src, '?' ) ) ) {
+				$type_attr = ' type="image/avif"';
+			}
 		}
 
 		// Support srcset — preload with imagesrcset if available.
-		$preload_tag = '<link rel="preload" as="image" href="' . esc_url( $lcp_src ) . '"' . $type_attr;
+		$preload_tag = '<link rel="preload" as="image" href="' . esc_url( $preload_src ) . '"' . $type_attr;
 
 		if ( preg_match( '#srcset=["\']([^"\']+)["\']#i', $lcp_tag, $srcset_m ) ) {
 			$preload_tag .= ' imagesrcset="' . esc_attr( $srcset_m[1] ) . '"';

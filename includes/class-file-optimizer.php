@@ -60,9 +60,9 @@ class Prime_Cache_File_Optimizer {
 	 *
 	 * - Strips cache_ignore_qs params (utm_*, fbclid, etc.)
 	 * - Keeps cache_query_strings params as part of the key
-	 * - Drops unknown params entirely
+	 * - Returns false if unknown params exist (page cache wouldn't cache this)
 	 *
-	 * @return string Normalized URI for use as cache key component.
+	 * @return string|false Normalized URI, or false if request has unknown query params.
 	 */
 	private function get_normalized_cache_uri() {
 		$uri  = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '/';
@@ -77,11 +77,21 @@ class Prime_Cache_File_Optimizer {
 		$cached_qs  = array_filter( array_map( 'trim', explode( ',', $s['cache_query_strings'] ?? '' ) ) );
 		$remaining  = array_diff_key( $_GET, array_flip( $ignored ) );
 
-		if ( empty( $remaining ) || empty( $cached_qs ) ) {
-			return $path; // No cacheable query params — use path only.
+		if ( empty( $remaining ) ) {
+			return $path; // All params were ignored — same as no query.
+		}
+
+		if ( empty( $cached_qs ) ) {
+			return false; // Unknown params exist, no whitelist — page cache skips this.
 		}
 
 		$to_cache = array_intersect_key( $remaining, array_flip( $cached_qs ) );
+		$unknown  = array_diff_key( $remaining, $to_cache );
+
+		if ( ! empty( $unknown ) ) {
+			return false; // Has params not in ignore or cache list — page cache skips.
+		}
+
 		if ( empty( $to_cache ) ) {
 			return $path;
 		}
@@ -522,8 +532,12 @@ class Prime_Cache_File_Optimizer {
 				continue;
 			}
 
-			// UCSS cache key: URL-specific, aligned with page cache query normalization.
+			// UCSS cache key: aligned with page cache query normalization.
+			// Skip UCSS for requests with unknown query params (page cache wouldn't cache these).
 			$ucss_uri = $this->get_normalized_cache_uri();
+			if ( false === $ucss_uri ) {
+				continue; // Unknown query — don't create/use UCSS cache.
+			}
 			$hash     = md5( 'ucss_' . $href . filemtime( $path ) . $ucss_uri );
 			$out     = $this->cache_dir . 'ucss/' . $hash . '.css';
 			$out_url = $this->cache_url . 'ucss/' . $hash . '.css';
@@ -659,11 +673,15 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		// Normalized URI aligned with page cache query handling.
+		// Skip CCSS caching for requests with unknown query params.
 		$request_uri = $this->get_normalized_cache_uri();
+		if ( false === $request_uri ) {
+			return $html; // Unknown query — don't generate/use cached critical CSS.
+		}
 
-		// Collect CSS from all linked stylesheets (needed for both cache key and generation).
-		$all_css       = '';
-		$css_filetimes = '';
+		// Phase 1: Collect ONLY metadata for cache key (no full CSS reads yet).
+		$css_filetimes  = '';
+		$css_link_paths = array();
 		if ( preg_match_all( '#<link\s[^>]*rel=["\']stylesheet["\'][^>]*href=["\']([^"\']+)["\'][^>]*/?\s*>#i', $html, $links ) ) {
 			foreach ( $links[1] as $href ) {
 				if ( ! $this->is_local_url( $href ) ) {
@@ -672,30 +690,24 @@ class Prime_Cache_File_Optimizer {
 				$path = $this->url_to_path( $href );
 				if ( $path && is_readable( $path ) ) {
 					$css_filetimes .= filemtime( $path ) . '|';
-					$css = file_get_contents( $path ); // phpcs:ignore
-					if ( $css ) {
-						$all_css .= $this->rebase_css_urls( $css, $path ) . "\n";
-					}
+					$css_link_paths[] = $path;
 				}
 			}
 		}
 
-		// Also collect inline <style> blocks BEFORE cache check so their hash
-		// is included in the cache key (inline CSS changes must invalidate cache).
+		// Inline <style> hash for cache key (lightweight — just hashing, not full processing).
 		$inline_css = '';
 		if ( preg_match_all( '#<style[^>]*>(.*?)</style>#si', $html, $styles ) ) {
 			foreach ( $styles[1] as $inline ) {
 				$inline_css .= $inline . "\n";
 			}
 		}
-		$all_css .= $inline_css;
 
-		// Cache key includes: URI, external CSS filemtimes, and inline CSS hash.
 		$inline_hash = $inline_css ? md5( $inline_css ) : '';
 		$hash        = md5( 'ccss_' . $request_uri . $css_filetimes . $inline_hash );
 		$ccss_file   = $this->cache_dir . 'ccss/' . $hash . '.css';
 
-		// Check cache.
+		// Check cache — on HIT, skip expensive full CSS reads.
 		if ( file_exists( $ccss_file ) ) {
 			$critical = file_get_contents( $ccss_file ); // phpcs:ignore
 			if ( $critical ) {
@@ -703,6 +715,16 @@ class Prime_Cache_File_Optimizer {
 			}
 			return $html;
 		}
+
+		// Phase 2: Cache MISS — now read full CSS for critical extraction.
+		$all_css = '';
+		foreach ( $css_link_paths as $path ) {
+			$css = file_get_contents( $path ); // phpcs:ignore
+			if ( $css ) {
+				$all_css .= $this->rebase_css_urls( $css, $path ) . "\n";
+			}
+		}
+		$all_css .= $inline_css;
 
 		if ( empty( $all_css ) ) {
 			return $html;
