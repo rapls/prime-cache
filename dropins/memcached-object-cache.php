@@ -299,7 +299,10 @@ class WP_Object_Cache {
 
 	public function flush() {
 		$this->cache = array();
-		return $this->mc->flush();
+		// Increment global version instead of mc->flush() to avoid destroying
+		// other applications' cache sharing the same Memcached cluster.
+		$ver_key = $this->key_prefix . 'prime_cache_global_ver';
+		return $this->mc->set( $ver_key, time() );
 	}
 
 	public function flush_runtime() {

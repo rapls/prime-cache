@@ -55,12 +55,19 @@ class Prime_Cache_Media_Optimizer {
 			// Build embed URL for when user clicks.
 			$embed_url = "https://www.youtube.com/embed/{$vid}?autoplay=1" . ( $params ? '&' . ltrim( $params, '?' ) : '' );
 
-			return '<div class="pc-yt-wrap" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;cursor:pointer;background:#000" data-src="' . esc_attr( $embed_url ) . '" onclick="this.innerHTML=\'<iframe src=\\\'\'+this.dataset.src+\'\\\' style=\\\'position:absolute;top:0;left:0;width:100%;height:100%;border:0\\\' allow=\\\'accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture\\\' allowfullscreen></iframe>\'">'
+			// No inline onclick — use data attributes + event delegation for CSP compatibility.
+			return '<div class="pc-yt-wrap" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;cursor:pointer;background:#000" data-pc-yt-src="' . esc_attr( $embed_url ) . '">'
 				. '<img src="' . esc_url( $thumb ) . '" alt="YouTube video" loading="lazy" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">'
 				. '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:68px;height:48px;background:rgba(255,0,0,.8);border-radius:14px;display:flex;align-items:center;justify-content:center">'
 				. '<svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>'
 				. '</div></div>';
 		}, $html );
+
+		// Inject event delegation script once (CSP-compatible, no inline handlers).
+		if ( false !== strpos( $html, 'pc-yt-wrap' ) && false === strpos( $html, 'pc-yt-init' ) ) {
+			$script = '<script id="pc-yt-init">document.addEventListener("click",function(e){var w=e.target.closest(".pc-yt-wrap[data-pc-yt-src]");if(w){w.innerHTML=\'<iframe src="\'+w.dataset.pcYtSrc+\'" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>\'}});</script>';
+			$html = str_replace( '</body>', $script . '</body>', $html );
+		}
 
 		return $html;
 	}

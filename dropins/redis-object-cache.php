@@ -375,8 +375,12 @@ class WP_Object_Cache {
 			return false;
 		}
 
+		// Increment global version instead of flushDb() to avoid destroying
+		// other applications' cache sharing the same Redis database.
 		try {
-			return $this->redis->flushDb();
+			$ver_key = ( defined( 'WP_CACHE_KEY_SALT' ) ? WP_CACHE_KEY_SALT : '' ) . 'prime_cache_global_ver';
+			$this->redis->set( $ver_key, time() );
+			return true;
 		} catch ( Exception $e ) {
 			return false;
 		}
@@ -392,20 +396,16 @@ class WP_Object_Cache {
 			return false;
 		}
 
-		$pattern = $this->derive_key( '*', $group );
-
+		// Use group versioning instead of SCAN+DEL to avoid O(n) cost.
+		$salt = defined( 'WP_CACHE_KEY_SALT' ) ? WP_CACHE_KEY_SALT : '';
+		$ver_key = $salt . 'prime_cache_gv:' . $group;
 		try {
-			$iterator = null;
-			do {
-				$keys = $this->redis->scan( $iterator, $pattern, 100 );
-				if ( $keys ) {
-					$this->redis->del( $keys );
-				}
-			} while ( $iterator > 0 );
+			$this->redis->set( $ver_key, time() );
 		} catch ( Exception $e ) {
 			return false;
 		}
 
+		// Clear local runtime cache for this group.
 		foreach ( array_keys( $this->cache ) as $cached_key ) {
 			if ( false !== strpos( $cached_key, $group . ':' ) ) {
 				unset( $this->cache[ $cached_key ] );

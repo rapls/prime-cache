@@ -753,9 +753,13 @@ class Prime_Cache_WebP {
 			wp_send_json_error();
 		}
 
-		$stats = get_option( 'prime_cache_img_stats', array( 'converted' => 0, 'saved' => 0 ) );
+		// Cache stats in a transient to avoid heavy DB + filesystem scan on every call.
+		$cached = get_transient( 'prime_cache_img_stats_cache' );
+		if ( false !== $cached ) {
+			wp_send_json_success( $cached );
+			return;
+		}
 
-		// Count total images and converted.
 		global $wpdb;
 		$total = (int) $wpdb->get_var( "SELECT COUNT(ID) FROM {$wpdb->posts} WHERE post_type='attachment' AND post_mime_type IN ('image/jpeg','image/png')" );
 
@@ -780,7 +784,7 @@ class Prime_Cache_WebP {
 		}
 
 		$sampled = count( $ids );
-		wp_send_json_success( array(
+		$result  = array(
 			'total'      => $total,
 			'sampled'    => $sampled,
 			'webp'       => $webp_count,
@@ -788,7 +792,10 @@ class Prime_Cache_WebP {
 			'saved'      => max( 0, $total_saved ),
 			'saved_fmt'  => size_format( max( 0, $total_saved ) ),
 			'is_sample'  => $sampled < $total,
-		) );
+		);
+
+		set_transient( 'prime_cache_img_stats_cache', $result, 60 );
+		wp_send_json_success( $result );
 	}
 
 	// ── Helpers ───────────────────────────────────────────────

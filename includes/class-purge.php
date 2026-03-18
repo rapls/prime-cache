@@ -237,11 +237,12 @@ class Prime_Cache_Purge {
 			}
 		}
 
-		$post_date = strtotime( $post->post_date );
+		// Use site-local time (not UTC) for date archive links to match WordPress behavior.
+		$post_date = get_post_time( 'U', false, $post );
 		if ( $post_date ) {
-			$urls[] = get_year_link( gmdate( 'Y', $post_date ) );
-			$urls[] = get_month_link( gmdate( 'Y', $post_date ), gmdate( 'm', $post_date ) );
-			$urls[] = get_day_link( gmdate( 'Y', $post_date ), gmdate( 'm', $post_date ), gmdate( 'd', $post_date ) );
+			$urls[] = get_year_link( wp_date( 'Y', $post_date ) );
+			$urls[] = get_month_link( wp_date( 'Y', $post_date ), wp_date( 'm', $post_date ) );
+			$urls[] = get_day_link( wp_date( 'Y', $post_date ), wp_date( 'm', $post_date ), wp_date( 'd', $post_date ) );
 		}
 
 		return array_unique( array_filter( $urls ) );

@@ -29,8 +29,9 @@ class Prime_Cache_File_Optimizer {
 		$this->cache_dir = WP_CONTENT_DIR . '/cache/prime-cache-fo/';
 		$this->cache_url = content_url( '/cache/prime-cache-fo/' );
 
-		// Cron handler for async local analytics refresh (avoids sync HTTP in page generation).
+		// Cron handlers for async external resource fetching.
 		add_action( 'prime_cache_refresh_local_analytics', array( $this, 'cron_refresh_local_analytics' ) );
+		add_action( 'prime_cache_refresh_google_fonts', array( $this, 'cron_refresh_google_fonts' ) );
 
 		if ( ! $this->should_optimize() ) {
 			return;
@@ -1214,34 +1215,17 @@ JS;
 			return $css_url;
 		}
 
-		// Fetch CSS from Google with a modern user-agent to get woff2 format.
-		$response = wp_remote_get( $gf_url, array(
-			'timeout'    => 10,
-			'user-agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-		) );
+		// Schedule async download instead of blocking page generation.
+		// Store the URL to fetch in a transient for the cron handler.
+		if ( ! wp_next_scheduled( 'prime_cache_refresh_google_fonts' ) ) {
+			set_transient( 'prime_cache_gf_pending', $gf_url, HOUR_IN_SECONDS );
+			wp_schedule_single_event( time(), 'prime_cache_refresh_google_fonts' );
+		}
 
-		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		// If local file doesn't exist yet, return false (use original Google URL).
+		if ( ! file_exists( $css_file ) ) {
 			return false;
 		}
-
-		$css = wp_remote_retrieve_body( $response );
-		if ( empty( $css ) ) {
-			return false;
-		}
-
-		// Find all font file URLs in the CSS and download them.
-		$css = preg_replace_callback( '#url\(\s*(?P<url>https?://fonts\.gstatic\.com/[^\s\)]+)\s*\)#i', function( $m ) use ( $fonts_dir, $fonts_url ) {
-			$remote_url = $m['url'];
-			$local      = $this->download_font_file( $remote_url, $fonts_dir, $fonts_url );
-			return $local ? 'url(' . $local . ')' : $m[0];
-		}, $css );
-
-		// Add display swap if enabled.
-		if ( $this->settings['google_fonts_display'] && false === strpos( $css, 'font-display' ) ) {
-			$css = preg_replace( '#(\{[^}]*)(})#', '$1font-display:swap;$2', $css );
-		}
-
-		self::atomic_write( $css_file, $css );
 
 		return $css_url;
 	}
@@ -1380,13 +1364,62 @@ JS;
 		return true;
 	}
 
+	/**
+	 * Cron handler: download Google Fonts CSS and font files asynchronously.
+	 */
+	public function cron_refresh_google_fonts() {
+		$gf_url = get_transient( 'prime_cache_gf_pending' );
+		if ( ! $gf_url ) {
+			return;
+		}
+		delete_transient( 'prime_cache_gf_pending' );
+
+		$fonts_dir = $this->cache_dir . 'fonts/';
+		$fonts_url = $this->cache_url . 'fonts/';
+		$hash      = md5( $gf_url );
+		$css_file  = $fonts_dir . $hash . '.css';
+
+		wp_mkdir_p( $fonts_dir );
+
+		$response = wp_remote_get( $gf_url, array(
+			'timeout'    => 15,
+			'user-agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+		) );
+
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return;
+		}
+
+		$css = wp_remote_retrieve_body( $response );
+		if ( empty( $css ) ) {
+			return;
+		}
+
+		$css = preg_replace_callback( '#url\(\s*(?P<url>https?://fonts\.gstatic\.com/[^\s\)]+)\s*\)#i', function( $m ) use ( $fonts_dir, $fonts_url ) {
+			$local = $this->download_font_file( $m['url'], $fonts_dir, $fonts_url );
+			return $local ? 'url(' . $local . ')' : $m[0];
+		}, $css );
+
+		if ( $this->settings['google_fonts_display'] && false === strpos( $css, 'font-display' ) ) {
+			$css = preg_replace( '#(\{[^}]*)(})#', '$1font-display:swap;$2', $css );
+		}
+
+		self::atomic_write( $css_file, $css );
+	}
+
 	// ── Query String Removal ─────────────────────────────────
 
 	private function strip_query_strings( $html ) {
-		// Remove all query strings (?ver=, ?v=, ?timestamp=, etc.) from CSS/JS URLs.
+		$site_url = home_url();
+		// Only strip query strings from local CSS/JS URLs.
+		// Preserve ?ver= etc. on external URLs (CDN signed URLs, third-party scripts).
 		return preg_replace_callback(
 			'#(href|src)=["\']([^"\']+\.(css|js))\?[^"\']*["\']#i',
-			function( $m ) {
+			function( $m ) use ( $site_url ) {
+				// Skip external URLs.
+				if ( 0 !== strpos( $m[2], '/' ) && 0 !== strpos( $m[2], $site_url ) ) {
+					return $m[0];
+				}
 				return $m[1] . '="' . $m[2] . '"';
 			},
 			$html
@@ -1527,9 +1560,9 @@ JS;
 		if ( ! defined( 'PRIME_CACHE_CACHE_DIR' ) ) return;
 		$log_file = PRIME_CACHE_CACHE_DIR . 'debug.log';
 		$line = '[' . gmdate( 'Y-m-d H:i:s' ) . ' UTC] ' . $message . "\n";
-		// Cap log at 1 MB.
+		// Cap log at 1 MB — rotate with LOCK_EX to prevent corruption.
 		if ( file_exists( $log_file ) && filesize( $log_file ) > 1048576 ) {
-			file_put_contents( $log_file, $line ); // phpcs:ignore -- overwrite
+			file_put_contents( $log_file, $line, LOCK_EX ); // phpcs:ignore -- overwrite
 		} else {
 			file_put_contents( $log_file, $line, FILE_APPEND | LOCK_EX ); // phpcs:ignore
 		}

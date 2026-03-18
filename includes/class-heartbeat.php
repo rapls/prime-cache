@@ -52,9 +52,21 @@ class Prime_Cache_Heartbeat {
 			return 'frontend';
 		}
 
-		// Post editor detection.
+		// Use get_current_screen() for accurate editor detection including
+		// block editor, site editor, widget editor, and customizer.
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( $screen ) {
+			if ( method_exists( $screen, 'is_block_editor' ) && $screen->is_block_editor() ) {
+				return 'editor';
+			}
+			if ( 'post' === $screen->base || in_array( $screen->id, array( 'site-editor', 'widgets', 'customize' ), true ) ) {
+				return 'editor';
+			}
+		}
+
+		// Fallback for early hooks before screen is set.
 		$uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
-		if ( preg_match( '#/wp-admin/(post\.php|post-new\.php)#', $uri ) ) {
+		if ( preg_match( '#/wp-admin/(post\.php|post-new\.php|site-editor\.php|widgets\.php)#', $uri ) ) {
 			return 'editor';
 		}
 

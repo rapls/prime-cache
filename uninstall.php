@@ -116,6 +116,7 @@ wp_clear_scheduled_hook( 'prime_cache_cleanup_expired' );
 wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
 wp_clear_scheduled_hook( 'prime_cache_db_cleanup' );
 wp_clear_scheduled_hook( 'prime_cache_refresh_local_analytics' );
+wp_clear_scheduled_hook( 'prime_cache_refresh_google_fonts' );
 
 // Remove transients (#20).
 delete_transient( 'prime_cache_preload_fonts' );

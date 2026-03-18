@@ -100,6 +100,18 @@ class Prime_Cache_Cloudflare {
 
 			if ( is_wp_error( $response ) ) {
 				$result = $response;
+				continue;
+			}
+
+			$code = wp_remote_retrieve_response_code( $response );
+			$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+			if ( 200 !== $code || ( isset( $body['success'] ) && ! $body['success'] ) ) {
+				$error_msg = 'Cloudflare API error (HTTP ' . $code . ')';
+				if ( ! empty( $body['errors'][0]['message'] ) ) {
+					$error_msg = $body['errors'][0]['message'];
+				}
+				$result = new WP_Error( 'cloudflare_purge_failed', $error_msg );
 			}
 		}
 

@@ -293,7 +293,11 @@ class WP_Object_Cache {
 	public function flush() {
 		$this->cache = array();
 		$this->group_versions = array();
-		return apcu_clear_cache();
+		// Increment global version instead of apcu_clear_cache() to avoid
+		// destroying other applications' cache in the same APCu pool.
+		$ver_key = $this->key_salt . 'prime_cache_global_ver';
+		apcu_store( $ver_key, time() );
+		return true;
 	}
 
 	public function flush_runtime() {
