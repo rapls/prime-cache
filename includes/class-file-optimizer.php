@@ -1379,9 +1379,9 @@ JS;
 	 */
 	public function cron_refresh_google_fonts() {
 		global $wpdb;
-		// Find all pending Google Font URLs stored as individual options.
+		// Find pending Google Font URL options (exclude attempt counters).
 		$rows = $wpdb->get_results(
-			"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%' LIMIT 20"
+			"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%' AND option_name NOT LIKE '%\_attempts' ORDER BY option_id ASC LIMIT 20"
 		);
 		if ( empty( $rows ) ) {
 			return;
@@ -1415,7 +1415,7 @@ JS;
 
 		// Re-schedule if more pending URLs remain.
 		$still_pending = (int) $wpdb->get_var(
-			"SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%' AND option_name NOT LIKE '%\_attempts'"
+			"SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%' AND option_name NOT LIKE '%\_attempts' LIMIT 1"
 		);
 		if ( $still_pending > 0 && ! wp_next_scheduled( 'prime_cache_refresh_google_fonts' ) ) {
 			wp_schedule_single_event( time() + 30, 'prime_cache_refresh_google_fonts' );

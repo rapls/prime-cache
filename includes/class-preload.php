@@ -175,7 +175,26 @@ class Prime_Cache_Preload {
 			$idx++;
 		}
 
-		$remaining = ( $idx < $total ) ? array_slice( $queue, $idx ) : array();
+		// Build remaining queue: keep URLs that were attempted but may not yet be
+		// cached (non-blocking request). They'll be verified via is_variant_cached()
+		// in the next batch and skipped if confirmed cached.
+		$unprocessed = ( $idx < $total ) ? array_slice( $queue, $idx ) : array();
+		$still_needed = array();
+		// Re-check attempted URLs — keep those not fully cached yet.
+		for ( $j = 0; $j < $idx; $j++ ) {
+			$u = $queue[ $j ];
+			$d_ok = ! $this->is_variant_cached( $u, false ) ? false : true;
+			$m_ok = $mobile_sep ? $this->is_variant_cached( $u, true ) : true;
+			if ( ! $d_ok || ! $m_ok ) {
+				// Still not fully cached AND not exhausted — keep in queue.
+				$d_a = isset( $attempts[ $u ] ) ? (int) $attempts[ $u ] : 0;
+				$m_a = isset( $attempts[ $u . ':m' ] ) ? (int) $attempts[ $u . ':m' ] : 0;
+				if ( $d_a < $max_attempts || ( $mobile_sep && $m_a < $max_attempts ) ) {
+					$still_needed[] = $u;
+				}
+			}
+		}
+		$remaining = array_merge( $still_needed, $unprocessed );
 		update_option( 'prime_cache_preload_attempts', $attempts, false );
 
 		if ( ! empty( $remaining ) ) {

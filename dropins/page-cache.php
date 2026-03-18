@@ -332,6 +332,11 @@ if ( is_readable( $_pc_cache_file ) ) {
 
 	header( 'Last-Modified: ' . gmdate( 'D, d M Y H:i:s', $_pc_modified_time ) . ' GMT' );
 
+	// Vary headers BEFORE 304 — must be consistent with 200 responses.
+	if ( ! empty( $prime_cache_config['cache_vary_cookies'] ) ) {
+		header( 'Vary: Cookie', false );
+	}
+
 	// HTTP 304 Not Modified — only for 200 responses.
 	if ( 200 === $_pc_original_status && ! empty( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
 		$_pc_since = strtotime( $_SERVER['HTTP_IF_MODIFIED_SINCE'] );
@@ -344,12 +349,6 @@ if ( is_readable( $_pc_cache_file ) ) {
 	}
 
 	header( 'X-Prime-Cache: HIT' );
-
-	// Tell upstream caches (CDN, reverse proxy) that content varies by cookie
-	// when cache_vary_cookies is active, preventing content mixing.
-	if ( ! empty( $prime_cache_config['cache_vary_cookies'] ) ) {
-		header( 'Vary: Cookie', false );
-	}
 
 	_prime_cache_record_stat( 'hit' );
 
