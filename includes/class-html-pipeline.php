@@ -69,7 +69,9 @@ class Prime_Cache_HTML_Pipeline {
 	 * @return string Processed HTML.
 	 */
 	public function process( $html ) {
-		if ( strlen( $html ) < 255 || false === stripos( $html, '</html>' ) ) {
+		// Only guard on minimum length. Individual processors check for </html>
+		// themselves if needed — CDN rewrite intentionally runs without it.
+		if ( strlen( $html ) < 255 ) {
 			return $html;
 		}
 
