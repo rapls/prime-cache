@@ -148,6 +148,7 @@ class Prime_Cache {
 		}
 		wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
 		wp_clear_scheduled_hook( 'prime_cache_cf_deferred_purge' );
+		wp_clear_scheduled_hook( 'prime_cache_cf_retry_full_purge' );
 		Prime_Cache_Database_Optimizer::unschedule();
 
 		// Remove .htaccess rules.
@@ -920,13 +921,14 @@ class Prime_Cache {
 			exit;
 		}
 
-		// Preserve existing sensitive keys if import has them empty AND the key
-		// exists in the file (masked export). If the key is completely absent from
-		// the JSON, the default empty string will apply (intentional reset).
+		// Preserve existing sensitive keys when importing:
+		// - Key absent from JSON (our export removes them) → keep existing value
+		// - Key present with empty string → intentional clear, allow it
+		// - Key present with value → use imported value
 		$current  = prime_cache_get_settings();
 		$preserve = array( 'cloudflare_api_key', 'sucuri_api_key' );
 		foreach ( $preserve as $pk ) {
-			if ( array_key_exists( $pk, $data ) && '' === $data[ $pk ] && ! empty( $current[ $pk ] ) ) {
+			if ( ! array_key_exists( $pk, $data ) && ! empty( $current[ $pk ] ) ) {
 				$data[ $pk ] = $current[ $pk ];
 			}
 		}

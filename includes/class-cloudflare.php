@@ -19,8 +19,9 @@ class Prime_Cache_Cloudflare {
 			return;
 		}
 
-		// Purge on full cache clear.
-		add_action( 'prime_cache_after_purge_all', array( $this, 'purge_everything' ) );
+		// Purge on full cache clear (with failure retry).
+		add_action( 'prime_cache_after_purge_all', array( $this, 'purge_everything_safe' ) );
+		add_action( 'prime_cache_cf_retry_full_purge', array( $this, 'purge_everything_safe' ) );
 
 		// Debounced purge on individual URL clear.
 		add_action( 'prime_cache_url_purged', array( $this, 'queue_url' ) );
@@ -62,6 +63,24 @@ class Prime_Cache_Cloudflare {
 	/**
 	 * Purge everything (full zone purge).
 	 */
+	/**
+	 * Purge everything with failure retry.
+	 */
+	public function purge_everything_safe() {
+		$result = $this->purge_everything();
+		if ( true !== $result ) {
+			$retries = (int) get_option( 'prime_cache_cf_full_purge_retries', 0 );
+			if ( $retries < 3 ) {
+				update_option( 'prime_cache_cf_full_purge_retries', $retries + 1, false );
+				wp_schedule_single_event( time() + 60, 'prime_cache_cf_retry_full_purge' );
+			} else {
+				delete_option( 'prime_cache_cf_full_purge_retries' );
+			}
+		} else {
+			delete_option( 'prime_cache_cf_full_purge_retries' );
+		}
+	}
+
 	public function purge_everything() {
 		$zone = trim( $this->settings['cloudflare_zone_id'] );
 		$url  = self::API_BASE . 'zones/' . $zone . '/purge_cache';

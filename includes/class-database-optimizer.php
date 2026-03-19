@@ -130,8 +130,8 @@ class Prime_Cache_Database_Optimizer {
 			) ),
 			'all_transients'     => (int) $wpdb->get_var( $wpdb->prepare(
 				"SELECT COUNT(option_name) FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s",
-				'%' . $wpdb->esc_like( '_transient_' ) . '%',
-				'%' . $wpdb->esc_like( '_transient_timeout_' ) . '%'
+				$wpdb->esc_like( '_transient_' ) . '%',
+				$wpdb->esc_like( '_transient_timeout_' ) . '%'
 			) ),
 			'tables'             => (int) $wpdb->get_var( $wpdb->prepare(
 				"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND table_name LIKE %s AND Engine <> 'InnoDB' AND data_free > 0",
