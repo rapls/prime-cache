@@ -2243,10 +2243,16 @@ class Prime_Cache_Admin_Settings {
 
 	public function show_notices() {
 		// Cloudflare purge failure alert — persists until dismissed or next success.
-		if ( get_option( 'prime_cache_cf_purge_failed' ) ) {
+		$cf_fail = get_option( 'prime_cache_cf_purge_failed' );
+		if ( $cf_fail ) {
 			$dismiss_url = wp_nonce_url( add_query_arg( 'pc_dismiss_cf_alert', '1' ), 'pc_dismiss_cf' );
+			$fail_time   = is_array( $cf_fail ) && isset( $cf_fail['time'] ) ? wp_date( 'Y/m/d H:i', $cf_fail['time'] ) : '';
+			$fail_type   = is_array( $cf_fail ) && isset( $cf_fail['type'] ) ? $cf_fail['type'] : '';
+			$type_label  = 'full_purge' === $fail_type ? __( 'Full zone purge', 'prime-cache' ) : __( 'URL purge', 'prime-cache' );
+			$detail      = $fail_time ? sprintf( ' (%s — %s)', esc_html( $type_label ), esc_html( $fail_time ) ) : '';
 			echo '<div class="notice notice-error"><p><strong>Prime Cache:</strong> '
 				. esc_html__( 'Cloudflare cache purge failed after multiple retries. Cloudflare may still be serving stale content. Please check your API credentials and try purging again.', 'prime-cache' )
+				. $detail
 				. ' <a href="' . esc_url( $dismiss_url ) . '">' . esc_html__( 'Dismiss', 'prime-cache' ) . '</a>'
 				. '</p></div>';
 		}
