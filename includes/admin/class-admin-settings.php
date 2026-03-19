@@ -1318,7 +1318,7 @@ class Prime_Cache_Admin_Settings {
 			<!-- Cloudflare -->
 			<div class="pc-card">
 				<span class="pc-card__h">Cloudflare</span>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[cloudflare_enabled]" value="1" <?php checked( $settings['cloudflare_enabled'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Cloudflare Cache Sync', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Automatically purge Cloudflare cache when Prime Cache is cleared. Supports full zone purge and per-URL purge (up to 30 URLs per API call, batched automatically). Individual URL purges are queued and sent in a single request on shutdown.', 'prime-cache' ); ?></small></span></label>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[cloudflare_enabled]" value="1" <?php checked( $settings['cloudflare_enabled'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Cloudflare Cache Sync', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Automatically purge Cloudflare cache when Prime Cache is cleared. Supports full zone purge and per-URL purge (up to 30 URLs per API call, batched automatically). Small batches are sent immediately; larger batches are deferred to a background task.', 'prime-cache' ); ?></small></span></label>
 				<div class="pc-field">
 					<label class="pc-lbl"><?php esc_html_e( 'Zone ID', 'prime-cache' ); ?></label>
 					<input type="text" name="prime_cache_settings[cloudflare_zone_id]" value="<?php echo esc_attr( $settings['cloudflare_zone_id'] ); ?>" class="pc-ta" style="font-family:monospace" placeholder="32-character zone ID">
@@ -1713,7 +1713,7 @@ class Prime_Cache_Admin_Settings {
 					<span class="pc-sw__track"></span>
 					<span class="pc-sw__body">
 						<b><?php esc_html_e( 'Optimize Tables', 'prime-cache' ); ?> <span class="pc-badge pc-badge--m"><?php echo esc_html( number_format( $counts['tables'] ) ); ?></span></b>
-						<small><?php esc_html_e( 'Run OPTIMIZE TABLE on non-InnoDB tables with fragmented space. Reclaims unused space and defragments the data file. InnoDB tables are skipped as they handle fragmentation internally.', 'prime-cache' ); ?></small>
+						<small><?php esc_html_e( 'Run OPTIMIZE TABLE on WordPress tables with fragmented space (data_free > 0). Applies to all storage engines including InnoDB. Only tables with the site prefix are targeted.', 'prime-cache' ); ?></small>
 					</span>
 				</label>
 			</div>

@@ -106,6 +106,7 @@ if ( is_dir( $fo_dir ) ) {
 // Remove stats, preload queue, and image optimization metadata.
 delete_option( 'prime_cache_stats' );
 delete_option( 'prime_cache_cf_purge_queue' );
+delete_option( 'prime_cache_cf_purge_retries' );
 delete_option( 'prime_cache_preload_queue' );
 delete_option( 'prime_cache_preload_attempts' );
 delete_option( 'prime_cache_flush_rewrite' );
@@ -120,6 +121,7 @@ wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
 wp_clear_scheduled_hook( 'prime_cache_db_cleanup' );
 wp_clear_scheduled_hook( 'prime_cache_refresh_local_analytics' );
 wp_clear_scheduled_hook( 'prime_cache_refresh_google_fonts' );
+wp_clear_scheduled_hook( 'prime_cache_cf_deferred_purge' );
 wp_clear_scheduled_hook( 'prime_cache_cleanup_gf_options' );
 // Clean up any remaining Google Fonts pending options.
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%'" );

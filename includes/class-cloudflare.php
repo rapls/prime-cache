@@ -158,14 +158,18 @@ class Prime_Cache_Cloudflare {
 		$urls = array_unique( self::$queued_urls );
 		self::$queued_urls = array();
 
-		// Always defer to cron — avoids blocking shutdown with sync API calls.
-		// Merge with any existing pending URLs to prevent overwrite.
-		$existing = get_option( 'prime_cache_cf_purge_queue', array() );
-		$merged   = array_unique( array_merge( $existing, $urls ) );
-		update_option( 'prime_cache_cf_purge_queue', $merged, false );
-
-		if ( ! wp_next_scheduled( 'prime_cache_cf_deferred_purge' ) ) {
-			wp_schedule_single_event( time(), 'prime_cache_cf_deferred_purge' );
+		// Small batches (≤30): send immediately (single API call, fast).
+		// Larger batches: defer to cron to avoid blocking shutdown.
+		if ( count( $urls ) <= 30 ) {
+			$this->purge_urls( $urls );
+		} else {
+			$existing = get_option( 'prime_cache_cf_purge_queue', array() );
+			$merged   = array_unique( array_merge( $existing, $urls ) );
+			update_option( 'prime_cache_cf_purge_queue', $merged, false );
+			delete_option( 'prime_cache_cf_purge_retries' );
+			if ( ! wp_next_scheduled( 'prime_cache_cf_deferred_purge' ) ) {
+				wp_schedule_single_event( time(), 'prime_cache_cf_deferred_purge' );
+			}
 		}
 	}
 
@@ -174,9 +178,26 @@ class Prime_Cache_Cloudflare {
 	 */
 	public function run_deferred_purge() {
 		$urls = get_option( 'prime_cache_cf_purge_queue', array() );
-		if ( ! empty( $urls ) ) {
+		if ( empty( $urls ) ) {
+			return;
+		}
+
+		$result = $this->purge_urls( $urls );
+
+		if ( true === $result ) {
+			// Success — clear queue.
 			delete_option( 'prime_cache_cf_purge_queue' );
-			$this->purge_urls( $urls );
+		} else {
+			// Failure — increment retry counter and re-schedule.
+			$retries = (int) get_option( 'prime_cache_cf_purge_retries', 0 );
+			if ( $retries >= 3 ) {
+				// Give up after 3 retries to prevent infinite loop.
+				delete_option( 'prime_cache_cf_purge_queue' );
+				delete_option( 'prime_cache_cf_purge_retries' );
+			} else {
+				update_option( 'prime_cache_cf_purge_retries', $retries + 1, false );
+				wp_schedule_single_event( time() + 60, 'prime_cache_cf_deferred_purge' );
+			}
 		}
 	}
 }

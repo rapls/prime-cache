@@ -946,7 +946,7 @@ class Prime_Cache_Preload {
 		$new_lcp = $lcp_tag;
 		$new_lcp = preg_replace( '#\s*loading=["\'][^"\']*["\']#i', '', $new_lcp );
 		$new_lcp = preg_replace( '#\s*fetchpriority=["\'][^"\']*["\']#i', '', $new_lcp );
-		$new_lcp = str_replace( '<img ', '<img fetchpriority="high" ', $new_lcp );
+		$new_lcp = preg_replace( '#^(<img)\b#i', '$1 fetchpriority="high"', $new_lcp );
 
 		$lcp_pos = strpos( $html, $lcp_tag );
 		if ( false !== $lcp_pos ) {

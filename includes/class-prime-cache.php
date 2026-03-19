@@ -147,6 +147,7 @@ class Prime_Cache {
 			wp_unschedule_event( $timestamp, 'prime_cache_cleanup_expired' );
 		}
 		wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
+		wp_clear_scheduled_hook( 'prime_cache_cf_deferred_purge' );
 		Prime_Cache_Database_Optimizer::unschedule();
 
 		// Remove .htaccess rules.
@@ -603,6 +604,7 @@ class Prime_Cache {
 				@unlink( $item->getPathname() );
 			}
 		}
+		delete_transient( 'prime_cache_dir_stats' );
 	}
 
 	/**
