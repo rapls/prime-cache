@@ -222,11 +222,13 @@ class Prime_Cache_Admin_Settings {
 		$s['db_cleanup_frequency']  = isset( $input['db_cleanup_frequency'] ) && in_array( $input['db_cleanup_frequency'], array( 'daily', 'weekly', 'monthly' ), true ) ? $input['db_cleanup_frequency'] : 'weekly';
 		$s['cache_ignore_qs']       = sanitize_textarea_field( $input['cache_ignore_qs'] ?? $defaults['cache_ignore_qs'] );
 
-		// Reschedule DB cleanup cron if settings changed.
-		if ( $s['db_auto_cleanup'] ) {
-			Prime_Cache_Database_Optimizer::reschedule_cron( $s['db_cleanup_frequency'] );
-		} else {
-			Prime_Cache_Database_Optimizer::unschedule();
+		// Reschedule DB cleanup cron if settings changed (Pro feature).
+		if ( class_exists( 'Prime_Cache_Database_Optimizer' ) ) {
+			if ( $s['db_auto_cleanup'] ) {
+				Prime_Cache_Database_Optimizer::reschedule_cron( $s['db_cleanup_frequency'] );
+			} else {
+				Prime_Cache_Database_Optimizer::unschedule();
+			}
 		}
 
 		// Environment pre-checks for high-risk features.
@@ -1123,7 +1125,7 @@ class Prime_Cache_Admin_Settings {
 			'img_include_uploads','img_include_themes','img_include_plugins','img_include_custom','img_exclude_folders',
 			'img_delivery_method','img_converter',
 		);
-		$caps = Prime_Cache_WebP::get_capabilities();
+		$caps = class_exists( 'Prime_Cache_WebP' ) ? Prime_Cache_WebP::get_capabilities() : array( 'gd_webp' => false, 'imagick_webp' => false, 'gd_avif' => false, 'imagick_avif' => false );
 		?>
 		<h2 class="pc-title"><?php esc_html_e( 'Media', 'prime-cache' ); ?></h2>
 		<form method="post" action="options.php">
@@ -1643,6 +1645,11 @@ class Prime_Cache_Admin_Settings {
 			'db_auto_cleanup','db_cleanup_frequency',
 		);
 
+		if ( ! class_exists( 'Prime_Cache_Database_Optimizer' ) ) {
+			echo '<h2 class="pc-title">' . esc_html__( 'Database', 'prime-cache' ) . '</h2>';
+			echo '<div class="pc-card" style="opacity:0.5"><p>' . esc_html__( 'Database optimization requires Prime Cache Pro.', 'prime-cache' ) . '</p></div>';
+			return;
+		}
 		$optimizer = new Prime_Cache_Database_Optimizer();
 		$counts    = $optimizer->get_counts();
 		$cleanup_url = wp_nonce_url( admin_url( 'admin.php?prime_cache_db_cleanup=1' ), 'prime_cache_db_cleanup' );
@@ -2047,7 +2054,7 @@ class Prime_Cache_Admin_Settings {
 	private function render_system_info() {
 		global $wpdb, $wp_version;
 
-		$caps = Prime_Cache_WebP::get_capabilities();
+		$caps = class_exists( 'Prime_Cache_WebP' ) ? Prime_Cache_WebP::get_capabilities() : array( 'gd_webp' => false, 'imagick_webp' => false, 'gd_avif' => false, 'imagick_avif' => false );
 		$s    = prime_cache_get_settings();
 		$oc   = Prime_Cache_Config::get_active_object_cache();
 

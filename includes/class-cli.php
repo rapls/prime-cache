@@ -195,6 +195,10 @@ class Prime_Cache_CLI extends WP_CLI_Command {
 	 * @subcommand db-cleanup
 	 */
 	public function db_cleanup( $args, $assoc_args ) {
+		if ( ! class_exists( 'Prime_Cache_Database_Optimizer' ) ) {
+			WP_CLI::error( 'Database optimization requires Prime Cache Pro.' );
+			return;
+		}
 		$s = prime_cache_get_settings();
 		$optimizer = new Prime_Cache_Database_Optimizer();
 		$results = $optimizer->execute_cleanup( $s );

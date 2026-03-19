@@ -38,15 +38,11 @@ class Prime_Cache {
 		$this->purge = new Prime_Cache_Purge();
 		new Prime_Cache_File_Optimizer();
 		new Prime_Cache_Preload();
-		new Prime_Cache_Database_Optimizer();
-		new Prime_Cache_Varnish();
-		new Prime_Cache_Sucuri();
-		new Prime_Cache_Heartbeat();
 		new Prime_Cache_LazyLoad();
-		new Prime_Cache_CDN();
-		new Prime_Cache_Cloudflare();
-		new Prime_Cache_WebP();
 		new Prime_Cache_Media_Optimizer();
+
+		// Pro classes — initialized by prime-cache-pro add-on:
+		// Database_Optimizer, Varnish, Sucuri, Heartbeat, CDN, Cloudflare, WebP
 		new Prime_Cache_Post_Metabox();
 		new Prime_Cache_Compatibility();
 		new Prime_Cache_Performance_Tweaks();
@@ -152,7 +148,9 @@ class Prime_Cache {
 		delete_option( 'prime_cache_cf_full_purge_retries' );
 		delete_option( 'prime_cache_cf_purge_retries' );
 		delete_option( 'prime_cache_cf_purge_failed' );
-		Prime_Cache_Database_Optimizer::unschedule();
+		if ( class_exists( 'Prime_Cache_Database_Optimizer' ) ) {
+			Prime_Cache_Database_Optimizer::unschedule();
+		}
 
 		// Remove .htaccess rules.
 		Prime_Cache_Htaccess::remove_rules();
@@ -416,20 +414,26 @@ class Prime_Cache {
 				break;
 
 			case 'purge_cloudflare':
-				$cf = new Prime_Cache_Cloudflare();
-				$cf->purge_everything();
+				if ( class_exists( 'Prime_Cache_Cloudflare' ) ) {
+					$cf = new Prime_Cache_Cloudflare();
+					$cf->purge_everything();
+				}
 				$msg = 'cloudflare';
 				break;
 
 			case 'purge_sucuri':
-				$sucuri = new Prime_Cache_Sucuri();
-				$result = $sucuri->purge();
-				$msg = is_wp_error( $result ) ? 'sucuri_error' : 'sucuri';
+				if ( class_exists( 'Prime_Cache_Sucuri' ) ) {
+					$sucuri = new Prime_Cache_Sucuri();
+					$result = $sucuri->purge();
+				}
+				$msg = isset( $result ) && is_wp_error( $result ) ? 'sucuri_error' : 'sucuri';
 				break;
 
 			case 'purge_varnish':
-				$varnish = new Prime_Cache_Varnish();
-				$varnish->purge_all();
+				if ( class_exists( 'Prime_Cache_Varnish' ) ) {
+					$varnish = new Prime_Cache_Varnish();
+					$varnish->purge_all();
+				}
 				$msg = 'varnish';
 				break;
 
