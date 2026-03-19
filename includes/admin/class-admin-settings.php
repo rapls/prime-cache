@@ -127,7 +127,16 @@ class Prime_Cache_Admin_Settings {
 		$s['cdn_relative']          = ! empty( $input['cdn_relative'] );
 		$s['cloudflare_enabled']    = ! empty( $input['cloudflare_enabled'] );
 		$s['cloudflare_email']      = sanitize_email( $input['cloudflare_email'] ?? '' );
-		$s['cloudflare_api_key']    = sanitize_text_field( $input['cloudflare_api_key'] ?? '' );
+		// Preserve DB-stored key if input is disabled (PRIME_CACHE_CF_API_TOKEN active).
+		if ( defined( 'PRIME_CACHE_CF_API_TOKEN' ) && ! isset( $input['cloudflare_api_key'] ) ) {
+			$s['cloudflare_api_key'] = $defaults['cloudflare_api_key'] ?? '';
+			$existing = get_option( 'prime_cache_settings', array() );
+			if ( ! empty( $existing['cloudflare_api_key'] ) ) {
+				$s['cloudflare_api_key'] = $existing['cloudflare_api_key'];
+			}
+		} else {
+			$s['cloudflare_api_key'] = sanitize_text_field( $input['cloudflare_api_key'] ?? '' );
+		}
 		$s['cloudflare_auth_mode']  = in_array( $input['cloudflare_auth_mode'] ?? '', array( 'token', 'global_key' ), true ) ? $input['cloudflare_auth_mode'] : 'token';
 		$s['cloudflare_zone_id']    = sanitize_text_field( $input['cloudflare_zone_id'] ?? '' );
 		$s['browser_cache']         = ! empty( $input['browser_cache'] );

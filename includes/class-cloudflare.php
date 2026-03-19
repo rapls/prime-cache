@@ -68,15 +68,20 @@ class Prime_Cache_Cloudflare {
 	 */
 	public function purge_everything_safe() {
 		$result = $this->purge_everything();
-		if ( true !== $result ) {
-			$retries = (int) get_option( 'prime_cache_cf_full_purge_retries', 0 );
-			if ( $retries < 3 ) {
-				update_option( 'prime_cache_cf_full_purge_retries', $retries + 1, false );
-				wp_schedule_single_event( time() + 60, 'prime_cache_cf_retry_full_purge' );
-			} else {
-				delete_option( 'prime_cache_cf_full_purge_retries' );
-			}
-		} else {
+
+		// Clear any pending retry events on success to prevent stale retries.
+		if ( true === $result ) {
+			delete_option( 'prime_cache_cf_full_purge_retries' );
+			wp_clear_scheduled_hook( 'prime_cache_cf_retry_full_purge' );
+			return;
+		}
+
+		// Failure — schedule retry with dedup guard.
+		$retries = (int) get_option( 'prime_cache_cf_full_purge_retries', 0 );
+		if ( $retries < 3 && ! wp_next_scheduled( 'prime_cache_cf_retry_full_purge' ) ) {
+			update_option( 'prime_cache_cf_full_purge_retries', $retries + 1, false );
+			wp_schedule_single_event( time() + 60, 'prime_cache_cf_retry_full_purge' );
+		} elseif ( $retries >= 3 ) {
 			delete_option( 'prime_cache_cf_full_purge_retries' );
 		}
 	}

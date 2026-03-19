@@ -223,10 +223,10 @@ class Prime_Cache_Database_Optimizer {
 			}
 		}
 
-		// Also clean site transients in multisite.
+		// Also clean site transients in multisite (batched).
 		if ( is_multisite() ) {
 			$site_names = $wpdb->get_col( $wpdb->prepare(
-				"SELECT meta_key FROM {$wpdb->sitemeta} WHERE meta_key LIKE %s AND meta_key NOT LIKE %s",
+				"SELECT meta_key FROM {$wpdb->sitemeta} WHERE meta_key LIKE %s AND meta_key NOT LIKE %s LIMIT 1000",
 				$wpdb->esc_like( '_site_transient_' ) . '%',
 				$wpdb->esc_like( '_site_transient_timeout_' ) . '%'
 			) );
