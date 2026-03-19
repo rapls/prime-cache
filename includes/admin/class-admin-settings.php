@@ -2233,12 +2233,19 @@ class Prime_Cache_Admin_Settings {
 	/* ── notices ───────────────────────────────────────────── */
 
 	public function show_notices() {
-		// Cloudflare purge failure alert.
-		if ( get_transient( 'prime_cache_cf_purge_failed' ) ) {
-			echo '<div class="notice notice-error is-dismissible"><p><strong>Prime Cache:</strong> '
+		// Cloudflare purge failure alert — persists until manually dismissed.
+		if ( get_option( 'prime_cache_cf_purge_failed' ) ) {
+			$dismiss_url = wp_nonce_url( admin_url( 'admin.php?pc_dismiss_cf_alert=1' ), 'pc_dismiss_cf' );
+			echo '<div class="notice notice-error"><p><strong>Prime Cache:</strong> '
 				. esc_html__( 'Cloudflare cache purge failed after multiple retries. Cloudflare may still be serving stale content. Please check your API credentials and try purging again.', 'prime-cache' )
+				. ' <a href="' . esc_url( $dismiss_url ) . '">' . esc_html__( 'Dismiss', 'prime-cache' ) . '</a>'
 				. '</p></div>';
-			delete_transient( 'prime_cache_cf_purge_failed' );
+		}
+		// Handle dismiss.
+		if ( isset( $_GET['pc_dismiss_cf_alert'] ) && wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'pc_dismiss_cf' ) ) {
+			delete_option( 'prime_cache_cf_purge_failed' );
+			wp_safe_redirect( remove_query_arg( array( 'pc_dismiss_cf_alert', '_wpnonce' ) ) );
+			exit;
 		}
 
 		// Multisite: page caching is not supported.

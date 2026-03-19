@@ -127,7 +127,11 @@ class Prime_Cache_Database_Optimizer {
 				"SELECT COUNT(option_name) FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
 				$wpdb->esc_like( '_transient_timeout_' ) . '%',
 				time()
-			) ),
+			) ) + ( is_multisite() ? (int) $wpdb->get_var( $wpdb->prepare(
+				"SELECT COUNT(meta_key) FROM {$wpdb->sitemeta} WHERE meta_key LIKE %s AND meta_value < %d",
+				$wpdb->esc_like( '_site_transient_timeout_' ) . '%',
+				time()
+			) ) : 0 ),
 			'all_transients'     => (int) $wpdb->get_var( $wpdb->prepare(
 				"SELECT COUNT(option_name) FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s",
 				$wpdb->esc_like( '_transient_' ) . '%',

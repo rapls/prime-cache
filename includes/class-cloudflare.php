@@ -84,7 +84,7 @@ class Prime_Cache_Cloudflare {
 		} elseif ( $retries >= 3 ) {
 			delete_option( 'prime_cache_cf_full_purge_retries' );
 			// Notify admin that Cloudflare purge failed after all retries.
-			set_transient( 'prime_cache_cf_purge_failed', true, DAY_IN_SECONDS );
+			update_option( 'prime_cache_cf_purge_failed', time(), false );
 		}
 	}
 
@@ -229,7 +229,7 @@ class Prime_Cache_Cloudflare {
 			if ( $retries >= 3 ) {
 				delete_option( 'prime_cache_cf_purge_queue' );
 				delete_option( 'prime_cache_cf_purge_retries' );
-				set_transient( 'prime_cache_cf_purge_failed', true, DAY_IN_SECONDS );
+				update_option( 'prime_cache_cf_purge_failed', time(), false );
 			} else {
 				update_option( 'prime_cache_cf_purge_retries', $retries + 1, false );
 				wp_schedule_single_event( time() + 60, 'prime_cache_cf_deferred_purge' );
