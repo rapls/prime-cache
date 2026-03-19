@@ -48,7 +48,12 @@ class Prime_Cache_Preload {
 
 		// LCP Optimization (preload hero image + fetchpriority).
 		if ( $s['lcp_optimization'] ) {
-			add_action( 'template_redirect', array( $this, 'start_lcp_buffer' ), 0 );
+			global $prime_cache_html_pipeline;
+			if ( $prime_cache_html_pipeline ) {
+				$prime_cache_html_pipeline->register( 'lcp', array( $this, 'optimize_lcp' ), 60 );
+			} else {
+				add_action( 'template_redirect', array( $this, 'start_lcp_buffer' ), 0 );
+			}
 		}
 
 		// Speculation Rules API (prerender on hover).

@@ -47,7 +47,18 @@ require_once PRIME_CACHE_PATH . 'includes/class-performance-tweaks.php';
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once PRIME_CACHE_PATH . 'includes/class-cli.php';
 }
+require_once PRIME_CACHE_PATH . 'includes/class-html-pipeline.php';
 require_once PRIME_CACHE_PATH . 'includes/class-prime-cache.php';
+
+// Global HTML pipeline — single ob_start for all HTML transformations.
+global $prime_cache_html_pipeline;
+$prime_cache_html_pipeline = new Prime_Cache_HTML_Pipeline();
+add_action( 'template_redirect', function() {
+	global $prime_cache_html_pipeline;
+	if ( ! is_admin() && ! wp_doing_ajax() && ! wp_doing_cron() ) {
+		$prime_cache_html_pipeline->start();
+	}
+}, 0 );
 
 if ( is_admin() ) {
 	require_once PRIME_CACHE_PATH . 'includes/admin/class-admin-settings.php';

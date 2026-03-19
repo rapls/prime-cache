@@ -44,10 +44,14 @@ class Prime_Cache_WebP {
 
 		// Frontend delivery.
 		if ( $active && ! is_admin() && ! wp_doing_ajax() && ! wp_doing_cron() ) {
-			if ( 'picture' === $this->settings['img_delivery_method'] ) {
-				add_action( 'template_redirect', function() { ob_start( array( $this, 'rewrite_to_picture_tags' ) ); }, 3 );
+			$webp_callback = ( 'picture' === $this->settings['img_delivery_method'] )
+				? array( $this, 'rewrite_to_picture_tags' )
+				: array( $this, 'rewrite_html' );
+			global $prime_cache_html_pipeline;
+			if ( $prime_cache_html_pipeline ) {
+				$prime_cache_html_pipeline->register( 'webp', $webp_callback, 30 );
 			} else {
-				add_action( 'template_redirect', function() { ob_start( array( $this, 'rewrite_html' ) ); }, 3 );
+				add_action( 'template_redirect', function() use ( $webp_callback ) { ob_start( $webp_callback ); }, 3 );
 			}
 		}
 

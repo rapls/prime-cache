@@ -26,10 +26,12 @@ class Prime_Cache_CDN {
 
 		$this->site_host = wp_parse_url( home_url(), PHP_URL_HOST );
 
-		// Priority 5: CDN rewrite runs AFTER WebP URL rewrite (priority 3) in LIFO order.
-		add_action( 'template_redirect', function() {
-			ob_start( array( $this, 'rewrite' ) );
-		}, 5 );
+		global $prime_cache_html_pipeline;
+		if ( $prime_cache_html_pipeline ) {
+			$prime_cache_html_pipeline->register( 'cdn', array( $this, 'rewrite' ), 50 );
+		} else {
+			add_action( 'template_redirect', function() { ob_start( array( $this, 'rewrite' ) ); }, 5 );
+		}
 	}
 
 	/**
