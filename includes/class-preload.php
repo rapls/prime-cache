@@ -50,7 +50,7 @@ class Prime_Cache_Preload {
 		if ( $s['lcp_optimization'] ) {
 			global $prime_cache_html_pipeline;
 			if ( $prime_cache_html_pipeline ) {
-				$prime_cache_html_pipeline->register( 'lcp', array( $this, 'optimize_lcp' ), 60 );
+				$prime_cache_html_pipeline->register( 'lcp', array( $this, 'optimize_lcp' ), 50 );
 			} else {
 				add_action( 'template_redirect', array( $this, 'start_lcp_buffer' ), 0 );
 			}

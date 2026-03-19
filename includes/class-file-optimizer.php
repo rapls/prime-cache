@@ -52,7 +52,7 @@ class Prime_Cache_File_Optimizer {
 		// Register with unified HTML pipeline instead of individual ob_start.
 		global $prime_cache_html_pipeline;
 		if ( $prime_cache_html_pipeline ) {
-			$prime_cache_html_pipeline->register( 'file_optimizer', array( $this, 'process_html' ), 10 );
+			$prime_cache_html_pipeline->register( 'file_optimizer', array( $this, 'process_html' ), 60 );
 		} else {
 			add_action( 'template_redirect', array( $this, 'start_buffer' ), -1 );
 		}

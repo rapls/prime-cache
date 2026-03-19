@@ -30,7 +30,7 @@ class Prime_Cache_LazyLoad {
 
 		global $prime_cache_html_pipeline;
 		if ( $prime_cache_html_pipeline ) {
-			$prime_cache_html_pipeline->register( 'lazyload', array( $this, 'process' ), 20 );
+			$prime_cache_html_pipeline->register( 'lazyload', array( $this, 'process' ), 40 );
 		} else {
 			add_action( 'template_redirect', function() { ob_start( array( $this, 'process' ) ); }, 2 );
 		}

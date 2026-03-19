@@ -20,7 +20,7 @@ class Prime_Cache_Media_Optimizer {
 		if ( $this->settings['youtube_thumbnail'] || $this->settings['add_missing_dimensions'] ) {
 			global $prime_cache_html_pipeline;
 			if ( $prime_cache_html_pipeline ) {
-				$prime_cache_html_pipeline->register( 'media_optimizer', array( $this, 'process' ), 40 );
+				$prime_cache_html_pipeline->register( 'media_optimizer', array( $this, 'process' ), 20 );
 			} else {
 				add_action( 'template_redirect', function() { ob_start( array( $this, 'process' ) ); }, 4 );
 			}

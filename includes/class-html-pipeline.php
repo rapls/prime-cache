@@ -6,13 +6,13 @@
  * runs all HTML transformations in one pass, reducing CPU/memory overhead
  * from repeated buffering and regex scanning of the same HTML.
  *
- * Processing order (matches previous ob_start priority order):
- * 1. File Optimizer (minify, combine, critical CSS, etc.)
- * 2. LazyLoad (images, iframes, videos)
+ * Processing order (matches the nested ob_start LIFO execution order):
+ * 1. CDN URL rewrite (was ob_start priority 5 = first to execute in LIFO)
+ * 2. Media Optimizer (YouTube thumbnails, image dimensions)
  * 3. WebP/AVIF (picture tags or URL rewrite)
- * 4. Media Optimizer (YouTube thumbnails, image dimensions)
- * 5. CDN URL rewrite
- * 6. LCP optimization (fetchpriority, preload)
+ * 4. LazyLoad (images, iframes, videos)
+ * 5. LCP optimization (fetchpriority, preload)
+ * 6. File Optimizer (minify, combine, critical CSS — was priority -1 = last in LIFO)
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -48,9 +48,14 @@ class Prime_Cache_HTML_Pipeline {
 			return;
 		}
 
-		// Sort by priority (stable sort preserves registration order for same priority).
+		// Sort by priority. Use index as tiebreaker for stability (PHP usort is unstable).
+		foreach ( $this->processors as $i => &$p ) {
+			$p['_idx'] = $i;
+		}
+		unset( $p );
 		usort( $this->processors, function( $a, $b ) {
-			return $a['priority'] - $b['priority'];
+			$diff = $a['priority'] - $b['priority'];
+			return $diff !== 0 ? $diff : $a['_idx'] - $b['_idx'];
 		} );
 
 		$this->active = true;

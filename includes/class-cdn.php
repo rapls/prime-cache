@@ -28,7 +28,7 @@ class Prime_Cache_CDN {
 
 		global $prime_cache_html_pipeline;
 		if ( $prime_cache_html_pipeline ) {
-			$prime_cache_html_pipeline->register( 'cdn', array( $this, 'rewrite' ), 50 );
+			$prime_cache_html_pipeline->register( 'cdn', array( $this, 'rewrite' ), 10 );
 		} else {
 			add_action( 'template_redirect', function() { ob_start( array( $this, 'rewrite' ) ); }, 5 );
 		}
