@@ -151,6 +151,7 @@ class Prime_Cache {
 		wp_clear_scheduled_hook( 'prime_cache_cf_retry_full_purge' );
 		delete_option( 'prime_cache_cf_full_purge_retries' );
 		delete_option( 'prime_cache_cf_purge_retries' );
+		delete_option( 'prime_cache_cf_purge_failed' );
 		Prime_Cache_Database_Optimizer::unschedule();
 
 		// Remove .htaccess rules.

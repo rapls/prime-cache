@@ -189,7 +189,9 @@ class Prime_Cache_Cloudflare {
 		// Larger batches: defer to cron to avoid blocking shutdown.
 		if ( count( $urls ) <= 30 ) {
 			$result = $this->purge_urls( $urls );
-			if ( true !== $result ) {
+			if ( true === $result ) {
+				delete_option( 'prime_cache_cf_purge_failed' );
+			} elseif ( true !== $result ) {
 				// API failed — queue for async retry instead of losing the purge.
 				$existing = get_option( 'prime_cache_cf_purge_queue', array() );
 				$merged   = array_unique( array_merge( $existing, $urls ) );
