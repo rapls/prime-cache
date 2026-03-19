@@ -2233,6 +2233,14 @@ class Prime_Cache_Admin_Settings {
 	/* ── notices ───────────────────────────────────────────── */
 
 	public function show_notices() {
+		// Cloudflare purge failure alert.
+		if ( get_transient( 'prime_cache_cf_purge_failed' ) ) {
+			echo '<div class="notice notice-error is-dismissible"><p><strong>Prime Cache:</strong> '
+				. esc_html__( 'Cloudflare cache purge failed after multiple retries. Cloudflare may still be serving stale content. Please check your API credentials and try purging again.', 'prime-cache' )
+				. '</p></div>';
+			delete_transient( 'prime_cache_cf_purge_failed' );
+		}
+
 		// Multisite: page caching is not supported.
 		if ( is_multisite() ) {
 			$screen = get_current_screen();

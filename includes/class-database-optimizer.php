@@ -132,7 +132,11 @@ class Prime_Cache_Database_Optimizer {
 				"SELECT COUNT(option_name) FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s",
 				$wpdb->esc_like( '_transient_' ) . '%',
 				$wpdb->esc_like( '_transient_timeout_' ) . '%'
-			) ),
+			) ) + ( is_multisite() ? (int) $wpdb->get_var( $wpdb->prepare(
+				"SELECT COUNT(meta_key) FROM {$wpdb->sitemeta} WHERE meta_key LIKE %s AND meta_key NOT LIKE %s",
+				$wpdb->esc_like( '_site_transient_' ) . '%',
+				$wpdb->esc_like( '_site_transient_timeout_' ) . '%'
+			) ) : 0 ),
 			'tables'             => (int) $wpdb->get_var( $wpdb->prepare(
 				"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND table_name LIKE %s AND Engine <> 'InnoDB' AND data_free > 0",
 				DB_NAME,
@@ -191,10 +195,11 @@ class Prime_Cache_Database_Optimizer {
 
 	private function clean_expired_transients() {
 		global $wpdb;
+		$now   = time();
 		$names = $wpdb->get_col( $wpdb->prepare(
 			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d LIMIT 1000",
 			$wpdb->esc_like( '_transient_timeout_' ) . '%',
-			time()
+			$now
 		) );
 
 		$count = 0;
@@ -204,6 +209,22 @@ class Prime_Cache_Database_Optimizer {
 				$count++;
 			}
 		}
+
+		// Also clean expired site transients in multisite.
+		if ( is_multisite() ) {
+			$site_names = $wpdb->get_col( $wpdb->prepare(
+				"SELECT meta_key FROM {$wpdb->sitemeta} WHERE meta_key LIKE %s AND meta_value < %d LIMIT 1000",
+				$wpdb->esc_like( '_site_transient_timeout_' ) . '%',
+				$now
+			) );
+			foreach ( $site_names as $name ) {
+				$key = str_replace( '_site_transient_timeout_', '', $name );
+				if ( delete_site_transient( $key ) ) {
+					$count++;
+				}
+			}
+		}
+
 		return $count;
 	}
 
