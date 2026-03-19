@@ -130,13 +130,16 @@ class Prime_Cache_File_Optimizer {
 			return false;
 		}
 
-		$s = $this->settings;
-		// At least one optimization must be enabled.
-		return $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['combine_css']
-			|| $s['async_css'] || $s['remove_unused_css'] || $s['minify_js'] || $s['combine_js']
-			|| $s['defer_js'] || $s['delay_js'] || $s['combine_google_fonts'] || $s['self_host_google_fonts']
-			|| $s['remove_query_strings'] || ! empty( $s['prefetch_dns'] ) || $s['local_analytics']
-			|| $s['inline_small_css'];
+		$s    = $this->settings;
+		$pro  = prime_cache_is_pro();
+		// Free: minify HTML/CSS/JS, remove comments, strip query strings.
+		// Pro: combine, defer, delay, critical CSS, UCSS, Google Fonts, local analytics, inline CSS.
+		$free_active = $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['minify_js'] || $s['remove_query_strings'];
+		$pro_active  = $pro && ( $s['combine_css'] || $s['async_css'] || $s['remove_unused_css']
+			|| $s['combine_js'] || $s['defer_js'] || $s['delay_js']
+			|| $s['combine_google_fonts'] || $s['self_host_google_fonts']
+			|| ! empty( $s['prefetch_dns'] ) || $s['local_analytics'] || $s['inline_small_css'] );
+		return $free_active || $pro_active;
 	}
 
 	public function start_buffer() {

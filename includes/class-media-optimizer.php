@@ -17,7 +17,10 @@ class Prime_Cache_Media_Optimizer {
 			return;
 		}
 
-		if ( $this->settings['youtube_thumbnail'] || $this->settings['add_missing_dimensions'] ) {
+		// YouTube thumbnails = Pro. Image dimensions = Free.
+		$yt_active  = prime_cache_is_pro() && $this->settings['youtube_thumbnail'];
+		$dim_active = $this->settings['add_missing_dimensions'];
+		if ( $yt_active || $dim_active ) {
 			global $prime_cache_html_pipeline;
 			if ( $prime_cache_html_pipeline ) {
 				$prime_cache_html_pipeline->register( 'media_optimizer', array( $this, 'process' ), 20 );
@@ -26,8 +29,8 @@ class Prime_Cache_Media_Optimizer {
 			}
 		}
 
-		// Enqueue YouTube click handler upfront (not in buffer callback).
-		if ( $this->settings['youtube_thumbnail'] ) {
+		// [Pro] Enqueue YouTube click handler.
+		if ( prime_cache_is_pro() && $this->settings['youtube_thumbnail'] ) {
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_yt_script' ) );
 		}
 	}

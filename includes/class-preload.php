@@ -12,42 +12,42 @@ class Prime_Cache_Preload {
 
 	public function __construct() {
 		$this->settings = prime_cache_get_settings();
-		$s = $this->settings;
+		$s   = $this->settings;
+		$pro = prime_cache_is_pro();
 
-		// Cache preload (warm cache via cron).
-		if ( $s['preload_enabled'] ) {
+		// [Pro] Cache preload (warm cache via cron).
+		if ( $pro && $s['preload_enabled'] ) {
 			add_action( 'prime_cache_preload_batch', array( $this, 'run_preload_batch' ) );
 			add_action( 'prime_cache_after_purge_all', array( $this, 'schedule_preload' ) );
 		}
 
-		// Link prefetching (frontend JS).
+		// [Free] Link prefetching (frontend JS).
 		if ( $s['preload_links'] ) {
 			add_action( 'wp_footer', array( $this, 'inject_link_prefetch_script' ), 99 );
 		}
 
-		// Font preloading.
-		if ( $s['preload_fonts'] ) {
-			// Priority 99 to ensure $wp_styles is fully populated.
+		// [Pro] Font preloading.
+		if ( $pro && $s['preload_fonts'] ) {
 			add_action( 'wp_head', array( $this, 'inject_font_preload' ), 99 );
 		}
 
-		// Preconnect resource hints.
-		if ( ! empty( $s['preconnect'] ) ) {
+		// [Pro] Preconnect resource hints.
+		if ( $pro && ! empty( $s['preconnect'] ) ) {
 			add_filter( 'wp_resource_hints', array( $this, 'add_preconnect_hints' ), 10, 2 );
 		}
 
-		// Manual preload resources.
-		if ( ! empty( $s['preload_resources'] ) ) {
+		// [Pro] Manual preload resources.
+		if ( $pro && ! empty( $s['preload_resources'] ) ) {
 			add_action( 'wp_head', array( $this, 'inject_manual_preloads' ), 1 );
 		}
 
-		// DNS Prefetch resource hints.
-		if ( ! empty( $s['prefetch_dns'] ) ) {
+		// [Pro] DNS Prefetch resource hints.
+		if ( $pro && ! empty( $s['prefetch_dns'] ) ) {
 			add_filter( 'wp_resource_hints', array( $this, 'add_dns_prefetch_hints' ), 10, 2 );
 		}
 
-		// LCP Optimization (preload hero image + fetchpriority).
-		if ( $s['lcp_optimization'] ) {
+		// [Pro] LCP Optimization (preload hero image + fetchpriority).
+		if ( $pro && $s['lcp_optimization'] ) {
 			global $prime_cache_html_pipeline;
 			if ( $prime_cache_html_pipeline ) {
 				$prime_cache_html_pipeline->register( 'lcp', array( $this, 'optimize_lcp' ), 50 );
@@ -56,8 +56,8 @@ class Prime_Cache_Preload {
 			}
 		}
 
-		// Speculation Rules API (prerender on hover).
-		if ( $s['speculation_rules'] ) {
+		// [Pro] Speculation Rules API (prerender on hover).
+		if ( $pro && $s['speculation_rules'] ) {
 			add_action( 'wp_footer', array( $this, 'inject_speculation_rules' ), 99 );
 		}
 	}

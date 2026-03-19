@@ -23,6 +23,16 @@ if ( ! defined( 'PRIME_CACHE_CONFIG_DIR' ) ) {
 
 define( 'PRIME_CACHE_DROPIN_SOURCE', PRIME_CACHE_PATH . 'dropins/page-cache.php' );
 
+/**
+ * Check if Prime Cache Pro add-on is active.
+ *
+ * @return bool
+ */
+function prime_cache_is_pro() {
+	return (bool) apply_filters( 'prime_cache_is_pro', false );
+}
+
+// Core classes (always loaded).
 require_once PRIME_CACHE_PATH . 'includes/class-cache-storage.php';
 require_once PRIME_CACHE_PATH . 'includes/class-cache-tests.php';
 require_once PRIME_CACHE_PATH . 'includes/class-config.php';
@@ -30,19 +40,16 @@ require_once PRIME_CACHE_PATH . 'includes/class-purge.php';
 require_once PRIME_CACHE_PATH . 'includes/class-htaccess.php';
 require_once PRIME_CACHE_PATH . 'includes/class-file-optimizer.php';
 require_once PRIME_CACHE_PATH . 'includes/class-preload.php';
-require_once PRIME_CACHE_PATH . 'includes/class-database-optimizer.php';
-require_once PRIME_CACHE_PATH . 'includes/class-varnish.php';
-require_once PRIME_CACHE_PATH . 'includes/class-sucuri.php';
-require_once PRIME_CACHE_PATH . 'includes/class-heartbeat.php';
 require_once PRIME_CACHE_PATH . 'includes/class-lazyload.php';
-require_once PRIME_CACHE_PATH . 'includes/class-cdn.php';
-require_once PRIME_CACHE_PATH . 'includes/class-cloudflare.php';
-require_once PRIME_CACHE_PATH . 'includes/class-webp.php';
 require_once PRIME_CACHE_PATH . 'includes/class-media-optimizer.php';
 require_once PRIME_CACHE_PATH . 'includes/class-post-metabox.php';
 require_once PRIME_CACHE_PATH . 'includes/class-compatibility.php';
-
 require_once PRIME_CACHE_PATH . 'includes/class-performance-tweaks.php';
+
+// Pro classes — loaded by prime-cache-pro add-on plugin:
+// class-cloudflare.php, class-sucuri.php, class-varnish.php,
+// class-cdn.php, class-heartbeat.php, class-database-optimizer.php,
+// class-webp.php, object cache dropins
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once PRIME_CACHE_PATH . 'includes/class-cli.php';

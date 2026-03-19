@@ -299,10 +299,12 @@ class Prime_Cache_Config {
 	 * @return string|false
 	 */
 	public static function get_object_cache_dropin_path( $backend ) {
+		// Object cache dropins are in Pro add-on.
+		$pro_path = defined( 'PRIME_CACHE_PRO_PATH' ) ? PRIME_CACHE_PRO_PATH : PRIME_CACHE_PATH;
 		$dropins = array(
-			'apcu'      => PRIME_CACHE_PATH . 'dropins/apcu-object-cache.php',
-			'redis'     => PRIME_CACHE_PATH . 'dropins/redis-object-cache.php',
-			'memcached' => PRIME_CACHE_PATH . 'dropins/memcached-object-cache.php',
+			'apcu'      => $pro_path . 'dropins/apcu-object-cache.php',
+			'redis'     => $pro_path . 'dropins/redis-object-cache.php',
+			'memcached' => $pro_path . 'dropins/memcached-object-cache.php',
 		);
 
 		return isset( $dropins[ $backend ] ) ? $dropins[ $backend ] : false;
