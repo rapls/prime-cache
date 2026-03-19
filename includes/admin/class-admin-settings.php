@@ -6,8 +6,17 @@ class Prime_Cache_Admin_Settings {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_action( 'admin_init', array( $this, 'handle_cf_dismiss' ) );
 		add_action( 'admin_notices', array( $this, 'show_notices' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+	}
+
+	public function handle_cf_dismiss() {
+		if ( isset( $_GET['pc_dismiss_cf_alert'] ) && wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'pc_dismiss_cf' ) && current_user_can( 'manage_options' ) ) {
+			delete_option( 'prime_cache_cf_purge_failed' );
+			wp_safe_redirect( remove_query_arg( array( 'pc_dismiss_cf_alert', '_wpnonce' ) ) );
+			exit;
+		}
 	}
 
 	public function add_menu() {
@@ -2233,19 +2242,13 @@ class Prime_Cache_Admin_Settings {
 	/* ── notices ───────────────────────────────────────────── */
 
 	public function show_notices() {
-		// Cloudflare purge failure alert — persists until manually dismissed.
+		// Cloudflare purge failure alert — persists until dismissed or next success.
 		if ( get_option( 'prime_cache_cf_purge_failed' ) ) {
-			$dismiss_url = wp_nonce_url( admin_url( 'admin.php?pc_dismiss_cf_alert=1' ), 'pc_dismiss_cf' );
+			$dismiss_url = wp_nonce_url( add_query_arg( 'pc_dismiss_cf_alert', '1' ), 'pc_dismiss_cf' );
 			echo '<div class="notice notice-error"><p><strong>Prime Cache:</strong> '
 				. esc_html__( 'Cloudflare cache purge failed after multiple retries. Cloudflare may still be serving stale content. Please check your API credentials and try purging again.', 'prime-cache' )
 				. ' <a href="' . esc_url( $dismiss_url ) . '">' . esc_html__( 'Dismiss', 'prime-cache' ) . '</a>'
 				. '</p></div>';
-		}
-		// Handle dismiss.
-		if ( isset( $_GET['pc_dismiss_cf_alert'] ) && wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'pc_dismiss_cf' ) ) {
-			delete_option( 'prime_cache_cf_purge_failed' );
-			wp_safe_redirect( remove_query_arg( array( 'pc_dismiss_cf_alert', '_wpnonce' ) ) );
-			exit;
 		}
 
 		// Multisite: page caching is not supported.

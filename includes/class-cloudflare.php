@@ -72,6 +72,7 @@ class Prime_Cache_Cloudflare {
 		// Clear any pending retry events on success to prevent stale retries.
 		if ( true === $result ) {
 			delete_option( 'prime_cache_cf_full_purge_retries' );
+			delete_option( 'prime_cache_cf_purge_failed' ); // Clear any stale failure alert.
 			wp_clear_scheduled_hook( 'prime_cache_cf_retry_full_purge' );
 			return;
 		}
@@ -221,8 +222,8 @@ class Prime_Cache_Cloudflare {
 		$result = $this->purge_urls( $urls );
 
 		if ( true === $result ) {
-			// Success — clear queue.
 			delete_option( 'prime_cache_cf_purge_queue' );
+			delete_option( 'prime_cache_cf_purge_failed' ); // Clear stale failure alert.
 		} else {
 			// Failure — increment retry counter and re-schedule.
 			$retries = (int) get_option( 'prime_cache_cf_purge_retries', 0 );
