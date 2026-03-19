@@ -1713,7 +1713,7 @@ class Prime_Cache_Admin_Settings {
 					<span class="pc-sw__track"></span>
 					<span class="pc-sw__body">
 						<b><?php esc_html_e( 'Optimize Tables', 'prime-cache' ); ?> <span class="pc-badge pc-badge--m"><?php echo esc_html( number_format( $counts['tables'] ) ); ?></span></b>
-						<small><?php esc_html_e( 'Run OPTIMIZE TABLE on WordPress tables with fragmented space (data_free > 0). Applies to all storage engines including InnoDB. Only tables with the site prefix are targeted.', 'prime-cache' ); ?></small>
+						<small><?php esc_html_e( 'Run OPTIMIZE TABLE on non-InnoDB WordPress tables with fragmented space. InnoDB tables are excluded because they handle fragmentation internally and OPTIMIZE can cause heavy table rebuilds on large tables.', 'prime-cache' ); ?></small>
 					</span>
 				</label>
 			</div>

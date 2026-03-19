@@ -129,11 +129,12 @@ class Prime_Cache_Database_Optimizer {
 				time()
 			) ),
 			'all_transients'     => (int) $wpdb->get_var( $wpdb->prepare(
-				"SELECT COUNT(option_name) FROM {$wpdb->options} WHERE option_name LIKE %s",
-				'%' . $wpdb->esc_like( '_transient_' ) . '%'
+				"SELECT COUNT(option_name) FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s",
+				'%' . $wpdb->esc_like( '_transient_' ) . '%',
+				'%' . $wpdb->esc_like( '_transient_timeout_' ) . '%'
 			) ),
 			'tables'             => (int) $wpdb->get_var( $wpdb->prepare(
-				"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND table_name LIKE %s AND data_free > 0",
+				"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND table_name LIKE %s AND Engine <> 'InnoDB' AND data_free > 0",
 				DB_NAME,
 				$wpdb->esc_like( $wpdb->prefix ) . '%'
 			) ),
@@ -191,7 +192,7 @@ class Prime_Cache_Database_Optimizer {
 	private function clean_expired_transients() {
 		global $wpdb;
 		$names = $wpdb->get_col( $wpdb->prepare(
-			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
+			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d LIMIT 1000",
 			$wpdb->esc_like( '_transient_timeout_' ) . '%',
 			time()
 		) );
@@ -209,7 +210,7 @@ class Prime_Cache_Database_Optimizer {
 	private function clean_all_transients() {
 		global $wpdb;
 		$names = $wpdb->get_col( $wpdb->prepare(
-			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s",
+			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s LIMIT 1000",
 			$wpdb->esc_like( '_transient_' ) . '%',
 			$wpdb->esc_like( '_transient_timeout_' ) . '%'
 		) );
@@ -242,9 +243,11 @@ class Prime_Cache_Database_Optimizer {
 
 	private function optimize_tables() {
 		global $wpdb;
-		// Include WP-prefixed tables with fragmentation (InnoDB + MyISAM).
+		// Only optimize non-InnoDB WP tables (MyISAM, ARCHIVE, etc.).
+		// InnoDB handles fragmentation internally and OPTIMIZE TABLE can be
+		// very heavy (full table rebuild with lock) on large InnoDB tables.
 		$tables = $wpdb->get_col( $wpdb->prepare(
-			"SELECT table_name FROM information_schema.tables WHERE table_schema = %s AND table_name LIKE %s AND data_free > 0",
+			"SELECT table_name FROM information_schema.tables WHERE table_schema = %s AND table_name LIKE %s AND Engine <> 'InnoDB' AND data_free > 0",
 			DB_NAME,
 			$wpdb->esc_like( $wpdb->prefix ) . '%'
 		) );

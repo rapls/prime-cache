@@ -158,10 +158,20 @@ class Prime_Cache_Cloudflare {
 		$urls = array_unique( self::$queued_urls );
 		self::$queued_urls = array();
 
-		// Small batches (≤30): send immediately (single API call, fast).
+		// Small batches (≤30): send immediately. On failure, queue for cron retry.
 		// Larger batches: defer to cron to avoid blocking shutdown.
 		if ( count( $urls ) <= 30 ) {
-			$this->purge_urls( $urls );
+			$result = $this->purge_urls( $urls );
+			if ( true !== $result ) {
+				// API failed — queue for async retry instead of losing the purge.
+				$existing = get_option( 'prime_cache_cf_purge_queue', array() );
+				$merged   = array_unique( array_merge( $existing, $urls ) );
+				update_option( 'prime_cache_cf_purge_queue', $merged, false );
+				delete_option( 'prime_cache_cf_purge_retries' );
+				if ( ! wp_next_scheduled( 'prime_cache_cf_deferred_purge' ) ) {
+					wp_schedule_single_event( time() + 30, 'prime_cache_cf_deferred_purge' );
+				}
+			}
 		} else {
 			$existing = get_option( 'prime_cache_cf_purge_queue', array() );
 			$merged   = array_unique( array_merge( $existing, $urls ) );

@@ -842,12 +842,12 @@ class Prime_Cache {
 		$settings = get_option( 'prime_cache_settings', array() );
 
 		// Mask sensitive API keys/secrets before export.
-		// Mask API keys/secrets (not email — it's configuration, not a secret).
+		// Remove API keys/secrets from export. Import will preserve existing
+		// values when the key is absent. To intentionally clear a key via import,
+		// manually add the key with an empty string to the JSON file.
 		$sensitive_keys = array( 'cloudflare_api_key', 'sucuri_api_key' );
 		foreach ( $sensitive_keys as $sk ) {
-			if ( ! empty( $settings[ $sk ] ) ) {
-				$settings[ $sk ] = ''; // Empty — import will preserve existing value.
-			}
+			unset( $settings[ $sk ] );
 		}
 
 		$data = wp_json_encode( $settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
@@ -920,11 +920,13 @@ class Prime_Cache {
 			exit;
 		}
 
-		// Preserve existing sensitive keys if import has them empty (masked export).
+		// Preserve existing sensitive keys if import has them empty AND the key
+		// exists in the file (masked export). If the key is completely absent from
+		// the JSON, the default empty string will apply (intentional reset).
 		$current  = prime_cache_get_settings();
 		$preserve = array( 'cloudflare_api_key', 'sucuri_api_key' );
 		foreach ( $preserve as $pk ) {
-			if ( isset( $data[ $pk ] ) && '' === $data[ $pk ] && ! empty( $current[ $pk ] ) ) {
+			if ( array_key_exists( $pk, $data ) && '' === $data[ $pk ] && ! empty( $current[ $pk ] ) ) {
 				$data[ $pk ] = $current[ $pk ];
 			}
 		}
