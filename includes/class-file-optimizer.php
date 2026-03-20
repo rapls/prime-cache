@@ -348,8 +348,11 @@ class Prime_Cache_File_Optimizer {
 		$preload_links = '';
 
 		// ── 1. Preload known icon font woff2 files ──────────────
+		// Only preload the most critical font file (fa-solid) to avoid
+		// PageSpeed warning "4+ preconnect connections found".
+		// fa-regular and fa-brands load on-demand via font-display:optional.
 		$icon_preloads = array(
-			'font-awesome' => array( 'fa-solid-900.woff2', 'fa-regular-400.woff2', 'fa-brands-400.woff2' ),
+			'font-awesome' => array( 'fa-solid-900.woff2' ),
 		);
 
 		foreach ( $icon_preloads as $detect => $woff2_files ) {
