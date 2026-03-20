@@ -134,8 +134,7 @@ class Prime_Cache_File_Optimizer {
 		$pro  = prime_cache_is_pro();
 		// Free: minify HTML/CSS/JS, remove comments, strip query strings.
 		// Pro: combine, defer, delay, critical CSS, UCSS, Google Fonts, local analytics, inline CSS.
-		// Free: minify HTML/CSS/JS, remove comments, strip query strings, icon font CLS prevention.
-		$free_active = $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['minify_js'] || $s['remove_query_strings'] || ! empty( $s['cache_enabled'] );
+		$free_active = $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['minify_js'] || $s['remove_query_strings'];
 		$pro_active  = $pro && ( $s['combine_css'] || $s['async_css'] || $s['remove_unused_css']
 			|| $s['combine_js'] || $s['defer_js'] || $s['delay_js']
 			|| $s['combine_google_fonts'] || $s['self_host_google_fonts']
