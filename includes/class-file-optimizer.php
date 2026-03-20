@@ -512,10 +512,17 @@ class Prime_Cache_File_Optimizer {
 	private function stabilize_layout( $html ) {
 		$css = '';
 
-		// 1. Reserve aspect ratio for common thumbnail/card images
-		//    that often lack width/height attributes.
-		$css .= '.entry-card-thumb,.cat-label,.eye-catch{overflow:hidden;aspect-ratio:auto}';
-		$css .= '.entry-card-thumb img,.eye-catch img{width:100%;height:auto;display:block}';
+		// 1. Reserve aspect ratio for common thumbnail/card images.
+		//    Force aspect-ratio from width/height attributes via CSS so the
+		//    browser reserves exact space even when sizes attribute differs.
+		$css .= '.entry-card-thumb{overflow:hidden;position:relative}';
+		$css .= '.entry-card-thumb img{width:100%;height:100%;object-fit:cover;display:block;aspect-ratio:attr(width) / attr(height)}';
+		// Fallback for browsers that don't support attr() in aspect-ratio (all current):
+		// Use 16:9 which is the most common WordPress thumbnail ratio.
+		$css .= '@supports not (aspect-ratio:attr(width)/attr(height)){';
+		$css .= '.entry-card-thumb img{aspect-ratio:16/9;height:auto}';
+		$css .= '}';
+		$css .= '.eye-catch{overflow:hidden}.eye-catch img{width:100%;height:auto;display:block}';
 
 		// 2. Cocoon theme: stabilize #content and sidebar layout
 		//    to prevent float reflow during CSS parsing.
@@ -527,14 +534,22 @@ class Prime_Cache_File_Optimizer {
 			$css .= '.notice-area{min-height:0;contain:layout}';
 			// Stabilize header height.
 			$css .= '.site-header-logo img{height:auto;max-height:60px}';
+			// Cocoon mobile: entry card layout stability.
+			$css .= '@media(max-width:480px){';
+			$css .= '.entry-card-wrap{display:flex;align-items:flex-start;gap:8px}';
+			$css .= '.entry-card-thumb{flex-shrink:0;width:120px;aspect-ratio:16/9}';
+			$css .= '.entry-card-content{flex:1;min-width:0}';
+			$css .= '}';
+			$css .= '@media(min-width:481px) and (max-width:834px){';
+			$css .= '.entry-card-thumb{aspect-ratio:16/9}';
+			$css .= '}';
 		}
 
 		// 3. Generic: ensure ad containers don't shift content.
 		$css .= '.ad-area,.widget_ads,.ad-space{min-height:0;contain:layout style}';
 
-		// 4. Font size-adjust for common system font stacks to reduce
-		//    text reflow when web fonts load.
-		$css .= 'body{font-display:optional;text-rendering:optimizeSpeed}';
+		// 4. Text rendering stability.
+		$css .= 'body{text-rendering:optimizeSpeed}';
 
 		if ( empty( $css ) ) {
 			return $html;
