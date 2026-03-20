@@ -507,7 +507,13 @@ class Prime_Cache {
 				return;
 		}
 
-		$redirect = remove_query_arg( array( 'pc_action', 'pc_url', '_wpnonce' ) );
+		// Redirect back to the referring page, or fall back to the Prime Cache dashboard.
+		$referer = wp_get_referer();
+		if ( $referer ) {
+			$redirect = remove_query_arg( array( 'pc_action', 'pc_url', 'pc_post_id', '_wpnonce', 'pc_cleared' ), $referer );
+		} else {
+			$redirect = admin_url( 'admin.php?page=prime-cache' );
+		}
 		$redirect = add_query_arg( 'pc_cleared', $msg, $redirect );
 		wp_safe_redirect( $redirect );
 		exit;

@@ -3,7 +3,7 @@
  * Plugin Name: Prime Cache
  * Description: A fast and stable page caching plugin for WordPress.
  * Version: 1.0.0
- * Author: rapls
+ * Author: Rapls Works
  * License: GPL-2.0-or-later
  * Text Domain: prime-cache
  */

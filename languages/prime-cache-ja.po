@@ -1,6 +1,6 @@
 # Japanese translation for Prime Cache
 # Following: https://ja.wordpress.org/team/handbook/translation/translation-style-guide/
-# Copyright (C) 2026 rapls
+# Copyright (C) 2026 Rapls Works
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
