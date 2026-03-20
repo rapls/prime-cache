@@ -93,13 +93,20 @@ class Prime_Cache_Htaccess {
 		$lines = array_merge( $lines, self::build_mime_rules() );
 		$lines[] = '';
 
-		// WebP/AVIF rewrite.
-		if ( ( ! empty( $settings['webp_enabled'] ) || ! empty( $settings['avif_enabled'] ) ) && 'rewrite' === ( $settings['img_delivery_method'] ?? '' ) ) {
+		// WebP/AVIF rewrite (Pro feature — only when conversion is active).
+		if ( ( ! empty( $settings['webp_enabled'] ) || ! empty( $settings['avif_enabled'] ) )
+			&& ! empty( $settings['img_conversion_enabled'] )
+			&& 'rewrite' === ( $settings['img_delivery_method'] ?? '' ) ) {
 			$lines = array_merge( $lines, self::build_image_rewrite_rules( $settings ) );
 			$lines[] = '';
 		}
 
-		$lines = array_merge( $lines, self::build_rewrite_rules( $settings ) );
+		// Page cache rewrite rules (only when caching is enabled).
+		if ( ! empty( $settings['cache_enabled'] ) ) {
+			$lines = array_merge( $lines, self::build_rewrite_rules( $settings ) );
+		} else {
+			$lines[] = '# Page cache rewrite rules disabled (cache is off).';
+		}
 		$lines[] = '';
 		$lines = array_merge( $lines, self::build_deflate_rules() );
 
@@ -153,8 +160,6 @@ class Prime_Cache_Htaccess {
 			'    AddType image/x-icon                          .ico',
 			'',
 			'    # Fonts',
-			'    AddType font/woff                             .woff',
-			'    AddType font/woff2                            .woff2',
 			'    AddType application/font-woff                 .woff',
 			'    AddType application/font-woff2                .woff2',
 			'    AddType font/ttf                              .ttf',
