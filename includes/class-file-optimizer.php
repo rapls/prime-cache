@@ -357,9 +357,21 @@ class Prime_Cache_File_Optimizer {
 				continue;
 			}
 			foreach ( $woff2_files as $woff2 ) {
+				// Match absolute URL.
 				if ( preg_match( '#(https?://[^\s"\']+/' . preg_quote( $woff2, '#' ) . ')#i', $html, $m ) ) {
 					$preload_links .= '<link rel="preload" href="' . $m[1] . '" as="font" type="font/woff2" crossorigin>';
-				} else {
+				}
+				// Match relative URL (e.g. ../webfonts/fa-solid-900.woff2).
+				elseif ( preg_match( '#url\(["\']?([^"\')\s]*/' . preg_quote( $woff2, '#' ) . ')["\']?\)#i', $html, $m ) ) {
+					$rel_url = $m[1];
+					// Resolve relative path: find the CSS file's base URL.
+					$resolved = $this->resolve_font_url( $rel_url, $html );
+					if ( $resolved ) {
+						$preload_links .= '<link rel="preload" href="' . esc_url( $resolved ) . '" as="font" type="font/woff2" crossorigin>';
+					}
+				}
+				// Fallback: filesystem search.
+				else {
 					$local = $this->find_local_woff2( $woff2 );
 					if ( $local ) {
 						$preload_links .= '<link rel="preload" href="' . $local . '" as="font" type="font/woff2" crossorigin>';
@@ -553,6 +565,40 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		return $html;
+	}
+
+	/**
+	 * Resolve a relative font URL (e.g. ../webfonts/fa-solid-900.woff2) to
+	 * an absolute URL by finding the CSS file that contains it.
+	 */
+	private function resolve_font_url( $relative_url, $html ) {
+		// Extract the font filename.
+		$filename = basename( $relative_url );
+
+		// Try to find a CSS link in the HTML whose path relates to the font.
+		// Font Awesome CSS is usually at .../css/fontawesome.css or .../css/all.css
+		// and references fonts at ../webfonts/
+		if ( preg_match_all( '#<link[^>]+href=["\']([^"\']+(?:font-?awesome|/css/all)[^"\']*\.css)["\']#i', $html, $css_matches ) ) {
+			foreach ( $css_matches[1] as $css_url ) {
+				// Resolve the CSS URL to get its base directory.
+				$css_url_clean = strtok( $css_url, '?' );
+				$css_dir = dirname( $css_url_clean );
+				// Apply relative path (../ resolution).
+				$parts = explode( '/', $relative_url );
+				$base_parts = explode( '/', $css_dir );
+				foreach ( $parts as $part ) {
+					if ( '..' === $part ) {
+						array_pop( $base_parts );
+					} elseif ( '.' !== $part && '' !== $part ) {
+						$base_parts[] = $part;
+					}
+				}
+				return implode( '/', $base_parts );
+			}
+		}
+
+		// Fallback: search filesystem.
+		return $this->find_local_woff2( $filename );
 	}
 
 	/**
