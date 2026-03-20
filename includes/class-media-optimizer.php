@@ -84,6 +84,11 @@ class Prime_Cache_Media_Optimizer {
 		return preg_replace_callback( '#<img\s[^>]+>#i', function( $m ) {
 			$tag = $m[0];
 
+			// Fix invalid width/height with unit suffixes (e.g. "313px" → "313").
+			// HTML attributes must be plain numbers; units cause CLS.
+			$tag = preg_replace( '#\b(width\s*=\s*["\'])(\d+)\s*px\s*(["\'])#i', '$1$2$3', $tag );
+			$tag = preg_replace( '#\b(height\s*=\s*["\'])(\d+)\s*px\s*(["\'])#i', '$1$2$3', $tag );
+
 			// Skip if both width and height already present.
 			if ( preg_match( '#\bwidth\s*=#i', $tag ) && preg_match( '#\bheight\s*=#i', $tag ) ) {
 				return $tag;
