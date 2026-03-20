@@ -916,12 +916,27 @@ class Prime_Cache_File_Optimizer {
 
 			// Delay JS execution.
 			if ( $s['delay_js'] && ! $no_delay && ! $this->matches_patterns( $src ?: $content, $delay_excl ) ) {
-				// Safe mode: skip internal scripts (wp-includes, wp-content).
+				// Safe mode: only skip critical WP infrastructure scripts that
+				// break if delayed (e.g. wp-hooks, wp-i18n used by CF7/block editor).
+				// All other scripts (including theme JS) are delayed.
 				if ( ! empty( $s['delay_js_safe_mode'] ) && $has_src ) {
-					$home = home_url();
-					if ( 0 === strpos( $src, $home ) || ( 0 === strpos( $src, '/' ) && 0 !== strpos( $src, '//' ) ) ) {
-						// Internal script — do not delay in safe mode.
-					} else {
+					// Scripts that must NOT be delayed (break core functionality).
+					$critical_patterns = array(
+						'/wp-includes/js/dist/hooks',
+						'/wp-includes/js/dist/i18n',
+						'/wp-includes/js/dist/element',
+						'/wp-includes/js/dist/dom-ready',
+						'/wp-includes/js/jquery/jquery.min',
+						'/wp-includes/js/jquery/jquery.js',
+					);
+					$is_critical = false;
+					foreach ( $critical_patterns as $pat ) {
+						if ( false !== strpos( $src, $pat ) ) {
+							$is_critical = true;
+							break;
+						}
+					}
+					if ( ! $is_critical ) {
 						return $this->delay_script( $attrs, $content, $has_src, $src );
 					}
 				} else {
