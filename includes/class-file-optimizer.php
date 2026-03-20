@@ -192,9 +192,9 @@ class Prime_Cache_File_Optimizer {
 			$html = $this->auto_critical_css( $html );
 		}
 
-		// Prevent CLS from icon fonts (Font Awesome, etc.) by preloading
-		// woff2 files and injecting font-display:optional fallback.
-		$html = $this->prevent_icon_font_cls( $html );
+		// Prevent CLS from web fonts by preloading critical woff2 files
+		// and injecting font-display:optional overrides.
+		$html = $this->prevent_font_cls( $html );
 
 		// CSS optimizations.
 		if ( $s['minify_css'] || $s['combine_css'] || $s['async_css'] ) {
@@ -322,73 +322,86 @@ class Prime_Cache_File_Optimizer {
 		return preg_replace( '#<!--(?!\[if\s|!?\[endif|PC_PRESERVE_).*?-->#s', '', $html );
 	}
 
-	// ── Icon Font CLS Prevention ────────────────────────────
+	// ── Web Font CLS Prevention ─────────────────────────────
 
 	/**
-	 * Prevent Cumulative Layout Shift from icon fonts (Font Awesome, etc.).
+	 * Prevent Cumulative Layout Shift from web fonts.
 	 *
-	 * 1. Detect icon font CSS files in the HTML.
-	 * 2. Inject <link rel="preload"> for their woff2 files so the browser
-	 *    fetches them before they are needed.
-	 * 3. Add an inline <style> with font-display:optional override so the
-	 *    browser never swaps glyphs after initial render (eliminates CLS).
+	 * Two-pronged approach:
+	 *   1. Preload critical woff2 files (icon fonts + detected @font-face)
+	 *   2. Inject font-display:optional overrides for ALL @font-face declarations
+	 *      found in inline styles and linked stylesheets
 	 *
-	 * font-display:optional means: use the font if it arrives within ~100ms,
-	 * otherwise use the fallback for the entire page lifetime. Combined with
-	 * preload, the font almost always arrives in time.
+	 * font-display:optional = use font if it loads within ~100ms, otherwise
+	 * stick with fallback for the entire page lifetime (zero CLS).
+	 * Combined with preload, fonts almost always arrive in time.
 	 */
-	private function prevent_icon_font_cls( $html ) {
-		// Known icon font families and their woff2 path patterns.
+	private function prevent_font_cls( $html ) {
+		$preload_links    = '';
+		$font_display_css = '';
+		$seen_families    = array();
+
+		// ── 1. Known icon fonts (preload + override) ────────────
 		$icon_fonts = array(
 			array(
 				'detect'  => 'font-awesome',
-				'family'  => 'Font Awesome',
-				'preload' => array(
-					'fa-solid-900.woff2',
-					'fa-regular-400.woff2',
-					'fa-brands-400.woff2',
-				),
-				'faces'   => array(
-					"'Font Awesome 5 Free'",
-					"'Font Awesome 5 Brands'",
-					"'Font Awesome 6 Free'",
-					"'Font Awesome 6 Brands'",
-					"'FontAwesome'",
-				),
+				'preload' => array( 'fa-solid-900.woff2', 'fa-regular-400.woff2', 'fa-brands-400.woff2' ),
+				'faces'   => array( "'Font Awesome 5 Free'", "'Font Awesome 5 Brands'", "'Font Awesome 6 Free'", "'Font Awesome 6 Brands'", "'FontAwesome'" ),
 			),
 			array(
 				'detect'  => 'dashicons',
-				'family'  => 'dashicons',
 				'preload' => array(),
 				'faces'   => array( "'dashicons'" ),
 			),
 		);
 
-		$preload_links = '';
-		$font_display_css = '';
-
 		foreach ( $icon_fonts as $font ) {
-			// Check if this icon font CSS is loaded on the page.
 			if ( stripos( $html, $font['detect'] ) === false ) {
 				continue;
 			}
-
-			// Find the actual woff2 URLs in the HTML or linked CSS.
-			foreach ( $font['preload'] as $woff2_file ) {
-				if ( preg_match( '#(https?://[^\s"\']+/' . preg_quote( $woff2_file, '#' ) . ')#i', $html, $m ) ) {
+			foreach ( $font['preload'] as $woff2 ) {
+				if ( preg_match( '#(https?://[^\s"\']+/' . preg_quote( $woff2, '#' ) . ')#i', $html, $m ) ) {
 					$preload_links .= '<link rel="preload" href="' . $m[1] . '" as="font" type="font/woff2" crossorigin>';
 				} else {
-					// Try to find via wp-content path.
-					$local = $this->find_local_woff2( $woff2_file );
+					$local = $this->find_local_woff2( $woff2 );
 					if ( $local ) {
 						$preload_links .= '<link rel="preload" href="' . $local . '" as="font" type="font/woff2" crossorigin>';
 					}
 				}
 			}
-
-			// Add font-display:optional override for each face.
 			foreach ( $font['faces'] as $face ) {
+				$key = strtolower( trim( $face, "\"' " ) );
+				if ( isset( $seen_families[ $key ] ) ) continue;
+				$seen_families[ $key ] = true;
 				$font_display_css .= '@font-face{font-family:' . $face . ';font-display:optional}';
+			}
+		}
+
+		// ── 2. Detect @font-face in inline <style> blocks ───────
+		if ( preg_match_all( '#<style[^>]*>(.*?)</style>#si', $html, $style_matches ) ) {
+			foreach ( $style_matches[1] as $css ) {
+				$this->extract_font_families( $css, $seen_families, $font_display_css, $preload_links, $html );
+			}
+		}
+
+		// ── 3. Detect @font-face in linked stylesheets ──────────
+		if ( preg_match_all( '#<link[^>]+href=["\']([^"\']+\.css[^"\']*)["\'][^>]*/?\s*>#i', $html, $link_matches ) ) {
+			$cache_key = 'pc_font_cls_' . md5( implode( '|', $link_matches[1] ) );
+			$cached_css_data = get_transient( $cache_key );
+
+			if ( false === $cached_css_data ) {
+				$cached_css_data = array();
+				foreach ( $link_matches[1] as $css_url ) {
+					$css_content = $this->read_local_css( $css_url );
+					if ( $css_content && stripos( $css_content, '@font-face' ) !== false ) {
+						$cached_css_data[] = $css_content;
+					}
+				}
+				set_transient( $cache_key, $cached_css_data, DAY_IN_SECONDS );
+			}
+
+			foreach ( $cached_css_data as $css ) {
+				$this->extract_font_families( $css, $seen_families, $font_display_css, $preload_links, $html );
 			}
 		}
 
@@ -396,15 +409,12 @@ class Prime_Cache_File_Optimizer {
 			return $html;
 		}
 
-		$inject = '';
-		if ( $preload_links ) {
-			$inject .= $preload_links;
-		}
+		$inject = $preload_links;
 		if ( $font_display_css ) {
-			$inject .= '<style id="pc-icon-font-cls">' . $font_display_css . '</style>';
+			$inject .= '<style id="pc-font-cls">' . $font_display_css . '</style>';
 		}
 
-		// Inject right after <head> or <meta charset> for earliest possible loading.
+		// Inject right after <meta charset> for earliest possible loading.
 		if ( preg_match( '#(<meta[^>]*charset[^>]*>)#i', $html, $m ) ) {
 			$html = str_replace( $m[0], $m[0] . $inject, $html );
 		} elseif ( stripos( $html, '</head>' ) !== false ) {
@@ -412,6 +422,78 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		return $html;
+	}
+
+	/**
+	 * Extract font-family names from CSS @font-face blocks and add
+	 * font-display:optional overrides + preload links for woff2 files.
+	 */
+	private function extract_font_families( $css, &$seen, &$display_css, &$preload, $html ) {
+		if ( ! preg_match_all( '#@font-face\s*\{([^}]+)\}#si', $css, $faces ) ) {
+			return;
+		}
+
+		foreach ( $faces[1] as $face_block ) {
+			// Extract font-family.
+			if ( ! preg_match( '#font-family\s*:\s*(["\']?)([^;"\'}]+)\1#i', $face_block, $fm ) ) {
+				continue;
+			}
+			$family = trim( $fm[2] );
+			$key    = strtolower( $family );
+
+			// Skip system/generic fonts.
+			$skip = array( 'serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui', 'inherit', 'initial' );
+			if ( in_array( $key, $skip, true ) ) continue;
+
+			if ( ! isset( $seen[ $key ] ) ) {
+				$seen[ $key ] = true;
+				$display_css .= "@font-face{font-family:'" . addslashes( $family ) . "';font-display:optional}";
+			}
+
+			// Extract woff2 URL for preload (first occurrence only per family).
+			$preload_key = 'preload_' . $key;
+			if ( ! isset( $seen[ $preload_key ] ) && preg_match( '#url\(["\']?([^"\')\s]+\.woff2)["\']?\)#i', $face_block, $um ) ) {
+				$seen[ $preload_key ] = true;
+				$woff2_url = $um[1];
+				// Resolve relative URLs.
+				if ( 0 !== strpos( $woff2_url, 'http' ) && 0 !== strpos( $woff2_url, '//' ) ) {
+					continue; // Skip relative paths in extracted CSS (can't resolve reliably).
+				}
+				$preload .= '<link rel="preload" href="' . esc_url( $woff2_url ) . '" as="font" type="font/woff2" crossorigin>';
+			}
+		}
+	}
+
+	/**
+	 * Read a local CSS file by URL. Returns content or false.
+	 */
+	private function read_local_css( $url ) {
+		$home = home_url( '/' );
+		if ( 0 === strpos( $url, '//' ) ) {
+			$url = ( is_ssl() ? 'https:' : 'http:' ) . $url;
+		}
+		// Only read local files.
+		if ( 0 !== strpos( $url, $home ) && 0 !== strpos( $url, '/' ) ) {
+			return false;
+		}
+		if ( 0 === strpos( $url, $home ) ) {
+			$path = ABSPATH . substr( $url, strlen( $home ) );
+		} elseif ( 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ) {
+			$path = ABSPATH . ltrim( $url, '/' );
+		} else {
+			return false;
+		}
+		$path = strtok( $path, '?' ); // Strip query string.
+		$real = realpath( $path );
+		if ( ! $real || 0 !== strpos( $real, realpath( ABSPATH ) ) || ! is_readable( $real ) ) {
+			return false;
+		}
+		// Limit to 512KB to avoid memory issues.
+		$size = filesize( $real );
+		if ( $size > 524288 ) {
+			return false;
+		}
+		return file_get_contents( $real );
 	}
 
 	/**
