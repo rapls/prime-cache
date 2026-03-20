@@ -102,20 +102,25 @@ class Prime_Cache {
 		$ac_result = Prime_Cache_Config::install_advanced_cache();
 		if ( ! $ac_result ) {
 			$owner = Prime_Cache_Config::get_advanced_cache_owner();
+			// Only warn if an external plugin owns the file.
+			// If the file is already ours, install may have failed due to
+			// permissions but the dropin is still functional — skip warning.
 			if ( 'external' === $owner ) {
 				$warnings[] = __( 'advanced-cache.php is managed by another plugin. Prime Cache page caching will not work until the other plugin is deactivated.', 'prime-cache' );
 			}
 		}
 
 		// Enable WP_CACHE in wp-config.php.
-		$wp_cache_result = Prime_Cache_Config::set_wp_cache( true );
-
-		// Verify WP_CACHE was written. Check the file content since the current
-		// request's PHP constants are already loaded and won't reflect the change.
-		if ( ! $wp_cache_result ) {
-			$warnings[] = __( 'WP_CACHE could not be set to true. wp-config.php may not be writable.', 'prime-cache' );
-		} elseif ( ! Prime_Cache_Config::verify_wp_cache_enabled() ) {
-			$warnings[] = __( 'WP_CACHE is defined as false by another source in wp-config.php. Page caching will not work until this is corrected.', 'prime-cache' );
+		// If already defined as true at runtime, verify the file too.
+		if ( defined( 'WP_CACHE' ) && WP_CACHE && Prime_Cache_Config::verify_wp_cache_enabled() ) {
+			// Already correct — no action needed.
+		} else {
+			$wp_cache_result = Prime_Cache_Config::set_wp_cache( true );
+			if ( ! $wp_cache_result ) {
+				$warnings[] = __( 'WP_CACHE could not be set to true. wp-config.php may not be writable.', 'prime-cache' );
+			} elseif ( ! Prime_Cache_Config::verify_wp_cache_enabled() ) {
+				$warnings[] = __( 'WP_CACHE is defined as false by another source in wp-config.php. Page caching will not work until this is corrected.', 'prime-cache' );
+			}
 		}
 
 		// Schedule cron events.
@@ -586,9 +591,232 @@ class Prime_Cache {
 					'speculation_rules'     => true,
 				) );
 
+			case 'auto':
+				return self::get_preset_auto();
+
 			default:
 				return false;
 		}
+	}
+
+	/**
+	 * Build an optimised preset by inspecting the server & WordPress environment.
+	 *
+	 * Detection order:
+	 *  1. Start from Balanced as a safe-but-useful baseline.
+	 *  2. Promote features the environment can handle.
+	 *  3. Demote features that would conflict.
+	 */
+	private static function get_preset_auto() {
+
+		// ── Environment probes ───────────────────────────────────────
+		$htaccess_ok = is_writable( ABSPATH . '.htaccess' ) || ( file_exists( ABSPATH . '.htaccess' ) && is_writable( ABSPATH ) );
+
+		// HTTP/2 detection: check via headers_list() or SERVER_PROTOCOL.
+		$http2 = false;
+		if ( function_exists( 'apache_get_modules' ) && in_array( 'mod_http2', apache_get_modules(), true ) ) {
+			$http2 = true;
+		} elseif ( ! empty( $_SERVER['SERVER_PROTOCOL'] ) && version_compare( str_replace( 'HTTP/', '', $_SERVER['SERVER_PROTOCOL'] ), '2', '>=' ) ) {
+			$http2 = true;
+		} elseif ( ! empty( $_SERVER['HTTP2'] ) || ! empty( $_SERVER['H2'] ) ) {
+			$http2 = true;
+		}
+
+		// PHP extensions for object cache.
+		$has_redis     = class_exists( 'Redis' );
+		$has_memcached = class_exists( 'Memcached' );
+		$has_apcu      = function_exists( 'apcu_add' );
+
+		// Image conversion capability.
+		$gd_webp      = function_exists( 'imagewebp' );
+		$imagick_webp = extension_loaded( 'imagick' ) && class_exists( 'Imagick' ) && in_array( 'WEBP', \Imagick::queryFormats(), true );
+		$can_webp     = $gd_webp || $imagick_webp;
+
+		// WordPress / plugin detection.
+		$has_woo       = class_exists( 'WooCommerce' );
+		$is_block_theme = function_exists( 'wp_is_block_theme' ) && wp_is_block_theme();
+		$post_count    = (int) wp_count_posts()->publish;
+		$is_pro        = prime_cache_is_pro();
+
+		// ── Build settings ───────────────────────────────────────────
+		$s = array(
+			// Core — always on.
+			'cache_enabled'         => true,
+			'cache_mobile'          => true,
+			'gzip_compression'      => true,
+			'cache_footprint'       => false, // production default
+
+			// Lazy load — universally safe.
+			'lazyload_images'       => true,
+			'lazyload_iframes'      => true,
+			'lazyload_videos'       => true,
+
+			// Browser cache — universally beneficial.
+			'browser_cache'         => true,
+
+			// .htaccess — only when writable (works on Xserver Nginx too).
+			'htaccess_enabled'      => $htaccess_ok,
+
+			// Minification — safe on all environments.
+			'minify_html'           => true,
+			'minify_css'            => true,
+			'minify_js'             => true,
+			'remove_html_comments'  => true,
+
+			// Combine — only when NOT HTTP/2 (HTTP/2 multiplexing makes combining counterproductive).
+			'combine_css'           => ! $http2 && $is_pro,
+			'combine_js'            => ! $http2 && $is_pro,
+
+			// Defer JS — safe with safe-mode.
+			'defer_js'              => $is_pro,
+			'delay_js'              => false, // too risky for auto
+			'delay_js_safe_mode'    => true,
+
+			// CSS delivery — async with auto critical CSS when Pro.
+			'optimize_css_delivery' => $is_pro,
+			'css_delivery_method'   => 'async_css',
+			'critical_css_auto'     => $is_pro,
+
+			// Inline small CSS.
+			'inline_small_css'      => $is_pro,
+
+			// Cleanup — safe tweaks.
+			'disable_emoji'         => true,
+			'disable_wp_embed'      => true,
+			'remove_query_strings'  => true,
+
+			// Block CSS — keep enabled for block themes.
+			'disable_block_css'     => ! $is_block_theme,
+
+			// Links / speculation.
+			'preload_links'         => true,
+			'speculation_rules'     => $is_pro,
+
+			// Preload.
+			'preload_enabled'       => $is_pro,
+			'preload_homepage'      => $is_pro,
+			'preload_public_posts'  => $is_pro,
+			'preload_public_tax'    => $is_pro,
+
+			// Font preloading.
+			'preload_fonts'         => $is_pro,
+
+			// LCP.
+			'lcp_optimization'      => $is_pro,
+		);
+
+		// ── Preload tuning by site size ──────────────────────────────
+		if ( $post_count > 2000 ) {
+			$s['preload_max_posts'] = 2000;
+			$s['preload_interval']  = 3;
+		} elseif ( $post_count > 500 ) {
+			$s['preload_max_posts'] = 1000;
+			$s['preload_interval']  = 2;
+		}
+
+		// ── WooCommerce optimizations ────────────────────────────────
+		if ( $has_woo ) {
+			$s['woo_disable_scripts']   = true;
+			$s['woo_disable_cart_frag'] = true;
+			// Never delay JS on WooCommerce — too many inline scripts.
+			$s['delay_js']              = false;
+			// Add standard WooCommerce exclusions.
+			$s['cache_reject_uri']      = 'cart|checkout|my-account|wc-api|add-to-cart';
+		}
+
+		// ── Image conversion (Pro) ───────────────────────────────────
+		if ( $is_pro && $can_webp ) {
+			$s['img_conversion_enabled'] = true;
+			$s['webp_enabled']           = true;
+			$s['img_auto_optimize']      = true;
+			$s['img_auto_remove_larger'] = true;
+			$s['img_include_uploads']    = true;
+		}
+
+		// ── Object cache (Pro) ───────────────────────────────────────
+		// Prefer Redis > Memcached > APCu based on available extensions.
+		if ( $is_pro ) {
+			if ( $has_redis ) {
+				$s['object_cache'] = 'redis';
+			} elseif ( $has_memcached ) {
+				$s['object_cache'] = 'memcached';
+			} elseif ( $has_apcu ) {
+				$s['object_cache'] = 'apcu';
+			}
+		}
+
+		return $s;
+	}
+
+	/**
+	 * Return a human-readable summary of the detected environment
+	 * for display in the Auto preset card.
+	 */
+	public static function get_auto_environment_summary() {
+		$info = array();
+
+		// Web server.
+		$server = 'Unknown';
+		$sw     = $_SERVER['SERVER_SOFTWARE'] ?? '';
+		if ( stripos( $sw, 'apache' ) !== false ) {
+			$server = 'Apache';
+		} elseif ( stripos( $sw, 'nginx' ) !== false ) {
+			$server = 'Nginx';
+		} elseif ( stripos( $sw, 'litespeed' ) !== false ) {
+			$server = 'LiteSpeed';
+		} elseif ( $sw ) {
+			$server = strtok( $sw, '/' );
+		}
+		$info[ __( 'Web Server', 'prime-cache' ) ] = $server;
+
+		// .htaccess.
+		$ht_ok = is_writable( ABSPATH . '.htaccess' ) || ( file_exists( ABSPATH . '.htaccess' ) && is_writable( ABSPATH ) );
+		$info[ '.htaccess' ] = $ht_ok ? __( 'Writable', 'prime-cache' ) : __( 'Not writable', 'prime-cache' );
+
+		// HTTP protocol.
+		$proto = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
+		if ( ! empty( $_SERVER['HTTP2'] ) || ! empty( $_SERVER['H2'] ) ) {
+			$proto = 'HTTP/2';
+		}
+		$info[ __( 'Protocol', 'prime-cache' ) ] = $proto;
+
+		// PHP.
+		$info[ 'PHP' ] = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
+
+		// Image libraries.
+		$libs = array();
+		if ( function_exists( 'imagewebp' ) )  $libs[] = 'GD';
+		if ( extension_loaded( 'imagick' ) )    $libs[] = 'Imagick';
+		$info[ __( 'Image Library', 'prime-cache' ) ] = $libs ? implode( ', ', $libs ) : __( 'None', 'prime-cache' );
+
+		// Object cache backends.
+		$oc = array();
+		if ( class_exists( 'Redis' ) )       $oc[] = 'Redis';
+		if ( class_exists( 'Memcached' ) )   $oc[] = 'Memcached';
+		if ( function_exists( 'apcu_add' ) ) $oc[] = 'APCu';
+		$info[ __( 'Object Cache', 'prime-cache' ) ] = $oc ? implode( ', ', $oc ) : __( 'None', 'prime-cache' );
+
+		// Theme.
+		$theme = wp_get_theme();
+		$type  = ( function_exists( 'wp_is_block_theme' ) && wp_is_block_theme() )
+			? __( 'Block Theme', 'prime-cache' )
+			: __( 'Classic Theme', 'prime-cache' );
+		$info[ __( 'Theme', 'prime-cache' ) ] = $theme->get( 'Name' ) . ' (' . $type . ')';
+
+		// Posts.
+		$info[ __( 'Published Posts', 'prime-cache' ) ] = number_format_i18n( (int) wp_count_posts()->publish );
+
+		// WooCommerce.
+		if ( class_exists( 'WooCommerce' ) ) {
+			$info[ 'WooCommerce' ] = WC()->version;
+		}
+
+		// Pro.
+		$info[ 'Prime Cache Pro' ] = prime_cache_is_pro()
+			? __( 'Active', 'prime-cache' )
+			: __( 'Inactive', 'prime-cache' );
+
+		return $info;
 	}
 
 	/**

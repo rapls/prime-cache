@@ -1706,3 +1706,121 @@ msgstr "サイトを自動的にクロールして、デフォルトのキャッ
 
 msgid "Default variant only"
 msgstr "デフォルトバリアントのみ"
+
+msgid "Auto"
+msgstr "自動"
+
+msgid "Recommended — analyzes your environment and applies optimal settings automatically."
+msgstr "推奨 — サーバー環境を分析し、最適な設定を自動的に適用します。"
+
+msgid "Apply Auto Preset"
+msgstr "自動プリセットを適用"
+
+msgid "Web Server"
+msgstr "Web サーバー"
+
+msgid "Writable"
+msgstr "書き込み可能"
+
+msgid "Not writable"
+msgstr "書き込み不可"
+
+msgid "Protocol"
+msgstr "プロトコル"
+
+msgid "Image Library"
+msgstr "画像ライブラリ"
+
+msgid "None"
+msgstr "なし"
+
+msgid "Block Theme"
+msgstr "ブロックテーマ"
+
+msgid "Classic Theme"
+msgstr "クラシックテーマ"
+
+msgid "Published Posts"
+msgstr "公開投稿数"
+
+msgid "Database optimization requires Prime Cache Pro."
+msgstr "データベース最適化には Prime Cache Pro が必要です。"
+
+msgid "Database cleanup processed %s items (max 1,000 per task). Run again if more remain."
+msgstr "データベースのクリーンアップで %s 件を処理しました (タスクあたり最大 1,000件)。残りがある場合は再度実行してください。"
+
+msgid "Max Posts"
+msgstr "最大投稿数"
+
+msgid "Max Terms"
+msgstr "最大ターム数"
+
+msgid "Maximum number of posts and taxonomy terms to include in each preload cycle. Higher values warm more pages but take longer to complete."
+msgstr "各プリロードサイクルに含める投稿とタクソノミータームの最大数です。値を大きくするとより多くのページをウォームアップしますが、完了まで時間がかかります。"
+
+msgid "Preload published posts, pages, and custom post types (most recently modified first)."
+msgstr "公開済みの投稿、固定ページ、カスタム投稿タイプをプリロードします (更新日の新しい順)。"
+
+msgid "Preload category, tag, and custom taxonomy archive pages."
+msgstr "カテゴリー、タグ、カスタムタクソノミーのアーカイブページをプリロードします。"
+
+msgid "URL path patterns to skip during preloading (one per line). Supports simple patterns with pipe (|) for alternatives. These pages will not be crawled by the preloader."
+msgstr "プリロード時にスキップする URL パスパターンです (1行に1つ)。パイプ (|) による代替パターンに対応しています。これらのページはプリローダーがクロールしません。"
+
+msgid "Authentication Method"
+msgstr "認証方法"
+
+msgid "API Token (recommended)"
+msgstr "API トークン (推奨)"
+
+msgid "Global API Key + Email"
+msgstr "グローバル API キー + メール"
+
+msgid "API Token: Create a custom token with \"Zone > Cache Purge > Purge\" permission. Global API Key: Use with the email address below. Can also be set via PRIME_CACHE_CF_API_TOKEN constant."
+msgstr "API トークン: 「Zone > Cache Purge > Purge」権限のカスタムトークンを作成してください。グローバル API キー: 下のメールアドレスと一緒に使用します。PRIME_CACHE_CF_API_TOKEN 定数でも設定できます。"
+
+msgid "Automatically purge Cloudflare cache when Prime Cache is cleared. Supports full zone purge and per-URL purge (up to 30 URLs per API call, batched automatically). Small batches are sent immediately; larger batches are deferred to a background task."
+msgstr "Prime Cache がクリアされたときに Cloudflare キャッシュを自動パージします。ゾーン全体パージと URL 単位パージに対応しています (API 呼び出しあたり最大 30 URL、自動バッチ処理)。少量のバッチは即座に送信され、大量のバッチはバックグラウンドタスクで処理されます。"
+
+msgid "Cloudflare cache purge failed after multiple retries. Cloudflare may still be serving stale content. Please check your API credentials and try purging again."
+msgstr "Cloudflare キャッシュのパージが複数回のリトライ後に失敗しました。Cloudflare が古いコンテンツを配信し続けている可能性があります。API 認証情報を確認し、もう一度パージしてください。"
+
+msgid "Full zone purge"
+msgstr "ゾーン全体パージ"
+
+msgid "URL purge"
+msgstr "URL パージ"
+
+msgid "Dismiss"
+msgstr "非表示にする"
+
+msgid "Convert JPG/PNG to WebP. Reduces file size by 25-35%."
+msgstr "JPG/PNG を WebP に変換します。ファイルサイズを 25〜35% 削減します。"
+
+msgid "Uploads"
+msgstr "アップロード"
+
+msgid "Themes"
+msgstr "テーマ"
+
+msgid "Plugins"
+msgstr "プラグイン"
+
+msgid "CSS & JS Cache Lifetime"
+msgstr "CSS と JS のキャッシュ期間"
+
+msgid "Images Cache Lifetime"
+msgstr "画像のキャッシュ期間"
+
+msgid "Fonts Cache Lifetime"
+msgstr "フォントのキャッシュ期間"
+
+msgid "HTML Cache Lifetime"
+msgstr "HTML のキャッシュ期間"
+
+msgid "Removes unused CSS per page (URL-specific). Can significantly reduce page size but may break layouts on pages with dynamic content, JS-injected classes, or complex selectors. Add affected selectors to the safelist below if issues occur. Test thoroughly on all page types!"
+msgstr "ページごとに未使用 CSS を削除します (URL 単位)。ページサイズを大幅に削減できますが、動的コンテンツ、JavaScript で挿入されるクラス、複雑なセレクターを使用するページでレイアウトが崩れる場合があります。問題が発生した場合は下のセーフリストに該当するセレクターを追加してください。すべてのページタイプで十分にテストしてください。"
+
+msgid "CSS selectors and file patterns that should never be removed (one per line). Add selectors for elements that appear via JavaScript interaction (modals, dropdowns, tabs, accordions), AJAX-loaded content, or hover/focus states. Common examples: .modal, .dropdown-menu, .tab-content, .accordion, .wp-block-*."
+msgstr "削除しない CSS セレクターとファイルパターンです (1行に1つ)。JavaScript の操作で表示される要素 (モーダル、ドロップダウン、タブ、アコーディオン)、AJAX で読み込まれるコンテンツ、hover/focus 状態のセレクターを追加してください。一般的な例: .modal, .dropdown-menu, .tab-content, .accordion, .wp-block-*。"
+
