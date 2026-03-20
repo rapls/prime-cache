@@ -155,6 +155,8 @@ class Prime_Cache_Htaccess {
 			'    # Fonts',
 			'    AddType font/woff                             .woff',
 			'    AddType font/woff2                            .woff2',
+			'    AddType application/font-woff                 .woff',
+			'    AddType application/font-woff2                .woff2',
 			'    AddType font/ttf                              .ttf',
 			'    AddType font/otf                              .otf',
 			'    AddType application/vnd.ms-fontobject         .eot',
@@ -203,6 +205,8 @@ class Prime_Cache_Htaccess {
 	private static function build_image_rewrite_rules( $settings ) {
 		$r = array();
 		$r[] = '# WebP/AVIF image serving';
+		$r[] = '# Only rewrites when the converted file actually exists on disk.';
+		$r[] = '# Falls through to serve the original image if no converted version is found.';
 		$r[] = '<IfModule mod_rewrite.c>';
 		$r[] = '    RewriteEngine On';
 
@@ -211,8 +215,8 @@ class Prime_Cache_Htaccess {
 			$r[] = '';
 			$r[] = '    # AVIF';
 			$r[] = '    RewriteCond %{HTTP_ACCEPT} image/avif';
-			$r[] = '    RewriteCond %{REQUEST_FILENAME} \.(jpe?g|png)$';
-			$r[] = '    RewriteCond %{REQUEST_FILENAME}.avif -f';
+			$r[] = '    RewriteCond %{REQUEST_URI} \.(jpe?g|png)$ [NC]';
+			$r[] = '    RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.avif -f';
 			$r[] = '    RewriteRule ^(.+)\.(jpe?g|png)$ $1.$2.avif [T=image/avif,E=REQUEST_image,L]';
 		}
 
@@ -221,8 +225,8 @@ class Prime_Cache_Htaccess {
 			$r[] = '';
 			$r[] = '    # WebP';
 			$r[] = '    RewriteCond %{HTTP_ACCEPT} image/webp';
-			$r[] = '    RewriteCond %{REQUEST_FILENAME} \.(jpe?g|png)$';
-			$r[] = '    RewriteCond %{REQUEST_FILENAME}.webp -f';
+			$r[] = '    RewriteCond %{REQUEST_URI} \.(jpe?g|png)$ [NC]';
+			$r[] = '    RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.webp -f';
 			$r[] = '    RewriteRule ^(.+)\.(jpe?g|png)$ $1.$2.webp [T=image/webp,E=REQUEST_image,L]';
 		}
 
