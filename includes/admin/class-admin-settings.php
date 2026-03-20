@@ -2510,7 +2510,7 @@ class Prime_Cache_Admin_Settings {
 .pc-radio input{display:none}
 .pc-radio__mark{width:20px;height:20px;border:2px solid #cbd5e1;border-radius:50%;flex-shrink:0;position:relative;margin-top:2px;transition:border-color .15s}
 .pc-radio--on .pc-radio__mark{border-color:var(--c-pri)}
-.pc-radio__mark::after{content:"";position:absolute;top:3px;left:3px;width:10px;height:10px;border-radius:50%;background:var(--c-pri);transform:scale(0);transition:transform .15s}
+.pc-radio__mark::after{content:"";position:absolute;top:5px;left:5px;width:10px;height:10px;border-radius:50%;background:var(--c-pri);transform:scale(0);transition:transform .15s}
 .pc-radio--on .pc-radio__mark::after{transform:scale(1)}
 .pc-radio__body{display:flex;flex-direction:column;gap:2px}
 .pc-radio__body b{font-size:13px;font-weight:600;color:var(--c-text)}
