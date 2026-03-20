@@ -527,25 +527,16 @@ class Prime_Cache_File_Optimizer {
 		$css .= '}';
 		$css .= '.eye-catch{overflow:hidden}.eye-catch img{width:100%;height:auto;display:block}';
 
-		// 2. Cocoon theme: stabilize #content and sidebar layout
-		//    to prevent float reflow during CSS parsing.
+		// 2. Cocoon theme: stabilize layout during CSS parsing.
+		//    Cocoon uses display:flex on .content-in — do NOT inject float rules
+		//    as that would override the native flex layout and cause CLS.
 		if ( stripos( $html, 'cocoon' ) !== false || stripos( $html, 'wp-theme-cocoon' ) !== false ) {
-			$css .= '#content.content{min-height:100vh}';
-			$css .= '.main,.sidebar{float:none}';
-			$css .= '@media(min-width:835px){.main,.sidebar{float:left}}';
+			// Ensure flex layout is applied immediately (before theme CSS loads).
+			$css .= '.content-in{display:flex;flex-wrap:wrap}';
 			// Prevent notification bar from pushing content.
 			$css .= '.notice-area{min-height:0;contain:layout}';
 			// Stabilize header height.
 			$css .= '.site-header-logo img{height:auto;max-height:60px}';
-			// Cocoon mobile: entry card layout stability.
-			$css .= '@media(max-width:480px){';
-			$css .= '.entry-card-wrap{display:flex;align-items:flex-start;gap:8px}';
-			$css .= '.entry-card-thumb{flex-shrink:0;width:120px;aspect-ratio:16/9}';
-			$css .= '.entry-card-content{flex:1;min-width:0}';
-			$css .= '}';
-			$css .= '@media(min-width:481px) and (max-width:834px){';
-			$css .= '.entry-card-thumb{aspect-ratio:16/9}';
-			$css .= '}';
 		}
 
 		// 3. Generic: ensure ad containers don't shift content.
