@@ -196,6 +196,9 @@ class Prime_Cache_File_Optimizer {
 		// and injecting font-display:optional overrides.
 		$html = $this->prevent_font_cls( $html );
 
+		// Stabilize layout: reserve space for known dynamic elements.
+		$html = $this->stabilize_layout( $html );
+
 		// CSS optimizations.
 		if ( $s['minify_css'] || $s['combine_css'] || $s['async_css'] ) {
 			$html = $this->process_css( $html );
@@ -494,6 +497,59 @@ class Prime_Cache_File_Optimizer {
 			return false;
 		}
 		return file_get_contents( $real );
+	}
+
+	// ── Layout Stabilization ────────────────────────────────
+
+	/**
+	 * Inject early CSS to prevent layout shifts from common causes:
+	 * - Entry card images without dimensions → reserve aspect ratio
+	 * - Sidebar collapse/float reflow on initial render
+	 * - Ad containers that load asynchronously
+	 *
+	 * Also adds size-adjust to body font fallbacks to minimize text reflow.
+	 */
+	private function stabilize_layout( $html ) {
+		$css = '';
+
+		// 1. Reserve aspect ratio for common thumbnail/card images
+		//    that often lack width/height attributes.
+		$css .= '.entry-card-thumb,.cat-label,.eye-catch{overflow:hidden;aspect-ratio:auto}';
+		$css .= '.entry-card-thumb img,.eye-catch img{width:100%;height:auto;display:block}';
+
+		// 2. Cocoon theme: stabilize #content and sidebar layout
+		//    to prevent float reflow during CSS parsing.
+		if ( stripos( $html, 'cocoon' ) !== false || stripos( $html, 'wp-theme-cocoon' ) !== false ) {
+			$css .= '#content.content{min-height:100vh}';
+			$css .= '.main,.sidebar{float:none}';
+			$css .= '@media(min-width:835px){.main,.sidebar{float:left}}';
+			// Prevent notification bar from pushing content.
+			$css .= '.notice-area{min-height:0;contain:layout}';
+			// Stabilize header height.
+			$css .= '.site-header-logo img{height:auto;max-height:60px}';
+		}
+
+		// 3. Generic: ensure ad containers don't shift content.
+		$css .= '.ad-area,.widget_ads,.ad-space{min-height:0;contain:layout style}';
+
+		// 4. Font size-adjust for common system font stacks to reduce
+		//    text reflow when web fonts load.
+		$css .= 'body{font-display:optional;text-rendering:optimizeSpeed}';
+
+		if ( empty( $css ) ) {
+			return $html;
+		}
+
+		$style = '<style id="pc-layout-stable">' . $css . '</style>';
+
+		// Inject right after <meta charset> or at end of <head>.
+		if ( preg_match( '#(<meta[^>]*charset[^>]*>)#i', $html, $m ) ) {
+			$html = str_replace( $m[0], $m[0] . $style, $html );
+		} elseif ( stripos( $html, '</head>' ) !== false ) {
+			$html = str_replace( '</head>', $style . '</head>', $html );
+		}
+
+		return $html;
 	}
 
 	/**
