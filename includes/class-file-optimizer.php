@@ -134,7 +134,8 @@ class Prime_Cache_File_Optimizer {
 		$pro  = prime_cache_is_pro();
 		// Free: minify HTML/CSS/JS, remove comments, strip query strings.
 		// Pro: combine, defer, delay, critical CSS, UCSS, Google Fonts, local analytics, inline CSS.
-		$free_active = $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['minify_js'] || $s['remove_query_strings'];
+		// Free: minify HTML/CSS/JS, remove comments, strip query strings, icon font CLS prevention.
+		$free_active = $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['minify_js'] || $s['remove_query_strings'] || ! empty( $s['cache_enabled'] );
 		$pro_active  = $pro && ( $s['combine_css'] || $s['async_css'] || $s['remove_unused_css']
 			|| $s['combine_js'] || $s['defer_js'] || $s['delay_js']
 			|| $s['combine_google_fonts'] || $s['self_host_google_fonts']
@@ -190,6 +191,10 @@ class Prime_Cache_File_Optimizer {
 		if ( $s['critical_css_auto'] && $s['async_css'] ) {
 			$html = $this->auto_critical_css( $html );
 		}
+
+		// Prevent CLS from icon fonts (Font Awesome, etc.) by preloading
+		// woff2 files and injecting font-display:optional fallback.
+		$html = $this->prevent_icon_font_cls( $html );
 
 		// CSS optimizations.
 		if ( $s['minify_css'] || $s['combine_css'] || $s['async_css'] ) {
@@ -315,6 +320,140 @@ class Prime_Cache_File_Optimizer {
 	private function remove_html_comments( $html ) {
 		// Remove HTML comments but keep IE conditionals and preserved markers.
 		return preg_replace( '#<!--(?!\[if\s|!?\[endif|PC_PRESERVE_).*?-->#s', '', $html );
+	}
+
+	// ── Icon Font CLS Prevention ────────────────────────────
+
+	/**
+	 * Prevent Cumulative Layout Shift from icon fonts (Font Awesome, etc.).
+	 *
+	 * 1. Detect icon font CSS files in the HTML.
+	 * 2. Inject <link rel="preload"> for their woff2 files so the browser
+	 *    fetches them before they are needed.
+	 * 3. Add an inline <style> with font-display:optional override so the
+	 *    browser never swaps glyphs after initial render (eliminates CLS).
+	 *
+	 * font-display:optional means: use the font if it arrives within ~100ms,
+	 * otherwise use the fallback for the entire page lifetime. Combined with
+	 * preload, the font almost always arrives in time.
+	 */
+	private function prevent_icon_font_cls( $html ) {
+		// Known icon font families and their woff2 path patterns.
+		$icon_fonts = array(
+			array(
+				'detect'  => 'font-awesome',
+				'family'  => 'Font Awesome',
+				'preload' => array(
+					'fa-solid-900.woff2',
+					'fa-regular-400.woff2',
+					'fa-brands-400.woff2',
+				),
+				'faces'   => array(
+					"'Font Awesome 5 Free'",
+					"'Font Awesome 5 Brands'",
+					"'Font Awesome 6 Free'",
+					"'Font Awesome 6 Brands'",
+					"'FontAwesome'",
+				),
+			),
+			array(
+				'detect'  => 'dashicons',
+				'family'  => 'dashicons',
+				'preload' => array(),
+				'faces'   => array( "'dashicons'" ),
+			),
+		);
+
+		$preload_links = '';
+		$font_display_css = '';
+
+		foreach ( $icon_fonts as $font ) {
+			// Check if this icon font CSS is loaded on the page.
+			if ( stripos( $html, $font['detect'] ) === false ) {
+				continue;
+			}
+
+			// Find the actual woff2 URLs in the HTML or linked CSS.
+			foreach ( $font['preload'] as $woff2_file ) {
+				if ( preg_match( '#(https?://[^\s"\']+/' . preg_quote( $woff2_file, '#' ) . ')#i', $html, $m ) ) {
+					$preload_links .= '<link rel="preload" href="' . $m[1] . '" as="font" type="font/woff2" crossorigin>';
+				} else {
+					// Try to find via wp-content path.
+					$local = $this->find_local_woff2( $woff2_file );
+					if ( $local ) {
+						$preload_links .= '<link rel="preload" href="' . $local . '" as="font" type="font/woff2" crossorigin>';
+					}
+				}
+			}
+
+			// Add font-display:optional override for each face.
+			foreach ( $font['faces'] as $face ) {
+				$font_display_css .= '@font-face{font-family:' . $face . ';font-display:optional}';
+			}
+		}
+
+		if ( empty( $preload_links ) && empty( $font_display_css ) ) {
+			return $html;
+		}
+
+		$inject = '';
+		if ( $preload_links ) {
+			$inject .= $preload_links;
+		}
+		if ( $font_display_css ) {
+			$inject .= '<style id="pc-icon-font-cls">' . $font_display_css . '</style>';
+		}
+
+		// Inject right after <head> or <meta charset> for earliest possible loading.
+		if ( preg_match( '#(<meta[^>]*charset[^>]*>)#i', $html, $m ) ) {
+			$html = str_replace( $m[0], $m[0] . $inject, $html );
+		} elseif ( stripos( $html, '</head>' ) !== false ) {
+			$html = str_replace( '</head>', $inject . '</head>', $html );
+		}
+
+		return $html;
+	}
+
+	/**
+	 * Try to find a woff2 file in common plugin/theme locations.
+	 * Results are cached in a transient to avoid repeated filesystem scans.
+	 */
+	private function find_local_woff2( $filename ) {
+		$cache_key = 'pc_woff2_' . md5( $filename );
+		$cached = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			return $cached ?: false;
+		}
+
+		$candidates = array(
+			WP_CONTENT_DIR . '/plugins/',
+			WP_CONTENT_DIR . '/themes/',
+		);
+
+		foreach ( $candidates as $dir ) {
+			if ( ! is_dir( $dir ) ) {
+				continue;
+			}
+			try {
+				$it = new RecursiveIteratorIterator(
+					new RecursiveDirectoryIterator( $dir, RecursiveDirectoryIterator::SKIP_DOTS ),
+					RecursiveIteratorIterator::LEAVES_ONLY
+				);
+				$it->setMaxDepth( 5 );
+				foreach ( $it as $file ) {
+					if ( $file->getFilename() === $filename ) {
+						$url = content_url( str_replace( WP_CONTENT_DIR, '', $file->getPathname() ) );
+						set_transient( $cache_key, $url, WEEK_IN_SECONDS );
+						return $url;
+					}
+				}
+			} catch ( Exception $e ) {
+				continue;
+			}
+		}
+
+		set_transient( $cache_key, '', WEEK_IN_SECONDS );
+		return false;
 	}
 
 	// ── CSS ──────────────────────────────────────────────────
