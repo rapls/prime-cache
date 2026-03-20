@@ -492,6 +492,17 @@ class Prime_Cache {
 				wp_safe_redirect( $redirect );
 				exit;
 
+			case 'toggle_cache':
+				$s = prime_cache_get_settings();
+				$s['cache_enabled'] = empty( $s['cache_enabled'] );
+				update_option( 'prime_cache_settings', $s );
+				if ( ! is_multisite() ) {
+					Prime_Cache_Config::write_config_file( $s );
+				}
+				$tab = sanitize_key( $_GET['tab'] ?? 'dashboard' );
+				wp_safe_redirect( admin_url( 'admin.php?page=prime-cache&tab=' . $tab ) );
+				exit;
+
 			default:
 				return;
 		}

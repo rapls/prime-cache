@@ -448,10 +448,11 @@ class Prime_Cache_Admin_Settings {
 					<?php endforeach; ?>
 				</nav>
 				<div class="pc-side__foot">
-					<label class="pc-pw" id="pc-power-toggle">
+					<?php $toggle_url = wp_nonce_url( admin_url( 'admin.php?pc_action=toggle_cache&tab=' . $tab ), 'prime_cache_admin_action' ); ?>
+					<a href="<?php echo esc_url( $toggle_url ); ?>" class="pc-pw" id="pc-power-toggle" style="text-decoration:none">
 						<span class="pc-pw__sw <?php echo $on ? 'is-on' : ''; ?>"><span class="pc-pw__knob"></span></span>
 						<span class="pc-pw__label"><?php echo $on ? esc_html__( 'Cache Enabled', 'prime-cache' ) : esc_html__( 'Cache Disabled', 'prime-cache' ); ?></span>
-					</label>
+					</a>
 				</div>
 			</aside>
 
@@ -789,8 +790,6 @@ class Prime_Cache_Admin_Settings {
 
 		<script>
 		(function(){
-			var pw=document.getElementById('pc-power-toggle'),ei=document.getElementById('pc-ei'),fm=document.getElementById('pc-settings-form');
-			if(pw&&ei&&fm)pw.addEventListener('click',function(){var on=ei.value==='0';ei.value=on?'1':'0';var s=pw.querySelector('.pc-pw__sw'),l=pw.querySelector('.pc-pw__label');if(s)s.classList.toggle('is-on',on);if(l)l.textContent=on?<?php echo wp_json_encode(__('Cache Enabled','prime-cache'));?>:<?php echo wp_json_encode(__('Cache Disabled','prime-cache'));?>;fm.submit();});
 			var vi=document.getElementById('pc-lv'),ui=document.getElementById('pc-lu'),hi=document.getElementById('pc-lh'),eq=document.getElementById('pc-leq'),cs=document.querySelectorAll('.pc-chip');
 			if(!vi||!ui||!hi)return;
 			var U=<?php echo wp_json_encode(__('Unlimited','prime-cache'));?>;
