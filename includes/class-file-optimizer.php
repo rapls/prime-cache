@@ -912,9 +912,26 @@ class Prime_Cache_File_Optimizer {
 	 * @param string $src    The script source URL.
 	 * @return string Modified tag with defer attribute.
 	 */
+	/**
+	 * Scripts that must NEVER be deferred.
+	 * jQuery and jQuery Migrate must load synchronously because
+	 * Cocoon and many plugins use inline jQuery code ($(document).ready etc.)
+	 * that executes immediately after the script tag.
+	 */
+	private static $defer_never = array(
+		'jquery-core',
+		'jquery',
+		'jquery-migrate',
+	);
+
 	public function filter_defer_script( $tag, $handle, $src ) {
 		// Skip if already has defer or async.
 		if ( false !== strpos( $tag, 'defer' ) || false !== strpos( $tag, 'async' ) ) {
+			return $tag;
+		}
+
+		// Never defer jQuery and critical dependencies.
+		if ( in_array( $handle, self::$defer_never, true ) ) {
 			return $tag;
 		}
 
