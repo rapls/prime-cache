@@ -173,10 +173,11 @@ class Prime_Cache_File_Optimizer {
 			return $html;
 		}
 
-		$s = $this->settings;
+		$s   = $this->settings;
+		$pro = prime_cache_is_pro();
 
-		// DNS Prefetch.
-		if ( ! empty( $s['prefetch_dns'] ) ) {
+		// [Pro] DNS Prefetch.
+		if ( $pro && ! empty( $s['prefetch_dns'] ) ) {
 			$html = $this->inject_dns_prefetch( $html );
 		}
 
@@ -185,38 +186,38 @@ class Prime_Cache_File_Optimizer {
 			$html = $this->strip_query_strings( $html );
 		}
 
-		// Local Google Analytics.
-		if ( $s['local_analytics'] ) {
+		// [Pro] Local Google Analytics.
+		if ( $pro && $s['local_analytics'] ) {
 			$html = $this->localize_analytics( $html );
 		}
 
-		// Google Fonts optimization (before CSS processing).
-		if ( $s['combine_google_fonts'] ) {
+		// [Pro] Google Fonts optimization (before CSS processing).
+		if ( $pro && $s['combine_google_fonts'] ) {
 			$html = $this->optimize_google_fonts( $html );
 		}
 
-		// Self-host Google Fonts — download CSS & font files locally.
-		if ( $s['self_host_google_fonts'] ) {
+		// [Pro] Self-host Google Fonts — download CSS & font files locally.
+		if ( $pro && $s['self_host_google_fonts'] ) {
 			$html = $this->self_host_google_fonts( $html );
 		}
 
-		// Remove Unused CSS (before other CSS processing).
-		if ( $s['remove_unused_css'] ) {
+		// [Pro] Remove Unused CSS (before other CSS processing).
+		if ( $pro && $s['remove_unused_css'] ) {
 			$html = $this->remove_unused_css( $html );
 		}
 
-		// Auto-generate Critical CSS.
-		if ( $s['critical_css_auto'] && $s['async_css'] ) {
+		// [Pro] Auto-generate Critical CSS.
+		if ( $pro && $s['critical_css_auto'] && $s['async_css'] ) {
 			$html = $this->auto_critical_css( $html );
 		}
 
-		// CSS optimizations.
-		if ( $s['minify_css'] || $s['combine_css'] || $s['async_css'] ) {
+		// CSS optimizations (minify = Free, combine/async = Pro).
+		if ( $s['minify_css'] || ( $pro && ( $s['combine_css'] || $s['async_css'] ) ) ) {
 			$html = $this->process_css( $html );
 		}
 
-		// JS optimizations.
-		if ( $s['minify_js'] || $s['combine_js'] || $s['defer_js'] || $s['delay_js'] ) {
+		// JS optimizations (minify/defer/delay = Free, combine = Pro).
+		if ( $s['minify_js'] || $s['defer_js'] || $s['delay_js'] || ( $pro && $s['combine_js'] ) ) {
 			$html = $this->process_js( $html );
 		}
 
@@ -339,7 +340,8 @@ class Prime_Cache_File_Optimizer {
 	// ── CSS ──────────────────────────────────────────────────
 
 	private function process_css( $html ) {
-		$s = $this->settings;
+		$s   = $this->settings;
+		$pro = prime_cache_is_pro();
 		$excludes = $this->parse_list( $s['exclude_css'] );
 
 		// Find all <link rel="stylesheet"> tags.
@@ -363,8 +365,8 @@ class Prime_Cache_File_Optimizer {
 				continue;
 			}
 
-			// Inline small CSS files.
-			if ( ! empty( $s['inline_small_css'] ) && $this->is_local_url( $href ) ) {
+			// [Pro] Inline small CSS files.
+			if ( $pro && ! empty( $s['inline_small_css'] ) && $this->is_local_url( $href ) ) {
 				$path = $this->url_to_path( $href );
 				if ( $path && is_readable( $path ) && filesize( $path ) <= (int) ( $s['inline_css_threshold'] ?? 8192 ) ) {
 					$css = file_get_contents( $path ); // phpcs:ignore
@@ -391,19 +393,19 @@ class Prime_Cache_File_Optimizer {
 				continue;
 			}
 
-			// Collect for combining.
-			if ( $s['combine_css'] && $this->is_local_url( $href ) ) {
+			// [Pro] Collect for combining.
+			if ( $pro && $s['combine_css'] && $this->is_local_url( $href ) ) {
 				$to_combine[] = array( 'tag' => $tag, 'href' => $href );
 			}
 		}
 
-		// Combine CSS.
-		if ( $s['combine_css'] && ! empty( $to_combine ) ) {
+		// [Pro] Combine CSS.
+		if ( $pro && $s['combine_css'] && ! empty( $to_combine ) ) {
 			$html = $this->combine_css_files( $html, $to_combine );
 		}
 
-		// Async CSS loading.
-		if ( $s['async_css'] ) {
+		// [Pro] Async CSS loading.
+		if ( $pro && $s['async_css'] ) {
 			$html = $this->async_css( $html, $excludes );
 		}
 
