@@ -410,7 +410,7 @@ class Prime_Cache_File_Optimizer {
 		}, $css );
 	}
 
-	private function combine_css_files( $html, $entries ) {
+	public function combine_css_files( $html, $entries ) {
 		$contents = '';
 		$hash_src = '';
 		$first_tag = null;
@@ -458,7 +458,7 @@ class Prime_Cache_File_Optimizer {
 		return $html;
 	}
 
-	private function async_css( $html, $excludes ) {
+	public function async_css( $html, $excludes ) {
 		$critical = trim( $this->settings['critical_css'] );
 
 		// Inject critical CSS.
@@ -491,7 +491,7 @@ class Prime_Cache_File_Optimizer {
 	 * Parses each local stylesheet, extracts selectors, checks them against
 	 * the page DOM, and rebuilds CSS with only matched rules.
 	 */
-	private function remove_unused_css( $html ) {
+	public function remove_unused_css( $html ) {
 		$safelist = $this->parse_list( $this->settings['ucss_safelist'] );
 		$excludes = $this->parse_list( $this->settings['exclude_css'] );
 
@@ -547,7 +547,7 @@ class Prime_Cache_File_Optimizer {
 	/**
 	 * Filter CSS to keep only rules whose selectors match something in the HTML.
 	 */
-	private function filter_used_rules( $css, $html, $safelist ) {
+	public function filter_used_rules( $css, $html, $safelist ) {
 		// Remove CSS comments.
 		$css = preg_replace( '#/\*.*?\*/#s', '', $css );
 
@@ -611,7 +611,7 @@ class Prime_Cache_File_Optimizer {
 	 * @param string $raw Raw selector string.
 	 * @return array Individual selectors.
 	 */
-	private function split_selectors( $raw ) {
+	public function split_selectors( $raw ) {
 		$result   = array();
 		$depth    = 0;
 		$start    = 0;
@@ -661,7 +661,7 @@ class Prime_Cache_File_Optimizer {
 		return $result;
 	}
 
-	private function selector_used_in_html( $selector, $html, $safelist ) {
+	public function selector_used_in_html( $selector, $html, $safelist ) {
 		// Always keep safelisted patterns.
 		foreach ( $safelist as $safe ) {
 			if ( false !== strpos( $selector, $safe ) ) {
@@ -708,7 +708,7 @@ class Prime_Cache_File_Optimizer {
 	 * Generates a per-URL critical CSS file by extracting rules that match common
 	 * above-the-fold selectors (body, header, nav, hero, h1, etc.).
 	 */
-	private function auto_critical_css( $html ) {
+	public function auto_critical_css( $html ) {
 		// Skip if manual critical CSS is already provided.
 		if ( ! empty( trim( $this->settings['critical_css'] ) ) ) {
 			return $html;
@@ -1094,7 +1094,7 @@ class Prime_Cache_File_Optimizer {
 		return $html;
 	}
 
-	private function minify_js_content( $js ) {
+	public function minify_js_content( $js ) {
 		// Preserve string literals and template literals.
 		$strings = array();
 		$js = preg_replace_callback( '#(["\'])(?:\\\\.|(?!\1).)*\1|`(?:\\\\.|[^`])*`#s', function( $m ) use ( &$strings ) {
@@ -1121,7 +1121,7 @@ class Prime_Cache_File_Optimizer {
 	/**
 	 * Combine local JS files into a single file.
 	 */
-	private function combine_js_files( $html, $excludes ) {
+	public function combine_js_files( $html, $excludes ) {
 		if ( ! preg_match_all( '#<script\s[^>]*src=["\']([^"\']+)["\'][^>]*>\s*</script>#i', $html, $matches, PREG_SET_ORDER ) ) {
 			return $html;
 		}
@@ -1264,7 +1264,7 @@ JS;
 
 	// ── Google Fonts ─────────────────────────────────────────
 
-	private function optimize_google_fonts( $html ) {
+	public function optimize_google_fonts( $html ) {
 		$pattern = '#<link[^>]+href=["\']https?://fonts\.googleapis\.com/css2?\?([^"\']+)["\'][^>]*/?\s*>#i';
 
 		if ( ! preg_match_all( $pattern, $html, $matches, PREG_SET_ORDER ) ) {
@@ -1317,7 +1317,7 @@ JS;
 	 * 5. Save the rewritten CSS locally.
 	 * 6. Replace the original <link> tag with the local CSS URL.
 	 */
-	private function self_host_google_fonts( $html ) {
+	public function self_host_google_fonts( $html ) {
 		$pattern = '#<link[^>]+href=["\'](?P<url>https?://fonts\.googleapis\.com/css2?\?[^"\']+)["\'][^>]*/?\s*>#i';
 
 		if ( ! preg_match_all( $pattern, $html, $matches, PREG_SET_ORDER ) ) {
@@ -1353,7 +1353,7 @@ JS;
 	 * @param string $fonts_url Local URL base for font files.
 	 * @return string|false Local CSS URL or false on failure.
 	 */
-	private function fetch_and_localize_gf_css( $gf_url, $fonts_dir, $fonts_url ) {
+	public function fetch_and_localize_gf_css( $gf_url, $fonts_dir, $fonts_url ) {
 		// Use URL hash as cache key so we only fetch once.
 		$hash     = md5( $gf_url );
 		$css_file = $fonts_dir . $hash . '.css';
@@ -1391,7 +1391,7 @@ JS;
 	 * @param string $fonts_url  Local URL base.
 	 * @return string|false Local URL or false on failure.
 	 */
-	private function download_font_file( $remote_url, $fonts_dir, $fonts_url ) {
+	public function download_font_file( $remote_url, $fonts_dir, $fonts_url ) {
 		// Derive a stable filename from the URL.
 		$ext  = pathinfo( wp_parse_url( $remote_url, PHP_URL_PATH ), PATHINFO_EXTENSION ) ?: 'woff2';
 		$name = md5( $remote_url ) . '.' . $ext;
@@ -1423,7 +1423,7 @@ JS;
 	/**
 	 * Download gtag.js / analytics.js and serve locally.
 	 */
-	private function localize_analytics( $html ) {
+	public function localize_analytics( $html ) {
 		$scripts = array(
 			'gtag'      => array( 'https://www.googletagmanager.com/gtag/js', 'gtag.js' ),
 			'analytics' => array( 'https://www.google-analytics.com/analytics.js', 'analytics.js' ),
@@ -1659,7 +1659,7 @@ JS;
 		}
 	}
 
-	private function fetch_google_font_css( $gf_url, $fonts_dir, $fonts_url ) {
+	public function fetch_google_font_css( $gf_url, $fonts_dir, $fonts_url ) {
 		$hash     = md5( $gf_url );
 		$css_file = $fonts_dir . $hash . '.css';
 
@@ -1709,7 +1709,7 @@ JS;
 
 	// ── DNS Prefetch ─────────────────────────────────────────
 
-	private function inject_dns_prefetch( $html ) {
+	public function inject_dns_prefetch( $html ) {
 		$domains = $this->parse_list( $this->settings['prefetch_dns'] );
 		if ( empty( $domains ) ) {
 			return $html;
