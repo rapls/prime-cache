@@ -360,12 +360,14 @@ class Prime_Cache_File_Optimizer {
 				}
 			}
 
-			// Minify individual CSS files.
+			// Minify individual CSS files (skip already minified .min.css).
 			if ( $s['minify_css'] && ! $s['combine_css'] && $this->is_local_url( $href ) ) {
-				$minified_url = $this->minify_css_file( $href );
-				if ( $minified_url ) {
-					$new_tag = str_replace( $href, $minified_url, $tag );
-					$html = str_replace( $tag, $new_tag, $html );
+				if ( false === strpos( $href, '.min.css' ) ) {
+					$minified_url = $this->minify_css_file( $href );
+					if ( $minified_url ) {
+						$new_tag = str_replace( $href, $minified_url, $tag );
+						$html = str_replace( $tag, $new_tag, $html );
+					}
 				}
 				continue;
 			}
@@ -390,22 +392,29 @@ class Prime_Cache_File_Optimizer {
 	}
 
 	private function minify_css_content( $css ) {
-		// Preserve calc() expressions.
-		$calcs = array();
-		$css = preg_replace_callback( '#calc\([^)]+\)#i', function( $m ) use ( &$calcs ) {
-			$key = '/*PC_CALC_' . count( $calcs ) . '*/';
-			$calcs[ $key ] = $m[0];
+		// Preserve strings and calc() to avoid corrupting content values.
+		$preserved = array();
+		$css = preg_replace_callback( '#(content\s*:\s*["\'])([^"\']*)["\']|calc\([^)]+\)#i', function( $m ) use ( &$preserved ) {
+			$key = '/*PC_P' . count( $preserved ) . '*/';
+			$preserved[ $key ] = $m[0];
 			return $key;
 		}, $css );
 
-		$css = preg_replace( '#/\*(?!PC_CALC_).*?\*/#s', '', $css );
-		$css = preg_replace( '#\s*([{};:,])\s*#', '$1', $css );
+		// Remove comments (but not our placeholders).
+		$css = preg_replace( '#/\*(?!PC_P).*?\*/#s', '', $css );
+		// Collapse whitespace.
 		$css = preg_replace( '#\s+#', ' ', $css );
+		// Remove spaces around { } ; : , but preserve space before ( for media queries.
+		// "and (" must keep the space — "and(" is invalid CSS.
+		$css = preg_replace( '#\s*([{};:,])\s*#', '$1', $css );
+		// Fix: restore space before ( after keywords like "and", "not", "or", "only".
+		$css = preg_replace( '#\b(and|not|or|only)\(#i', '$1 (', $css );
+		// Remove last semicolon before }.
 		$css = str_replace( ';}', '}', $css );
 
-		// Restore calc() expressions.
-		if ( $calcs ) {
-			$css = str_replace( array_keys( $calcs ), array_values( $calcs ), $css );
+		// Restore preserved values.
+		if ( $preserved ) {
+			$css = str_replace( array_keys( $preserved ), array_values( $preserved ), $css );
 		}
 		return trim( $css );
 	}
