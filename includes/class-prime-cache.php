@@ -568,10 +568,10 @@ class Prime_Cache {
 					'disable_wp_embed'     => true,
 					'remove_query_strings' => true,
 					'preload_fonts'        => true,
-					// Keep combining/deferring off for stability.
+					'defer_js'             => true,
+					// Keep combining off for stability.
 					'combine_css'          => false,
 					'combine_js'           => false,
-					'defer_js'             => false,
 					'delay_js'             => false,
 				) );
 
@@ -684,8 +684,8 @@ class Prime_Cache {
 			'combine_css'           => ! $http2 && $is_pro,
 			'combine_js'            => ! $http2 && $is_pro,
 
-			// Defer JS — safe with safe-mode.
-			'defer_js'              => $is_pro,
+			// Defer JS — Free feature, safe for all sites.
+			'defer_js'              => true,
 			'delay_js'              => false, // too risky for auto
 			'delay_js_safe_mode'    => true,
 
