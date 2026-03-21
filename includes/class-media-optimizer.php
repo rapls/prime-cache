@@ -45,7 +45,7 @@ class Prime_Cache_Media_Optimizer {
 			return $html;
 		}
 
-		if ( $this->settings['youtube_thumbnail'] ) {
+		if ( prime_cache_is_pro() && $this->settings['youtube_thumbnail'] ) {
 			$html = $this->replace_youtube_iframes( $html );
 		}
 

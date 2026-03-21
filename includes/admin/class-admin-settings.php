@@ -483,6 +483,7 @@ class Prime_Cache_Admin_Settings {
 	/* ── tab: dashboard ──────────────────────────────────── */
 
 	private function tab_dashboard( $settings ) {
+		$is_pro = prime_cache_is_pro();
 		$hs = $this->get_hit_stats();
 		$st = $this->get_cache_stats();
 		$sys = $this->get_system_status();
@@ -641,6 +642,7 @@ class Prime_Cache_Admin_Settings {
 	/* ── tab: page cache ──────────────────────────────────── */
 
 	private function tab_page( $settings, $on ) {
+		$is_pro = prime_cache_is_pro();
 		$purge = wp_nonce_url( admin_url( 'admin.php?prime_cache_purge=all' ), 'prime_cache_purge' );
 		?>
 		<h2 class="pc-title"><?php esc_html_e( 'Page Cache', 'prime-cache' ); ?></h2>

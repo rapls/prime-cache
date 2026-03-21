@@ -511,7 +511,6 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		// Replace type and src to prevent execution.
-		$tag = preg_replace( '#type=["\'][^"\']*["\']#i', 'type="pc-delay/js"', $tag );
 		if ( false === strpos( $tag, 'type=' ) ) {
 			$tag = str_replace( '<script ', '<script type="pc-delay/js" ', $tag );
 		} else {

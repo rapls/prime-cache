@@ -264,7 +264,7 @@ class Prime_Cache {
 		}
 
 		// Purge Varnish Cache.
-		if ( $s['varnish_enabled'] ) {
+		if ( prime_cache_is_pro() && $s['varnish_enabled'] ) {
 			$wp_admin_bar->add_node( array(
 				'id' => 'pc-clear-varnish', 'parent' => 'prime-cache',
 				'title' => __( 'Purge Varnish Cache', 'prime-cache' ),
@@ -273,7 +273,7 @@ class Prime_Cache {
 		}
 
 		// Purge Sucuri Cache.
-		if ( $s['sucuri_enabled'] ) {
+		if ( prime_cache_is_pro() && $s['sucuri_enabled'] ) {
 			$wp_admin_bar->add_node( array(
 				'id' => 'pc-clear-sucuri', 'parent' => 'prime-cache',
 				'title' => __( 'Purge Sucuri Cache', 'prime-cache' ),
@@ -282,7 +282,7 @@ class Prime_Cache {
 		}
 
 		// Purge Cloudflare Cache.
-		if ( $s['cloudflare_enabled'] ) {
+		if ( prime_cache_is_pro() && $s['cloudflare_enabled'] ) {
 			$wp_admin_bar->add_node( array(
 				'id' => 'pc-clear-cf', 'parent' => 'prime-cache',
 				'title' => __( 'Purge Cloudflare Cache', 'prime-cache' ),
@@ -316,7 +316,7 @@ class Prime_Cache {
 		}
 
 		// ── Preload ──────────────────────────────────────────
-		if ( $s['preload_enabled'] ) {
+		if ( prime_cache_is_pro() && $s['preload_enabled'] ) {
 			$wp_admin_bar->add_node( array(
 				'id' => 'pc-sep1', 'parent' => 'prime-cache',
 				'title' => '<hr style="margin:4px 0;border:none;border-top:1px solid rgba(255,255,255,.15)">',
@@ -577,7 +577,7 @@ class Prime_Cache {
 					'disable_emoji'        => true,
 					'disable_wp_embed'     => true,
 					'remove_query_strings' => true,
-					'preload_fonts'        => true,
+					'preload_fonts'        => false,
 					'defer_js'             => true,
 					// Keep combining off for stability.
 					'combine_css'          => false,
