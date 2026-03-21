@@ -574,18 +574,19 @@ class Prime_Cache_Admin_Settings {
 					<?php
 					$features = array(
 						array( $settings['cache_enabled'], __( 'Page Cache', 'prime-cache' ) ),
-						array( 'off' !== $oc, __( 'Object Cache', 'prime-cache' ) . ( 'off' !== $oc && 'external' !== $oc ? ' (' . strtoupper( $oc ) . ')' : '' ) ),
+						array( $is_pro && 'off' !== $oc, __( 'Object Cache', 'prime-cache' ) . ( $is_pro && 'off' !== $oc && 'external' !== $oc ? ' (' . strtoupper( $oc ) . ')' : '' ) ),
 						array( $settings['minify_html'] || $settings['minify_css'] || $settings['minify_js'], __( 'File Optimization', 'prime-cache' ) ),
+						array( $settings['defer_js'] || $settings['delay_js'], __( 'JS Optimization', 'prime-cache' ) ),
 						array( $settings['lazyload_images'], __( 'Lazy Load', 'prime-cache' ) ),
-						array( ! empty( $settings['img_conversion_enabled'] ) && ( $settings['webp_enabled'] || $settings['avif_enabled'] ), 'WebP / AVIF' ),
-						array( $settings['cdn_enabled'], __( 'CDN', 'prime-cache' ) ),
-						array( $settings['preload_enabled'], __( 'Cache Preload', 'prime-cache' ) ),
+						array( $is_pro && ! empty( $settings['img_conversion_enabled'] ) && ( $settings['webp_enabled'] || $settings['avif_enabled'] ), 'WebP / AVIF' ),
+						array( $is_pro && $settings['cdn_enabled'], __( 'CDN', 'prime-cache' ) ),
+						array( $is_pro && $settings['preload_enabled'], __( 'Cache Preload', 'prime-cache' ) ),
 						array( $settings['htaccess_enabled'], '.htaccess' ),
 						array( $settings['browser_cache'], __( 'Browser Cache', 'prime-cache' ) ),
-						array( $settings['heartbeat_enabled'], __( 'Heartbeat', 'prime-cache' ) ),
-						array( $settings['varnish_enabled'], 'Varnish' ),
-						array( $settings['cloudflare_enabled'], 'Cloudflare' ),
-						array( $settings['sucuri_enabled'], 'Sucuri' ),
+						array( $is_pro && $settings['heartbeat_enabled'], __( 'Heartbeat', 'prime-cache' ) ),
+						array( $is_pro && $settings['varnish_enabled'], 'Varnish' ),
+						array( $is_pro && $settings['cloudflare_enabled'], 'Cloudflare' ),
+						array( $is_pro && $settings['sucuri_enabled'], 'Sucuri' ),
 					);
 					foreach ( $features as $f ) :
 					?>
