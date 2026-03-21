@@ -671,8 +671,8 @@ class Prime_Cache_Admin_Settings {
 			</div>
 
 			<!-- Varnish -->
-			<div class="pc-card">
-				<span class="pc-card__h"><?php esc_html_e( 'Varnish', 'prime-cache' ); ?></span>
+			<div class="pc-card<?php echo $is_pro ? '' : ' pc-card--pro'; ?>">
+				<span class="pc-card__h"><?php esc_html_e( 'Varnish', 'prime-cache' ); ?><?php if ( ! $is_pro ) : ?> <span class="pc-pro-badge">PRO</span><?php endif; ?></span>
 				<label class="pc-sw">
 					<input type="checkbox" name="prime_cache_settings[varnish_enabled]" value="1" <?php checked( $settings['varnish_enabled'] ); ?>>
 					<span class="pc-sw__track"></span>
@@ -689,8 +689,8 @@ class Prime_Cache_Admin_Settings {
 			</div>
 
 			<!-- Sucuri -->
-			<div class="pc-card">
-				<span class="pc-card__h">Sucuri</span>
+			<div class="pc-card<?php echo $is_pro ? '' : ' pc-card--pro'; ?>">
+				<span class="pc-card__h">Sucuri<?php if ( ! $is_pro ) : ?> <span class="pc-pro-badge">PRO</span><?php endif; ?></span>
 				<label class="pc-sw">
 					<input type="checkbox" name="prime_cache_settings[sucuri_enabled]" value="1" <?php checked( $settings['sucuri_enabled'] ); ?>>
 					<span class="pc-sw__track"></span>

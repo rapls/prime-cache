@@ -29,15 +29,7 @@ class Prime_Cache_File_Optimizer {
 		$this->cache_dir = WP_CONTENT_DIR . '/cache/prime-cache-fo/';
 		$this->cache_url = content_url( '/cache/prime-cache-fo/' );
 
-		// Cron handlers for async external resource fetching.
-		add_action( 'prime_cache_refresh_local_analytics', array( $this, 'cron_refresh_local_analytics' ) );
-		add_action( 'prime_cache_refresh_google_fonts', array( $this, 'cron_refresh_google_fonts' ) );
-		add_action( 'prime_cache_cleanup_gf_options', array( $this, 'cleanup_stale_gf_options' ) );
-
-		// Schedule daily cleanup of stale Google Fonts options.
-		if ( ! wp_next_scheduled( 'prime_cache_cleanup_gf_options' ) ) {
-			wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', 'prime_cache_cleanup_gf_options' );
-		}
+		// Pro cron handlers are registered by class-file-optimizer-pro.php.
 
 		// Flush rewrite rules on next request after setting toggle (deferred from save).
 		if ( get_option( 'prime_cache_flush_rewrite' ) ) {
@@ -652,15 +644,7 @@ class Prime_Cache_File_Optimizer {
 			return $full;
 		}, $html );
 
-		// Combine JS files.
-		if ( $s['combine_js'] && ! $s['delay_js'] ) {
-			$html = $this->combine_js_files( $html, $excludes );
-		}
-
-		// Inject delay JS loader script.
-		if ( $s['delay_js'] ) {
-			$html = $this->inject_delay_loader( $html );
-		}
+		// Pro: JS combine and ob_start delay are handled via apply_filters in process_html.
 
 		return $html;
 	}
@@ -843,7 +827,22 @@ class Prime_Cache_File_Optimizer {
 		exit;
 	}
 
-	// ── Utility ──────────────────────────────────────────────
+	// ── Shared Utility ──────────────────────────────────────
+
+	/**
+	 * Atomic file write: temp file + rename to prevent serving partial files.
+	 */
+	public static function atomic_write( $path, $content ) {
+		$tmp = $path . '.tmp.' . getmypid();
+		if ( false === file_put_contents( $tmp, $content ) ) { // phpcs:ignore
+			return false;
+		}
+		if ( ! rename( $tmp, $path ) ) { // phpcs:ignore
+			@unlink( $tmp );
+			return false;
+		}
+		return true;
+	}
 
 	public function parse_list( $value ) {
 		if ( empty( $value ) ) {

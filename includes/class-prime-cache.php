@@ -34,9 +34,19 @@ class Prime_Cache {
 	/**
 	 * Constructor.
 	 */
+	/** @var Prime_Cache_File_Optimizer */
+	private static $file_optimizer;
+
+	/**
+	 * Get the shared File Optimizer instance (for Pro plugin delegation).
+	 */
+	public static function get_file_optimizer() {
+		return self::$file_optimizer;
+	}
+
 	private function __construct() {
 		$this->purge = new Prime_Cache_Purge();
-		new Prime_Cache_File_Optimizer();
+		self::$file_optimizer = new Prime_Cache_File_Optimizer();
 		new Prime_Cache_Preload();
 		new Prime_Cache_LazyLoad();
 		new Prime_Cache_Media_Optimizer();
@@ -576,6 +586,7 @@ class Prime_Cache {
 				) );
 
 			case 'aggressive':
+				$is_pro = prime_cache_is_pro();
 				return array_merge( $common, array(
 					'lazyload_images'       => true,
 					'lazyload_iframes'      => true,
@@ -587,25 +598,26 @@ class Prime_Cache {
 					'minify_css'            => true,
 					'minify_js'             => true,
 					'remove_html_comments'  => true,
-					'combine_css'           => true,
-					'combine_js'            => true,
 					'defer_js'              => true,
 					'delay_js'              => true,
-					'delay_js_safe_mode'    => true,
-					'optimize_css_delivery' => true,
-					'css_delivery_method'   => 'async_css',
-					'critical_css_auto'     => true,
-					'inline_small_css'      => true,
 					'disable_emoji'         => true,
 					'disable_wp_embed'      => true,
 					'disable_dashicons'     => true,
 					'remove_query_strings'  => true,
-					'preload_fonts'         => true,
-					'preload_enabled'       => true,
-					'preload_homepage'      => true,
-					'preload_public_posts'  => true,
-					'lcp_optimization'      => true,
-					'speculation_rules'     => true,
+					// Pro-only features.
+					'combine_css'           => $is_pro,
+					'combine_js'            => $is_pro,
+					'delay_js_safe_mode'    => $is_pro,
+					'optimize_css_delivery' => $is_pro,
+					'css_delivery_method'   => 'async_css',
+					'critical_css_auto'     => $is_pro,
+					'inline_small_css'      => $is_pro,
+					'preload_fonts'         => $is_pro,
+					'preload_enabled'       => $is_pro,
+					'preload_homepage'      => $is_pro,
+					'preload_public_posts'  => $is_pro,
+					'lcp_optimization'      => $is_pro,
+					'speculation_rules'     => $is_pro,
 				) );
 
 			case 'auto':
