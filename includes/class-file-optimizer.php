@@ -45,11 +45,19 @@ class Prime_Cache_File_Optimizer {
 			add_action( 'init', function() { flush_rewrite_rules( false ); }, 99 );
 		}
 
-		// Defer JS via WordPress filter (no ob_start needed).
+		// Defer/Delay JS via WordPress filter (no ob_start needed).
 		// This avoids buffering the entire HTML which causes CLS on
 		// servers with Nginx-level caching (e.g. Xserver Xアクセラレータ).
-		if ( ! empty( $this->settings['defer_js'] ) && ! is_admin() && ! wp_doing_ajax() && ! wp_doing_cron() ) {
-			add_filter( 'script_loader_tag', array( $this, 'filter_defer_script' ), 10, 3 );
+		if ( ! is_admin() && ! wp_doing_ajax() && ! wp_doing_cron() ) {
+			if ( ! empty( $this->settings['defer_js'] ) ) {
+				add_filter( 'script_loader_tag', array( $this, 'filter_defer_script' ), 10, 3 );
+			}
+			// Delay JS: change script type to prevent execution until user interaction.
+			// Works via filter (no ob_start) — compatible with Xserver Xアクセラレータ.
+			if ( ! empty( $this->settings['delay_js'] ) ) {
+				add_filter( 'script_loader_tag', array( $this, 'filter_delay_script' ), 11, 3 );
+				add_action( 'wp_footer', array( $this, 'print_delay_loader' ), 999 );
+			}
 		}
 
 		if ( ! $this->should_optimize_html() ) {
@@ -953,6 +961,101 @@ class Prime_Cache_File_Optimizer {
 
 		// Add defer attribute.
 		return str_replace( ' src=', ' defer src=', $tag );
+	}
+
+	// ── Delay JS (filter-based, no ob_start) ────────────────
+
+	/**
+	 * Scripts that must NEVER be delayed (break core functionality).
+	 */
+	private static $delay_never = array(
+		'jquery-core',
+		'jquery',
+		'jquery-migrate',
+		'wp-hooks',
+		'wp-i18n',
+		'wp-element',
+		'wp-dom-ready',
+	);
+
+	/**
+	 * Delay enqueued scripts via script_loader_tag filter.
+	 * Changes script type to prevent execution, adds data-src.
+	 * A tiny loader script restores them on user interaction.
+	 *
+	 * No ob_start needed — compatible with Nginx-level caching.
+	 */
+	public function filter_delay_script( $tag, $handle, $src ) {
+		// Skip if already deferred/async (might be handled by filter_defer_script).
+		if ( false !== strpos( $tag, 'data-pc-delayed' ) ) {
+			return $tag;
+		}
+
+		// Never delay critical scripts.
+		if ( in_array( $handle, self::$delay_never, true ) ) {
+			return $tag;
+		}
+
+		// Skip non-JS types.
+		if ( preg_match( '#type=["\'](?!text/javascript|module)[^"\']+["\']#i', $tag ) ) {
+			return $tag;
+		}
+
+		// Skip data-no-delay scripts.
+		if ( false !== strpos( $tag, 'data-no-delay' ) ) {
+			return $tag;
+		}
+
+		// Check delay exclusion list.
+		$delay_excl = $this->parse_list( $this->settings['exclude_delay_js'] );
+		if ( $this->matches_patterns( $src, $delay_excl ) ) {
+			return $tag;
+		}
+
+		// Replace type and src to prevent execution.
+		$tag = preg_replace( '#type=["\'][^"\']*["\']#i', 'type="pc-delay/js"', $tag );
+		if ( false === strpos( $tag, 'type=' ) ) {
+			$tag = str_replace( '<script ', '<script type="pc-delay/js" ', $tag );
+		} else {
+			$tag = preg_replace( '#type=["\'][^"\']*["\']#i', 'type="pc-delay/js"', $tag );
+		}
+		$tag = str_replace( ' src=', ' data-pc-delayed data-src=', $tag );
+
+		return $tag;
+	}
+
+	/**
+	 * Print the tiny delay loader script in the footer.
+	 * Restores delayed scripts on first user interaction.
+	 */
+	public function print_delay_loader() {
+		$timeout = (int) ( $this->settings['delay_js_timeout'] ?? 0 );
+		$timeout_js = $timeout > 0 ? "setTimeout(run,{$timeout});" : '';
+		?>
+		<script id="pc-delay-loader">
+		(function(){
+			var done=false;
+			function run(){
+				if(done)return;done=true;
+				document.querySelectorAll('script[type="pc-delay/js"]').forEach(function(el){
+					var n=document.createElement('script');
+					Array.from(el.attributes).forEach(function(a){
+						if(a.name==='type')return;
+						if(a.name==='data-src'){n.src=a.value;return;}
+						if(a.name==='data-pc-delayed')return;
+						n.setAttribute(a.name,a.value);
+					});
+					if(!n.src&&el.textContent)n.textContent=el.textContent;
+					el.parentNode.replaceChild(n,el);
+				});
+			}
+			['scroll','click','keydown','touchstart','mousemove'].forEach(function(e){
+				window.addEventListener(e,run,{once:true,passive:true});
+			});
+			<?php echo $timeout_js; ?>
+		})();
+		</script>
+		<?php
 	}
 
 	// ── JS (ob_start pipeline) ───────────────────────────────
