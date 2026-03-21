@@ -13,6 +13,11 @@ class Prime_Cache_Media_Optimizer {
 	public function __construct() {
 		$this->settings = prime_cache_get_settings();
 
+		// Upload-time image processing (works in admin context).
+		if ( ! empty( $this->settings['img_strip_exif'] ) || ! empty( $this->settings['img_resize'] ) ) {
+			add_filter( 'wp_handle_upload', array( $this, 'process_upload' ) );
+		}
+
 		if ( is_admin() || wp_doing_ajax() || wp_doing_cron() ) {
 			return;
 		}
@@ -173,5 +178,103 @@ class Prime_Cache_Media_Optimizer {
 			PRIME_CACHE_VERSION,
 			array( 'strategy' => 'defer', 'in_footer' => true )
 		);
+	}
+
+	// ── Upload-time Image Processing ────────────────────────
+
+	/**
+	 * Process uploaded images: strip EXIF and/or resize.
+	 *
+	 * @param array $upload Upload data from wp_handle_upload.
+	 * @return array Modified upload data.
+	 */
+	public function process_upload( $upload ) {
+		if ( empty( $upload['file'] ) || ! empty( $upload['error'] ) ) {
+			return $upload;
+		}
+
+		$file = $upload['file'];
+		$type = $upload['type'] ?? '';
+
+		// Only process JPEG images (EXIF and resize).
+		if ( ! in_array( $type, array( 'image/jpeg', 'image/jpg' ), true ) ) {
+			// PNG resize only (no EXIF).
+			if ( 'image/png' === $type && ! empty( $this->settings['img_resize'] ) ) {
+				$this->resize_image( $file, $type );
+			}
+			return $upload;
+		}
+
+		// Strip EXIF metadata.
+		if ( ! empty( $this->settings['img_strip_exif'] ) ) {
+			$this->strip_exif( $file );
+		}
+
+		// Resize oversized images.
+		if ( ! empty( $this->settings['img_resize'] ) ) {
+			$this->resize_image( $file, $type );
+		}
+
+		return $upload;
+	}
+
+	/**
+	 * Strip EXIF metadata from a JPEG file by re-saving with GD.
+	 *
+	 * @param string $file Absolute file path.
+	 */
+	private function strip_exif( $file ) {
+		if ( ! function_exists( 'imagecreatefromjpeg' ) ) {
+			return;
+		}
+
+		$img = @imagecreatefromjpeg( $file );
+		if ( ! $img ) {
+			return;
+		}
+
+		// Re-save without EXIF (GD doesn't preserve metadata).
+		imagejpeg( $img, $file, 92 );
+		imagedestroy( $img );
+	}
+
+	/**
+	 * Resize an image if it exceeds max dimensions.
+	 *
+	 * @param string $file Absolute file path.
+	 * @param string $type MIME type.
+	 */
+	private function resize_image( $file, $type ) {
+		$max_w = (int) ( $this->settings['img_max_width'] ?? 2560 );
+		$max_h = (int) ( $this->settings['img_max_height'] ?? 2560 );
+
+		if ( $max_w <= 0 && $max_h <= 0 ) {
+			return;
+		}
+
+		$size = @getimagesize( $file );
+		if ( ! $size ) {
+			return;
+		}
+
+		$orig_w = $size[0];
+		$orig_h = $size[1];
+
+		// Skip if already within limits.
+		if ( ( $max_w <= 0 || $orig_w <= $max_w ) && ( $max_h <= 0 || $orig_h <= $max_h ) ) {
+			return;
+		}
+
+		// Use WordPress's built-in image editor for safe resizing.
+		$editor = wp_get_image_editor( $file );
+		if ( is_wp_error( $editor ) ) {
+			return;
+		}
+
+		$new_w = $max_w > 0 ? min( $orig_w, $max_w ) : $orig_w;
+		$new_h = $max_h > 0 ? min( $orig_h, $max_h ) : $orig_h;
+
+		$editor->resize( $new_w, $new_h, false );
+		$editor->save( $file );
 	}
 }

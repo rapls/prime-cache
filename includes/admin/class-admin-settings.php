@@ -290,8 +290,8 @@ class Prime_Cache_Admin_Settings {
 			set_transient( 'prime_cache_env_warnings', $warnings, 60 );
 		}
 
-		// Schedule immediate async fetch of local analytics files on save.
-		if ( ! empty( $s['local_analytics'] ) ) {
+		// Schedule immediate async fetch of local analytics files on save (Pro only).
+		if ( prime_cache_is_pro() && ! empty( $s['local_analytics'] ) ) {
 			if ( ! wp_next_scheduled( 'prime_cache_refresh_local_analytics' ) ) {
 				wp_schedule_single_event( time(), 'prime_cache_refresh_local_analytics' );
 			}
@@ -963,9 +963,9 @@ class Prime_Cache_Admin_Settings {
 					<input type="number" name="prime_cache_settings[delay_js_timeout]" value="<?php echo esc_attr( $settings['delay_js_timeout'] ); ?>" min="0" max="30000" class="pc-inp" style="width:140px">
 					<p class="pc-help"><?php esc_html_e( 'Auto-load delayed scripts after this many milliseconds even without user interaction. 0 = wait for interaction only.', 'prime-cache' ); ?></p>
 				</div>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js_safe_mode]" value="1" <?php checked( $settings['delay_js_safe_mode'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Delay JS Safe Mode', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Only delay external (third-party) scripts. All internal scripts from your site (wp-includes, wp-content) load immediately. Reduces performance gains but prevents most compatibility issues.', 'prime-cache' ); ?></small></span></label>
 				<?php if ( ! $is_pro ) : ?><div class="pc-pro-wrap"><span class="pc-pro-badge">PRO</span><?php endif; ?>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[combine_js]" value="1" <?php checked( $settings['combine_js'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Combine JavaScript Files', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Merge multiple JS files into a single file to reduce HTTP requests. Not recommended on HTTP/2 servers. May cause issues — test thoroughly.', 'prime-cache' ); ?></small></span></label>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js_safe_mode]" value="1" <?php checked( $settings['delay_js_safe_mode'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Delay JS Safe Mode', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Only delay external (third-party) scripts. All internal scripts from your site (wp-includes, wp-content) load immediately. Reduces performance gains but prevents most compatibility issues.', 'prime-cache' ); ?></small></span></label>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[local_analytics]" value="1" <?php checked( $settings['local_analytics'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Local Google Analytics', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Download gtag.js, analytics.js, and gtm.js to your server and serve them locally. Eliminates external connections to Google domains and improves PageSpeed scores. Files are refreshed every 24 hours.', 'prime-cache' ); ?></small></span></label>
 			<?php if ( ! $is_pro ) : ?></div><?php endif; ?>
 				<div class="pc-field">

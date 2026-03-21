@@ -502,9 +502,11 @@ class Prime_Cache_File_Optimizer {
 			return $tag;
 		}
 
-		// Check delay exclusion list.
+		// Check delay exclusion list + presets.
 		$delay_excl = $this->parse_list( $this->settings['exclude_delay_js'] );
-		if ( $this->matches_patterns( $src, $delay_excl ) ) {
+		$preset_excl = $this->get_delay_preset_patterns();
+		$all_excl = array_merge( $delay_excl, $preset_excl );
+		if ( $this->matches_patterns( $src, $all_excl ) ) {
 			return $tag;
 		}
 
@@ -518,6 +520,46 @@ class Prime_Cache_File_Optimizer {
 		$tag = str_replace( ' src=', ' data-pc-delayed data-src=', $tag );
 
 		return $tag;
+	}
+
+	/**
+	 * Get URL patterns from delay JS presets.
+	 *
+	 * Maps preset keys (e.g. 'google_analytics', 'facebook_pixel') to
+	 * script URL patterns that should be excluded from delay.
+	 *
+	 * @return array URL patterns to exclude.
+	 */
+	private function get_delay_preset_patterns() {
+		$presets_value = trim( $this->settings['delay_js_presets'] ?? '' );
+		if ( empty( $presets_value ) ) {
+			return array();
+		}
+
+		$preset_map = array(
+			'google_analytics'  => array( 'google-analytics.com/analytics.js', 'googletagmanager.com/gtag/js' ),
+			'google_tag_manager' => array( 'googletagmanager.com/gtm.js' ),
+			'facebook_pixel'    => array( 'connect.facebook.net' ),
+			'google_adsense'    => array( 'pagead2.googlesyndication.com' ),
+			'google_recaptcha'  => array( 'google.com/recaptcha', 'gstatic.com/recaptcha' ),
+			'hotjar'            => array( 'static.hotjar.com' ),
+			'clarity'           => array( 'clarity.ms' ),
+			'intercom'          => array( 'widget.intercom.io' ),
+			'crisp'             => array( 'client.crisp.chat' ),
+			'tawk'              => array( 'embed.tawk.to' ),
+			'hubspot'           => array( 'js.hs-scripts.com', 'js.hs-analytics.net' ),
+			'pinterest'         => array( 'assets.pinterest.com/js/pinit' ),
+			'twitter'           => array( 'platform.twitter.com/widgets.js' ),
+		);
+
+		$active = array_filter( array_map( 'trim', explode( ',', $presets_value ) ) );
+		$patterns = array();
+		foreach ( $active as $key ) {
+			if ( isset( $preset_map[ $key ] ) ) {
+				$patterns = array_merge( $patterns, $preset_map[ $key ] );
+			}
+		}
+		return $patterns;
 	}
 
 	/**
