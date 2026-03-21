@@ -492,7 +492,7 @@ ob_start( function ( $buffer ) {
 
 	// Create directory.
 	if ( ! is_dir( $cache_dir ) ) {
-		if ( ! mkdir( $cache_dir, 0755, true ) ) {
+		if ( ! @mkdir( $cache_dir, 0755, true ) ) {
 			return $buffer;
 		}
 	}

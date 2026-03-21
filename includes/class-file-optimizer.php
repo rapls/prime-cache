@@ -45,7 +45,14 @@ class Prime_Cache_File_Optimizer {
 			add_action( 'init', function() { flush_rewrite_rules( false ); }, 99 );
 		}
 
-		if ( ! $this->should_optimize() ) {
+		// Defer JS via WordPress filter (no ob_start needed).
+		// This avoids buffering the entire HTML which causes CLS on
+		// servers with Nginx-level caching (e.g. Xserver Xアクセラレータ).
+		if ( ! empty( $this->settings['defer_js'] ) && ! is_admin() && ! wp_doing_ajax() && ! wp_doing_cron() ) {
+			add_filter( 'script_loader_tag', array( $this, 'filter_defer_script' ), 10, 3 );
+		}
+
+		if ( ! $this->should_optimize_html() ) {
 			return;
 		}
 
@@ -122,7 +129,11 @@ class Prime_Cache_File_Optimizer {
 	/**
 	 * Whether optimization should run on this request.
 	 */
-	private function should_optimize() {
+	/**
+	 * Whether HTML pipeline (ob_start) should run.
+	 * Defer JS no longer needs ob_start — it uses script_loader_tag filter.
+	 */
+	private function should_optimize_html() {
 		if ( is_admin() || wp_doing_cron() || wp_doing_ajax() ) {
 			return false;
 		}
@@ -132,9 +143,9 @@ class Prime_Cache_File_Optimizer {
 
 		$s    = $this->settings;
 		$pro  = prime_cache_is_pro();
-		// Free: minify HTML/CSS/JS, remove comments, strip query strings, defer JS.
+		// Free: minify HTML/CSS/JS, remove comments, strip query strings.
 		// Pro: combine, delay, critical CSS, UCSS, Google Fonts, local analytics, inline CSS.
-		$free_active = $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['minify_js'] || $s['remove_query_strings'] || $s['defer_js'];
+		$free_active = $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['minify_js'] || $s['remove_query_strings'];
 		$pro_active  = $pro && ( $s['combine_css'] || $s['async_css'] || $s['remove_unused_css']
 			|| $s['combine_js'] || $s['delay_js']
 			|| $s['combine_google_fonts'] || $s['self_host_google_fonts']
@@ -887,7 +898,47 @@ class Prime_Cache_File_Optimizer {
 		return $html;
 	}
 
-	// ── JS ───────────────────────────────────────────────────
+	// ── Defer JS (filter-based, no ob_start) ────────────────
+
+	/**
+	 * Add defer attribute to enqueued scripts via script_loader_tag filter.
+	 *
+	 * This approach avoids ob_start buffering entirely, which is critical
+	 * for servers with Nginx-level caching (Xserver Xアクセラレータ etc.)
+	 * where ob_start delays output and causes CLS.
+	 *
+	 * @param string $tag    The <script> tag HTML.
+	 * @param string $handle The script handle.
+	 * @param string $src    The script source URL.
+	 * @return string Modified tag with defer attribute.
+	 */
+	public function filter_defer_script( $tag, $handle, $src ) {
+		// Skip if already has defer or async.
+		if ( false !== strpos( $tag, 'defer' ) || false !== strpos( $tag, 'async' ) ) {
+			return $tag;
+		}
+
+		// Skip non-JS types (e.g. application/ld+json).
+		if ( preg_match( '#type=["\'](?!text/javascript|module)[^"\']+["\']#i', $tag ) ) {
+			return $tag;
+		}
+
+		// Skip data-no-defer scripts.
+		if ( false !== strpos( $tag, 'data-no-defer' ) ) {
+			return $tag;
+		}
+
+		// Check defer exclusion list.
+		$defer_excl = $this->parse_list( $this->settings['exclude_defer_js'] );
+		if ( $this->matches_patterns( $src, $defer_excl ) ) {
+			return $tag;
+		}
+
+		// Add defer attribute.
+		return str_replace( ' src=', ' defer src=', $tag );
+	}
+
+	// ── JS (ob_start pipeline) ───────────────────────────────
 
 	private function process_js( $html ) {
 		$s = $this->settings;
