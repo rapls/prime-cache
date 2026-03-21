@@ -149,16 +149,11 @@ class Prime_Cache_File_Optimizer {
 			return false;
 		}
 
-		$s    = $this->settings;
-		$pro  = prime_cache_is_pro();
+		$s = $this->settings;
 		// Free: minify HTML/CSS/JS, remove comments, strip query strings.
-		// Pro: combine, delay, critical CSS, UCSS, Google Fonts, local analytics, inline CSS.
-		$free_active = $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['minify_js'] || $s['remove_query_strings'];
-		$pro_active  = $pro && ( $s['combine_css'] || $s['async_css'] || $s['remove_unused_css']
-			|| $s['combine_js'] || $s['delay_js']
-			|| $s['combine_google_fonts'] || $s['self_host_google_fonts']
-			|| ! empty( $s['prefetch_dns'] ) || $s['local_analytics'] || $s['inline_small_css'] );
-		return $free_active || $pro_active;
+		// Pro features use apply_filters hooks — they register via the pipeline independently.
+		return $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['minify_js'] || $s['remove_query_strings']
+			|| apply_filters( 'prime_cache_should_optimize_html', false );
 	}
 
 	public function start_buffer() {
@@ -173,53 +168,31 @@ class Prime_Cache_File_Optimizer {
 			return $html;
 		}
 
-		$s   = $this->settings;
-		$pro = prime_cache_is_pro();
+		$s = $this->settings;
 
-		// [Pro] DNS Prefetch.
-		if ( $pro && ! empty( $s['prefetch_dns'] ) ) {
-			$html = $this->inject_dns_prefetch( $html );
-		}
+		// Pro hook: runs before Free optimizations (DNS prefetch, analytics, fonts, UCSS, critical CSS).
+		$html = apply_filters( 'prime_cache_before_optimize', $html, $s );
 
 		// Remove query strings from static resources.
 		if ( $s['remove_query_strings'] ) {
 			$html = $this->strip_query_strings( $html );
 		}
 
-		// [Pro] Local Google Analytics.
-		if ( $pro && $s['local_analytics'] ) {
-			$html = $this->localize_analytics( $html );
-		}
-
-		// [Pro] Google Fonts optimization (before CSS processing).
-		if ( $pro && $s['combine_google_fonts'] ) {
-			$html = $this->optimize_google_fonts( $html );
-		}
-
-		// [Pro] Self-host Google Fonts — download CSS & font files locally.
-		if ( $pro && $s['self_host_google_fonts'] ) {
-			$html = $this->self_host_google_fonts( $html );
-		}
-
-		// [Pro] Remove Unused CSS (before other CSS processing).
-		if ( $pro && $s['remove_unused_css'] ) {
-			$html = $this->remove_unused_css( $html );
-		}
-
-		// [Pro] Auto-generate Critical CSS.
-		if ( $pro && $s['critical_css_auto'] && $s['async_css'] ) {
-			$html = $this->auto_critical_css( $html );
-		}
-
-		// CSS optimizations (minify = Free, combine/async = Pro).
-		if ( $s['minify_css'] || ( $pro && ( $s['combine_css'] || $s['async_css'] ) ) ) {
+		// CSS optimizations (Free: minify only).
+		if ( $s['minify_css'] ) {
 			$html = $this->process_css( $html );
 		}
 
-		// JS optimizations (minify/defer/delay = Free, combine = Pro).
-		if ( $s['minify_js'] || $s['defer_js'] || $s['delay_js'] || ( $pro && $s['combine_js'] ) ) {
+		// Pro hook: CSS combine, async, critical CSS.
+		$html = apply_filters( 'prime_cache_process_css', $html, $s );
+
+		// JS optimizations (Free: minify only via ob_start pipeline).
+		if ( $s['minify_js'] ) {
 			$html = $this->process_js( $html );
 		}
+
+		// Pro hook: JS combine.
+		$html = apply_filters( 'prime_cache_process_js', $html, $s );
 
 		// HTML minification (last step).
 		if ( $s['remove_html_comments'] ) {
@@ -340,8 +313,7 @@ class Prime_Cache_File_Optimizer {
 	// ── CSS ──────────────────────────────────────────────────
 
 	private function process_css( $html ) {
-		$s   = $this->settings;
-		$pro = prime_cache_is_pro();
+		$s = $this->settings;
 		$excludes = $this->parse_list( $s['exclude_css'] );
 
 		// Find all <link rel="stylesheet"> tags.
@@ -349,70 +321,29 @@ class Prime_Cache_File_Optimizer {
 			return $html;
 		}
 
-		$to_combine = array();
-
 		foreach ( $matches as $match ) {
 			$tag = $match[0];
-
-			// Extract href.
 			if ( ! preg_match( '#href=["\']([^"\']+)["\']#i', $tag, $href_match ) ) {
 				continue;
 			}
 			$href = $href_match[1];
-
-			// Check exclusions.
 			if ( $this->matches_patterns( $href, $excludes ) ) {
 				continue;
 			}
 
-			// [Pro] Inline small CSS files.
-			if ( $pro && ! empty( $s['inline_small_css'] ) && $this->is_local_url( $href ) ) {
-				$path = $this->url_to_path( $href );
-				if ( $path && is_readable( $path ) && filesize( $path ) <= (int) ( $s['inline_css_threshold'] ?? 8192 ) ) {
-					$css = file_get_contents( $path ); // phpcs:ignore
-					if ( false !== $css ) {
-						$css = $this->rebase_css_urls( $css, $path );
-						if ( $s['minify_css'] ) {
-							$css = $this->minify_css_content( $css );
-						}
-						$html = str_replace( $tag, '<style>' . $css . '</style>', $html );
-						continue;
-					}
-				}
-			}
-
 			// Minify individual CSS files (skip already minified .min.css).
-			if ( $s['minify_css'] && ! $s['combine_css'] && $this->is_local_url( $href ) ) {
-				if ( false === strpos( $href, '.min.css' ) ) {
-					$minified_url = $this->minify_css_file( $href );
-					if ( $minified_url ) {
-						$new_tag = str_replace( $href, $minified_url, $tag );
-						$html = str_replace( $tag, $new_tag, $html );
-					}
+			if ( $s['minify_css'] && $this->is_local_url( $href ) && false === strpos( $href, '.min.css' ) ) {
+				$minified_url = $this->minify_css_file( $href );
+				if ( $minified_url ) {
+					$html = str_replace( $tag, str_replace( $href, $minified_url, $tag ), $html );
 				}
-				continue;
 			}
-
-			// [Pro] Collect for combining.
-			if ( $pro && $s['combine_css'] && $this->is_local_url( $href ) ) {
-				$to_combine[] = array( 'tag' => $tag, 'href' => $href );
-			}
-		}
-
-		// [Pro] Combine CSS.
-		if ( $pro && $s['combine_css'] && ! empty( $to_combine ) ) {
-			$html = $this->combine_css_files( $html, $to_combine );
-		}
-
-		// [Pro] Async CSS loading.
-		if ( $pro && $s['async_css'] ) {
-			$html = $this->async_css( $html, $excludes );
 		}
 
 		return $html;
 	}
 
-	private function minify_css_content( $css ) {
+	public function minify_css_content( $css ) {
 		// Preserve strings and calc() to avoid corrupting content values.
 		$preserved = array();
 		$css = preg_replace_callback( '#(content\s*:\s*["\'])([^"\']*)["\']|calc\([^)]+\)#i', function( $m ) use ( &$preserved ) {
@@ -468,7 +399,7 @@ class Prime_Cache_File_Optimizer {
 		return $out_url;
 	}
 
-	private function rebase_css_urls( $css, $css_path ) {
+	public function rebase_css_urls( $css, $css_path ) {
 		$css_dir = dirname( $css_path );
 		return preg_replace_callback( '#url\(\s*["\']?(?!data:|https?://|//)([^"\')\s]+)["\']?\s*\)#i', function( $m ) use ( $css_dir ) {
 			$abs = realpath( $css_dir . '/' . $m[1] );
@@ -1574,7 +1505,7 @@ JS;
 	/**
 	 * Atomic file write: temp file + rename to prevent serving partial files.
 	 */
-	private static function atomic_write( $path, $content ) {
+	public static function atomic_write( $path, $content ) {
 		$tmp = $path . '.tmp.' . getmypid();
 		if ( false === file_put_contents( $tmp, $content ) ) { // phpcs:ignore
 			return false;
@@ -1866,7 +1797,7 @@ JS;
 
 	// ── Utility ──────────────────────────────────────────────
 
-	private function parse_list( $value ) {
+	public function parse_list( $value ) {
 		if ( empty( $value ) ) {
 			return array();
 		}
@@ -1875,7 +1806,7 @@ JS;
 		return array_filter( array_map( 'trim', $items ) );
 	}
 
-	private function matches_patterns( $subject, $patterns ) {
+	public function matches_patterns( $subject, $patterns ) {
 		foreach ( $patterns as $pattern ) {
 			if ( empty( $pattern ) ) {
 				continue;
@@ -1918,7 +1849,7 @@ JS;
 		}
 	}
 
-	private function is_local_url( $url ) {
+	public function is_local_url( $url ) {
 		$home = home_url();
 		if ( 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ) {
 			return true;
@@ -1926,7 +1857,7 @@ JS;
 		return 0 === strpos( $url, $home );
 	}
 
-	private function url_to_path( $url ) {
+	public function url_to_path( $url ) {
 		$home_url  = home_url( '/' );
 		$home_path = ABSPATH;
 
