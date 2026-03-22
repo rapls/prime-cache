@@ -941,7 +941,7 @@ class Prime_Cache_Admin_Settings {
 					</label>
 
 					<div class="pc-radio-sub" id="pc-async-sub" style="<?php echo 'async_css' === $method ? '' : 'display:none;'; ?>">
-						<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[critical_css_auto]" value="1" <?php checked( $settings['critical_css_auto'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Auto-generate Critical CSS', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Automatically extract above-the-fold CSS rules per page. Cached for 7 days per URL. Skipped if manual critical CSS is provided below. Requires "Load CSS Asynchronously" to be selected above.', 'prime-cache' ); ?></small></span></label>
+						<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[critical_css_auto]" value="1" <?php checked( $settings['critical_css_auto'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Auto-generate Critical CSS', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Automatically extract above-the-fold CSS rules per page. Cached for 7 days per URL. Skipped if manual critical CSS is provided below. Critical CSS is injected into the HTML head independently. Best combined with "Load CSS Asynchronously" to prevent flash of unstyled content.', 'prime-cache' ); ?></small></span></label>
 						<div class="pc-field">
 							<label class="pc-lbl"><?php esc_html_e( 'Fallback Critical CSS', 'prime-cache' ); ?></label>
 							<textarea name="prime_cache_settings[critical_css]" rows="4" class="pc-ta" placeholder="body{margin:0}header{...}"><?php echo esc_textarea( $settings['critical_css'] ); ?></textarea>
