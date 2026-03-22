@@ -941,11 +941,11 @@ class Prime_Cache_Admin_Settings {
 					</label>
 
 					<div class="pc-radio-sub" id="pc-async-sub" style="<?php echo 'async_css' === $method ? '' : 'display:none;'; ?>">
-						<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[critical_css_auto]" value="1" <?php checked( $settings['critical_css_auto'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Auto-generate Critical CSS', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Automatically extract above-the-fold CSS rules per page. Cached for 7 days per URL. Skipped if manual critical CSS is provided below.', 'prime-cache' ); ?></small></span></label>
+						<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[critical_css_auto]" value="1" <?php checked( $settings['critical_css_auto'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Auto-generate Critical CSS', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Automatically extract above-the-fold CSS rules per page. Cached for 7 days per URL. Skipped if manual critical CSS is provided below. Requires "Load CSS Asynchronously" to be selected above.', 'prime-cache' ); ?></small></span></label>
 						<div class="pc-field">
 							<label class="pc-lbl"><?php esc_html_e( 'Fallback Critical CSS', 'prime-cache' ); ?></label>
 							<textarea name="prime_cache_settings[critical_css]" rows="4" class="pc-ta" placeholder="body{margin:0}header{...}"><?php echo esc_textarea( $settings['critical_css'] ); ?></textarea>
-							<p class="pc-help"><?php esc_html_e( 'CSS to inline in the head for above-the-fold content. Prevents flash of unstyled content while stylesheets load. If auto-generate is enabled and this field is empty, critical CSS will be generated automatically.', 'prime-cache' ); ?></p>
+							<p class="pc-help"><?php esc_html_e( 'CSS to inline in the head for above-the-fold content. Prevents flash of unstyled content while stylesheets load. If auto-generate is enabled and this field is empty, critical CSS will be generated automatically. Both options require "Load CSS Asynchronously" to be selected.', 'prime-cache' ); ?></p>
 						</div>
 					</div>
 
@@ -1205,9 +1205,10 @@ class Prime_Cache_Admin_Settings {
 					<label class="pc-lbl"><?php esc_html_e( 'Quality Mode', 'prime-cache' ); ?></label>
 					<select name="prime_cache_settings[img_quality_mode]" class="pc-sel" style="width:180px">
 						<option value="lossy" <?php selected( $settings['img_quality_mode'], 'lossy' ); ?>><?php esc_html_e( 'Lossy (recommended)', 'prime-cache' ); ?></option>
-						<option value="lossless" <?php selected( $settings['img_quality_mode'], 'lossless' ); ?>><?php esc_html_e( 'Lossless', 'prime-cache' ); ?></option>
+						<option value="lossless" <?php selected( $settings['img_quality_mode'], 'lossless' ); ?>><?php esc_html_e( 'Lossless (quality 100)', 'prime-cache' ); ?></option>
 						<option value="custom" <?php selected( $settings['img_quality_mode'], 'custom' ); ?>><?php esc_html_e( 'Custom', 'prime-cache' ); ?></option>
 					</select>
+					<p class="pc-help"><?php esc_html_e( 'Lossless mode sets quality to 100 (maximum). For WebP, this produces true lossless output with Imagick. For AVIF, this produces near-lossless output as true lossless depends on encoder support.', 'prime-cache' ); ?></p>
 				</div>
 				<div class="pc-field" style="display:flex;gap:16px;flex-wrap:wrap">
 					<div>
@@ -1795,7 +1796,7 @@ class Prime_Cache_Admin_Settings {
 
 			<div class="pc-actions">
 				<?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?>
-				<a href="<?php echo esc_url( $cleanup_url ); ?>" class="pc-btn pc-btn--p" onclick="return confirm(<?php echo esc_attr( wp_json_encode( __( 'Run database cleanup now? This cannot be undone.', 'prime-cache' ) ) ); ?>)">
+				<a href="<?php echo esc_url( $cleanup_url ); ?>" class="pc-btn pc-btn--p" onclick="return confirm(<?php echo esc_attr( wp_json_encode( __( 'Run database cleanup now? Up to 1,000 items will be processed per run. This cannot be undone.', 'prime-cache' ) ) ); ?>)">
 					<span class="dashicons dashicons-database-remove"></span><?php esc_html_e( 'Run Cleanup Now', 'prime-cache' ); ?>
 				</a>
 			</div>
