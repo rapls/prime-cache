@@ -535,12 +535,13 @@ class Prime_Cache_File_Optimizer {
 			return array();
 		}
 
+		// Keys must match the UI checkbox values in class-admin-settings.php (hyphenated).
 		$preset_map = array(
-			'google_analytics'  => array( 'google-analytics.com/analytics.js', 'googletagmanager.com/gtag/js' ),
-			'google_tag_manager' => array( 'googletagmanager.com/gtm.js' ),
-			'facebook_pixel'    => array( 'connect.facebook.net' ),
-			'google_adsense'    => array( 'pagead2.googlesyndication.com' ),
-			'google_recaptcha'  => array( 'google.com/recaptcha', 'gstatic.com/recaptcha' ),
+			'google-analytics'  => array( 'google-analytics.com/analytics.js', 'googletagmanager.com/gtag/js' ),
+			'google-tag-manager' => array( 'googletagmanager.com/gtm.js' ),
+			'facebook-pixel'    => array( 'connect.facebook.net' ),
+			'google-adsense'    => array( 'pagead2.googlesyndication.com' ),
+			'recaptcha'         => array( 'google.com/recaptcha', 'gstatic.com/recaptcha' ),
 			'hotjar'            => array( 'static.hotjar.com' ),
 			'clarity'           => array( 'clarity.ms' ),
 			'intercom'          => array( 'widget.intercom.io' ),
