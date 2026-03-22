@@ -496,7 +496,7 @@ class Prime_Cache_Preload {
 		?>
 		<script id="pc-preload-links">
 		(function(){
-			if(!window.IntersectionObserver||navigator.connection&&navigator.connection.saveData)return;
+			if(navigator.connection&&navigator.connection.saveData)return;
 			var done={},exc=<?php echo $exclude_json; ?>,rate=3,sent=0,queue=[],timer=null;
 			function ok(u){
 				if(!u||done[u]||u.indexOf('<?php echo $site_url; ?>')!==0)return false;
