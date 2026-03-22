@@ -373,6 +373,11 @@ class Prime_Cache_File_Optimizer {
 		$out  = $this->cache_dir . 'css/' . $hash . '.css';
 		$out_url = $this->cache_url . 'css/' . $hash . '.css';
 
+		// Use clean /_pc-static/ URL when rewrite is enabled.
+		if ( ! empty( $this->settings['rewrite_file_optimizer'] ) ) {
+			$out_url = home_url( '/_pc-static/' . $hash . '.css' );
+		}
+
 		if ( file_exists( $out ) ) {
 			return $out_url;
 		}
@@ -510,6 +515,14 @@ class Prime_Cache_File_Optimizer {
 			return $tag;
 		}
 
+		// Safe mode: only delay external (third-party) scripts.
+		// Scripts from the site's own domain load immediately.
+		if ( ! empty( $this->settings['delay_js_safe_mode'] ) ) {
+			if ( $this->is_local_url( $src ) ) {
+				return $tag;
+			}
+		}
+
 		// Replace type and src to prevent execution.
 		if ( false === strpos( $tag, 'type=' ) ) {
 			$tag = str_replace( '<script ', '<script type="pc-delay/js" ', $tag );
@@ -602,11 +615,13 @@ class Prime_Cache_File_Optimizer {
 		$s = $this->settings;
 		$excludes       = $this->parse_list( $s['exclude_js'] );
 		$inline_excl    = $this->parse_list( $s['exclude_inline_js'] );
-		$defer_excl     = $this->parse_list( $s['exclude_defer_js'] );
-		$delay_excl     = $this->parse_list( $s['exclude_delay_js'] );
+
+		// Note: Delay JS is handled by filter_delay_script() via script_loader_tag filter.
+		// Defer JS is handled by filter_defer_script() via script_loader_tag filter.
+		// The ob_start pipeline only handles minification to avoid dual conventions.
 
 		// Process <script> tags.
-		$html = preg_replace_callback( '#<script\b([^>]*)>(.*?)</script>#si', function( $m ) use ( $s, $excludes, $inline_excl, $defer_excl, $delay_excl ) {
+		$html = preg_replace_callback( '#<script\b([^>]*)>(.*?)</script>#si', function( $m ) use ( $s, $excludes, $inline_excl ) {
 			$attrs   = $m[1];
 			$content = $m[2];
 			$full    = $m[0];
@@ -619,54 +634,17 @@ class Prime_Cache_File_Optimizer {
 				return $full;
 			}
 
+			// Skip already-delayed scripts (processed by filter_delay_script).
+			if ( false !== strpos( $attrs, 'data-pc-delayed' ) || false !== strpos( $attrs, 'pc-delay/' ) ) {
+				return $full;
+			}
+
 			// Check exclusions.
 			if ( $has_src && $this->matches_patterns( $src, $excludes ) ) {
 				return $full;
 			}
 			if ( ! $has_src && $this->matches_inline_patterns( $content, $inline_excl ) ) {
 				return $full;
-			}
-
-			// Skip data-no-defer and data-no-delay attributes.
-			$no_defer = false !== strpos( $attrs, 'data-no-defer' );
-			$no_delay = false !== strpos( $attrs, 'data-no-delay' );
-
-			// Delay JS execution.
-			if ( $s['delay_js'] && ! $no_delay && ! $this->matches_patterns( $src ?: $content, $delay_excl ) ) {
-				// Safe mode: only skip critical WP infrastructure scripts that
-				// break if delayed (e.g. wp-hooks, wp-i18n used by CF7/block editor).
-				// All other scripts (including theme JS) are delayed.
-				if ( ! empty( $s['delay_js_safe_mode'] ) && $has_src ) {
-					// Scripts that must NOT be delayed (break core functionality).
-					$critical_patterns = array(
-						'/wp-includes/js/dist/hooks',
-						'/wp-includes/js/dist/i18n',
-						'/wp-includes/js/dist/element',
-						'/wp-includes/js/dist/dom-ready',
-						'/wp-includes/js/jquery/jquery.min',
-						'/wp-includes/js/jquery/jquery.js',
-					);
-					$is_critical = false;
-					foreach ( $critical_patterns as $pat ) {
-						if ( false !== strpos( $src, $pat ) ) {
-							$is_critical = true;
-							break;
-						}
-					}
-					if ( ! $is_critical ) {
-						return $this->delay_script( $attrs, $content, $has_src, $src );
-					}
-				} else {
-					return $this->delay_script( $attrs, $content, $has_src, $src );
-				}
-			}
-
-			// Defer JS.
-			if ( $s['defer_js'] && $has_src && ! $no_defer && ! $this->matches_patterns( $src, $defer_excl ) ) {
-				if ( false === strpos( $attrs, 'defer' ) && false === strpos( $attrs, 'async' ) ) {
-					$attrs .= ' defer';
-					return '<script' . $attrs . '>' . $content . '</script>';
-				}
 			}
 
 			// Minify inline JS.
@@ -685,8 +663,6 @@ class Prime_Cache_File_Optimizer {
 
 			return $full;
 		}, $html );
-
-		// Pro: JS combine and ob_start delay are handled via apply_filters in process_html.
 
 		return $html;
 	}
@@ -733,6 +709,11 @@ class Prime_Cache_File_Optimizer {
 		$out  = $this->cache_dir . 'js/' . $hash . '.js';
 		$out_url = $this->cache_url . 'js/' . $hash . '.js';
 
+		// Use clean /_pc-static/ URL when rewrite is enabled.
+		if ( ! empty( $this->settings['rewrite_file_optimizer'] ) ) {
+			$out_url = home_url( '/_pc-static/' . $hash . '.js' );
+		}
+
 		if ( file_exists( $out ) ) {
 			return $out_url;
 		}
@@ -749,33 +730,38 @@ class Prime_Cache_File_Optimizer {
 		return $out_url;
 	}
 
-	private function delay_script( $attrs, $content, $has_src, $src ) {
-		if ( $has_src ) {
-			// Replace src with data-pc-src, set type to pc-delay.
-			$attrs = str_replace( $src, '', $attrs );
-			$attrs = preg_replace( '#src=["\']["\']#i', '', $attrs );
-			$attrs = preg_replace( '#type=["\'][^"\']*["\']#i', '', $attrs );
-			return '<script type="pc-delay/javascript" data-pc-src="' . esc_attr( $src ) . '"' . $attrs . '></script>';
-		}
-
-		// Inline script — replace type.
-		$attrs = preg_replace( '#type=["\'][^"\']*["\']#i', '', $attrs );
-		return '<script type="pc-delay/javascript"' . $attrs . '>' . $content . '</script>';
-	}
+	// Delay JS is handled entirely by filter_delay_script() + print_delay_loader().
+	// Convention: type="pc-delay/js", data-src, data-pc-delayed.
 
 	// ── Query String Removal ─────────────────────────────────
 
 	private function strip_query_strings( $html ) {
-		// Only strip ?ver= / ?v= from local CSS/JS URLs.
+		// Strip ?ver= / ?v= parameters from local CSS/JS URLs regardless of position.
+		// Handles: only param, first param, middle param, last param.
 		return preg_replace_callback(
-			'#((?:href|src)=["\'])([^"\']+\.(css|js))\?(?:ver|v)=[^&"\']*(["\'])#i',
+			'#((?:href|src)=["\'])([^"\']+\.(?:css|js))\?([^"\']+)(["\'])#i',
 			function( $m ) {
-				$url = $m[2];
+				$url   = $m[2];
+				$query = $m[3];
+
 				// Only strip from local (relative or same-host) URLs.
-				if ( 0 === strpos( $url, '/' ) || $this->is_local_url( $url ) ) {
+				if ( 0 !== strpos( $url, '/' ) && ! $this->is_local_url( $url ) ) {
+					return $m[0]; // External — keep query string.
+				}
+
+				// Parse query parameters and remove ver/v.
+				$params = array();
+				foreach ( explode( '&', $query ) as $part ) {
+					$key = strtok( $part, '=' );
+					if ( 'ver' !== $key && 'v' !== $key ) {
+						$params[] = $part;
+					}
+				}
+
+				if ( empty( $params ) ) {
 					return $m[1] . $url . $m[4];
 				}
-				return $m[0]; // External — keep query string.
+				return $m[1] . $url . '?' . implode( '&', $params ) . $m[4];
 			},
 			$html
 		);
