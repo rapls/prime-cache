@@ -497,16 +497,26 @@ class Prime_Cache_Preload {
 		<script id="pc-preload-links">
 		(function(){
 			if(!window.IntersectionObserver||navigator.connection&&navigator.connection.saveData)return;
-			var q={},exc=<?php echo $exclude_json; ?>,max=3,n=0,t=null;
+			var done={},exc=<?php echo $exclude_json; ?>,rate=3,sent=0,queue=[],timer=null;
 			function ok(u){
-				if(!u||q[u]||u.indexOf('<?php echo $site_url; ?>')!==0)return false;
+				if(!u||done[u]||u.indexOf('<?php echo $site_url; ?>')!==0)return false;
 				for(var i=0;i<exc.length;i++){if(u.indexOf(exc[i])!==-1)return false;}
 				return true;
 			}
-			function pf(u){
-				if(!ok(u))return;q[u]=1;n++;
-				if(n>max){clearTimeout(t);t=setTimeout(function(){n=0;},1000);}
+			function send(u){
+				done[u]=1;
 				var l=document.createElement('link');l.rel='prefetch';l.href=u;document.head.appendChild(l);
+			}
+			function drain(){
+				sent=0;
+				var batch=Math.min(rate,queue.length);
+				for(var i=0;i<batch;i++){send(queue.shift());sent++;}
+				if(queue.length>0){timer=setTimeout(drain,1000);}else{timer=null;}
+			}
+			function pf(u){
+				if(!ok(u))return;done[u]=1;
+				if(sent<rate&&!timer){sent++;send(u);if(sent>=rate){timer=setTimeout(drain,1000);}}
+				else{queue.push(u);if(!timer){timer=setTimeout(drain,1000);}}
 			}
 			var delay;
 			document.addEventListener('pointerover',function(e){

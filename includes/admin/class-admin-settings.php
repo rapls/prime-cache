@@ -360,22 +360,21 @@ class Prime_Cache_Admin_Settings {
 		if ( strlen( $value ) > 512 ) {
 			return '';
 		}
-		// Strip null bytes, carriage returns, and newlines.
-		$value = preg_replace( '#[\x00\r\n]#', '', $value );
-		// Tight allowlist for Apache RewriteCond safety.
-		// Allows: a-z A-Z 0-9 . | ^ $ _ - /
-		// Blocks: ( ) * + ? { } [ ] \ spaces, quotes, and all other special chars.
-		// This means patterns are limited to pipe-separated literal substrings
-		// with . as single-char wildcard and ^ $ as anchors — sufficient for
-		// URL path, cookie name, and user-agent matching.
-		if ( preg_match( '#[^a-zA-Z0-9.|^$_\-/]#', $value ) ) {
+		// Strip null bytes and control characters (except printable ASCII).
+		$value = preg_replace( '#[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]#', '', $value );
+		// Remove carriage returns and newlines.
+		$value = preg_replace( '#[\r\n]#', '', $value );
+		$value = trim( $value );
+		if ( '' === $value ) {
 			return '';
 		}
+		// Escape the delimiter character (#) in the input to prevent regex injection.
+		$value = str_replace( '#', '\\#', $value );
 		// Block empty alternation branches (||, leading |, trailing |).
-		if ( preg_match( '#\|\||^\||\|$|^$#', $value ) ) {
+		if ( preg_match( '/\|\||^\||\|$/', $value ) ) {
 			return '';
 		}
-		// Test the pattern to ensure it's valid PHP regex.
+		// Validate the complete pattern compiles as valid regex.
 		$test = @preg_match( '#' . $value . '#', '' );
 		if ( false === $test ) {
 			return '';
@@ -662,7 +661,7 @@ class Prime_Cache_Admin_Settings {
 					array( 'gzip_compression',       __( 'Gzip Compression','prime-cache' ),       __( 'Pre-compress cache files with gzip. Supported browsers receive the compressed version, reducing transfer size by 60-80%. Recommended for most environments.','prime-cache' ) ),
 					array( 'brotli_compression',     __( 'Brotli Compression','prime-cache' ),     __( 'Enable Brotli compression via mod_brotli (Apache 2.4+). Brotli achieves 15-25% better compression than gzip for text-based assets. Requires mod_brotli to be installed on the server. Falls back to gzip if unavailable.','prime-cache' ) ),
 					array( 'htaccess_enabled',       __( '.htaccess Optimization','prime-cache' ), __( 'Write optimization rules to .htaccess. Apache serves cached files directly without invoking PHP, significantly improving response time. Also enables mod_deflate compression, mod_expires browser caching, and ETag removal. No effect on Nginx.','prime-cache' ) ),
-					array( 'cache_404',              __( 'Cache 404 Pages','prime-cache' ),        __( 'Cache 404 (Not Found) pages. Reduces server load from repeated requests to non-existent URLs. The cached 404 page is served with proper 404 HTTP status code.','prime-cache' ) ),
+					array( 'cache_404',              __( 'Cache 404 Pages','prime-cache' ),        __( 'Cache 404 (Not Found) pages. Reduces server load from repeated requests to non-existent URLs. The cached 404 page is served with proper 404 HTTP status code via the PHP drop-in. Note: .htaccess Optimization does not serve cached 404 pages (they always go through PHP to ensure the correct status code).','prime-cache' ) ),
 					array( 'cache_footprint',        __( 'Cache Footprint','prime-cache' ),        __( 'Append an HTML comment with cache generation time to the source. Useful for verifying cache behavior via "View Source". Can be disabled in production.','prime-cache' ) ),
 				);
 				foreach ( $tg as $t ) : ?>
@@ -782,7 +781,7 @@ class Prime_Cache_Admin_Settings {
 					<span class="pc-meta" id="pc-leq"><?php echo $ls<=0?'= '.esc_html__('Unlimited','prime-cache'):'= '.number_format($ls).' '.esc_html__('sec','prime-cache'); ?></span>
 					<input type="hidden" id="pc-lh" name="prime_cache_settings[cache_lifespan]" value="<?php echo esc_attr($ls); ?>">
 				</div>
-				<p class="pc-help"><?php esc_html_e( 'How long until cache files are automatically discarded. Expired caches are regenerated on the next visit and cleaned up hourly by WP-Cron. Set to 0 for unlimited (purge only on post updates, comments, and term changes). For frequently updated news sites, use 1-6 hours. For less active sites, use 1-7 days or unlimited.','prime-cache' ); ?></p>
+				<p class="pc-help"><?php esc_html_e( 'How long until cache files are automatically discarded. Expired caches are regenerated on the next visit and cleaned up hourly by WP-Cron. Set to 0 for unlimited (purge only on post updates, comments, and term changes). For frequently updated news sites, use 1-6 hours. For less active sites, use 1-7 days or unlimited. Note: When .htaccess Optimization is enabled, Apache serves cached files directly and cannot check file age. Expired files may continue to be served until the next WP-Cron cleanup (runs hourly).','prime-cache' ); ?></p>
 			</div>
 
 			<div class="pc-actions">
@@ -2021,7 +2020,10 @@ class Prime_Cache_Admin_Settings {
 
 			<div class="pc-card">
 				<span class="pc-card__h"><?php esc_html_e( 'Security Headers', 'prime-cache' ); ?></span>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[hsts_enabled]" value="1" <?php checked( $settings['hsts_enabled'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'HTTP Strict Transport Security (HSTS)', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Force browsers to use HTTPS for all future connections. Only enable if your site fully supports HTTPS. Includes includeSubDomains and preload directives.', 'prime-cache' ); ?></small></span></label>
+				<?php if ( empty( $settings['htaccess_enabled'] ) ) : ?>
+				<div class="notice notice-warning inline" style="margin:0 0 12px"><p><?php esc_html_e( 'Security headers require .htaccess Optimization to be enabled on the Page Cache tab. Without it, these headers will not be added to responses.', 'prime-cache' ); ?></p></div>
+				<?php endif; ?>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[hsts_enabled]" value="1" <?php checked( $settings['hsts_enabled'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'HTTP Strict Transport Security (HSTS)', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Force browsers to use HTTPS for all future connections. Only enable if your site fully supports HTTPS. Includes includeSubDomains and preload directives. Requires .htaccess Optimization on the Page Cache tab.', 'prime-cache' ); ?></small></span></label>
 				<?php
 				$hsts_s = (int) $settings['hsts_max_age'];
 				if ( $hsts_s <= 0 )               { $hv = 0; $hu = 86400; }
@@ -2059,13 +2061,13 @@ class Prime_Cache_Admin_Settings {
 					v.addEventListener('input',calc);u.addEventListener('change',calc);
 				})();
 				</script>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[security_headers]" value="1" <?php checked( $settings['security_headers'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Security Response Headers', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Add X-Content-Type-Options (nosniff), X-Frame-Options (SAMEORIGIN), X-XSS-Protection, Referrer-Policy, and Permissions-Policy headers. Protects against clickjacking, MIME-type sniffing, and XSS attacks.', 'prime-cache' ); ?></small></span></label>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[security_headers]" value="1" <?php checked( $settings['security_headers'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Security Response Headers', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Add X-Content-Type-Options (nosniff), X-Frame-Options (SAMEORIGIN), X-XSS-Protection, Referrer-Policy, and Permissions-Policy headers. Protects against clickjacking, MIME-type sniffing, and XSS attacks. Requires .htaccess Optimization on the Page Cache tab.', 'prime-cache' ); ?></small></span></label>
 			</div>
 
 			<!-- Debug -->
 			<div class="pc-card">
 				<span class="pc-card__h"><?php esc_html_e( 'Debug', 'prime-cache' ); ?></span>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[debug_log]" value="1" <?php checked( $settings['debug_log'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Enable Debug Logging', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Log cache operations (HIT, MISS, PURGE) to wp-content/cache/prime-cache/debug.log. Useful for troubleshooting. Disable in production as it increases disk I/O.', 'prime-cache' ); ?></small></span></label>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[debug_log]" value="1" <?php checked( $settings['debug_log'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Enable Debug Logging', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Log cache purge operations (PURGE ALL, PURGE URL) to wp-content/cache/prime-cache/debug.log. Useful for troubleshooting cache invalidation. Disable in production as it increases disk I/O.', 'prime-cache' ); ?></small></span></label>
 				<?php
 				$log_file = PRIME_CACHE_CACHE_DIR . 'debug.log';
 				if ( file_exists( $log_file ) ) :

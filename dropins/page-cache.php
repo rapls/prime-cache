@@ -260,8 +260,8 @@ function _prime_cache_get_cache_dir() {
  * @param string $qs_suffix            Query string suffix.
  * @return string
  */
-function _prime_cache_get_filename( $is_ssl, $is_mobile, $use_mobile_separate, $gzip = false, $vary_suffix = '', $qs_suffix = '' ) {
-	$name = 'index';
+function _prime_cache_get_filename( $is_ssl, $is_mobile, $use_mobile_separate, $gzip = false, $vary_suffix = '', $qs_suffix = '', $status = 200 ) {
+	$name = ( 404 === $status ) ? '404-index' : 'index';
 
 	if ( $is_ssl ) {
 		$name .= '-https';
@@ -311,6 +311,18 @@ $_pc_filename   = _prime_cache_get_filename( $_pc_is_ssl, $_pc_is_mobile, $prime
 // ----- Try to Serve Cached File -----
 
 $_pc_cache_file = $_pc_cache_dir . $_pc_filename;
+
+// Also check for 404-prefixed cache file when cache_404 is enabled.
+$_pc_serving_404 = false;
+if ( ! is_readable( $_pc_cache_file ) && ! empty( $prime_cache_config['cache_404'] ) ) {
+	$_pc_404_filename = _prime_cache_get_filename( $_pc_is_ssl, $_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], false, $_pc_vary_suffix, $_pc_qs_suffix, 404 );
+	$_pc_404_file     = $_pc_cache_dir . $_pc_404_filename;
+	if ( is_readable( $_pc_404_file ) ) {
+		$_pc_cache_file  = $_pc_404_file;
+		$_pc_filename    = $_pc_404_filename;
+		$_pc_serving_404 = true;
+	}
+}
 
 if ( is_readable( $_pc_cache_file ) ) {
 	$_pc_modified_time = filemtime( $_pc_cache_file );
@@ -385,7 +397,8 @@ if ( is_readable( $_pc_cache_file ) ) {
 
 	// Determine response file and content headers (same for GET/HEAD).
 	$_pc_accept_gzip = isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && strpos( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) !== false;
-	$_pc_gz_file     = $_pc_cache_dir . _prime_cache_get_filename( $_pc_is_ssl, $_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], true, $_pc_vary_suffix, $_pc_qs_suffix );
+	$_pc_gz_status   = $_pc_serving_404 ? 404 : 200;
+	$_pc_gz_file     = $_pc_cache_dir . _prime_cache_get_filename( $_pc_is_ssl, $_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], true, $_pc_vary_suffix, $_pc_qs_suffix, $_pc_gz_status );
 	$_pc_use_gz      = $_pc_accept_gzip && is_readable( $_pc_gz_file );
 	$_pc_serve_file  = $_pc_use_gz ? $_pc_gz_file : $_pc_cache_file;
 
@@ -487,7 +500,8 @@ ob_start( function ( $buffer ) {
 		$prime_cache_config['cache_mobile_separate'],
 		false,
 		$_pc_vary_suffix,
-		$_pc_qs_suffix
+		$_pc_qs_suffix,
+		$_pc_status
 	);
 
 	// Create directory.
@@ -531,7 +545,8 @@ ob_start( function ( $buffer ) {
 			$prime_cache_config['cache_mobile_separate'],
 			true,
 			$_pc_vary_suffix,
-			$_pc_qs_suffix
+			$_pc_qs_suffix,
+			$_pc_status
 		);
 		$gz_filepath = $cache_dir . $gz_filename;
 		$gz_tempfile = $gz_filepath . '.tmp.' . getmypid();

@@ -35,8 +35,8 @@ class Prime_Cache_Storage {
 	 * @param string $qs_suffix    Query string suffix (e.g. '-qs_def67890').
 	 * @return string Filename.
 	 */
-	public static function get_cache_filename( $is_ssl = false, $is_mobile = false, $gzip = false, $vary_suffix = '', $qs_suffix = '' ) {
-		$name = 'index';
+	public static function get_cache_filename( $is_ssl = false, $is_mobile = false, $gzip = false, $vary_suffix = '', $qs_suffix = '', $status = 200 ) {
+		$name = ( 404 === $status ) ? '404-index' : 'index';
 
 		if ( $is_ssl ) {
 			$name .= '-https';
