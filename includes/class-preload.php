@@ -499,7 +499,8 @@ class Prime_Cache_Preload {
 			if(navigator.connection&&navigator.connection.saveData)return;
 			var done={},exc=<?php echo $exclude_json; ?>,rate=3,sent=0,queue=[],timer=null;
 			function ok(u){
-				if(!u||done[u]||u.indexOf('<?php echo $site_url; ?>')!==0)return false;
+				if(!u||done[u])return false;
+				if(u.indexOf('<?php echo $site_url; ?>')!==0&&u.indexOf(location.origin+'/')!==0)return false;
 				for(var i=0;i<exc.length;i++){if(u.indexOf(exc[i])!==-1)return false;}
 				return true;
 			}
@@ -515,8 +516,8 @@ class Prime_Cache_Preload {
 			}
 			function pf(u){
 				if(!ok(u))return;done[u]=1;
-				if(sent<rate&&!timer){sent++;send(u);if(sent>=rate){timer=setTimeout(drain,1000);}}
-				else{queue.push(u);if(!timer){timer=setTimeout(drain,1000);}}
+				queue.push(u);
+				if(!timer){timer=setTimeout(drain,0);}
 			}
 			var delay;
 			document.addEventListener('pointerover',function(e){
@@ -528,7 +529,7 @@ class Prime_Cache_Preload {
 				var obs=new IntersectionObserver(function(entries){
 					entries.forEach(function(en){if(en.isIntersecting){var a=en.target;pf(a.href);obs.unobserve(a);}});
 				},{rootMargin:'200px'});
-				document.querySelectorAll('a[href^="<?php echo $site_url; ?>"]').forEach(function(a){obs.observe(a);});
+				document.querySelectorAll('a[href^="<?php echo $site_url; ?>"],a[href^="/"]').forEach(function(a){if(a.getAttribute('href').indexOf('//')===0)return;obs.observe(a);});
 			}
 		})();
 		</script>

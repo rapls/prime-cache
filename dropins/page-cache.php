@@ -386,7 +386,7 @@ if ( is_readable( $_pc_cache_file ) ) {
 	// Browser cache: allow browsers to cache the HTML for a short period.
 	// Reduces repeat requests while still allowing rapid updates via purge.
 	$_pc_html_maxage = isset( $prime_cache_config['browser_cache_html'] ) ? (int) $prime_cache_config['browser_cache_html'] : 0;
-	if ( $_pc_html_maxage > 0 ) {
+	if ( $_pc_html_maxage > 0 && ! empty( $prime_cache_config['browser_cache'] ) ) {
 		header( 'Cache-Control: public, max-age=' . $_pc_html_maxage . ', must-revalidate' );
 	} else {
 		// Default: allow conditional caching (304) but no browser storage.

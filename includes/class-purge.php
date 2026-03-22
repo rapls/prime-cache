@@ -24,7 +24,7 @@ class Prime_Cache_Purge {
 		// ── Post trash / delete ───────────────────────────────
 		if ( $s['purge_on_post_delete'] ) {
 			add_action( 'trashed_post', array( $this, 'on_post_delete' ) );
-			add_action( 'deleted_post', array( $this, 'on_post_delete' ) );
+			add_action( 'before_delete_post', array( $this, 'on_post_delete' ) );
 		}
 
 		// ── Comment ───────────────────────────────────────────
@@ -73,12 +73,13 @@ class Prime_Cache_Purge {
 		// ── Navigation menu update ────────────────────────────
 		if ( $s['purge_on_nav_menu'] ) {
 			add_action( 'wp_update_nav_menu', array( $this, 'purge_all' ) );
+			add_action( 'wp_delete_nav_menu', array( $this, 'purge_all' ) );
 		}
 
 		// ── WordPress core update ─────────────────────────────
 		if ( $s['purge_on_core_update'] ) {
 			add_action( '_core_updated_successfully', array( $this, 'purge_all' ) );
-			add_action( 'upgrader_process_complete', array( $this, 'purge_all' ) );
+			add_action( 'upgrader_process_complete', array( $this, 'on_upgrader_complete' ), 10, 2 );
 		}
 
 		// ── User profile update (author archive) ──────────────
@@ -151,6 +152,20 @@ class Prime_Cache_Purge {
 			return;
 		}
 		$this->purge_all();
+	}
+
+	// ── Core update (upgrader) ───────────────────────────────
+
+	/**
+	 * Only purge cache when a core update completes, not plugin/theme/translation updates.
+	 *
+	 * @param WP_Upgrader $upgrader Upgrader instance.
+	 * @param array       $options  Update details including 'type'.
+	 */
+	public function on_upgrader_complete( $upgrader, $options ) {
+		if ( isset( $options['type'] ) && 'core' === $options['type'] ) {
+			$this->purge_all();
+		}
 	}
 
 	// ── Widget update ─────────────────────────────────────────
