@@ -607,7 +607,7 @@ class Prime_Cache {
 					// Pro-only features.
 					'combine_css'           => $is_pro,
 					'combine_js'            => $is_pro,
-					'delay_js_safe_mode'    => $is_pro,
+					'delay_js_safe_mode'    => true,
 					'optimize_css_delivery' => $is_pro,
 					'css_delivery_method'   => 'async_css',
 					'critical_css_auto'     => $is_pro,
