@@ -37,19 +37,13 @@ class Prime_Cache_File_Optimizer {
 			add_action( 'init', function() { flush_rewrite_rules( false ); }, 99 );
 		}
 
-		// Defer/Delay JS via WordPress filter (no ob_start needed).
-		// This avoids buffering the entire HTML which causes CLS on
-		// servers with Nginx-level caching (e.g. Xserver Xアクセラレータ).
+		// Defer JS via WordPress filter (safe, no ob_start needed).
 		if ( ! is_admin() && ! wp_doing_ajax() && ! wp_doing_cron() ) {
 			if ( ! empty( $this->settings['defer_js'] ) ) {
 				add_filter( 'script_loader_tag', array( $this, 'filter_defer_script' ), 10, 3 );
 			}
-			// Delay JS: change script type to prevent execution until user interaction.
-			// Works via filter (no ob_start) — compatible with Xserver Xアクセラレータ.
-			if ( ! empty( $this->settings['delay_js'] ) ) {
-				add_filter( 'script_loader_tag', array( $this, 'filter_delay_script' ), 11, 3 );
-				add_action( 'wp_footer', array( $this, 'print_delay_loader' ), 999 );
-			}
+			// Delay JS: now processed via HTML pipeline (ob_start) for full coverage.
+			// This captures ALL scripts (inline + external + CDN), not just enqueued.
 		}
 
 		if ( ! $this->should_optimize_html() ) {
@@ -131,7 +125,6 @@ class Prime_Cache_File_Optimizer {
 	 */
 	/**
 	 * Whether HTML pipeline (ob_start) should run.
-	 * Defer JS no longer needs ob_start — it uses script_loader_tag filter.
 	 */
 	private function should_optimize_html() {
 		if ( is_admin() || wp_doing_cron() || wp_doing_ajax() ) {
@@ -142,9 +135,8 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		$s = $this->settings;
-		// Free: minify HTML/CSS/JS, remove comments, strip query strings.
-		// Pro features use apply_filters hooks — they register via the pipeline independently.
-		return $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['minify_js'] || $s['remove_query_strings']
+		return $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['minify_js']
+			|| $s['remove_query_strings'] || $s['delay_js']
 			|| apply_filters( 'prime_cache_should_optimize_html', false );
 	}
 
@@ -185,6 +177,12 @@ class Prime_Cache_File_Optimizer {
 
 		// Pro hook: JS combine.
 		$html = apply_filters( 'prime_cache_process_js', $html, $s );
+
+		// Delay JS: transform ALL script tags via HTML pipeline.
+		// Runs AFTER minify/combine so combined scripts are also delayed.
+		if ( $s['delay_js'] ) {
+			$html = $this->delay_all_scripts( $html );
+		}
 
 		// HTML minification (last step).
 		if ( $s['remove_html_comments'] ) {
@@ -609,6 +607,169 @@ class Prime_Cache_File_Optimizer {
 		<?php
 	}
 
+	// ── Delay JS (ob_start pipeline — full HTML processing) ──
+
+	/** @var string|null Cached loader script content. */
+	private static $delay_loader_cache = null;
+
+	/**
+	 * Delay ALL JavaScript via HTML pipeline processing.
+	 *
+	 * Transforms every <script> tag in the HTML output:
+	 * - External: type → pc-delay/javascript, src → data-pc-src
+	 * - Inline: type → pc-delay/javascript
+	 * Injects the delay loader script right after <head>.
+	 *
+	 * This is the WP-Rocket-style approach: full HTML processing via ob_start
+	 * captures ALL scripts (inline + external + CDN), not just enqueued.
+	 */
+	private function delay_all_scripts( $html ) {
+		$s = $this->settings;
+
+		// Build exclusion patterns.
+		$excl = $this->parse_list( $s['exclude_delay_js'] );
+		$excl = array_merge( $excl, $this->get_delay_preset_patterns() );
+
+		// Safe mode: exclude local scripts.
+		$safe_mode = ! empty( $s['delay_js_safe_mode'] );
+
+		// Non-JS types to skip.
+		$skip_types = array(
+			'application/json', 'application/ld+json', 'text/template',
+			'text/html', 'text/x-template', 'text/x-handlebars-template',
+			'text/x-custom-template',
+		);
+
+		// Protect SVG content from script matching.
+		$svg_placeholders = array();
+		$html = preg_replace_callback( '#<svg[^>]*>.*?</svg>#si', function( $m ) use ( &$svg_placeholders ) {
+			$key = '<!--PC_SVG_' . count( $svg_placeholders ) . '-->';
+			$svg_placeholders[ $key ] = $m[0];
+			return $key;
+		}, $html );
+
+		// Transform script tags.
+		$html = preg_replace_callback(
+			'#<\s*script(?<attr>\s[^>]*?)?>(?<content>.*?)?<\s*/\s*script\s*>#ims',
+			function( $m ) use ( $excl, $safe_mode, $skip_types ) {
+				$full = $m[0];
+				$attr = isset( $m['attr'] ) ? $m['attr'] : '';
+				$content = isset( $m['content'] ) ? $m['content'] : '';
+
+				// Skip if already delayed.
+				if ( false !== strpos( $attr, 'data-pc-delayed' ) ) return $full;
+				if ( false !== strpos( $attr, 'pc-delay' ) ) return $full;
+
+				// Skip data-no-delay.
+				if ( false !== strpos( $attr, 'data-no-delay' ) ) return $full;
+
+				// Check type — skip non-JS types.
+				if ( preg_match( '/type\s*=\s*["\']([^"\']*)["\'/]/i', $attr, $type_m ) ) {
+					$type = strtolower( trim( $type_m[1] ) );
+					if ( $type && in_array( $type, $skip_types, true ) ) {
+						return $full;
+					}
+				}
+
+				// Extract src if present.
+				$src = '';
+				if ( preg_match( '/src\s*=\s*["\']([^"\']+)["\']/i', $attr, $src_m ) ) {
+					$src = $src_m[1];
+				}
+
+				// Check exclusion patterns (match against src or inline content).
+				$match_target = $src ? $src : $content;
+				foreach ( $excl as $pattern ) {
+					if ( false !== stripos( $match_target, $pattern ) ) {
+						return $full;
+					}
+					// Try as regex.
+					if ( @preg_match( '#' . $pattern . '#i', $match_target ) ) {
+						return $full;
+					}
+				}
+
+				// Safe mode: skip local scripts.
+				if ( $safe_mode && $src && $this->is_local_url( $src ) ) {
+					return $full;
+				}
+
+				// Skip the delay loader itself.
+				if ( false !== strpos( $attr, 'id="pc-delay-loader"' ) ) return $full;
+				if ( false !== strpos( $content, 'pcDelayTimeout' ) ) return $full;
+
+				// ── Transform ──
+				// Rename type to data-pc-type, set type to delay marker.
+				if ( preg_match( '/type\s*=\s*["\']([^"\']*)["\'/]/i', $attr, $type_m ) ) {
+					$attr = preg_replace(
+						'/type\s*=\s*["\'][^"\']*["\']/i',
+						'data-pc-type="' . esc_attr( $type_m[1] ) . '" type="pc-delay/javascript"',
+						$attr
+					);
+				} else {
+					$attr = ' type="pc-delay/javascript"' . $attr;
+				}
+
+				// Rename src to data-pc-src.
+				if ( $src ) {
+					$attr = preg_replace(
+						'/src\s*=\s*["\']([^"\']+)["\']/i',
+						'data-pc-src="$1"',
+						$attr
+					);
+				}
+
+				// Add marker.
+				$attr .= ' data-pc-delayed';
+
+				return '<script' . $attr . '>' . $content . '</script>';
+			},
+			$html
+		);
+
+		// Restore SVG.
+		if ( $svg_placeholders ) {
+			$html = str_replace( array_keys( $svg_placeholders ), array_values( $svg_placeholders ), $html );
+		}
+
+		// Inject loader script right after <head>.
+		$loader = $this->get_delay_loader_script();
+		if ( $loader ) {
+			$html = preg_replace(
+				'/<head([^>]*)>/i',
+				'<head$1>' . "\n" . '<script id="pc-delay-loader" data-no-delay>' . $loader . '</script>',
+				$html,
+				1
+			);
+		}
+
+		return $html;
+	}
+
+	/**
+	 * Get the delay loader JS content (cached).
+	 */
+	private function get_delay_loader_script() {
+		if ( null !== self::$delay_loader_cache ) {
+			return self::$delay_loader_cache;
+		}
+
+		$file = PRIME_CACHE_PATH . 'assets/js/pc-delay-loader.js';
+		if ( ! is_readable( $file ) ) {
+			self::$delay_loader_cache = '';
+			return '';
+		}
+
+		$js = file_get_contents( $file ); // phpcs:ignore
+
+		// Embed timeout config.
+		$timeout = (int) ( $this->settings['delay_js_timeout'] ?? 0 );
+		$js = 'window.pcDelayTimeout=' . $timeout . ';' . "\n" . $js;
+
+		self::$delay_loader_cache = $js;
+		return $js;
+	}
+
 	// ── JS (ob_start pipeline) ───────────────────────────────
 
 	private function process_js( $html ) {
@@ -616,9 +777,8 @@ class Prime_Cache_File_Optimizer {
 		$excludes       = $this->parse_list( $s['exclude_js'] );
 		$inline_excl    = $this->parse_list( $s['exclude_inline_js'] );
 
-		// Note: Delay JS is handled by filter_delay_script() via script_loader_tag filter.
+		// Note: Delay JS is now handled by delay_all_scripts() in the HTML pipeline.
 		// Defer JS is handled by filter_defer_script() via script_loader_tag filter.
-		// The ob_start pipeline only handles minification to avoid dual conventions.
 
 		// Process <script> tags.
 		$html = preg_replace_callback( '#<script\b([^>]*)>(.*?)</script>#si', function( $m ) use ( $s, $excludes, $inline_excl ) {
