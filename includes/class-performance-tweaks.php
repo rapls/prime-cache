@@ -20,7 +20,7 @@ class Prime_Cache_Performance_Tweaks {
 		// Restore local jQuery when theme/plugin loads it from external CDN.
 		// Eliminates external connection overhead (DNS+TCP+TLS ~600ms on mobile).
 		if ( ! empty( $this->s['local_jquery'] ) ) {
-			add_action( 'wp_enqueue_scripts', array( $this, 'restore_local_jquery' ), 1 );
+			add_action( 'wp_enqueue_scripts', array( $this, 'restore_local_jquery' ), 999 );
 		}
 
 		if ( $this->s['disable_wp_embed'] ) {
@@ -184,20 +184,29 @@ class Prime_Cache_Performance_Tweaks {
 			return;
 		}
 		$wp_scripts = wp_scripts();
+		$site       = site_url();
 
-		// Check jquery-core.
-		if ( ! empty( $wp_scripts->registered['jquery-core'] ) ) {
-			$src = $wp_scripts->registered['jquery-core']->src;
-			if ( $src && false === strpos( $src, site_url() ) && ( 0 === strpos( $src, '//' ) || 0 === strpos( $src, 'http' ) ) ) {
-				$wp_scripts->registered['jquery-core']->src = includes_url( 'js/jquery/jquery.min.js' );
+		// Handles to check: Cocoon may override 'jquery' directly or 'jquery-core'.
+		$jquery_handles = array(
+			'jquery'         => includes_url( 'js/jquery/jquery.min.js' ),
+			'jquery-core'    => includes_url( 'js/jquery/jquery.min.js' ),
+			'jquery-migrate' => includes_url( 'js/jquery/jquery-migrate.min.js' ),
+		);
+
+		foreach ( $jquery_handles as $handle => $local_src ) {
+			if ( empty( $wp_scripts->registered[ $handle ] ) ) {
+				continue;
 			}
-		}
-
-		// Check jquery-migrate.
-		if ( ! empty( $wp_scripts->registered['jquery-migrate'] ) ) {
-			$src = $wp_scripts->registered['jquery-migrate']->src;
-			if ( $src && false === strpos( $src, site_url() ) && ( 0 === strpos( $src, '//' ) || 0 === strpos( $src, 'http' ) ) ) {
-				$wp_scripts->registered['jquery-migrate']->src = includes_url( 'js/jquery/jquery-migrate.min.js' );
+			$src = $wp_scripts->registered[ $handle ]->src;
+			if ( ! $src ) {
+				continue;
+			}
+			// Check if src is external (starts with // or http and is not our site).
+			$is_external = ( 0 === strpos( $src, '//' ) || 0 === strpos( $src, 'http' ) )
+				&& false === strpos( $src, $site );
+			if ( $is_external ) {
+				$wp_scripts->registered[ $handle ]->src = $local_src;
+				$wp_scripts->registered[ $handle ]->ver = null; // use WP default version
 			}
 		}
 	}
