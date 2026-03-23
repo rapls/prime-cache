@@ -78,7 +78,6 @@ class Prime_Cache_Purge {
 
 		// ── WordPress core update ─────────────────────────────
 		if ( $s['purge_on_core_update'] ) {
-			add_action( '_core_updated_successfully', array( $this, 'purge_all' ) );
 			add_action( 'upgrader_process_complete', array( $this, 'on_upgrader_complete' ), 10, 2 );
 		}
 
@@ -107,8 +106,11 @@ class Prime_Cache_Purge {
 	// ── Post trash / delete ───────────────────────────────────
 
 	public function on_post_delete( $post_id ) {
+		if ( wp_is_post_revision( $post_id ) ) {
+			return;
+		}
 		$post = get_post( $post_id );
-		if ( ! $post ) {
+		if ( ! $post || 'auto-draft' === $post->post_status || 'attachment' === $post->post_type ) {
 			return;
 		}
 		$this->purge_post_and_related( $post_id );

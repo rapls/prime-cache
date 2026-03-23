@@ -105,8 +105,9 @@ class Prime_Cache_LazyLoad {
 					return $tag;
 				}
 
-				if ( preg_match( '#preload\s*=\s*["\'](?:auto|metadata)["\']#i', $tag ) ) {
-					$tag = preg_replace( '#preload\s*=\s*["\'](?:auto|metadata)["\']#i', 'preload="none"', $tag );
+				$replaced = preg_replace( '#preload\s*=\s*["\'](?:auto|metadata)["\']#i', 'preload="none"', $tag );
+				if ( $replaced !== $tag ) {
+					$tag = $replaced;
 				} elseif ( false === stripos( $tag, 'preload' ) ) {
 					$tag = preg_replace( '#^(<video)\b#i', '$1 preload="none"', $tag );
 				}

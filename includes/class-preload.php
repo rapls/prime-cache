@@ -492,15 +492,15 @@ class Prime_Cache_Preload {
 
 		$exclude_patterns = array( '/wp-admin', '/wp-login', '/cart', '/checkout', '#', 'mailto:', 'tel:', 'javascript:' );
 		$exclude_json = wp_json_encode( $exclude_patterns );
-		$site_url = esc_js( home_url() );
+		$site_url = trim( wp_json_encode( home_url() ), '"' );
 		?>
 		<script id="pc-preload-links">
 		(function(){
 			if(navigator.connection&&navigator.connection.saveData)return;
-			var done={},exc=<?php echo $exclude_json; ?>,rate=3,sent=0,queue=[],timer=null;
+			var done={},exc=<?php echo $exclude_json; ?>,rate=3,sent=0,queue=[],timer=null,origin=location.origin+'/';
 			function ok(u){
 				if(!u||done[u])return false;
-				if(u.indexOf('<?php echo $site_url; ?>')!==0&&u.indexOf(location.origin+'/')!==0)return false;
+				if(u.indexOf('<?php echo $site_url; ?>')!==0&&u.indexOf(origin)!==0)return false;
 				for(var i=0;i<exc.length;i++){if(u.indexOf(exc[i])!==-1)return false;}
 				return true;
 			}
