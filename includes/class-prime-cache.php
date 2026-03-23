@@ -112,11 +112,8 @@ class Prime_Cache {
 		$ac_result = Prime_Cache_Config::install_advanced_cache();
 		if ( ! $ac_result ) {
 			$owner = Prime_Cache_Config::get_advanced_cache_owner();
-			// Only warn if an external plugin owns the file.
-			// If the file is already ours, install may have failed due to
-			// permissions but the dropin is still functional — skip warning.
 			if ( 'external' === $owner ) {
-				$warnings[] = __( 'advanced-cache.php is managed by another plugin. Prime Cache page caching will not work until the other plugin is deactivated.', 'prime-cache' );
+				$warnings[] = __( 'advanced-cache.php is managed by another active plugin. Prime Cache page caching will not work until the other plugin is deactivated.', 'prime-cache' );
 			}
 		}
 
