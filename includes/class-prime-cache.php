@@ -482,6 +482,13 @@ class Prime_Cache {
 				if ( $preset_settings ) {
 					$current = prime_cache_get_settings();
 					$merged  = array_merge( $current, $preset_settings );
+
+					// Compute derived fields that sanitize_settings() normally calculates.
+					$ocd    = ! empty( $merged['optimize_css_delivery'] );
+					$method = isset( $merged['css_delivery_method'] ) ? $merged['css_delivery_method'] : 'remove_unused_css';
+					$merged['async_css']        = $ocd && 'async_css' === $method;
+					$merged['remove_unused_css'] = $ocd && 'remove_unused_css' === $method;
+
 					update_option( 'prime_cache_settings', $merged );
 					if ( ! is_multisite() ) {
 						Prime_Cache_Config::write_config_file( $merged );
