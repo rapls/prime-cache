@@ -461,11 +461,14 @@ class Prime_Cache_Preload {
 			return true;
 		}
 
-		// Detect CPU core count for load normalization.
-		$cores = 1;
-		if ( is_readable( '/proc/cpuinfo' ) ) {
-			$cpuinfo = file_get_contents( '/proc/cpuinfo' ); // phpcs:ignore
-			$cores   = max( 1, substr_count( $cpuinfo, 'processor' ) );
+		// Detect CPU core count for load normalization (memoized).
+		static $cores = null;
+		if ( null === $cores ) {
+			$cores = 1;
+			if ( is_readable( '/proc/cpuinfo' ) ) {
+				$cpuinfo = file_get_contents( '/proc/cpuinfo' ); // phpcs:ignore
+				$cores   = max( 1, substr_count( $cpuinfo, 'processor' ) );
+			}
 		}
 
 		// Weighted average: 50% 1min, 30% 5min, 20% 15min.
@@ -492,15 +495,16 @@ class Prime_Cache_Preload {
 
 		$exclude_patterns = array( '/wp-admin', '/wp-login', '/cart', '/checkout', '#', 'mailto:', 'tel:', 'javascript:' );
 		$exclude_json = wp_json_encode( $exclude_patterns );
-		$site_url = trim( wp_json_encode( home_url() ), '"' );
+		$site_url_json = wp_json_encode( home_url() );
+		$site_url_attr = esc_attr( home_url() );
 		?>
 		<script id="pc-preload-links">
 		(function(){
 			if(navigator.connection&&navigator.connection.saveData)return;
-			var done={},exc=<?php echo $exclude_json; ?>,rate=3,sent=0,queue=[],timer=null,origin=location.origin+'/';
+			var done={},exc=<?php echo $exclude_json; ?>,rate=3,sent=0,queue=[],timer=null,origin=location.origin+'/',siteUrl=<?php echo $site_url_json; ?>;
 			function ok(u){
 				if(!u||done[u])return false;
-				if(u.indexOf('<?php echo $site_url; ?>')!==0&&u.indexOf(origin)!==0)return false;
+				if(u.indexOf(siteUrl)!==0&&u.indexOf(origin)!==0)return false;
 				for(var i=0;i<exc.length;i++){if(u.indexOf(exc[i])!==-1)return false;}
 				return true;
 			}
@@ -529,7 +533,7 @@ class Prime_Cache_Preload {
 				var obs=new IntersectionObserver(function(entries){
 					entries.forEach(function(en){if(en.isIntersecting){var a=en.target;pf(a.href);obs.unobserve(a);}});
 				},{rootMargin:'200px'});
-				document.querySelectorAll('a[href^="<?php echo $site_url; ?>"],a[href^="/"]').forEach(function(a){if(a.getAttribute('href').indexOf('//')===0)return;obs.observe(a);});
+				document.querySelectorAll('a[href^="<?php echo $site_url_attr; ?>"],a[href^="/"]').forEach(function(a){if(a.getAttribute('href').indexOf('//')===0)return;obs.observe(a);});
 			}
 		})();
 		</script>

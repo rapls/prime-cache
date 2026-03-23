@@ -106,7 +106,7 @@ class Prime_Cache_LazyLoad {
 				}
 
 				$replaced = preg_replace( '#preload\s*=\s*["\'](?:auto|metadata)["\']#i', 'preload="none"', $tag );
-				if ( $replaced !== $tag ) {
+				if ( null !== $replaced && $replaced !== $tag ) {
 					$tag = $replaced;
 				} elseif ( false === stripos( $tag, 'preload' ) ) {
 					$tag = preg_replace( '#^(<video)\b#i', '$1 preload="none"', $tag );
