@@ -679,6 +679,7 @@ class Prime_Cache {
 			// Core — always on.
 			'cache_enabled'         => true,
 			'cache_mobile'          => true,
+			'cache_mobile_separate' => true, // required: delay JS is mobile-only
 			'gzip_compression'      => true,
 			'cache_footprint'       => false, // production default
 
