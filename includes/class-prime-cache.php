@@ -708,8 +708,9 @@ class Prime_Cache {
 
 			// Defer JS — Free feature, safe for all sites.
 			'defer_js'              => true,
-			'delay_js'              => false, // too risky for auto
-			'delay_js_safe_mode'    => true,
+			// Delay JS — enabled when Pro has critical CSS (prevents CLS).
+			'delay_js'              => $is_pro,
+			'delay_js_safe_mode'    => false, // delay all JS for maximum FCP improvement
 
 			// CSS delivery — async with auto critical CSS when Pro.
 			'optimize_css_delivery' => $is_pro,
