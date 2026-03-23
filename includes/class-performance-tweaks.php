@@ -17,6 +17,12 @@ class Prime_Cache_Performance_Tweaks {
 			add_action( 'wp_default_scripts', array( $this, 'remove_jquery_migrate' ) );
 		}
 
+		// Restore local jQuery when theme/plugin loads it from external CDN.
+		// Eliminates external connection overhead (DNS+TCP+TLS ~600ms on mobile).
+		if ( ! empty( $this->s['local_jquery'] ) ) {
+			add_action( 'wp_enqueue_scripts', array( $this, 'restore_local_jquery' ), 1 );
+		}
+
 		if ( $this->s['disable_wp_embed'] ) {
 			add_action( 'wp_footer', function() { wp_deregister_script( 'wp-embed' ); } );
 			add_action( 'init', function() {
@@ -163,6 +169,36 @@ class Prime_Cache_Performance_Tweaks {
 					wp_dequeue_script( 'wc-cart-fragments' );
 				}
 			}, 99 );
+		}
+	}
+
+	/**
+	 * Restore WordPress's bundled jQuery when a theme/plugin overrides it with a CDN URL.
+	 *
+	 * Cocoon and some themes replace jQuery with cdnjs.cloudflare.com versions.
+	 * External CDN adds ~600ms of connection overhead on mobile (DNS+TCP+TLS).
+	 * This restores the local copy which loads from the same origin — no extra connection.
+	 */
+	public function restore_local_jquery() {
+		if ( is_admin() ) {
+			return;
+		}
+		$wp_scripts = wp_scripts();
+
+		// Check jquery-core.
+		if ( ! empty( $wp_scripts->registered['jquery-core'] ) ) {
+			$src = $wp_scripts->registered['jquery-core']->src;
+			if ( $src && false === strpos( $src, site_url() ) && ( 0 === strpos( $src, '//' ) || 0 === strpos( $src, 'http' ) ) ) {
+				$wp_scripts->registered['jquery-core']->src = includes_url( 'js/jquery/jquery.min.js' );
+			}
+		}
+
+		// Check jquery-migrate.
+		if ( ! empty( $wp_scripts->registered['jquery-migrate'] ) ) {
+			$src = $wp_scripts->registered['jquery-migrate']->src;
+			if ( $src && false === strpos( $src, site_url() ) && ( 0 === strpos( $src, '//' ) || 0 === strpos( $src, 'http' ) ) ) {
+				$wp_scripts->registered['jquery-migrate']->src = includes_url( 'js/jquery/jquery-migrate.min.js' );
+			}
 		}
 	}
 

@@ -1014,6 +1014,7 @@ class Prime_Cache_Admin_Settings {
 				<span class="pc-card__h"><?php esc_html_e( 'Performance Tweaks', 'prime-cache' ); ?></span>
 				<?php
 				$tweaks = array(
+					array( 'local_jquery', __( 'Use Local jQuery', 'prime-cache' ), __( 'Restore WordPress bundled jQuery when the theme loads it from an external CDN (e.g. cdnjs.cloudflare.com). Eliminates external connection overhead (~600ms on mobile) by serving jQuery from the same origin.', 'prime-cache' ) ),
 					array( 'disable_jquery_migrate', __( 'Disable jQuery Migrate', 'prime-cache' ), __( 'Remove jquery-migrate.min.js from the frontend. Most modern jQuery code and plugins no longer need it. Saves ~10 KB per page.', 'prime-cache' ) ),
 					array( 'disable_wp_embed', __( 'Disable WP Embed', 'prime-cache' ), __( 'Remove wp-embed.min.js and oEmbed discovery links. Prevents other sites from embedding your content and removes ~6 KB of JavaScript.', 'prime-cache' ) ),
 					array( 'disable_dashicons', __( 'Disable Dashicons (Frontend)', 'prime-cache' ), __( 'Remove the Dashicons stylesheet for non-logged-in visitors. Saves ~46 KB. Icons remain available for logged-in users and the admin area.', 'prime-cache' ) ),

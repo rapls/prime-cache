@@ -703,6 +703,9 @@ class Prime_Cache {
 			'combine_css'           => ! $http2 && $is_pro,
 			'combine_js'            => ! $http2 && $is_pro,
 
+			// jQuery — restore local copy if theme uses CDN.
+			'local_jquery'          => true,
+
 			// Defer JS — Free feature, safe for all sites.
 			'defer_js'              => true,
 			'delay_js'              => false, // too risky for auto
