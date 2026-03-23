@@ -1025,6 +1025,7 @@ class Prime_Cache_Admin_Settings {
 					array( 'disable_block_css', __( 'Disable Gutenberg Block CSS', 'prime-cache' ), __( 'Remove wp-block-library, wp-block-library-theme, and WooCommerce block stylesheets. Use only if you are using the Classic Editor and not using any Gutenberg blocks.', 'prime-cache' ) ),
 					array( 'disable_google_fonts', __( 'Disable Google Fonts', 'prime-cache' ), __( 'Dequeue all Google Fonts (fonts.googleapis.com and fonts.bunny.net) loaded by themes and plugins. Use if you self-host fonts or do not need external fonts.', 'prime-cache' ) ),
 					array( 'disable_global_styles', __( 'Disable Global Styles (SVG)', 'prime-cache' ), __( 'Remove the global-styles inline CSS and SVG filters added by WordPress 6.1+. Saves ~2 KB of inline markup on every page.', 'prime-cache' ) ),
+					array( 'limit_dns_prefetch', __( 'Limit DNS Prefetch Hints', 'prime-cache' ), __( 'Limit dns-prefetch and preconnect hints to 4 entries. WordPress auto-adds hints for every external domain, which wastes mobile connections. PageSpeed recommends 4 or fewer.', 'prime-cache' ) ),
 				);
 				foreach ( $tweaks as $t ) :
 				?>

@@ -140,6 +140,13 @@ class Prime_Cache_Performance_Tweaks {
 			add_filter( 'wp_sitemaps_enabled', '__return_false' );
 		}
 
+		// Limit excessive dns-prefetch / preconnect hints.
+		// WordPress auto-adds dns-prefetch for every external script/style domain.
+		// PageSpeed recommends 4 or fewer preconnect hints.
+		if ( ! empty( $this->s['limit_dns_prefetch'] ) ) {
+			add_filter( 'wp_resource_hints', array( $this, 'limit_dns_prefetch_hints' ), 999, 2 );
+		}
+
 		// WooCommerce script optimization.
 		if ( $this->s['woo_disable_scripts'] ) {
 			add_action( 'wp_enqueue_scripts', array( $this, 'woo_optimize_scripts' ), 99 );
@@ -198,5 +205,22 @@ class Prime_Cache_Performance_Tweaks {
 		if ( function_exists( 'WC' ) && WC() && isset( WC()->structured_data ) ) {
 			remove_action( 'wp_head', array( WC()->structured_data, 'output_structured_data' ) );
 		}
+	}
+
+	/**
+	 * Limit the number of dns-prefetch / preconnect hints.
+	 *
+	 * WordPress auto-adds dns-prefetch for every external enqueued domain.
+	 * PageSpeed recommends 4 or fewer preconnect hints.
+	 */
+	public function limit_dns_prefetch_hints( $hints, $relation_type ) {
+		if ( 'dns-prefetch' !== $relation_type && 'preconnect' !== $relation_type ) {
+			return $hints;
+		}
+		$max = 4;
+		if ( count( $hints ) > $max ) {
+			$hints = array_slice( $hints, 0, $max );
+		}
+		return $hints;
 	}
 }

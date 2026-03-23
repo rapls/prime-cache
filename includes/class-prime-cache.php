@@ -716,10 +716,19 @@ class Prime_Cache {
 			// Inline small CSS.
 			'inline_small_css'      => $is_pro,
 
+			// Google Fonts — self-host when Pro (eliminates external CSS request).
+			'self_host_google_fonts' => $is_pro,
+			'google_fonts_display'   => true,
+
+			// Local Analytics — reduce external JS when Pro.
+			'local_analytics'       => $is_pro,
+
 			// Cleanup — safe tweaks.
 			'disable_emoji'         => true,
 			'disable_wp_embed'      => true,
+			'disable_oembed'        => true,
 			'remove_query_strings'  => true,
+			'limit_dns_prefetch'    => true,
 
 			// Block CSS — keep enabled for block themes.
 			'disable_block_css'     => ! $is_block_theme,
@@ -1093,7 +1102,7 @@ class Prime_Cache {
 		add_filter( 'wp_resource_hints', function( $urls, $relation_type ) {
 			if ( 'dns-prefetch' === $relation_type ) {
 				$urls = array_filter( $urls, function( $url ) {
-					return false === strpos( $url, 'https://s.w.org/images/core/emoji/' );
+					return false === strpos( $url, 's.w.org' );
 				} );
 			}
 			return $urls;
