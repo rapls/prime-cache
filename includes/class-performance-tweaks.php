@@ -141,10 +141,14 @@ class Prime_Cache_Performance_Tweaks {
 		}
 
 		// Limit excessive dns-prefetch / preconnect hints.
-		// WordPress auto-adds dns-prefetch for every external script/style domain.
-		// PageSpeed recommends 4 or fewer preconnect hints.
+		// Themes like Cocoon output <link rel="preconnect dns-prefetch"> directly
+		// in wp_head, bypassing wp_resource_hints. Process via HTML pipeline.
 		if ( ! empty( $this->s['limit_dns_prefetch'] ) ) {
 			add_filter( 'wp_resource_hints', array( $this, 'limit_dns_prefetch_hints' ), 999, 2 );
+			global $prime_cache_html_pipeline;
+			if ( $prime_cache_html_pipeline ) {
+				$prime_cache_html_pipeline->register( 'dns_limit', array( $this, 'limit_dns_prefetch_html' ), 5 );
+			}
 		}
 
 		// WooCommerce script optimization.
@@ -208,10 +212,7 @@ class Prime_Cache_Performance_Tweaks {
 	}
 
 	/**
-	 * Limit the number of dns-prefetch / preconnect hints.
-	 *
-	 * WordPress auto-adds dns-prefetch for every external enqueued domain.
-	 * PageSpeed recommends 4 or fewer preconnect hints.
+	 * Limit the number of dns-prefetch / preconnect hints (wp_resource_hints filter).
 	 */
 	public function limit_dns_prefetch_hints( $hints, $relation_type ) {
 		if ( 'dns-prefetch' !== $relation_type && 'preconnect' !== $relation_type ) {
@@ -222,5 +223,28 @@ class Prime_Cache_Performance_Tweaks {
 			$hints = array_slice( $hints, 0, $max );
 		}
 		return $hints;
+	}
+
+	/**
+	 * Limit dns-prefetch / preconnect link tags in HTML output.
+	 *
+	 * Handles themes (e.g. Cocoon) that output <link rel="preconnect dns-prefetch">
+	 * directly in wp_head, bypassing the wp_resource_hints filter.
+	 * Keeps only the first 4 and removes the rest.
+	 */
+	public function limit_dns_prefetch_html( $html ) {
+		$max   = 4;
+		$count = 0;
+
+		$html = preg_replace_callback(
+			'#<link\s[^>]*rel=["\'](?:dns-prefetch|preconnect|preconnect\s+dns-prefetch|dns-prefetch\s+preconnect)["\'][^>]*>#i',
+			function ( $m ) use ( $max, &$count ) {
+				$count++;
+				return $count > $max ? '' : $m[0];
+			},
+			$html
+		);
+
+		return $html;
 	}
 }
