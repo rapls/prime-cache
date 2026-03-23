@@ -794,8 +794,8 @@ class Prime_Cache_Admin_Settings {
 		(function(){
 			var vi=document.getElementById('pc-lv'),ui=document.getElementById('pc-lu'),hi=document.getElementById('pc-lh'),eq=document.getElementById('pc-leq'),cs=document.querySelectorAll('.pc-chip');
 			if(!vi||!ui||!hi)return;
-			var U=<?php echo wp_json_encode(__('Unlimited','prime-cache'));?>;
-			var uL={31536000:<?php echo wp_json_encode(__('year(s)','prime-cache'));?>,2592000:<?php echo wp_json_encode(__('month(s)','prime-cache'));?>,604800:<?php echo wp_json_encode(__('week(s)','prime-cache'));?>,86400:<?php echo wp_json_encode(__('day(s)','prime-cache'));?>,3600:<?php echo wp_json_encode(__('hour(s)','prime-cache'));?>,60:<?php echo wp_json_encode(__('minute(s)','prime-cache'));?>,1:<?php echo wp_json_encode(__('sec','prime-cache'));?>};
+			var U=<?php echo wp_json_encode(__('Unlimited','prime-cache'), JSON_HEX_TAG);?>;
+			var uL={31536000:<?php echo wp_json_encode(__('year(s)','prime-cache'), JSON_HEX_TAG);?>,2592000:<?php echo wp_json_encode(__('month(s)','prime-cache'), JSON_HEX_TAG);?>,604800:<?php echo wp_json_encode(__('week(s)','prime-cache'), JSON_HEX_TAG);?>,86400:<?php echo wp_json_encode(__('day(s)','prime-cache'), JSON_HEX_TAG);?>,3600:<?php echo wp_json_encode(__('hour(s)','prime-cache'), JSON_HEX_TAG);?>,60:<?php echo wp_json_encode(__('minute(s)','prime-cache'), JSON_HEX_TAG);?>,1:<?php echo wp_json_encode(__('sec','prime-cache'), JSON_HEX_TAG);?>};
 			function hum(s){if(s<=0)return'= '+U;var k=[31536000,2592000,604800,86400,3600,60,1];for(var i=0;i<k.length;i++){if(s>=k[i]&&s%k[i]===0)return'= '+(s/k[i])+' '+uL[k[i]];}return'= '+s+' '+uL[1];}
 			function C(){var s=(parseInt(vi.value,10)||0)*(parseInt(ui.value,10)||1);hi.value=s;eq.textContent=hum(s);cs.forEach(function(b){b.classList.toggle('is-on',parseInt(b.dataset.s,10)===s);});}
 			vi.addEventListener('input',C);ui.addEventListener('change',C);
@@ -820,11 +820,11 @@ class Prime_Cache_Admin_Settings {
 					hidEl.value=s;
 					if(eqEl){
 						if(s<=0) eqEl.textContent='(no-cache)';
-						else if(s>=31536000) eqEl.textContent='= '+(s/31536000)+' '+<?php echo wp_json_encode(__('year(s)','prime-cache'));?>;
-						else if(s>=2592000) eqEl.textContent='= '+Math.round(s/2592000*10)/10+' '+<?php echo wp_json_encode(__('month(s)','prime-cache'));?>;
-						else if(s>=86400) eqEl.textContent='= '+Math.round(s/86400*10)/10+' '+<?php echo wp_json_encode(__('day(s)','prime-cache'));?>;
-						else if(s>=3600) eqEl.textContent='= '+Math.round(s/3600*10)/10+' '+<?php echo wp_json_encode(__('hour(s)','prime-cache'));?>;
-						else eqEl.textContent='= '+s+' '+<?php echo wp_json_encode(__('sec','prime-cache'));?>;
+						else if(s>=31536000) eqEl.textContent='= '+(s/31536000)+' '+<?php echo wp_json_encode(__('year(s)','prime-cache'), JSON_HEX_TAG);?>;
+						else if(s>=2592000) eqEl.textContent='= '+Math.round(s/2592000*10)/10+' '+<?php echo wp_json_encode(__('month(s)','prime-cache'), JSON_HEX_TAG);?>;
+						else if(s>=86400) eqEl.textContent='= '+Math.round(s/86400*10)/10+' '+<?php echo wp_json_encode(__('day(s)','prime-cache'), JSON_HEX_TAG);?>;
+						else if(s>=3600) eqEl.textContent='= '+Math.round(s/3600*10)/10+' '+<?php echo wp_json_encode(__('hour(s)','prime-cache'), JSON_HEX_TAG);?>;
+						else eqEl.textContent='= '+s+' '+<?php echo wp_json_encode(__('sec','prime-cache'), JSON_HEX_TAG);?>;
 					}
 				}
 				valEl.addEventListener('input',upd);
@@ -1283,25 +1283,25 @@ class Prime_Cache_Admin_Settings {
 
 		<script>
 		(function(){
-			var nonce=<?php echo wp_json_encode( wp_create_nonce( 'pc_img_nonce' ) ); ?>;
+			var nonce=<?php echo wp_json_encode( wp_create_nonce( 'pc_img_nonce' ), JSON_HEX_TAG ); ?>;
 			var scanBtn=document.getElementById('pc-bulk-scan'),status=document.getElementById('pc-bulk-status'),bar=document.getElementById('pc-bulk-bar'),txt=document.getElementById('pc-bulk-text');
 			if(!scanBtn)return;
 
 			scanBtn.addEventListener('click',function(){
-				scanBtn.disabled=true;scanBtn.textContent=<?php echo wp_json_encode(__('Scanning...','prime-cache')); ?>;
+				scanBtn.disabled=true;scanBtn.textContent=<?php echo wp_json_encode(__('Scanning...','prime-cache'), JSON_HEX_TAG); ?>;
 				fetch(ajaxurl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'action=pc_img_scan&nonce='+nonce})
 				.then(function(r){return r.json();})
 				.then(function(d){
-					if(!d.success||!d.data.total){scanBtn.textContent=<?php echo wp_json_encode(__('No images to convert','prime-cache')); ?>;scanBtn.disabled=false;return;}
+					if(!d.success||!d.data.total){scanBtn.textContent=<?php echo wp_json_encode(__('No images to convert','prime-cache'), JSON_HEX_TAG); ?>;scanBtn.disabled=false;return;}
 					var items=d.data.items,total=items.length,done=0,saved=0,batch=5;
 					status.style.display='';txt.textContent='0 / '+total;
-					scanBtn.textContent=<?php echo wp_json_encode(__('Processing...','prime-cache')); ?>;
+					scanBtn.textContent=<?php echo wp_json_encode(__('Processing...','prime-cache'), JSON_HEX_TAG); ?>;
 
 					function next(){
 						if(done>=total){
 							bar.style.width='100%';
-							txt.textContent=<?php echo wp_json_encode(__('Done!','prime-cache')); ?>+' '+total+' '+<?php echo wp_json_encode(__('images processed.','prime-cache')); ?>;
-							scanBtn.textContent=<?php echo wp_json_encode(__('Scan Unconverted Images','prime-cache')); ?>;scanBtn.disabled=false;return;
+							txt.textContent=<?php echo wp_json_encode(__('Done!','prime-cache'), JSON_HEX_TAG); ?>+' '+total+' '+<?php echo wp_json_encode(__('images processed.','prime-cache'), JSON_HEX_TAG); ?>;
+							scanBtn.textContent=<?php echo wp_json_encode(__('Scan Unconverted Images','prime-cache'), JSON_HEX_TAG); ?>;scanBtn.disabled=false;return;
 						}
 						var chunk=items.slice(done,done+batch);
 						var fd=new FormData();fd.append('action','pc_img_batch');fd.append('nonce',nonce);
@@ -2058,7 +2058,7 @@ class Prime_Cache_Admin_Settings {
 				(function(){
 					var v=document.getElementById('pc-hsts-val'),u=document.getElementById('pc-hsts-unit'),h=document.getElementById('pc-hsts-hidden'),e=document.getElementById('pc-hsts-eq');
 					if(!v||!u||!h)return;
-					var uL={31536000:<?php echo wp_json_encode(__('year(s)','prime-cache'));?>,2592000:<?php echo wp_json_encode(__('month(s)','prime-cache'));?>,604800:<?php echo wp_json_encode(__('week(s)','prime-cache'));?>,86400:<?php echo wp_json_encode(__('day(s)','prime-cache'));?>,3600:<?php echo wp_json_encode(__('hour(s)','prime-cache'));?>,60:<?php echo wp_json_encode(__('minute(s)','prime-cache'));?>,1:<?php echo wp_json_encode(__('sec','prime-cache'));?>};
+					var uL={31536000:<?php echo wp_json_encode(__('year(s)','prime-cache'), JSON_HEX_TAG);?>,2592000:<?php echo wp_json_encode(__('month(s)','prime-cache'), JSON_HEX_TAG);?>,604800:<?php echo wp_json_encode(__('week(s)','prime-cache'), JSON_HEX_TAG);?>,86400:<?php echo wp_json_encode(__('day(s)','prime-cache'), JSON_HEX_TAG);?>,3600:<?php echo wp_json_encode(__('hour(s)','prime-cache'), JSON_HEX_TAG);?>,60:<?php echo wp_json_encode(__('minute(s)','prime-cache'), JSON_HEX_TAG);?>,1:<?php echo wp_json_encode(__('sec','prime-cache'), JSON_HEX_TAG);?>};
 					function calc(){var s=(parseInt(v.value,10)||0)*(parseInt(u.value,10)||1);h.value=s;if(s<=0){e.textContent='(0)';}else{var k=[31536000,2592000,604800,86400,3600,60,1];for(var i=0;i<k.length;i++){if(s>=k[i]&&s%k[i]===0){e.textContent='= '+(s/k[i])+' '+uL[k[i]];return;}}e.textContent='= '+s+' '+uL[1];}}
 					v.addEventListener('input',calc);u.addEventListener('change',calc);
 				})();
@@ -2091,7 +2091,7 @@ class Prime_Cache_Admin_Settings {
 			<p class="pc-help" style="margin:0 0 14px"><?php esc_html_e( 'Copy and paste this information when reporting bugs or requesting support.', 'prime-cache' ); ?></p>
 			<?php $this->render_system_info(); ?>
 			<div style="margin-top:12px">
-				<button type="button" class="pc-btn pc-btn--o pc-btn--sm" onclick="var t=document.getElementById('pc-sysinfo');t.select();document.execCommand('copy');this.textContent=<?php echo wp_json_encode( __( 'Copied!', 'prime-cache' ) ); ?>;setTimeout(function(){this.textContent=<?php echo wp_json_encode( __( 'Copy to Clipboard', 'prime-cache' ) ); ?>;}.bind(this),2000);">
+				<button type="button" class="pc-btn pc-btn--o pc-btn--sm" onclick="var t=document.getElementById('pc-sysinfo');t.select();document.execCommand('copy');this.textContent=<?php echo wp_json_encode( __( 'Copied!', 'prime-cache' ), JSON_HEX_TAG ); ?>;setTimeout(function(){this.textContent=<?php echo wp_json_encode( __( 'Copy to Clipboard', 'prime-cache' ), JSON_HEX_TAG ); ?>;}.bind(this),2000);">
 					<span class="dashicons dashicons-clipboard" style="font-size:15px;width:15px;height:15px;line-height:15px"></span><?php esc_html_e( 'Copy to Clipboard', 'prime-cache' ); ?>
 				</button>
 			</div>
