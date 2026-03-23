@@ -494,9 +494,8 @@ class Prime_Cache_Preload {
 		}
 
 		$exclude_patterns = array( '/wp-admin', '/wp-login', '/cart', '/checkout', '#', 'mailto:', 'tel:', 'javascript:' );
-		$exclude_json = wp_json_encode( $exclude_patterns );
-		$site_url_json = wp_json_encode( home_url() );
-		$site_url_attr = esc_attr( home_url() );
+		$exclude_json  = wp_json_encode( $exclude_patterns, JSON_HEX_TAG );
+		$site_url_json = wp_json_encode( home_url(), JSON_HEX_TAG );
 		?>
 		<script id="pc-preload-links">
 		(function(){
@@ -533,7 +532,7 @@ class Prime_Cache_Preload {
 				var obs=new IntersectionObserver(function(entries){
 					entries.forEach(function(en){if(en.isIntersecting){var a=en.target;pf(a.href);obs.unobserve(a);}});
 				},{rootMargin:'200px'});
-				document.querySelectorAll('a[href^="<?php echo $site_url_attr; ?>"],a[href^="/"]').forEach(function(a){if(a.getAttribute('href').indexOf('//')===0)return;obs.observe(a);});
+				document.querySelectorAll('a[href^="'+siteUrl+'"],a[href^="/"]').forEach(function(a){if(a.getAttribute('href').indexOf('//')===0)return;obs.observe(a);});
 			}
 		})();
 		</script>
@@ -789,7 +788,7 @@ class Prime_Cache_Preload {
 			),
 		);
 
-		$json = wp_json_encode( $rules, JSON_UNESCAPED_SLASHES );
+		$json = wp_json_encode( $rules, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG );
 		?>
 		<script type="speculationrules"><?php echo $json; // phpcs:ignore ?></script>
 		<?php
