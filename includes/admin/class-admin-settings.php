@@ -2091,7 +2091,7 @@ class Prime_Cache_Admin_Settings {
 			<p class="pc-help" style="margin:0 0 14px"><?php esc_html_e( 'Copy and paste this information when reporting bugs or requesting support.', 'prime-cache' ); ?></p>
 			<?php $this->render_system_info(); ?>
 			<div style="margin-top:12px">
-				<button type="button" class="pc-btn pc-btn--o pc-btn--sm" onclick="var t=document.getElementById('pc-sysinfo');t.select();document.execCommand('copy');this.textContent=<?php echo wp_json_encode( __( 'Copied!', 'prime-cache' ), JSON_HEX_TAG ); ?>;setTimeout(function(){this.textContent=<?php echo wp_json_encode( __( 'Copy to Clipboard', 'prime-cache' ), JSON_HEX_TAG ); ?>;}.bind(this),2000);">
+				<button type="button" class="pc-btn pc-btn--o pc-btn--sm" onclick="var t=document.getElementById('pc-sysinfo');t.select();document.execCommand('copy');this.textContent=<?php echo esc_attr( wp_json_encode( __( 'Copied!', 'prime-cache' ) ) ); ?>;setTimeout(function(){this.textContent=<?php echo esc_attr( wp_json_encode( __( 'Copy to Clipboard', 'prime-cache' ) ) ); ?>;}.bind(this),2000);">
 					<span class="dashicons dashicons-clipboard" style="font-size:15px;width:15px;height:15px;line-height:15px"></span><?php esc_html_e( 'Copy to Clipboard', 'prime-cache' ); ?>
 				</button>
 			</div>

@@ -51,10 +51,13 @@ foreach ( $config_paths as $config_path ) {
 			'',
 			$config_content
 		);
+		if ( null === $config_content ) {
+			break; // PCRE error — leave wp-config.php untouched.
+		}
 		$config_content = preg_replace( "#\n{3,}#", "\n\n", $config_content );
 		// Atomic write: temp file + rename.
 		$tempfile = $config_path . '.tmp.' . getmypid();
-		if ( false !== file_put_contents( $tempfile, $config_content ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		if ( null !== $config_content && false !== file_put_contents( $tempfile, $config_content ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 			if ( ! rename( $tempfile, $config_path ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
 				@unlink( $tempfile );
 			}
