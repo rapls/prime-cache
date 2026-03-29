@@ -448,15 +448,14 @@ ob_start( function ( $buffer ) {
 		if ( 0 === strpos( $_pc_rh_lower, 'set-cookie:' ) ) {
 			return $buffer;
 		}
-		// Respect Cache-Control: private, no-store, no-cache.
+		// Respect Cache-Control: private, no-store.
+		// Note: no-cache means "revalidate before use" — it does NOT prohibit
+		// server-side page caching. Plugins and themes commonly set no-cache
+		// as a default; only no-store and private genuinely prevent caching.
 		if ( 0 === strpos( $_pc_rh_lower, 'cache-control:' ) ) {
-			if ( preg_match( '#\b(private|no-store|no-cache)\b#i', $_pc_rh ) ) {
+			if ( preg_match( '#\b(private|no-store)\b#i', $_pc_rh ) ) {
 				return $buffer;
 			}
-		}
-		// Pragma: no-cache.
-		if ( 'pragma: no-cache' === $_pc_rh_lower ) {
-			return $buffer;
 		}
 		// Vary: * means uncacheable.
 		if ( preg_match( '#^vary:\s*\*\s*$#i', $_pc_rh ) ) {
