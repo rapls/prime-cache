@@ -102,58 +102,35 @@ class Prime_Cache {
 	 */
 	public function maybe_repair_setup() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			error_log( 'Prime Cache repair: skipped (no manage_options capability)' );
 			return;
 		}
 
-		error_log( 'Prime Cache repair: running checks...' );
-
 		$settings  = prime_cache_get_settings();
-		$needs_fix = false;
 
 		// 1. advanced-cache.php missing or not ours.
 		$owner = Prime_Cache_Config::get_advanced_cache_owner();
-		error_log( 'Prime Cache repair: advanced-cache owner = ' . $owner );
 		if ( 'ours' !== $owner ) {
-			$result = Prime_Cache_Config::install_advanced_cache();
-			error_log( 'Prime Cache repair: install_advanced_cache() = ' . ( $result ? 'OK' : 'FAILED' ) );
-			if ( $result ) {
-				$needs_fix = true;
-			}
+			Prime_Cache_Config::install_advanced_cache();
 		}
 
 		// 2. WP_CACHE not enabled in wp-config.php.
-		$wp_cache_ok = Prime_Cache_Config::verify_wp_cache_enabled();
-		error_log( 'Prime Cache repair: WP_CACHE verified = ' . ( $wp_cache_ok ? 'yes' : 'no' ) );
-		if ( ! $wp_cache_ok ) {
-			$result = Prime_Cache_Config::set_wp_cache( true );
-			error_log( 'Prime Cache repair: set_wp_cache(true) = ' . ( $result ? 'OK' : 'FAILED' ) );
-			if ( $result ) {
-				$needs_fix = true;
-			}
+		if ( ! Prime_Cache_Config::verify_wp_cache_enabled() ) {
+			Prime_Cache_Config::set_wp_cache( true );
 		}
 
 		// 3. Config file missing.
-		$config_dir  = PRIME_CACHE_CONFIG_DIR;
 		$install_seed = ABSPATH . '|' . DB_NAME . '|' . ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' );
 		$install_key  = substr( md5( $install_seed ), 0, 8 );
-		$config_file  = $config_dir . 'site-config-' . $install_key . '.php';
+		$config_file  = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $install_key . '.php';
 
-		error_log( 'Prime Cache repair: config_file = ' . $config_file . ' exists=' . ( file_exists( $config_file ) ? 'yes' : 'no' ) );
 		if ( ! file_exists( $config_file ) ) {
-			$result = Prime_Cache_Config::write_config_file( $settings );
-			error_log( 'Prime Cache repair: write_config_file() = ' . ( $result ? 'OK' : 'FAILED' ) );
-			if ( $result ) {
-				$needs_fix = true;
-			}
+			Prime_Cache_Config::write_config_file( $settings );
 		}
 
 		// 4. Cron not scheduled.
 		if ( ! wp_next_scheduled( 'prime_cache_cleanup_expired' ) ) {
 			wp_schedule_event( time(), 'hourly', 'prime_cache_cleanup_expired' );
 		}
-
-		error_log( 'Prime Cache repair: done. needs_fix=' . ( $needs_fix ? 'yes' : 'no' ) );
 	}
 
 	/**

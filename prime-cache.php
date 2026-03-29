@@ -10,8 +10,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-error_log( 'Prime Cache: FILE LOADED v1.8.5 — ' . __FILE__ );
-
 define( 'PRIME_CACHE_VERSION', '1.8.5' );
 define( 'PRIME_CACHE_FILE', __FILE__ );
 define( 'PRIME_CACHE_PATH', plugin_dir_path( __FILE__ ) );
