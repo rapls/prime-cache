@@ -14,9 +14,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-// Temporary debug: confirm dropin is executing on every request.
-header( 'X-PC-Dropin: loaded' );
-
 // Bail if another caching system is active.
 if ( defined( 'PRIME_CACHE_SERVING' ) ) {
 	return;
