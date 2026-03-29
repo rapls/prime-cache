@@ -2233,6 +2233,9 @@ class Prime_Cache_Admin_Settings {
 		$lines[] = '.htaccess Exists: ' . ( $htaccess_exists ? 'Yes' : 'No' );
 		$lines[] = '.htaccess Writable: ' . ( $htaccess_write ? 'Yes' : 'No' );
 		$lines[] = 'Advanced-cache.php: ' . ( file_exists( WP_CONTENT_DIR . '/advanced-cache.php' ) ? 'Installed' : 'Missing' );
+		$lines[] = 'Dropin Loaded: ' . ( defined( 'PRIME_CACHE_ADVANCED_CACHE' ) ? 'Yes' : 'No' );
+		$lines[] = 'WP_CACHE (runtime): ' . ( defined( 'WP_CACHE' ) && WP_CACHE ? 'true' : ( defined( 'WP_CACHE' ) ? 'false' : 'undefined' ) );
+		$lines[] = 'WP_CACHE (file): ' . ( Prime_Cache_Config::verify_wp_cache_enabled() ? 'true' : 'false/missing' );
 		$lines[] = 'Object-cache.php: ' . ( file_exists( WP_CONTENT_DIR . '/object-cache.php' ) ? 'Installed' : 'Missing' );
 		$lines[] = '';
 		$lines[] = '## Theme';
