@@ -179,9 +179,9 @@ class Prime_Cache_File_Optimizer {
 		$html = apply_filters( 'prime_cache_process_js', $html, $s );
 
 		// Delay JS: transform ALL script tags via HTML pipeline.
-		// Only on mobile — desktop FCP is already fast and delay causes CLS.
-		// Requires separate_mobile_cache for correct cache variant handling.
-		if ( $s['delay_js'] && wp_is_mobile() ) {
+		// Applied on both mobile and desktop — the delay loader patches jQuery
+		// and spoofs lifecycle events, so CLS is managed by Critical CSS.
+		if ( $s['delay_js'] ) {
 			$html = $this->delay_all_scripts( $html );
 		}
 
