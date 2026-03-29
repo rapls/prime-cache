@@ -29,7 +29,73 @@ class Prime_Cache_Htaccess {
 
 		$rules = self::build_rules( $settings );
 
-		return insert_with_markers( $htaccess, self::MARKER, $rules );
+		// Prime Cache rules MUST appear before # BEGIN WordPress in .htaccess.
+		// WordPress's rewrite rules convert permalink URLs to index.php with [L],
+		// which stops all further rule processing. If our rules come after,
+		// Apache never checks for cached files.
+		return self::insert_before_wordpress( $htaccess, self::MARKER, $rules );
+	}
+
+	/**
+	 * Insert rules BEFORE # BEGIN WordPress in .htaccess.
+	 *
+	 * WordPress's insert_with_markers() always appends after WordPress rules,
+	 * which prevents our rewrite rules from ever matching permalink URLs.
+	 *
+	 * @param string $htaccess Path to .htaccess file.
+	 * @param string $marker   Marker name.
+	 * @param array  $rules    Lines of rules.
+	 * @return bool
+	 */
+	private static function insert_before_wordpress( $htaccess, $marker, $rules ) {
+		if ( ! file_exists( $htaccess ) ) {
+			// No .htaccess yet — use standard insert_with_markers.
+			return insert_with_markers( $htaccess, $marker, $rules );
+		}
+
+		$content = file_get_contents( $htaccess ); // phpcs:ignore
+		if ( false === $content ) {
+			return false;
+		}
+
+		$begin_marker = '# BEGIN ' . $marker;
+		$end_marker   = '# END ' . $marker;
+		$begin_wp     = '# BEGIN WordPress';
+
+		// Build the new block.
+		$block_lines   = array();
+		$block_lines[] = $begin_marker;
+		foreach ( $rules as $line ) {
+			$block_lines[] = $line;
+		}
+		$block_lines[] = $end_marker;
+		$new_block     = implode( "\n", $block_lines ) . "\n";
+
+		// Remove existing Prime Cache block if present.
+		$pattern = '#\s*' . preg_quote( $begin_marker, '#' ) . '.*?' . preg_quote( $end_marker, '#' ) . '\s*#si';
+		$content = preg_replace( $pattern, "\n", $content );
+
+		// Insert before # BEGIN WordPress.
+		if ( false !== strpos( $content, $begin_wp ) ) {
+			$content = str_replace( $begin_wp, $new_block . "\n" . $begin_wp, $content );
+		} else {
+			// No WordPress block — prepend to file.
+			$content = $new_block . "\n" . $content;
+		}
+
+		// Clean up multiple blank lines.
+		$content = preg_replace( "#\n{3,}#", "\n\n", $content );
+
+		// Atomic write.
+		$tempfile = $htaccess . '.tmp.' . getmypid();
+		if ( false === file_put_contents( $tempfile, $content ) ) { // phpcs:ignore
+			return false;
+		}
+		if ( ! rename( $tempfile, $htaccess ) ) { // phpcs:ignore
+			@unlink( $tempfile );
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -43,7 +109,29 @@ class Prime_Cache_Htaccess {
 			return true;
 		}
 
-		return insert_with_markers( $htaccess, self::MARKER, array() );
+		$content = file_get_contents( $htaccess ); // phpcs:ignore
+		if ( false === $content ) {
+			return false;
+		}
+
+		$begin = '# BEGIN ' . self::MARKER;
+		$end   = '# END ' . self::MARKER;
+
+		// Remove block wherever it is (before or after WordPress rules).
+		$pattern = '#\s*' . preg_quote( $begin, '#' ) . '.*?' . preg_quote( $end, '#' ) . '\s*#si';
+		$content = preg_replace( $pattern, "\n", $content );
+		$content = preg_replace( "#\n{3,}#", "\n\n", $content );
+
+		// Atomic write.
+		$tempfile = $htaccess . '.tmp.' . getmypid();
+		if ( false === file_put_contents( $tempfile, $content ) ) { // phpcs:ignore
+			return false;
+		}
+		if ( ! rename( $tempfile, $htaccess ) ) { // phpcs:ignore
+			@unlink( $tempfile );
+			return false;
+		}
+		return true;
 	}
 
 	/**
