@@ -85,6 +85,63 @@ class Prime_Cache {
 
 		// Expired cache cleanup cron (handler only — scheduling done on activation).
 		add_action( 'prime_cache_cleanup_expired', array( $this, 'cleanup_expired_cache' ) );
+
+		// Self-heal: if the plugin is active but essential setup is missing
+		// (e.g. activation hook was interrupted), repair on the next admin page load.
+		if ( is_admin() && ! is_multisite() ) {
+			add_action( 'admin_init', array( $this, 'maybe_repair_setup' ) );
+		}
+	}
+
+	/**
+	 * Repair essential setup if missing (self-heal after interrupted activation).
+	 *
+	 * Checks once per request whether advanced-cache.php, WP_CACHE, and the
+	 * config file are in place. Only runs on admin pages so it never adds
+	 * latency to front-end requests.
+	 */
+	public function maybe_repair_setup() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$settings  = prime_cache_get_settings();
+		$needs_fix = false;
+
+		// 1. advanced-cache.php missing or not ours.
+		$owner = Prime_Cache_Config::get_advanced_cache_owner();
+		if ( 'ours' !== $owner ) {
+			$result = Prime_Cache_Config::install_advanced_cache();
+			if ( $result ) {
+				$needs_fix = true;
+			}
+		}
+
+		// 2. WP_CACHE not enabled in wp-config.php.
+		if ( ! Prime_Cache_Config::verify_wp_cache_enabled() ) {
+			$result = Prime_Cache_Config::set_wp_cache( true );
+			if ( $result ) {
+				$needs_fix = true;
+			}
+		}
+
+		// 3. Config file missing.
+		$config_dir  = PRIME_CACHE_CONFIG_DIR;
+		$install_seed = ABSPATH . '|' . DB_NAME . '|' . ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' );
+		$install_key  = substr( md5( $install_seed ), 0, 8 );
+		$config_file  = $config_dir . 'site-config-' . $install_key . '.php';
+
+		if ( ! file_exists( $config_file ) ) {
+			$result = Prime_Cache_Config::write_config_file( $settings );
+			if ( $result ) {
+				$needs_fix = true;
+			}
+		}
+
+		// 4. Cron not scheduled.
+		if ( ! wp_next_scheduled( 'prime_cache_cleanup_expired' ) ) {
+			wp_schedule_event( time(), 'hourly', 'prime_cache_cleanup_expired' );
+		}
 	}
 
 	/**
