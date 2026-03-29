@@ -178,6 +178,13 @@ class Prime_Cache_File_Optimizer {
 		// Pro hook: JS combine.
 		$html = apply_filters( 'prime_cache_process_js', $html, $s );
 
+		// Wrap inline jQuery scripts with DOMContentLoaded so jQuery can be deferred.
+		// Without this, deferred jQuery would break inline $(document).ready() calls
+		// that execute immediately after the script tag.
+		if ( $s['defer_js'] ) {
+			$html = $this->wrap_inline_jquery( $html );
+		}
+
 		// Delay JS: transform ALL script tags via HTML pipeline.
 		// Mobile only — desktop suffers CLS regression when scripts are delayed
 		// because layout-dependent JS (sliders, menus) runs late.
@@ -409,6 +416,44 @@ class Prime_Cache_File_Optimizer {
 	// ── Defer JS (filter-based, no ob_start) ────────────────
 
 	/**
+	 * Wrap inline scripts that depend on jQuery with DOMContentLoaded.
+	 *
+	 * When jQuery is deferred, inline scripts like $(document).ready() or
+	 * jQuery(...) that execute synchronously will fail because jQuery isn't
+	 * loaded yet. This wraps them so they wait for DOMContentLoaded, at which
+	 * point deferred jQuery has already executed.
+	 *
+	 * @param string $html Full HTML output.
+	 * @return string HTML with inline jQuery scripts wrapped.
+	 */
+	private function wrap_inline_jquery( $html ) {
+		return preg_replace_callback(
+			'#<script\b(?![^>]*\bsrc\b)[^>]*>(.*?)</script>#si',
+			function ( $m ) {
+				$code = $m[1];
+				$trimmed = trim( $code );
+				if ( '' === $trimmed ) {
+					return $m[0];
+				}
+				// Only wrap if it contains jQuery patterns.
+				if ( ! preg_match( '/\bjQuery\s*\(|\$\s*\(/', $code ) ) {
+					return $m[0];
+				}
+				// Skip if already wrapped in DOMContentLoaded or deferred.
+				if ( false !== stripos( $code, 'DOMContentLoaded' ) || false !== stripos( $code, 'addEventListener' ) ) {
+					return $m[0];
+				}
+				// Skip JSON-LD and other non-JS types.
+				if ( preg_match( '#type=["\'](?!text/javascript|module)[^"\']+["\']#i', $m[0] ) ) {
+					return $m[0];
+				}
+				return '<script>window.addEventListener("DOMContentLoaded",function(){' . $trimmed . '});</script>';
+			},
+			$html
+		);
+	}
+
+	/**
 	 * Add defer attribute to enqueued scripts via script_loader_tag filter.
 	 *
 	 * This approach avoids ob_start buffering entirely, which is critical
@@ -422,15 +467,10 @@ class Prime_Cache_File_Optimizer {
 	 */
 	/**
 	 * Scripts that must NEVER be deferred.
-	 * jQuery and jQuery Migrate must load synchronously because
-	 * Cocoon and many plugins use inline jQuery code ($(document).ready etc.)
-	 * that executes immediately after the script tag.
+	 * jQuery is no longer excluded — inline jQuery code is wrapped with
+	 * DOMContentLoaded by wrap_inline_jquery() to allow safe deferral.
 	 */
-	private static $defer_never = array(
-		'jquery-core',
-		'jquery',
-		'jquery-migrate',
-	);
+	private static $defer_never = array();
 
 	public function filter_defer_script( $tag, $handle, $src ) {
 		// Skip if already has defer or async.
