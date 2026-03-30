@@ -44,17 +44,22 @@ class Prime_Cache_LazyLoad {
 			return $html;
 		}
 
-		$excludes = $this->parse_list( $this->settings['lazyload_exclude'] );
-		$count    = 0;
+		$excludes   = $this->parse_list( $this->settings['lazyload_exclude'] );
+		$count      = 0;
+		$skip_first = (int) $this->settings['lazyload_skip_first'];
 
 		// Images.
 		if ( $this->settings['lazyload_images'] ) {
-			$html = preg_replace_callback( '#<img\s[^>]+>#i', function( $m ) use ( $excludes, &$count ) {
+			$html = preg_replace_callback( '#<img\s[^>]+>#i', function( $m ) use ( $excludes, &$count, $skip_first ) {
 				$tag = $m[0];
 				$count++;
 
-				// Skip first 2 images (likely above the fold).
-				if ( $count <= 2 ) {
+				// Skip first N images (likely above the fold).
+				if ( $count <= $skip_first ) {
+					// Add fetchpriority="high" to the very first image (LCP candidate).
+					if ( 1 === $count && false === stripos( $tag, 'fetchpriority' ) ) {
+						$tag = preg_replace( '#^(<img)\b#i', '$1 fetchpriority="high"', $tag );
+					}
 					return $tag;
 				}
 

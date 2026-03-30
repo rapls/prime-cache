@@ -258,16 +258,77 @@ class Prime_Cache_Performance_Tweaks {
 
 	/**
 	 * Limit the number of dns-prefetch / preconnect hints (wp_resource_hints filter).
+	 *
+	 * - Removes self-origin hints (preconnect to own domain is useless).
+	 * - For dns-prefetch: drops origins that already have a preconnect hint
+	 *   (preconnect implies dns-prefetch, so keeping both is redundant).
+	 * - Caps total hints at 4 per relation type.
 	 */
 	public function limit_dns_prefetch_hints( $hints, $relation_type ) {
 		if ( 'dns-prefetch' !== $relation_type && 'preconnect' !== $relation_type ) {
 			return $hints;
 		}
-		$max = 4;
+
+		$site_host = wp_parse_url( home_url(), PHP_URL_HOST );
+		$max       = 4;
+
+		// Remove self-origin hints.
+		$hints = array_filter( $hints, function ( $hint ) use ( $site_host ) {
+			$url  = is_array( $hint ) ? ( $hint['href'] ?? '' ) : $hint;
+			$host = wp_parse_url( $url, PHP_URL_HOST );
+			return $host && $host !== $site_host;
+		} );
+
+		// For dns-prefetch, drop origins that already have a preconnect hint.
+		if ( 'dns-prefetch' === $relation_type ) {
+			$preconnect_origins = $this->get_preconnect_origins();
+			$hints = array_filter( $hints, function ( $hint ) use ( $preconnect_origins ) {
+				$url  = is_array( $hint ) ? ( $hint['href'] ?? '' ) : $hint;
+				$host = wp_parse_url( $url, PHP_URL_HOST );
+				return ! $host || ! isset( $preconnect_origins[ $host ] );
+			} );
+		}
+
+		// Re-index and cap.
+		$hints = array_values( $hints );
 		if ( count( $hints ) > $max ) {
 			$hints = array_slice( $hints, 0, $max );
 		}
+
 		return $hints;
+	}
+
+	/**
+	 * Collect origins that have preconnect hints registered via wp_resource_hints.
+	 *
+	 * Temporarily unhooks our own filter to avoid recursion when calling
+	 * apply_filters( 'wp_resource_hints', ... ).
+	 *
+	 * @return array<string, true> Map of hostnames.
+	 */
+	private function get_preconnect_origins() {
+		static $origins = null;
+		if ( null !== $origins ) {
+			return $origins;
+		}
+		$origins = array();
+
+		// Temporarily remove our filter to prevent recursion.
+		remove_filter( 'wp_resource_hints', array( $this, 'limit_dns_prefetch_hints' ), 999 );
+
+		$preconnect_hints = apply_filters( 'wp_resource_hints', array(), 'preconnect' );
+
+		// Re-add our filter.
+		add_filter( 'wp_resource_hints', array( $this, 'limit_dns_prefetch_hints' ), 999, 2 );
+
+		foreach ( $preconnect_hints as $hint ) {
+			$url  = is_array( $hint ) ? ( $hint['href'] ?? '' ) : $hint;
+			$host = wp_parse_url( $url, PHP_URL_HOST );
+			if ( $host ) {
+				$origins[ $host ] = true;
+			}
+		}
+		return $origins;
 	}
 
 	/**
@@ -275,21 +336,68 @@ class Prime_Cache_Performance_Tweaks {
 	 *
 	 * Handles themes (e.g. Cocoon) that output <link rel="preconnect dns-prefetch">
 	 * directly in wp_head, bypassing the wp_resource_hints filter.
-	 * Keeps only the first 4 and removes the rest.
+	 *
+	 * Processing:
+	 * 1. Remove self-origin hints.
+	 * 2. Remove dns-prefetch tags whose origin already has a preconnect tag.
+	 * 3. Cap remaining hints at 4.
 	 */
 	public function limit_dns_prefetch_html( $html ) {
-		$max   = 4;
-		$count = 0;
+		$max       = 4;
+		$site_host = wp_parse_url( home_url(), PHP_URL_HOST );
+		$pattern   = '#<link\s[^>]*rel=["\'](?:dns-prefetch|preconnect|preconnect\s+dns-prefetch|dns-prefetch\s+preconnect)["\'][^>]*>#i';
 
-		$html = preg_replace_callback(
-			'#<link\s[^>]*rel=["\'](?:dns-prefetch|preconnect|preconnect\s+dns-prefetch|dns-prefetch\s+preconnect)["\'][^>]*>#i',
-			function ( $m ) use ( $max, &$count ) {
+		// First pass: collect all hint tags and identify preconnect origins.
+		$preconnect_origins = array();
+		if ( preg_match_all( $pattern, $html, $matches ) ) {
+			foreach ( $matches[0] as $tag ) {
+				if ( preg_match( '/rel=["\'][^"\']*preconnect[^"\']*["\']/', $tag ) ) {
+					$origin = $this->extract_href_host( $tag );
+					if ( $origin ) {
+						$preconnect_origins[ $origin ] = true;
+					}
+				}
+			}
+		}
+
+		// Second pass: filter tags.
+		$count = 0;
+		$html  = preg_replace_callback(
+			$pattern,
+			function ( $m ) use ( $max, &$count, $site_host, $preconnect_origins ) {
+				$tag    = $m[0];
+				$origin = $this->extract_href_host( $tag );
+
+				// Remove self-origin hints.
+				if ( $origin && $origin === $site_host ) {
+					return '';
+				}
+
+				// Remove dns-prefetch-only tags when a preconnect for the same origin exists.
+				$is_preconnect = (bool) preg_match( '/rel=["\'][^"\']*preconnect[^"\']*["\']/', $tag );
+				if ( ! $is_preconnect && $origin && isset( $preconnect_origins[ $origin ] ) ) {
+					return '';
+				}
+
 				$count++;
-				return $count > $max ? '' : $m[0];
+				return $count > $max ? '' : $tag;
 			},
 			$html
 		);
 
 		return $html;
+	}
+
+	/**
+	 * Extract the hostname from a link tag's href attribute.
+	 *
+	 * @param string $tag HTML link tag.
+	 * @return string|null Hostname or null.
+	 */
+	private function extract_href_host( $tag ) {
+		if ( preg_match( '/href=["\']([^"\']+)["\']/', $tag, $m ) ) {
+			return wp_parse_url( $m[1], PHP_URL_HOST );
+		}
+		return null;
 	}
 }
