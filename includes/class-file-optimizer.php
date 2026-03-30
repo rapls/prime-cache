@@ -167,6 +167,11 @@ class Prime_Cache_File_Optimizer {
 			$html = $this->process_css( $html );
 		}
 
+		// Make Google Fonts CSS non-render-blocking (Free feature).
+		// Font CSS is never above-fold critical — text renders with fallback font
+		// via font-display: swap, then swaps when font loads.
+		$html = $this->async_google_fonts( $html );
+
 		// Pro hook: CSS combine, async, critical CSS.
 		$html = apply_filters( 'prime_cache_process_css', $html, $s );
 
@@ -411,6 +416,39 @@ class Prime_Cache_File_Optimizer {
 			}
 			return $m[0];
 		}, $css );
+	}
+
+	// ── Google Fonts Async ──────────────────────────────────
+
+	/**
+	 * Make Google Fonts <link> tags non-render-blocking.
+	 *
+	 * Uses media="print" onload="this.media='all'" pattern.
+	 * Also adds display=swap to the URL if not already present.
+	 *
+	 * @param string $html Full HTML.
+	 * @return string HTML with async Google Fonts.
+	 */
+	private function async_google_fonts( $html ) {
+		$pattern = '#<link\s[^>]*href=["\'](?:https?:)?//fonts\.googleapis\.com/css2?\?[^"\']+["\'][^>]*/?>#i';
+
+		return preg_replace_callback( $pattern, function ( $m ) {
+			$tag = $m[0];
+			// Skip if already async.
+			if ( false !== strpos( $tag, 'media="print"' ) ) {
+				return $tag;
+			}
+			// Add display=swap if missing.
+			if ( false === strpos( $tag, 'display=' ) ) {
+				$tag = preg_replace( '#(href=["\'][^"\']+)(["\'])#i', '$1&display=swap$2', $tag );
+			}
+			// Remove existing media attribute.
+			$tag = preg_replace( '#\s*media=["\'][^"\']*["\']#i', '', $tag );
+			// Add async loading pattern.
+			$tag = preg_replace( '#(/?\s*>)$#', ' media="print" onload="this.media=\'all\'"$1', $tag );
+			// Add noscript fallback.
+			return $tag . '<noscript>' . $m[0] . '</noscript>';
+		}, $html );
 	}
 
 	// ── Defer JS (filter-based, no ob_start) ────────────────

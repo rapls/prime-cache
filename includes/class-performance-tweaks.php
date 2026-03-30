@@ -259,10 +259,9 @@ class Prime_Cache_Performance_Tweaks {
 	/**
 	 * Limit the number of dns-prefetch / preconnect hints (wp_resource_hints filter).
 	 *
-	 * - Removes self-origin hints (preconnect to own domain is useless).
-	 * - For dns-prefetch: drops origins that already have a preconnect hint
-	 *   (preconnect implies dns-prefetch, so keeping both is redundant).
-	 * - Caps total hints at 4 per relation type.
+	 * Removes self-origin hints and caps at 4 per relation type.
+	 * Duplicate consolidation (dns-prefetch vs preconnect) is handled by the
+	 * HTML pipeline pass which sees the final rendered output.
 	 */
 	public function limit_dns_prefetch_hints( $hints, $relation_type ) {
 		if ( 'dns-prefetch' !== $relation_type && 'preconnect' !== $relation_type ) {
@@ -270,65 +269,21 @@ class Prime_Cache_Performance_Tweaks {
 		}
 
 		$site_host = wp_parse_url( home_url(), PHP_URL_HOST );
-		$max       = 4;
 
 		// Remove self-origin hints.
 		$hints = array_filter( $hints, function ( $hint ) use ( $site_host ) {
 			$url  = is_array( $hint ) ? ( $hint['href'] ?? '' ) : $hint;
 			$host = wp_parse_url( $url, PHP_URL_HOST );
-			return $host && $host !== $site_host;
+			return ! $host || $host !== $site_host;
 		} );
 
-		// For dns-prefetch, drop origins that already have a preconnect hint.
-		if ( 'dns-prefetch' === $relation_type ) {
-			$preconnect_origins = $this->get_preconnect_origins();
-			$hints = array_filter( $hints, function ( $hint ) use ( $preconnect_origins ) {
-				$url  = is_array( $hint ) ? ( $hint['href'] ?? '' ) : $hint;
-				$host = wp_parse_url( $url, PHP_URL_HOST );
-				return ! $host || ! isset( $preconnect_origins[ $host ] );
-			} );
-		}
-
-		// Re-index and cap.
+		// Re-index and cap at 4.
 		$hints = array_values( $hints );
-		if ( count( $hints ) > $max ) {
-			$hints = array_slice( $hints, 0, $max );
+		if ( count( $hints ) > 4 ) {
+			$hints = array_slice( $hints, 0, 4 );
 		}
 
 		return $hints;
-	}
-
-	/**
-	 * Collect origins that have preconnect hints registered via wp_resource_hints.
-	 *
-	 * Temporarily unhooks our own filter to avoid recursion when calling
-	 * apply_filters( 'wp_resource_hints', ... ).
-	 *
-	 * @return array<string, true> Map of hostnames.
-	 */
-	private function get_preconnect_origins() {
-		static $origins = null;
-		if ( null !== $origins ) {
-			return $origins;
-		}
-		$origins = array();
-
-		// Temporarily remove our filter to prevent recursion.
-		remove_filter( 'wp_resource_hints', array( $this, 'limit_dns_prefetch_hints' ), 999 );
-
-		$preconnect_hints = apply_filters( 'wp_resource_hints', array(), 'preconnect' );
-
-		// Re-add our filter.
-		add_filter( 'wp_resource_hints', array( $this, 'limit_dns_prefetch_hints' ), 999, 2 );
-
-		foreach ( $preconnect_hints as $hint ) {
-			$url  = is_array( $hint ) ? ( $hint['href'] ?? '' ) : $hint;
-			$host = wp_parse_url( $url, PHP_URL_HOST );
-			if ( $host ) {
-				$origins[ $host ] = true;
-			}
-		}
-		return $origins;
 	}
 
 	/**
