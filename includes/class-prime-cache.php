@@ -78,6 +78,8 @@ class Prime_Cache {
 			$self->maybe_handle_actions();
 		} );
 
+		add_filter( 'plugin_action_links_' . plugin_basename( PRIME_CACHE_FILE ), array( $this, 'plugin_action_links' ) );
+
 		add_action( 'admin_init', array( $this, 'handle_stats_reset' ) );
 		add_action( 'admin_init', array( $this, 'handle_export' ) );
 		add_action( 'admin_init', array( $this, 'handle_import' ) );
@@ -242,6 +244,19 @@ class Prime_Cache {
 	 *
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar instance.
 	 */
+
+	/**
+	 * Add action links on the Plugins list page.
+	 */
+	public function plugin_action_links( $links ) {
+		$settings = '<a href="' . esc_url( admin_url( 'admin.php?page=prime-cache' ) ) . '">' . __( 'Settings', 'prime-cache' ) . '</a>';
+		array_unshift( $links, $settings );
+		if ( ! prime_cache_is_pro() ) {
+			$links['go_pro'] = '<a href="https://raplsworks.com/prime-cache-pro/" target="_blank" style="color:#6366f1;font-weight:700">' . __( 'Get Pro', 'prime-cache' ) . '</a>';
+		}
+		return $links;
+	}
+
 	public function admin_bar_menu( $wp_admin_bar ) {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;

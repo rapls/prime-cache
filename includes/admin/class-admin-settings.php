@@ -443,6 +443,11 @@ class Prime_Cache_Admin_Settings {
 						<span class="dashicons <?php echo esc_attr( $t[0] ); ?>"></span><?php echo esc_html( $t[1] ); ?>
 					</a>
 					<?php endforeach; ?>
+				<?php if ( ! prime_cache_is_pro() ) : ?>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=prime-cache&tab=upgrade' ) ); ?>" class="pc-nav__item pc-nav__upgrade<?php echo 'upgrade' === $tab ? ' pc-nav__item--on' : ''; ?>">
+					<span class="dashicons dashicons-star-filled"></span><?php esc_html_e( 'Go Pro', 'prime-cache' ); ?>
+				</a>
+				<?php endif; ?>
 				</nav>
 				<div class="pc-side__foot">
 					<?php $toggle_url = wp_nonce_url( admin_url( 'admin.php?pc_action=toggle_cache&tab=' . $tab ), 'prime_cache_admin_action' ); ?>
@@ -469,10 +474,70 @@ class Prime_Cache_Admin_Settings {
 					case 'exclusions':    $this->tab_exclusions( $settings ); break;
 					case 'tools':         $this->tab_tools( $settings ); break;
 					case 'dashboard':     $this->tab_dashboard( $settings ); break;
+					case 'upgrade':       $this->tab_upgrade(); break;
 					default:              $this->tab_page( $settings, $on ); break;
 				}
 				?>
 			</main>
+		</div>
+		<?php
+	}
+
+	/* ── tab: upgrade (Go Pro) ───────────────────────────── */
+
+	private function tab_upgrade() {
+		$url = 'https://raplsworks.com/prime-cache-pro/';
+		?>
+		<h2 class="pc-title"><?php esc_html_e( 'Prime Cache Pro', 'prime-cache' ); ?></h2>
+		<p style="font-size:15px;color:#475569;margin:0 0 24px;max-width:640px"><?php esc_html_e( 'Unlock the full potential of your site with advanced performance optimization features.', 'prime-cache' ); ?></p>
+		<a href="<?php echo esc_url( $url ); ?>" class="pc-btn pc-btn--p" target="_blank" rel="noopener"><?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
+
+		<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px">
+
+		<div class="pc-card">
+			<span class="pc-card__h"><span class="dashicons dashicons-database" style="margin-right:6px;color:#6366f1"></span><?php esc_html_e( 'Object Cache', 'prime-cache' ); ?></span>
+			<p style="font-size:13px;color:#64748b;line-height:1.7;margin:0"><?php esc_html_e( 'Persistent object caching with Redis, Memcached, or APCu. Dramatically reduces database queries and speeds up dynamic pages.', 'prime-cache' ); ?></p>
+		</div>
+
+		<div class="pc-card">
+			<span class="pc-card__h"><span class="dashicons dashicons-format-image" style="margin-right:6px;color:#6366f1"></span><?php esc_html_e( 'WebP & AVIF Conversion', 'prime-cache' ); ?></span>
+			<p style="font-size:13px;color:#64748b;line-height:1.7;margin:0"><?php esc_html_e( 'Auto-convert images to modern formats on upload. Bulk optimize your entire media library. Reduce image sizes by 25-80%.', 'prime-cache' ); ?></p>
+		</div>
+
+		<div class="pc-card">
+			<span class="pc-card__h"><span class="dashicons dashicons-editor-code" style="margin-right:6px;color:#6366f1"></span><?php esc_html_e( 'Advanced CSS & JS', 'prime-cache' ); ?></span>
+			<p style="font-size:13px;color:#64748b;line-height:1.7;margin:0"><?php esc_html_e( 'Combine CSS/JS files, Remove Unused CSS, auto-generate Critical CSS, Optimize CSS Delivery, and host Google Analytics locally.', 'prime-cache' ); ?></p>
+		</div>
+
+		<div class="pc-card">
+			<span class="pc-card__h"><span class="dashicons dashicons-admin-tools" style="margin-right:6px;color:#6366f1"></span><?php esc_html_e( 'Database Optimization', 'prime-cache' ); ?></span>
+			<p style="font-size:13px;color:#64748b;line-height:1.7;margin:0"><?php esc_html_e( 'Clean up revisions, drafts, spam comments, expired transients, and optimize tables. Schedule automatic cleanup.', 'prime-cache' ); ?></p>
+		</div>
+
+		<div class="pc-card">
+			<span class="pc-card__h"><span class="dashicons dashicons-heart" style="margin-right:6px;color:#6366f1"></span><?php esc_html_e( 'Heartbeat Control', 'prime-cache' ); ?></span>
+			<p style="font-size:13px;color:#64748b;line-height:1.7;margin:0"><?php esc_html_e( 'Control the WordPress Heartbeat API per location (frontend, admin, editor). Reduce server load by disabling or throttling.', 'prime-cache' ); ?></p>
+		</div>
+
+		<div class="pc-card">
+			<span class="pc-card__h"><span class="dashicons dashicons-performance" style="margin-right:6px;color:#6366f1"></span><?php esc_html_e( 'Advanced Preloading', 'prime-cache' ); ?></span>
+			<p style="font-size:13px;color:#64748b;line-height:1.7;margin:0"><?php esc_html_e( 'Sitemap preloading, Speculation Rules API, font preloading, LCP optimization, DNS prefetch, and preconnect.', 'prime-cache' ); ?></p>
+		</div>
+
+		<div class="pc-card">
+			<span class="pc-card__h"><span class="dashicons dashicons-cloud" style="margin-right:6px;color:#6366f1"></span><?php esc_html_e( 'Varnish, Sucuri & Cloudflare', 'prime-cache' ); ?></span>
+			<p style="font-size:13px;color:#64748b;line-height:1.7;margin:0"><?php esc_html_e( 'Automatic cache sync with Varnish reverse proxies, Sucuri firewalls, and Cloudflare CDN zones when content changes.', 'prime-cache' ); ?></p>
+		</div>
+
+		<div class="pc-card">
+			<span class="pc-card__h"><span class="dashicons dashicons-images-alt2" style="margin-right:6px;color:#6366f1"></span><?php esc_html_e( 'YouTube & Media', 'prime-cache' ); ?></span>
+			<p style="font-size:13px;color:#64748b;line-height:1.7;margin:0"><?php esc_html_e( 'Replace YouTube iframes with lightweight thumbnails. Save 500KB-1MB per embed on initial page load.', 'prime-cache' ); ?></p>
+		</div>
+
+		</div>
+
+		<div style="margin-top:28px;text-align:center">
+			<a href="<?php echo esc_url( $url ); ?>" class="pc-btn pc-btn--p" target="_blank" rel="noopener"><?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
 		</div>
 		<?php
 	}
@@ -628,6 +693,13 @@ class Prime_Cache_Admin_Settings {
 				<?php endforeach; ?>
 			</div>
 		</div>
+		<?php if ( ! prime_cache_is_pro() ) : ?>
+		<div class="pc-card pc-upsell">
+			<span class="pc-card__h"><?php esc_html_e( 'Want more speed?', 'prime-cache' ); ?></span>
+			<p><?php esc_html_e( 'You\'re using Prime Cache Free. Upgrade to Pro for Object Cache, WebP/AVIF conversion, Remove Unused CSS, database optimization, and 30+ additional features.', 'prime-cache' ); ?></p>
+			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Learn More', 'prime-cache' ); ?> &rarr;</a>
+		</div>
+		<?php endif; ?>
 		<?php
 	}
 
@@ -790,6 +862,13 @@ class Prime_Cache_Admin_Settings {
 			});
 		})();
 		</script>
+		<?php if ( ! prime_cache_is_pro() ) : ?>
+		<div class="pc-card pc-upsell">
+			<span class="pc-card__h"><?php esc_html_e( 'Want more speed?', 'prime-cache' ); ?></span>
+			<p><?php esc_html_e( 'Prime Cache Pro adds Varnish cache purging and Sucuri firewall sync for enterprise hosting environments.', 'prime-cache' ); ?></p>
+			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Learn More', 'prime-cache' ); ?> &rarr;</a>
+		</div>
+		<?php endif; ?>
 		<?php
 	}
 
@@ -1022,6 +1101,13 @@ class Prime_Cache_Admin_Settings {
 			}
 		})();
 		</script>
+		<?php if ( ! prime_cache_is_pro() ) : ?>
+		<div class="pc-card pc-upsell">
+			<span class="pc-card__h"><?php esc_html_e( 'Want more speed?', 'prime-cache' ); ?></span>
+			<p><?php esc_html_e( 'Prime Cache Pro adds Combine CSS/JS, Remove Unused CSS, Critical CSS generation, Async CSS Delivery, and local Google Analytics hosting.', 'prime-cache' ); ?></p>
+			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Learn More', 'prime-cache' ); ?> &rarr;</a>
+		</div>
+		<?php endif; ?>
 		<?php
 	}
 
@@ -1080,6 +1166,13 @@ class Prime_Cache_Admin_Settings {
 
 			<div class="pc-actions"><?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?></div>
 		</form>
+		<?php if ( ! prime_cache_is_pro() ) : ?>
+		<div class="pc-card pc-upsell">
+			<span class="pc-card__h"><?php esc_html_e( 'Want more speed?', 'prime-cache' ); ?></span>
+			<p><?php esc_html_e( 'Prime Cache Pro adds WebP and AVIF image conversion, bulk media library optimization, and YouTube thumbnail replacement.', 'prime-cache' ); ?></p>
+			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Learn More', 'prime-cache' ); ?> &rarr;</a>
+		</div>
+		<?php endif; ?>
 		<?php
 	}
 
@@ -1216,6 +1309,13 @@ class Prime_Cache_Admin_Settings {
 
 			<div class="pc-actions"><?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?></div>
 		</form>
+		<?php if ( ! prime_cache_is_pro() ) : ?>
+		<div class="pc-card pc-upsell">
+			<span class="pc-card__h"><?php esc_html_e( 'Want more speed?', 'prime-cache' ); ?></span>
+			<p><?php esc_html_e( 'Prime Cache Pro adds Sitemap Preloading, Speculation Rules API, Font Preloading, LCP Optimization, DNS Prefetch, and Preconnect.', 'prime-cache' ); ?></p>
+			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Learn More', 'prime-cache' ); ?> &rarr;</a>
+		</div>
+		<?php endif; ?>
 		<?php
 	}
 
@@ -2129,6 +2229,9 @@ class Prime_Cache_Admin_Settings {
 .pc-nav__item:hover .dashicons{color:#64748b}
 .pc-nav__item--on{background:#ede9fe;color:var(--c-pri);font-weight:600}
 .pc-nav__item--on .dashicons{color:var(--c-pri)}
+.pc-nav__upgrade{color:#6366f1 !important;font-weight:600;border-top:1px solid var(--c-subtle);margin-top:8px;padding-top:8px}
+.pc-nav__upgrade .dashicons{color:#6366f1}
+.pc-nav__upgrade:hover{background:rgba(99,102,241,.08) !important;color:#4f46e5 !important}
 /* Pro badge — available for Pro plugin to use when injecting cards via hooks. */
 .pc-pro-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.5px;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;padding:1px 6px;border-radius:4px;margin-left:auto;line-height:16px}
 
@@ -2163,6 +2266,9 @@ class Prime_Cache_Admin_Settings {
 .pc-card__h{display:block;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--c-muted);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--c-subtle)}
 .pc-card__row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .pc-card__row .pc-card__h{margin:0;padding:0;border:none}
+.pc-upsell{background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 100%);border-color:#c4b5fd}
+.pc-upsell .pc-card__h{color:#6366f1}
+.pc-upsell p{font-size:13px;color:#475569;line-height:1.7;margin:0 0 14px}
 
 /* hit bar */
 .pc-bar{height:20px;background:var(--c-subtle);border-radius:10px;overflow:hidden}
