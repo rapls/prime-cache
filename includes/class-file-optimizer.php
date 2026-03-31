@@ -322,10 +322,7 @@ class Prime_Cache_File_Optimizer {
 		$do_inline  = ! $is_pro && ! empty( $s['inline_small_css'] );
 		$do_async   = ! $is_pro && ! empty( $s['async_css_free'] );
 		$threshold  = (int) ( $s['inline_css_threshold'] ?? 8192 );
-		// On mobile: async ALL CSS (including first) to eliminate render-blocking.
-		// Requires cache_mobile_separate so desktop keeps the safer first-blocking strategy.
-		$is_mobile  = function_exists( 'wp_is_mobile' ) && wp_is_mobile();
-		$async_all  = $do_async && $is_mobile && ! empty( $s['cache_mobile_separate'] );
+		$async_all  = false;
 
 		// Find all <link rel="stylesheet"> tags.
 		if ( ! preg_match_all( '#<link\s[^>]*rel=["\']stylesheet["\'][^>]*/?\s*>#i', $html, $matches, PREG_SET_ORDER ) ) {
