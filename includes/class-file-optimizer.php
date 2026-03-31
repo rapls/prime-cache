@@ -322,13 +322,18 @@ class Prime_Cache_File_Optimizer {
 		$do_inline  = ! $is_pro && ! empty( $s['inline_small_css'] );
 		$do_async   = ! $is_pro && ! empty( $s['async_css_free'] );
 		$threshold  = (int) ( $s['inline_css_threshold'] ?? 8192 );
+		// On mobile: async ALL CSS (including first) to eliminate render-blocking.
+		// Requires cache_mobile_separate so desktop keeps the safer first-blocking strategy.
+		$is_mobile  = function_exists( 'wp_is_mobile' ) && wp_is_mobile();
+		$async_all  = $do_async && $is_mobile && ! empty( $s['cache_mobile_separate'] );
 
 		// Find all <link rel="stylesheet"> tags.
 		if ( ! preg_match_all( '#<link\s[^>]*rel=["\']stylesheet["\'][^>]*/?\s*>#i', $html, $matches, PREG_SET_ORDER ) ) {
 			return $html;
 		}
 
-		$css_index = 0;
+		$css_index  = 0;
+		$has_asyncd = false;
 		foreach ( $matches as $match ) {
 			$tag = $match[0];
 			if ( ! preg_match( '#href=["\']([^"\']+)["\']#i', $tag, $href_match ) ) {
@@ -368,10 +373,9 @@ class Prime_Cache_File_Optimizer {
 				}
 			}
 
-			// Async non-first CSS: keep the first stylesheet render-blocking
-			// (it's usually the main theme CSS and prevents FOUC), convert the
-			// rest to media="print" onload="this.media='all'" pattern.
-			if ( $do_async && $css_index > 1 ) {
+			// Async CSS: on mobile async ALL, on desktop async non-first only.
+			$should_async = $do_async && ( $async_all || $css_index > 1 );
+			if ( $should_async ) {
 				// Skip if already has non-"all" media (already non-blocking).
 				if ( preg_match( '#media=["\']([^"\']+)["\']#i', $tag, $media_m ) && 'all' !== strtolower( trim( $media_m[1] ) ) ) {
 					continue;
@@ -379,7 +383,20 @@ class Prime_Cache_File_Optimizer {
 				$async_tag = preg_replace( '#\s*media=["\'][^"\']*["\']#i', '', $tag );
 				$async_tag = preg_replace( '#(/?\s*>)$#', ' media="print" onload="this.media=\'all\'"$1', $async_tag );
 				$html = str_replace( $tag, $async_tag . '<noscript>' . $tag . '</noscript>', $html );
+				$has_asyncd = true;
 			}
+		}
+
+		// On mobile with all-async: inject minimal inline CSS to prevent worst FOUC.
+		// Provides base font, background, box-sizing, and image max-width.
+		if ( $async_all && $has_asyncd ) {
+			$reset = '<style id="pc-css-reset">'
+				. 'body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;background:#fff;color:#333;line-height:1.8}'
+				. '*,::before,::after{box-sizing:border-box}'
+				. 'img{max-width:100%;height:auto}'
+				. 'a{color:#1967d2}'
+				. '</style>';
+			$html = str_replace( '</head>', $reset . "\n</head>", $html );
 		}
 
 		return $html;
