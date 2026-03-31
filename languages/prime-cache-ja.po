@@ -1824,3 +1824,83 @@ msgstr "ページごとに未使用 CSS を削除します (URL 単位)。ペー
 msgid "CSS selectors and file patterns that should never be removed (one per line). Add selectors for elements that appear via JavaScript interaction (modals, dropdowns, tabs, accordions), AJAX-loaded content, or hover/focus states. Common examples: .modal, .dropdown-menu, .tab-content, .accordion, .wp-block-*."
 msgstr "削除しない CSS セレクターとファイルパターンです (1行に1つ)。JavaScript の操作で表示される要素 (モーダル、ドロップダウン、タブ、アコーディオン)、AJAX で読み込まれるコンテンツ、hover/focus 状態のセレクターを追加してください。一般的な例: .modal, .dropdown-menu, .tab-content, .accordion, .wp-block-*。"
 
+
+# ── Upsell strings ─────────────────────────────────────
+
+msgid "Get Pro"
+msgstr "Pro を入手"
+
+msgid "Go Pro"
+msgstr "Pro を入手"
+
+msgid "Get Prime Cache Pro"
+msgstr "Prime Cache Pro を入手"
+
+msgid "Learn More"
+msgstr "詳しく見る"
+
+msgid "Want more speed?"
+msgstr "さらに高速化しませんか？"
+
+msgid "Unlock the full potential of your site with advanced performance optimization features."
+msgstr "高度なパフォーマンス最適化機能でサイトの可能性を最大限に引き出しましょう。"
+
+msgid "You're using Prime Cache Free. Upgrade to Pro for Object Cache, WebP/AVIF conversion, Remove Unused CSS, database optimization, and 30+ additional features."
+msgstr "Prime Cache Free をご利用中です。Pro にアップグレードすると、オブジェクトキャッシュ、WebP/AVIF 変換、未使用 CSS 削除、データベース最適化など 30 以上の機能が利用可能になります。"
+
+msgid "Prime Cache Pro adds Varnish cache purging and Sucuri firewall sync for enterprise hosting environments."
+msgstr "Prime Cache Pro では Varnish キャッシュパージと Sucuri ファイアウォール同期が追加され、エンタープライズホスティング環境に対応します。"
+
+msgid "Prime Cache Pro adds Combine CSS/JS, Remove Unused CSS, Critical CSS generation, Async CSS Delivery, and local Google Analytics hosting."
+msgstr "Prime Cache Pro では CSS/JS 結合、未使用 CSS 削除、Critical CSS 自動生成、CSS 非同期配信、Google Analytics ローカルホスティングが追加されます。"
+
+msgid "Prime Cache Pro adds WebP and AVIF image conversion, bulk media library optimization, and YouTube thumbnail replacement."
+msgstr "Prime Cache Pro では WebP/AVIF 画像変換、メディアライブラリの一括最適化、YouTube サムネイル置換が追加されます。"
+
+msgid "Prime Cache Pro adds Sitemap Preloading, Speculation Rules API, Font Preloading, LCP Optimization, DNS Prefetch, and Preconnect."
+msgstr "Prime Cache Pro ではサイトマッププリロード、Speculation Rules API、フォントプリロード、LCP 最適化、DNS Prefetch、Preconnect が追加されます。"
+
+msgid "Persistent object caching with Redis, Memcached, or APCu. Dramatically reduces database queries and speeds up dynamic pages."
+msgstr "Redis、Memcached、APCu による永続オブジェクトキャッシュ。データベースクエリを大幅に削減し、動的ページを高速化します。"
+
+msgid "WebP & AVIF Conversion"
+msgstr "WebP & AVIF 変換"
+
+msgid "Auto-convert images to modern formats on upload. Bulk optimize your entire media library. Reduce image sizes by 25-80%."
+msgstr "アップロード時に画像を最新フォーマットに自動変換。メディアライブラリ全体を一括最適化。画像サイズを 25〜80% 削減します。"
+
+msgid "Advanced CSS & JS"
+msgstr "高度な CSS & JS"
+
+msgid "Combine CSS/JS files, Remove Unused CSS, auto-generate Critical CSS, Optimize CSS Delivery, and host Google Analytics locally."
+msgstr "CSS/JS ファイルの結合、未使用 CSS 削除、Critical CSS 自動生成、CSS 配信最適化、Google Analytics ローカルホスティング。"
+
+msgid "Database Optimization"
+msgstr "データベース最適化"
+
+msgid "Clean up revisions, drafts, spam comments, expired transients, and optimize tables. Schedule automatic cleanup."
+msgstr "リビジョン、下書き、スパムコメント、期限切れ Transient を整理し、テーブルを最適化。自動クリーンアップのスケジュール設定も可能です。"
+
+msgid "Heartbeat Control"
+msgstr "Heartbeat コントロール"
+
+msgid "Control the WordPress Heartbeat API per location (frontend, admin, editor). Reduce server load by disabling or throttling."
+msgstr "WordPress Heartbeat API をフロントエンド・管理画面・エディターごとに制御。無効化や頻度の調整でサーバー負荷を軽減します。"
+
+msgid "Advanced Preloading"
+msgstr "高度なプリロード"
+
+msgid "Sitemap preloading, Speculation Rules API, font preloading, LCP optimization, DNS prefetch, and preconnect."
+msgstr "サイトマッププリロード、Speculation Rules API、フォントプリロード、LCP 最適化、DNS Prefetch、Preconnect。"
+
+msgid "Varnish, Sucuri & Cloudflare"
+msgstr "Varnish、Sucuri & Cloudflare"
+
+msgid "Automatic cache sync with Varnish reverse proxies, Sucuri firewalls, and Cloudflare CDN zones when content changes."
+msgstr "コンテンツ変更時に Varnish リバースプロキシ、Sucuri ファイアウォール、Cloudflare CDN ゾーンと自動キャッシュ同期。"
+
+msgid "YouTube & Media"
+msgstr "YouTube & メディア"
+
+msgid "Replace YouTube iframes with lightweight thumbnails. Save 500KB-1MB per embed on initial page load."
+msgstr "YouTube iframe を軽量サムネイルに置換。初回ページ読み込みで埋め込みごとに 500KB〜1MB を節約します。"
