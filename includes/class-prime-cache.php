@@ -666,7 +666,8 @@ class Prime_Cache {
 					'optimize_css_delivery' => $is_pro,
 					'css_delivery_method'   => 'async_css',
 					'critical_css_auto'     => $is_pro,
-					'inline_small_css'      => $is_pro,
+					'inline_small_css'      => true,
+					'async_css_free'        => true,
 					'preload_fonts'         => $is_pro,
 					'preload_enabled'       => true,
 					'preload_homepage'      => true,
@@ -766,8 +767,9 @@ class Prime_Cache {
 			'css_delivery_method'   => 'async_css',
 			'critical_css_auto'     => $is_pro,
 
-			// Inline small CSS.
-			'inline_small_css'      => $is_pro,
+			// Inline small CSS + async non-first CSS (Free features).
+			'inline_small_css'      => true,
+			'async_css_free'        => true,
 
 			// Google Fonts — self-host when Pro (eliminates external CSS request).
 			'self_host_google_fonts' => $is_pro,

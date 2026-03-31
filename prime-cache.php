@@ -114,6 +114,7 @@ function prime_cache_get_settings( $force = false ) {
 		'optimize_css_delivery'  => false,
 		'css_delivery_method'   => 'remove_unused_css',
 		'async_css'             => false,
+		'async_css_free'        => false,
 		'critical_css'          => '',
 		'critical_css_auto'     => false,
 		'remove_unused_css'     => false,

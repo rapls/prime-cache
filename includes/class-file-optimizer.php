@@ -162,10 +162,8 @@ class Prime_Cache_File_Optimizer {
 			$html = $this->strip_query_strings( $html );
 		}
 
-		// CSS optimizations (Free: minify only).
-		if ( $s['minify_css'] ) {
-			$html = $this->process_css( $html );
-		}
+		// CSS optimizations (Free: minify, inline small, async non-first).
+		$html = $this->process_css( $html );
 
 		// Make Google Fonts CSS non-render-blocking (Free feature).
 		// Font CSS is never above-fold critical — text renders with fallback font
@@ -317,13 +315,20 @@ class Prime_Cache_File_Optimizer {
 
 	private function process_css( $html ) {
 		$s = $this->settings;
-		$excludes = $this->parse_list( $s['exclude_css'] );
+		$excludes   = $this->parse_list( $s['exclude_css'] );
+		$is_pro     = prime_cache_is_pro();
+		$do_minify  = ! empty( $s['minify_css'] );
+		// Free-only async: skip when Pro handles CSS (async_css, combine_css, critical_css).
+		$do_inline  = ! $is_pro && ! empty( $s['inline_small_css'] );
+		$do_async   = ! $is_pro && ! empty( $s['async_css_free'] );
+		$threshold  = (int) ( $s['inline_css_threshold'] ?? 8192 );
 
 		// Find all <link rel="stylesheet"> tags.
 		if ( ! preg_match_all( '#<link\s[^>]*rel=["\']stylesheet["\'][^>]*/?\s*>#i', $html, $matches, PREG_SET_ORDER ) ) {
 			return $html;
 		}
 
+		$css_index = 0;
 		foreach ( $matches as $match ) {
 			$tag = $match[0];
 			if ( ! preg_match( '#href=["\']([^"\']+)["\']#i', $tag, $href_match ) ) {
@@ -334,12 +339,46 @@ class Prime_Cache_File_Optimizer {
 				continue;
 			}
 
+			$is_local = $this->is_local_url( $href );
+			$css_index++;
+
+			// Inline small CSS files (eliminate HTTP request).
+			if ( $do_inline && $is_local ) {
+				$path = $this->url_to_path( $href );
+				if ( $path && is_readable( $path ) && filesize( $path ) <= $threshold ) {
+					$css = file_get_contents( $path ); // phpcs:ignore
+					if ( false !== $css ) {
+						$css = $this->rebase_css_urls( $css, $path );
+						if ( $do_minify ) {
+							$css = $this->minify_css_content( $css );
+						}
+						$html = str_replace( $tag, '<style>' . $css . '</style>', $html );
+						continue;
+					}
+				}
+			}
+
 			// Minify individual CSS files (skip already minified .min.css).
-			if ( $s['minify_css'] && $this->is_local_url( $href ) && false === strpos( $href, '.min.css' ) ) {
+			if ( $do_minify && $is_local && false === strpos( $href, '.min.css' ) ) {
 				$minified_url = $this->minify_css_file( $href );
 				if ( $minified_url ) {
-					$html = str_replace( $tag, str_replace( $href, $minified_url, $tag ), $html );
+					$new_tag = str_replace( $href, $minified_url, $tag );
+					$html = str_replace( $tag, $new_tag, $html );
+					$tag  = $new_tag;
 				}
+			}
+
+			// Async non-first CSS: keep the first stylesheet render-blocking
+			// (it's usually the main theme CSS and prevents FOUC), convert the
+			// rest to media="print" onload="this.media='all'" pattern.
+			if ( $do_async && $css_index > 1 ) {
+				// Skip if already has non-"all" media (already non-blocking).
+				if ( preg_match( '#media=["\']([^"\']+)["\']#i', $tag, $media_m ) && 'all' !== strtolower( trim( $media_m[1] ) ) ) {
+					continue;
+				}
+				$async_tag = preg_replace( '#\s*media=["\'][^"\']*["\']#i', '', $tag );
+				$async_tag = preg_replace( '#(/?\s*>)$#', ' media="print" onload="this.media=\'all\'"$1', $async_tag );
+				$html = str_replace( $tag, $async_tag . '<noscript>' . $tag . '</noscript>', $html );
 			}
 		}
 
