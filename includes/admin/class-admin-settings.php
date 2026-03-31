@@ -127,6 +127,7 @@ class Prime_Cache_Admin_Settings {
 		$s['lazyload_iframes']      = ! empty( $input['lazyload_iframes'] );
 		$s['lazyload_videos']       = ! empty( $input['lazyload_videos'] );
 		$s['lazyload_disable_native'] = ! empty( $input['lazyload_disable_native'] );
+		$s['lazyload_skip_first']   = isset( $input['lazyload_skip_first'] ) ? max( 0, min( 10, (int) $input['lazyload_skip_first'] ) ) : 3;
 		$s['lazyload_exclude']      = sanitize_textarea_field( $input['lazyload_exclude'] ?? '' );
 
 		$s['cdn_enabled']           = ! empty( $input['cdn_enabled'] );
@@ -1136,7 +1137,7 @@ class Prime_Cache_Admin_Settings {
 
 	private function tab_media( $settings ) {
 		$vis = array(
-			'lazyload_images','lazyload_iframes','lazyload_videos','lazyload_disable_native','lazyload_exclude',
+			'lazyload_images','lazyload_iframes','lazyload_videos','lazyload_disable_native','lazyload_skip_first','lazyload_exclude',
 			'add_missing_dimensions',
 			'img_strip_exif','img_resize','img_max_width','img_max_height',
 		);
