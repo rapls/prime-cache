@@ -297,6 +297,11 @@ class Prime_Cache_Admin_Settings {
 			}
 		}
 
+		// Trigger cache preloading after settings save when enabled.
+		if ( ! empty( $s['preload_enabled'] ) && ! empty( $s['cache_enabled'] ) ) {
+			do_action( 'prime_cache_after_purge_all' );
+		}
+
 		return $s;
 	}
 
@@ -580,7 +585,7 @@ class Prime_Cache_Admin_Settings {
 						array( $settings['lazyload_images'], __( 'Lazy Load', 'prime-cache' ) ),
 						array( $is_pro && ! empty( $settings['img_conversion_enabled'] ) && ( $settings['webp_enabled'] || $settings['avif_enabled'] ), 'WebP / AVIF' ),
 						array( $is_pro && $settings['cdn_enabled'], __( 'CDN', 'prime-cache' ) ),
-						array( $is_pro && $settings['preload_enabled'], __( 'Cache Preload', 'prime-cache' ) ),
+						array( $settings['preload_enabled'], __( 'Cache Preload', 'prime-cache' ) ),
 						array( $settings['htaccess_enabled'], '.htaccess' ),
 						array( $settings['browser_cache'], __( 'Browser Cache', 'prime-cache' ) ),
 						array( $is_pro && $settings['heartbeat_enabled'], __( 'Heartbeat', 'prime-cache' ) ),
@@ -1406,8 +1411,8 @@ class Prime_Cache_Admin_Settings {
 			<?php $this->hidden( $settings, $vis ); ?>
 
 			<!-- Cache Preloading -->
-			<div class="pc-card<?php echo prime_cache_is_pro() ? '' : ' pc-card--pro'; ?>">
-				<span class="pc-card__h"><?php esc_html_e( 'Cache Preloading', 'prime-cache' ); ?><?php if ( ! prime_cache_is_pro() ) : ?> <span class="pc-pro-badge">PRO</span><?php endif; ?></span>
+			<div class="pc-card">
+				<span class="pc-card__h"><?php esc_html_e( 'Cache Preloading', 'prime-cache' ); ?></span>
 				<?php if ( ! empty( trim( $settings['cache_vary_cookies'] ?? '' ) ) ) : ?>
 				<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:10px 14px;margin:0 0 12px;font-size:13px;color:#92400e">
 					<strong><?php esc_html_e( 'Partial preload:', 'prime-cache' ); ?></strong> <?php esc_html_e( 'Vary Cookies are active. Preloading can only warm the default (no-cookie) variant for each URL. Cookie-specific cache files (e.g. for currency, country, A/B tests) cannot be preloaded and will be generated on the first real visitor request with that cookie value. This is a technical limitation — not a bug.', 'prime-cache' ); ?>

@@ -186,6 +186,11 @@ class Prime_Cache {
 			Prime_Cache_Htaccess::add_rules( $settings );
 		}
 
+		// Trigger cache preloading if enabled.
+		if ( ! empty( $settings['preload_enabled'] ) ) {
+			do_action( 'prime_cache_after_purge_all' );
+		}
+
 		if ( ! empty( $warnings ) ) {
 			set_transient( 'prime_cache_activation_warnings', $warnings, 120 );
 		}
@@ -663,9 +668,9 @@ class Prime_Cache {
 					'critical_css_auto'     => $is_pro,
 					'inline_small_css'      => $is_pro,
 					'preload_fonts'         => $is_pro,
-					'preload_enabled'       => $is_pro,
-					'preload_homepage'      => $is_pro,
-					'preload_public_posts'  => $is_pro,
+					'preload_enabled'       => true,
+					'preload_homepage'      => true,
+					'preload_public_posts'  => true,
 					'lcp_optimization'      => $is_pro,
 					'speculation_rules'     => $is_pro,
 				) );
@@ -786,9 +791,9 @@ class Prime_Cache {
 			'speculation_rules'     => $is_pro,
 
 			// Preload.
-			'preload_enabled'       => $is_pro,
-			'preload_homepage'      => $is_pro,
-			'preload_public_posts'  => $is_pro,
+			'preload_enabled'       => true,
+			'preload_homepage'      => true,
+			'preload_public_posts'  => true,
 			'preload_public_tax'    => $is_pro,
 
 			// Font preloading.

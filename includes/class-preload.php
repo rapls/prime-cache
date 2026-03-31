@@ -15,8 +15,8 @@ class Prime_Cache_Preload {
 		$s   = $this->settings;
 		$pro = prime_cache_is_pro();
 
-		// [Pro] Cache preload (warm cache via cron).
-		if ( $pro && $s['preload_enabled'] ) {
+		// Cache preload (warm cache via cron).
+		if ( $s['preload_enabled'] ) {
 			add_action( 'prime_cache_preload_batch', array( $this, 'run_preload_batch' ) );
 			add_action( 'prime_cache_after_purge_all', array( $this, 'schedule_preload' ) );
 		}

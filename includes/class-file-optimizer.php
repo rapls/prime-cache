@@ -432,6 +432,14 @@ class Prime_Cache_File_Optimizer {
 	private function async_google_fonts( $html ) {
 		$pattern = '#<link\s[^>]*href=["\'](?:https?:)?//fonts\.googleapis\.com/css2?\?[^"\']+["\'][^>]*/?>#i';
 
+		// If Google Fonts are present, inject early preconnect for font file downloads.
+		if ( preg_match( $pattern, $html ) ) {
+			$preconnect = '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
+			if ( false === strpos( $html, 'fonts.gstatic.com' ) || false === strpos( $html, 'preconnect' ) ) {
+				$html = str_replace( '<head>', '<head>' . "\n" . $preconnect, $html );
+			}
+		}
+
 		return preg_replace_callback( $pattern, function ( $m ) {
 			$tag = $m[0];
 			// Skip if already async.
