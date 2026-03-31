@@ -412,7 +412,6 @@ class Prime_Cache_Admin_Settings {
 		$settings = prime_cache_get_settings();
 		$on = ! empty( $settings['cache_enabled'] );
 
-		$is_pro = prime_cache_is_pro();
 		$tabs = array(
 			'dashboard'     => array( 'dashicons-dashboard',       __( 'Dashboard', 'prime-cache' ) ),
 			'page-cache'    => array( 'dashicons-admin-page',     __( 'Page Cache', 'prime-cache' ) ),
@@ -461,10 +460,7 @@ class Prime_Cache_Admin_Settings {
 			<!-- Main -->
 			<main class="pc-main">
 				<?php
-				// Tabs registered by Pro via prime_cache_admin_tabs filter.
-				// Only render if the tab is actually in the filtered tabs array.
-				$pro_tabs = array( 'object-cache', 'heartbeat', 'database' );
-
+				// Pro-only tabs: render only if Pro registered them via prime_cache_admin_tabs filter.
 				switch ( $tab ) {
 					case 'object-cache':
 					case 'heartbeat':
@@ -557,7 +553,6 @@ class Prime_Cache_Admin_Settings {
 	/* ── tab: dashboard ──────────────────────────────────── */
 
 	private function tab_dashboard( $settings ) {
-		$is_pro = prime_cache_is_pro();
 		$hs = $this->get_hit_stats();
 		$st = $this->get_cache_stats();
 		$sys = $this->get_system_status();
@@ -718,7 +713,6 @@ class Prime_Cache_Admin_Settings {
 	/* ── tab: page cache ──────────────────────────────────── */
 
 	private function tab_page( $settings, $on ) {
-		$is_pro = prime_cache_is_pro();
 		$purge = wp_nonce_url( admin_url( 'admin.php?prime_cache_purge=all' ), 'prime_cache_purge' );
 		?>
 		<h2 class="pc-title"><?php esc_html_e( 'Page Cache', 'prime-cache' ); ?></h2>
@@ -726,7 +720,13 @@ class Prime_Cache_Admin_Settings {
 		<form method="post" action="options.php" id="pc-settings-form">
 			<?php settings_fields( 'prime_cache_settings_group' ); ?>
 			<input type="hidden" name="prime_cache_settings[cache_enabled]" value="<?php echo $on ? '1' : '0'; ?>" id="pc-ei">
-			<?php $this->hidden( $settings, array( 'cache_enabled','cache_mobile','cache_mobile_separate','cache_logged_in','cache_404','gzip_compression','htaccess_enabled','browser_cache','browser_cache_css_js','browser_cache_images','browser_cache_fonts','browser_cache_html','brotli_compression','cache_control_immutable','varnish_enabled','varnish_ip','sucuri_enabled','sucuri_api_key','cache_lifespan','cache_footprint' ) ); ?>
+			<?php
+			$page_vis = array( 'cache_enabled','cache_mobile','cache_mobile_separate','cache_logged_in','cache_404','gzip_compression','htaccess_enabled','browser_cache','browser_cache_css_js','browser_cache_images','browser_cache_fonts','browser_cache_html','brotli_compression','cache_control_immutable','cache_lifespan','cache_footprint' );
+			if ( prime_cache_is_pro() ) {
+				$page_vis = array_merge( $page_vis, array( 'varnish_enabled','varnish_ip','sucuri_enabled','sucuri_api_key' ) );
+			}
+			$this->hidden( $settings, $page_vis );
+			?>
 
 			<div class="pc-card">
 				<span class="pc-card__h"><?php esc_html_e( 'General Settings', 'prime-cache' ); ?></span>
@@ -887,14 +887,12 @@ class Prime_Cache_Admin_Settings {
 	/* ── tab: file optimization ────────────────────────────── */
 
 	private function tab_file_opt( $settings ) {
-		$is_pro = prime_cache_is_pro();
 		$fo_keys = array(
 			'minify_html','minify_html_dom','remove_html_comments','disable_emoji',
-			'minify_css','combine_css','optimize_css_delivery','css_delivery_method',
-			'async_css','critical_css','critical_css_auto','remove_unused_css','ucss_safelist','exclude_css',
-			'minify_js','combine_js','defer_js','delay_js','delay_js_timeout',
+			'minify_css','exclude_css',
+			'minify_js','defer_js','delay_js','delay_js_timeout',
 			'exclude_js','exclude_inline_js','exclude_defer_js','exclude_delay_js',
-			'combine_google_fonts','self_host_google_fonts','google_fonts_display',
+			'google_fonts_display',
 			'remove_query_strings','rewrite_file_optimizer',
 			'disable_emoji','disable_jquery_migrate','disable_wp_embed','disable_dashicons',
 			'disable_wp_version','disable_xmlrpc','disable_self_pingback',
@@ -904,8 +902,15 @@ class Prime_Cache_Admin_Settings {
 			'disable_wp_sitemap','add_blank_favicon',
 			'woo_disable_scripts','woo_disable_cart_frag',
 			'delay_js_safe_mode','delay_js_presets',
-			'inline_small_css','inline_css_threshold','local_analytics',
+			'inline_small_css','inline_css_threshold','async_css_free',
 		);
+		if ( prime_cache_is_pro() ) {
+			$fo_keys = array_merge( $fo_keys, array(
+				'combine_css','optimize_css_delivery','css_delivery_method',
+				'async_css','critical_css','critical_css_auto','remove_unused_css','ucss_safelist',
+				'combine_js','combine_google_fonts','self_host_google_fonts','local_analytics',
+			) );
+		}
 		?>
 		<h2 class="pc-title"><?php esc_html_e( 'File Optimization', 'prime-cache' ); ?></h2>
 		<form method="post" action="options.php">
@@ -1127,13 +1132,19 @@ class Prime_Cache_Admin_Settings {
 
 	private function tab_media( $settings ) {
 		$vis = array(
-			'lazyload_images','lazyload_iframes','lazyload_videos','lazyload_disable_native','lazyload_exclude',			'youtube_thumbnail','add_missing_dimensions',
-			'img_conversion_enabled','webp_enabled','avif_enabled','img_quality_mode','webp_quality','avif_quality',
+			'lazyload_images','lazyload_iframes','lazyload_videos','lazyload_disable_native','lazyload_exclude',
+			'add_missing_dimensions',
 			'img_strip_exif','img_resize','img_max_width','img_max_height',
-			'img_auto_optimize','img_auto_remove_larger','img_exclude_png',
-			'img_include_uploads','img_include_themes','img_include_plugins','img_include_custom','img_exclude_folders',
-			'img_delivery_method','img_converter',
 		);
+		if ( prime_cache_is_pro() ) {
+			$vis = array_merge( $vis, array(
+				'youtube_thumbnail',
+				'img_conversion_enabled','webp_enabled','avif_enabled','img_quality_mode','webp_quality','avif_quality',
+				'img_auto_optimize','img_auto_remove_larger','img_exclude_png',
+				'img_include_uploads','img_include_themes','img_include_plugins','img_include_custom','img_exclude_folders',
+				'img_delivery_method','img_converter',
+			) );
+		}
 		$caps = class_exists( 'Prime_Cache_WebP' ) ? Prime_Cache_WebP::get_capabilities() : array( 'gd_webp' => false, 'imagick_webp' => false, 'gd_avif' => false, 'imagick_avif' => false );
 		?>
 		<h2 class="pc-title"><?php esc_html_e( 'Media', 'prime-cache' ); ?></h2>
@@ -1259,9 +1270,15 @@ class Prime_Cache_Admin_Settings {
 	private function tab_preload( $settings ) {
 		$vis = array(
 			'preload_enabled','preload_homepage','preload_public_posts','preload_public_tax',
-			'preload_sitemap_enabled','preload_sitemap','preload_interval','preload_max_posts','preload_max_terms','preload_excluded_uri',
-			'preload_links','speculation_rules','preload_fonts','lcp_optimization','lcp_excluded','preload_resources','prefetch_dns','preconnect',
+			'preload_interval','preload_max_posts','preload_max_terms','preload_excluded_uri',
+			'preload_links',
 		);
+		if ( prime_cache_is_pro() ) {
+			$vis = array_merge( $vis, array(
+				'preload_sitemap_enabled','preload_sitemap',
+				'speculation_rules','preload_fonts','lcp_optimization','lcp_excluded','preload_resources','prefetch_dns','preconnect',
+			) );
+		}
 		?>
 		<h2 class="pc-title"><?php esc_html_e( 'Preload', 'prime-cache' ); ?></h2>
 		<form method="post" action="options.php">
