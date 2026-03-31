@@ -641,8 +641,7 @@ class Prime_Cache {
 				) );
 
 			case 'aggressive':
-				$is_pro = prime_cache_is_pro();
-				return array_merge( $common, array(
+				$preset = array_merge( $common, array(
 					'lazyload_images'       => true,
 					'lazyload_iframes'      => true,
 					'lazyload_videos'       => true,
@@ -659,22 +658,15 @@ class Prime_Cache {
 					'disable_wp_embed'      => true,
 					'disable_dashicons'     => true,
 					'remove_query_strings'  => true,
-					// Pro-only features.
-					'combine_css'           => $is_pro,
-					'combine_js'            => $is_pro,
 					'delay_js_safe_mode'    => true,
-					'optimize_css_delivery' => $is_pro,
-					'css_delivery_method'   => 'async_css',
-					'critical_css_auto'     => $is_pro,
 					'inline_small_css'      => true,
 					'async_css_free'        => true,
-					'preload_fonts'         => $is_pro,
 					'preload_enabled'       => true,
 					'preload_homepage'      => true,
 					'preload_public_posts'  => true,
-					'lcp_optimization'      => $is_pro,
-					'speculation_rules'     => $is_pro,
 				) );
+				// Pro enhances presets with additional features.
+				return apply_filters( 'prime_cache_preset_aggressive', $preset );
 
 			case 'auto':
 				return self::get_preset_auto();
@@ -749,34 +741,18 @@ class Prime_Cache {
 			'minify_js'             => true,
 			'remove_html_comments'  => true,
 
-			// Combine — only when NOT HTTP/2 (HTTP/2 multiplexing makes combining counterproductive).
-			'combine_css'           => ! $http2 && $is_pro,
-			'combine_js'            => ! $http2 && $is_pro,
-
 			// jQuery — restore local copy if theme uses CDN.
 			'local_jquery'          => true,
 
 			// Defer JS — Free feature, safe for all sites.
 			'defer_js'              => true,
-			// Delay JS — enabled when Pro has critical CSS (prevents CLS).
-			'delay_js'              => $is_pro,
-			'delay_js_safe_mode'    => false, // delay all JS for maximum FCP improvement
-
-			// CSS delivery — async with auto critical CSS when Pro.
-			'optimize_css_delivery' => $is_pro,
-			'css_delivery_method'   => 'async_css',
-			'critical_css_auto'     => $is_pro,
 
 			// Inline small CSS + async non-first CSS (Free features).
 			'inline_small_css'      => true,
 			'async_css_free'        => true,
 
-			// Google Fonts — self-host when Pro (eliminates external CSS request).
-			'self_host_google_fonts' => $is_pro,
+			// Google Fonts display swap (Free feature).
 			'google_fonts_display'   => true,
-
-			// Local Analytics — reduce external JS when Pro.
-			'local_analytics'       => $is_pro,
 
 			// Cleanup — safe tweaks.
 			'disable_emoji'         => true,
@@ -788,22 +764,17 @@ class Prime_Cache {
 			// Block CSS — keep enabled for block themes.
 			'disable_block_css'     => ! $is_block_theme,
 
-			// Links / speculation.
+			// Links.
 			'preload_links'         => true,
-			'speculation_rules'     => $is_pro,
 
 			// Preload.
 			'preload_enabled'       => true,
 			'preload_homepage'      => true,
 			'preload_public_posts'  => true,
-			'preload_public_tax'    => $is_pro,
-
-			// Font preloading.
-			'preload_fonts'         => $is_pro,
-
-			// LCP.
-			'lcp_optimization'      => $is_pro,
 		);
+
+		// Pro enhances auto preset with additional features.
+		$s = apply_filters( 'prime_cache_preset_auto', $s );
 
 		// ── Preload tuning by site size ──────────────────────────────
 		if ( $post_count > 2000 ) {
@@ -824,26 +795,8 @@ class Prime_Cache {
 			$s['cache_reject_uri']      = 'cart|checkout|my-account|wc-api|add-to-cart';
 		}
 
-		// ── Image conversion (Pro) ───────────────────────────────────
-		if ( $is_pro && $can_webp ) {
-			$s['img_conversion_enabled'] = true;
-			$s['webp_enabled']           = true;
-			$s['img_auto_optimize']      = true;
-			$s['img_auto_remove_larger'] = true;
-			$s['img_include_uploads']    = true;
-		}
-
-		// ── Object cache (Pro) ───────────────────────────────────────
-		// Prefer Redis > Memcached > APCu based on available extensions.
-		if ( $is_pro ) {
-			if ( $has_redis ) {
-				$s['object_cache'] = 'redis';
-			} elseif ( $has_memcached ) {
-				$s['object_cache'] = 'memcached';
-			} elseif ( $has_apcu ) {
-				$s['object_cache'] = 'apcu';
-			}
-		}
+		// Pro adds image conversion, object cache, and other Pro settings
+		// via the prime_cache_preset_auto filter above.
 
 		return $s;
 	}
