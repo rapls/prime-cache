@@ -97,7 +97,14 @@ class Prime_Cache_Config {
 			}
 		}
 
-		return false;
+		// No known signature matched. Check if any caching plugin is active
+		// that might own this dropin. If none are active, treat as orphaned.
+		foreach ( array_unique( array_values( $signatures ) ) as $plugin_file ) {
+			if ( is_plugin_active( $plugin_file ) ) {
+				return false; // A known caching plugin is active — don't assume orphaned.
+			}
+		}
+		return true; // No known caching plugin active — safe to replace.
 	}
 
 	/**
