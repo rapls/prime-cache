@@ -34,7 +34,7 @@ Prime Cache is a comprehensive WordPress performance optimization plugin that co
 * **Minify JavaScript** - Remove comments and whitespace from JS files
 * **Combine JavaScript** - Merge JS files to reduce HTTP requests
 * **Defer JavaScript** - Add defer attribute to eliminate render-blocking JS
-* **Delay JavaScript** - Delay all JS until user interaction (scroll, click, touch)
+* **Delay JavaScript** - Delay all JS until user interaction on mobile devices (scroll, click, touch). Requires separate mobile cache.
 * **Delay JS Safe Mode** - Only delay external (third-party) scripts
 * **Critical CSS** - Auto-generate or manually define above-the-fold CSS
 * **Remove Unused CSS** - Analyze each page and strip unused CSS rules

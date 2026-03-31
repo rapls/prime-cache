@@ -81,6 +81,11 @@ class Prime_Cache_Admin_Settings {
 		$s['combine_js']            = ! empty( $input['combine_js'] );
 		$s['defer_js']              = ! empty( $input['defer_js'] );
 		$s['delay_js']              = ! empty( $input['delay_js'] );
+		// Delay JS is mobile-only; requires separate mobile cache to prevent
+		// mobile-transformed HTML from being served to desktop visitors.
+		if ( $s['delay_js'] ) {
+			$s['cache_mobile_separate'] = true;
+		}
 		$s['delay_js_timeout']      = isset( $input['delay_js_timeout'] ) ? max( 0, (int) $input['delay_js_timeout'] ) : 0;
 		$s['exclude_js']            = sanitize_textarea_field( $input['exclude_js'] ?? '' );
 		$s['exclude_inline_js']     = sanitize_textarea_field( $input['exclude_inline_js'] ?? '' );
@@ -381,6 +386,12 @@ class Prime_Cache_Admin_Settings {
 		$value = str_replace( '#', '\\#', $value );
 		// Block empty alternation branches (||, leading |, trailing |).
 		if ( preg_match( '/\|\||^\||\|$/', $value ) ) {
+			return '';
+		}
+		// ReDoS prevention: reject patterns with nested quantifiers or
+		// backreferences that can cause catastrophic backtracking.
+		// These patterns are evaluated on every request in the dropin.
+		if ( preg_match( '/[+*?]\s*[+*?]|\(\?[^)]*[+*].*[+*]|\{[0-9,]+\}\s*[+*?]/', $value ) ) {
 			return '';
 		}
 		// Validate the complete pattern compiles as valid regex.
@@ -956,7 +967,7 @@ class Prime_Cache_Admin_Settings {
 				<span class="pc-card__h">JavaScript</span>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[minify_js]" value="1" <?php checked( $settings['minify_js'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Minify JavaScript', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Remove whitespace and comments from JavaScript files to reduce file size. Already minified files (.min.js) are skipped.', 'prime-cache' ); ?></small></span></label>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[defer_js]" value="1" <?php checked( $settings['defer_js'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Load JavaScript Deferred', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Add the defer attribute to enqueued scripts (wp_enqueue_script) to eliminate render-blocking JavaScript. Scripts are downloaded in parallel and executed after HTML parsing. Manually inserted scripts in theme templates are not affected.', 'prime-cache' ); ?></small></span></label>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js]" value="1" <?php checked( $settings['delay_js'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Delay JavaScript Execution', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Delay loading of enqueued JavaScript (wp_enqueue_script) until user interaction (scroll, click, keydown, touchstart, mousemove). Significantly improves initial page load metrics but may cause a brief delay on first interaction. Manually inserted scripts in theme templates are not affected.', 'prime-cache' ); ?></small></span></label>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js]" value="1" <?php checked( $settings['delay_js'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Delay JavaScript Execution', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Delay loading of enqueued JavaScript (wp_enqueue_script) until user interaction (scroll, click, keydown, touchstart, mousemove). Applied on mobile devices only to avoid CLS regression on desktop. Separate mobile cache is automatically enabled when this setting is on. Significantly improves mobile page load metrics but may cause a brief delay on first interaction.', 'prime-cache' ); ?></small></span></label>
 
 				<div class="pc-field">
 					<label class="pc-lbl"><?php esc_html_e( 'Delay Timeout (ms)', 'prime-cache' ); ?></label>
