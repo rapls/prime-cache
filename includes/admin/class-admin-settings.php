@@ -461,15 +461,27 @@ class Prime_Cache_Admin_Settings {
 			<!-- Main -->
 			<main class="pc-main">
 				<?php
+				// Tabs registered by Pro via prime_cache_admin_tabs filter.
+				// Only render if the tab is actually in the filtered tabs array.
+				$pro_tabs = array( 'object-cache', 'heartbeat', 'database' );
+
 				switch ( $tab ) {
-					case 'object-cache':  $this->tab_object(); break;
+					case 'object-cache':
+					case 'heartbeat':
+					case 'database':
+						if ( isset( $tabs[ $tab ] ) ) {
+							if ( 'object-cache' === $tab ) { $this->tab_object(); }
+							elseif ( 'heartbeat' === $tab ) { $this->tab_heartbeat( $settings ); }
+							elseif ( 'database' === $tab ) { $this->tab_database( $settings ); }
+						} else {
+							$this->tab_dashboard( $settings );
+						}
+						break;
 					case 'file-opt':      $this->tab_file_opt( $settings ); break;
 					case 'media':         $this->tab_media( $settings ); break;
 					case 'cdn':           $this->tab_cdn( $settings ); break;
 					case 'preload':       $this->tab_preload( $settings ); break;
 					case 'cache-control': $this->tab_control( $settings ); break;
-					case 'heartbeat':     $this->tab_heartbeat( $settings ); break;
-					case 'database':      $this->tab_database( $settings ); break;
 					case 'auto-purge':    $this->tab_auto_purge( $settings ); break;
 					case 'exclusions':    $this->tab_exclusions( $settings ); break;
 					case 'tools':         $this->tab_tools( $settings ); break;
