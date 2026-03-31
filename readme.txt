@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.8.3
+Stable tag: 1.9.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -246,6 +246,22 @@ Start with page caching and basic file optimization. Test your site after each c
 
 == Changelog ==
 
+= 1.9.3 =
+* Fix: Place .htaccess cache rewrite rules before WordPress rewrite block for PHP-less serving
+* Fix: Defer jQuery safely by wrapping inline jQuery code with DOMContentLoaded
+* Fix: Stop treating Cache-Control no-cache as uncacheable (allow caching with security plugins)
+* Fix: Self-heal setup on admin_init when activation hook fails silently
+* Fix: Auto-replace orphaned advanced-cache.php from deactivated or unknown plugins
+* New: Google Fonts async loading (media=print onload pattern) with automatic preconnect
+* New: Cache preloading available for Free users (homepage + public posts)
+* New: Preload triggers on plugin activation and settings save
+* New: Async non-first CSS for Free (reduce render-blocking without Pro)
+* New: Inline small CSS for Free (eliminate HTTP requests for small stylesheets)
+* New: Lazy load configurable skip-first-N images (default 3) with fetchpriority=high on first image
+* New: Preconnect/DNS-prefetch limiting enabled by default (cap at 4, remove self-origin)
+* New: System Info shows dropin loaded status and WP_CACHE runtime/file diagnostics
+* Improved: Critical CSS pattern optimization (tighter selectors, reduced unused CSS)
+
 = 1.0.0 =
 * Initial release
 * Page Cache with advanced-cache.php dropin
@@ -303,6 +319,9 @@ Start with page caching and basic file optimization. Test your site after each c
 * English + Japanese translation (WordPress style guide compliant)
 
 == Upgrade Notice ==
+
+= 1.9.3 =
+Major PageSpeed improvement. jQuery defer, .htaccess fast-path fix, Google Fonts async, cache preloading for Free, and multiple CSS optimization features. Clear all caches after update.
 
 = 1.0.0 =
 Initial release.
