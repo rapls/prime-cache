@@ -206,6 +206,9 @@ class Prime_Cache_Admin_Settings {
 		$s['inline_small_css']      = ! empty( $input['inline_small_css'] );
 		$s['inline_css_threshold']  = isset( $input['inline_css_threshold'] ) ? max( 0, (int) $input['inline_css_threshold'] ) : 8192;
 		$s['local_analytics']       = ! empty( $input['local_analytics'] );
+		$s['async_css_free']        = ! empty( $input['async_css_free'] );
+		$s['local_jquery']          = ! empty( $input['local_jquery'] );
+		$s['limit_dns_prefetch']    = ! empty( $input['limit_dns_prefetch'] );
 		$s['preload_resources']     = sanitize_textarea_field( $input['preload_resources'] ?? '' );
 		$s['speculation_rules']     = ! empty( $input['speculation_rules'] );
 		$s['cache_404']             = ! empty( $input['cache_404'] );
@@ -903,6 +906,7 @@ class Prime_Cache_Admin_Settings {
 			'woo_disable_scripts','woo_disable_cart_frag',
 			'delay_js_safe_mode','delay_js_presets',
 			'inline_small_css','inline_css_threshold','async_css_free',
+			'local_jquery','limit_dns_prefetch',
 		);
 		if ( prime_cache_is_pro() ) {
 			$fo_keys = array_merge( $fo_keys, array(
