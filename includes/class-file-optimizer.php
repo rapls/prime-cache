@@ -137,6 +137,8 @@ class Prime_Cache_File_Optimizer {
 		$s = $this->settings;
 		return $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['minify_js']
 			|| $s['remove_query_strings'] || $s['delay_js']
+			|| ! empty( $s['inline_small_css'] ) || ! empty( $s['async_css_free'] )
+			|| ! empty( $s['defer_js'] )
 			|| apply_filters( 'prime_cache_should_optimize_html', false );
 	}
 
@@ -485,22 +487,26 @@ class Prime_Cache_File_Optimizer {
 	private function async_google_fonts( $html ) {
 		$pattern = '#<link\s[^>]*href=["\'](?:https?:)?//fonts\.googleapis\.com/css2?\?[^"\']+["\'][^>]*/?>#i';
 
-		// If Google Fonts are present, inject early preconnect for font file downloads.
-		if ( preg_match( $pattern, $html ) ) {
-			$preconnect = '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
-			if ( false === strpos( $html, 'fonts.gstatic.com' ) || false === strpos( $html, 'preconnect' ) ) {
-				$html = str_replace( '<head>', '<head>' . "\n" . $preconnect, $html );
-			}
+		if ( ! preg_match( $pattern, $html ) ) {
+			return $html;
 		}
 
-		return preg_replace_callback( $pattern, function ( $m ) {
+		// Inject early preconnect for font file downloads.
+		$preconnect = '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
+		if ( false === strpos( $html, 'fonts.gstatic.com' ) || false === strpos( $html, 'preconnect' ) ) {
+			$html = str_replace( '<head>', '<head>' . "\n" . $preconnect, $html );
+		}
+
+		$add_swap = ! empty( $this->settings['google_fonts_display'] );
+
+		return preg_replace_callback( $pattern, function ( $m ) use ( $add_swap ) {
 			$tag = $m[0];
 			// Skip if already async.
 			if ( false !== strpos( $tag, 'media="print"' ) ) {
 				return $tag;
 			}
-			// Add display=swap if missing.
-			if ( false === strpos( $tag, 'display=' ) ) {
+			// Add display=swap if setting enabled and not already present.
+			if ( $add_swap && false === strpos( $tag, 'display=' ) ) {
 				$tag = preg_replace( '#(href=["\'][^"\']+)(["\'])#i', '$1&display=swap$2', $tag );
 			}
 			// Remove existing media attribute.
