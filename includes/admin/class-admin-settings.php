@@ -401,6 +401,9 @@ class Prime_Cache_Admin_Settings {
 			if ( '' === $part ) {
 				continue;
 			}
+			// Migration: strip regex escape sequences from legacy patterns.
+			// e.g. example\.com → example.com, /path\-name → /path-name
+			$part = stripslashes( $part );
 			// Split on * (wildcard), escape each segment, rejoin with .*
 			$segments = explode( '*', $part );
 			$escaped  = array_map( function( $seg ) {
@@ -1815,7 +1818,7 @@ class Prime_Cache_Admin_Settings {
 		<form method="post" action="options.php"><?php settings_fields('prime_cache_settings_group'); $this->hidden($settings,$vis); ?>
 			<?php foreach($rows as $r): ?>
 			<div class="pc-card"><span class="pc-card__h"><?php echo esc_html($r[1]); ?></span>
-				<div class="pc-field"><label class="pc-lbl"><?php echo esc_html($r[2]); ?> <span class="pc-tag"><?php esc_html_e('Regex','prime-cache'); ?></span></label><textarea name="prime_cache_settings[<?php echo esc_attr($r[0]); ?>]" rows="3" class="pc-ta" placeholder="<?php echo esc_attr($r[3]); ?>"><?php echo esc_textarea($settings[$r[0]]); ?></textarea><p class="pc-help"><?php echo wp_kses($r[4],array('code'=>array())); ?></p></div>
+				<div class="pc-field"><label class="pc-lbl"><?php echo esc_html($r[2]); ?> <span class="pc-tag"><?php esc_html_e('Wildcard','prime-cache'); ?></span></label><textarea name="prime_cache_settings[<?php echo esc_attr($r[0]); ?>]" rows="3" class="pc-ta" placeholder="<?php echo esc_attr($r[3]); ?>"><?php echo esc_textarea($settings[$r[0]]); ?></textarea><p class="pc-help"><?php echo wp_kses($r[4],array('code'=>array())); ?></p></div>
 			</div>
 			<?php endforeach; ?>
 			<div class="pc-actions"><?php submit_button(__('Save Settings','prime-cache'),'primary large','submit',false); ?></div>
