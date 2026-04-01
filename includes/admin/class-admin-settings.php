@@ -506,6 +506,53 @@ class Prime_Cache_Admin_Settings {
 		<?php
 	}
 
+	/* ── SVG preview card for Pro features ────────────────── */
+
+	/**
+	 * Render a lightweight SVG card that mimics a Pro setting toggle.
+	 *
+	 * The card is a pure SVG image — no form elements, no inputs, no
+	 * interactivity. It shows what the Pro setting looks like without
+	 * being a disabled/locked control (WordPress.org Guideline 5 safe).
+	 *
+	 * @param string $title       Setting title.
+	 * @param string $description Setting description.
+	 */
+	private function render_svg_preview_card( $title, $description ) {
+		$t = esc_html( $title );
+		$d = esc_html( $description );
+		// Word-wrap description into lines of ~50 chars.
+		$words = explode( ' ', $d );
+		$lines = array();
+		$line  = '';
+		foreach ( $words as $w ) {
+			if ( strlen( $line . ' ' . $w ) > 50 && '' !== $line ) {
+				$lines[] = $line;
+				$line = $w;
+			} else {
+				$line = '' === $line ? $w : $line . ' ' . $w;
+			}
+		}
+		if ( '' !== $line ) {
+			$lines[] = $line;
+		}
+		$h = 48 + count( $lines ) * 16;
+		$desc_svg = '';
+		foreach ( $lines as $i => $ln ) {
+			$y = 42 + $i * 16;
+			$desc_svg .= '<text x="12" y="' . $y . '" font-size="10.5" fill="#94a3b8">' . esc_html( $ln ) . '</text>';
+		}
+		?>
+		<svg viewBox="0 0 340 <?php echo (int) $h; ?>" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+			<rect width="340" height="<?php echo (int) $h; ?>" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+			<text x="12" y="22" font-size="12.5" font-weight="600" fill="#334155" font-family="-apple-system,BlinkMacSystemFont,sans-serif"><?php echo $t; ?></text>
+			<rect x="296" y="8" width="32" height="18" rx="9" fill="#c4b5fd"/>
+			<circle cx="320" cy="17" r="7" fill="#fff"/>
+			<?php echo $desc_svg; ?>
+		</svg>
+		<?php
+	}
+
 	/* ── tab: upgrade (Go Pro) ───────────────────────────── */
 
 	private function tab_upgrade() {
@@ -891,9 +938,14 @@ class Prime_Cache_Admin_Settings {
 		</script>
 		<?php if ( ! prime_cache_is_pro() ) : ?>
 		<div class="pc-card pc-upsell">
-			<span class="pc-card__h"><?php esc_html_e( 'Want more speed?', 'prime-cache' ); ?></span>
-			<p><?php esc_html_e( 'Prime Cache Pro adds Varnish cache purging and Sucuri firewall sync for enterprise hosting environments.', 'prime-cache' ); ?></p>
-			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Learn More', 'prime-cache' ); ?> &rarr;</a>
+			<span class="pc-card__h"><?php esc_html_e( 'Available in Prime Cache Pro', 'prime-cache' ); ?></span>
+			<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0 16px">
+			<?php
+			$this->render_svg_preview_card( __( 'Varnish Cache Purging', 'prime-cache' ), __( 'Auto-purge Varnish reverse proxy when content changes.', 'prime-cache' ) );
+			$this->render_svg_preview_card( __( 'Sucuri Firewall Sync', 'prime-cache' ), __( 'Clear Sucuri firewall cache via API on content update.', 'prime-cache' ) );
+			?>
+			</div>
+			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
 		</div>
 		<?php endif; ?>
 		<?php
@@ -1136,9 +1188,18 @@ class Prime_Cache_Admin_Settings {
 		</script>
 		<?php if ( ! prime_cache_is_pro() ) : ?>
 		<div class="pc-card pc-upsell">
-			<span class="pc-card__h"><?php esc_html_e( 'Want more speed?', 'prime-cache' ); ?></span>
-			<p><?php esc_html_e( 'Prime Cache Pro adds Combine CSS/JS, Remove Unused CSS, Critical CSS generation, Async CSS Delivery, and local Google Analytics hosting.', 'prime-cache' ); ?></p>
-			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Learn More', 'prime-cache' ); ?> &rarr;</a>
+			<span class="pc-card__h"><?php esc_html_e( 'Available in Prime Cache Pro', 'prime-cache' ); ?></span>
+			<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0 16px">
+			<?php
+			$this->render_svg_preview_card( __( 'Combine CSS Files', 'prime-cache' ), __( 'Merge multiple CSS files into a single file to reduce HTTP requests.', 'prime-cache' ) );
+			$this->render_svg_preview_card( __( 'Combine JavaScript', 'prime-cache' ), __( 'Merge JS files into one request. Reduces connection overhead.', 'prime-cache' ) );
+			$this->render_svg_preview_card( __( 'Remove Unused CSS', 'prime-cache' ), __( 'Analyze each page and strip CSS rules that are never used.', 'prime-cache' ) );
+			$this->render_svg_preview_card( __( 'Critical CSS', 'prime-cache' ), __( 'Auto-generate above-the-fold CSS for instant first paint.', 'prime-cache' ) );
+			$this->render_svg_preview_card( __( 'Async CSS Delivery', 'prime-cache' ), __( 'Load stylesheets without blocking page rendering.', 'prime-cache' ) );
+			$this->render_svg_preview_card( __( 'Local Google Analytics', 'prime-cache' ), __( 'Host analytics scripts locally. Eliminates external connections.', 'prime-cache' ) );
+			?>
+			</div>
+			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
 		</div>
 		<?php endif; ?>
 		<?php
@@ -1207,9 +1268,16 @@ class Prime_Cache_Admin_Settings {
 		</form>
 		<?php if ( ! prime_cache_is_pro() ) : ?>
 		<div class="pc-card pc-upsell">
-			<span class="pc-card__h"><?php esc_html_e( 'Want more speed?', 'prime-cache' ); ?></span>
-			<p><?php esc_html_e( 'Prime Cache Pro adds WebP and AVIF image conversion, bulk media library optimization, and YouTube thumbnail replacement.', 'prime-cache' ); ?></p>
-			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Learn More', 'prime-cache' ); ?> &rarr;</a>
+			<span class="pc-card__h"><?php esc_html_e( 'Available in Prime Cache Pro', 'prime-cache' ); ?></span>
+			<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0 16px">
+			<?php
+			$this->render_svg_preview_card( __( 'WebP Conversion', 'prime-cache' ), __( 'Auto-convert images to WebP on upload. 25-80% smaller files.', 'prime-cache' ) );
+			$this->render_svg_preview_card( __( 'AVIF Conversion', 'prime-cache' ), __( 'Next-gen image format with even better compression than WebP.', 'prime-cache' ) );
+			$this->render_svg_preview_card( __( 'Bulk Optimization', 'prime-cache' ), __( 'Batch convert your entire media library in one click.', 'prime-cache' ) );
+			$this->render_svg_preview_card( __( 'YouTube Thumbnails', 'prime-cache' ), __( 'Replace iframes with lightweight thumbnails. Save 500KB+ per embed.', 'prime-cache' ) );
+			?>
+			</div>
+			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
 		</div>
 		<?php endif; ?>
 		<?php
@@ -1356,9 +1424,18 @@ class Prime_Cache_Admin_Settings {
 		</form>
 		<?php if ( ! prime_cache_is_pro() ) : ?>
 		<div class="pc-card pc-upsell">
-			<span class="pc-card__h"><?php esc_html_e( 'Want more speed?', 'prime-cache' ); ?></span>
-			<p><?php esc_html_e( 'Prime Cache Pro adds Sitemap Preloading, Speculation Rules API, Font Preloading, LCP Optimization, DNS Prefetch, and Preconnect.', 'prime-cache' ); ?></p>
-			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Learn More', 'prime-cache' ); ?> &rarr;</a>
+			<span class="pc-card__h"><?php esc_html_e( 'Available in Prime Cache Pro', 'prime-cache' ); ?></span>
+			<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0 16px">
+			<?php
+			$this->render_svg_preview_card( __( 'Sitemap Preloading', 'prime-cache' ), __( 'Discover and warm all URLs from your XML sitemap.', 'prime-cache' ) );
+			$this->render_svg_preview_card( __( 'Speculation Rules API', 'prime-cache' ), __( 'Chrome prerendering for instant page navigation.', 'prime-cache' ) );
+			$this->render_svg_preview_card( __( 'Font Preloading', 'prime-cache' ), __( 'Auto-detect and preload @font-face fonts used above the fold.', 'prime-cache' ) );
+			$this->render_svg_preview_card( __( 'LCP Optimization', 'prime-cache' ), __( 'Preload hero images with fetchpriority=high for faster LCP.', 'prime-cache' ) );
+			$this->render_svg_preview_card( __( 'DNS Prefetch', 'prime-cache' ), __( 'Early DNS resolution for external domains.', 'prime-cache' ) );
+			$this->render_svg_preview_card( __( 'Preconnect', 'prime-cache' ), __( 'Full DNS + TCP + TLS handshake in advance.', 'prime-cache' ) );
+			?>
+			</div>
+			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
 		</div>
 		<?php endif; ?>
 		<?php
