@@ -522,8 +522,15 @@ class Prime_Cache_Admin_Settings {
 					case 'exclusions':    $this->tab_exclusions( $settings ); break;
 					case 'tools':         $this->tab_tools( $settings ); break;
 					case 'dashboard':     $this->tab_dashboard( $settings ); break;
-					case 'upgrade':       $this->tab_upgrade(); break;
-					default:              $this->tab_page( $settings, $on ); break;
+					case 'upgrade':       if ( ! prime_cache_is_pro() ) { $this->tab_upgrade(); } else { $this->tab_dashboard( $settings ); } break;
+					default:
+						// Unknown tab slug (e.g. bookmarked Pro tab URL when Pro is inactive).
+						if ( isset( $tabs[ $tab ] ) ) {
+							$this->tab_dashboard( $settings ); // Safety fallback.
+						} else {
+							$this->tab_page( $settings, $on );
+						}
+						break;
 				}
 				?>
 			</main>
@@ -968,7 +975,7 @@ class Prime_Cache_Admin_Settings {
 		})();
 		</script>
 		<?php if ( ! prime_cache_is_pro() ) : ?>
-		<div class="pc-card pc-upsell">
+		<div class="pc-card pc-upsell" style="margin-top:24px">
 			<span class="pc-card__h" style="display:flex;align-items:center;gap:8px">👑 <?php esc_html_e( 'Unlock with Prime Cache Pro', 'prime-cache' ); ?></span>
 			<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0 16px">
 			<?php
@@ -1298,7 +1305,7 @@ class Prime_Cache_Admin_Settings {
 			<div class="pc-actions"><?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?></div>
 		</form>
 		<?php if ( ! prime_cache_is_pro() ) : ?>
-		<div class="pc-card pc-upsell">
+		<div class="pc-card pc-upsell" style="margin-top:24px">
 			<span class="pc-card__h" style="display:flex;align-items:center;gap:8px">👑 <?php esc_html_e( 'Unlock with Prime Cache Pro', 'prime-cache' ); ?></span>
 			<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0 16px">
 			<?php
