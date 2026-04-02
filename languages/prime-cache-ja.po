@@ -1904,3 +1904,197 @@ msgstr "YouTube & メディア"
 
 msgid "Replace YouTube iframes with lightweight thumbnails. Save 500KB-1MB per embed on initial page load."
 msgstr "YouTube iframe を軽量サムネイルに置換。初回ページ読み込みで埋め込みごとに 500KB〜1MB を節約します。"
+
+# ── Missing translations (2026-04-02) ──────────────────
+
+msgid "AVIF Conversion"
+msgstr "AVIF 変換"
+
+msgid "Add Cache-Control headers to cached responses. HTML headers are applied by the PHP drop-in. CSS, JS, image, and font headers require .htaccess Optimization to be enabled."
+msgstr "キャッシュ済みレスポンスに Cache-Control ヘッダーを追加します。HTML ヘッダーは PHP ドロップインが適用します。CSS、JS、画像、フォントのヘッダーは .htaccess 最適化の有効化が必要です。"
+
+msgid "Add X-Content-Type-Options (nosniff), X-Frame-Options (SAMEORIGIN), X-XSS-Protection, Referrer-Policy, and Permissions-Policy headers. Protects against clickjacking, MIME-type sniffing, and XSS attacks. Requires .htaccess Optimization on the Page Cache tab."
+msgstr "X-Content-Type-Options (nosniff)、X-Frame-Options (SAMEORIGIN)、X-XSS-Protection、Referrer-Policy、Permissions-Policy ヘッダーを追加します。クリックジャッキング、MIME タイプスニッフィング、XSS 攻撃から保護します。ページキャッシュタブの .htaccess 最適化が必要です。"
+
+msgid "Add the defer attribute to enqueued scripts (wp_enqueue_script) to eliminate render-blocking JavaScript. Scripts are downloaded in parallel and executed after HTML parsing. Manually inserted scripts in theme templates are not affected."
+msgstr "エンキューされたスクリプト (wp_enqueue_script) に defer 属性を追加し、レンダリングブロック JavaScript を排除します。スクリプトは並列ダウンロードされ、HTML パース後に実行されます。テーマテンプレートに直接挿入されたスクリプトには影響しません。"
+
+msgid "Analyze each page and strip CSS rules that are never used."
+msgstr "各ページを解析し、使用されていない CSS ルールを削除します。"
+
+msgid "Async CSS Delivery"
+msgstr "CSS 非同期配信"
+
+msgid "Auto-convert images to WebP on upload. 25-80% smaller files."
+msgstr "アップロード時に画像を WebP に自動変換。ファイルサイズを 25〜80% 削減。"
+
+msgid "Auto-detect and preload @font-face fonts used above the fold."
+msgstr "ファーストビューで使用される @font-face フォントを自動検出してプリロードします。"
+
+msgid "Auto-generate above-the-fold CSS for instant first paint."
+msgstr "ファーストビュー用の CSS を自動生成し、即座に初回描画します。"
+
+msgid "Auto-purge Varnish reverse proxy when content changes."
+msgstr "コンテンツ変更時に Varnish リバースプロキシを自動パージします。"
+
+msgid "Automatically resize JPEG and PNG images that exceed the maximum dimensions on upload. WebP, GIF, and AVIF images are not affected. Prevents unnecessarily large images from being stored and served."
+msgstr "アップロード時に最大サイズを超える JPEG および PNG 画像を自動リサイズします。WebP、GIF、AVIF 画像には影響しません。不必要に大きな画像の保存と配信を防ぎます。"
+
+msgid "Available in Prime Cache Pro"
+msgstr "Prime Cache Pro で利用可能"
+
+msgid "Batch convert your entire media library in one click."
+msgstr "メディアライブラリ全体をワンクリックで一括変換します。"
+
+msgid "Cache 404 (Not Found) pages. Reduces server load from repeated requests to non-existent URLs. The cached 404 page is served with proper 404 HTTP status code via the PHP drop-in. Note: .htaccess Optimization does not serve cached 404 pages (they always go through PHP to ensure the correct status code)."
+msgstr "404 (Not Found) ページをキャッシュします。存在しない URL への繰り返しリクエストによるサーバー負荷を軽減します。キャッシュされた 404 ページは PHP ドロップインを通じて適切な 404 HTTP ステータスコードで配信されます。注意: .htaccess 最適化はキャッシュされた 404 ページを配信しません (正しいステータスコードを保証するため常に PHP を経由します)。"
+
+msgid "Chrome prerendering for instant page navigation."
+msgstr "Chrome プリレンダリングによる瞬時のページ遷移。"
+
+msgid "Clear Sucuri firewall cache via API on content update."
+msgstr "コンテンツ更新時に API 経由で Sucuri ファイアウォールキャッシュをクリアします。"
+
+msgid "Combine JavaScript"
+msgstr "JavaScript 結合"
+
+msgid "Critical CSS"
+msgstr "Critical CSS"
+
+msgid "Delay between each preload request. Higher values reduce server load but take longer to complete. Preloading automatically pauses if server load is too high (exceeds 80% of CPU core count, or load spike detected)."
+msgstr "各プリロードリクエスト間の遅延。値を大きくするとサーバー負荷は減りますが、完了までの時間が長くなります。サーバー負荷が高すぎる場合 (CPU コア数の 80% を超える、または負荷スパイク検出時) はプリロードが自動的に一時停止します。"
+
+msgid "Delay loading of enqueued JavaScript (wp_enqueue_script) until user interaction (scroll, click, keydown, touchstart, mousemove). Applied on mobile devices only to avoid CLS regression on desktop. Separate mobile cache is automatically enabled when this setting is on. Significantly improves mobile page load metrics but may cause a brief delay on first interaction."
+msgstr "エンキューされた JavaScript (wp_enqueue_script) の読み込みをユーザー操作 (スクロール、クリック、キー入力、タッチ、マウス移動) まで遅延します。デスクトップの CLS 悪化を避けるため、モバイルデバイスのみに適用されます。この設定が有効な場合、モバイル別キャッシュが自動的に有効化されます。モバイルのページ読み込み指標を大幅に改善しますが、初回操作時にわずかな遅延が生じる場合があります。"
+
+msgid "Disable WooCommerce CSS and JavaScript on non-WooCommerce pages (shop, product, archive, cart, checkout, and account pages are excluded). Saves ~100 KB+ on regular blog/pages."
+msgstr "WooCommerce 以外のページで WooCommerce の CSS と JavaScript を無効化します (ショップ、商品、アーカイブ、カート、チェックアウト、アカウントページは除外)。通常のブログ/固定ページで 100KB 以上を節約します。"
+
+msgid "Disable the XML-RPC API via the xmlrpc_enabled filter and remove the X-Pingback header. This does not block access to xmlrpc.php at the server level — use .htaccess or server configuration for full blocking. Not needed if you use the REST API."
+msgstr "xmlrpc_enabled フィルターで XML-RPC API を無効化し、X-Pingback ヘッダーを削除します。サーバーレベルでの xmlrpc.php へのアクセスはブロックしません。完全なブロックには .htaccess またはサーバー設定を使用してください。REST API を使用している場合は不要です。"
+
+msgid "Discover and warm all URLs from your XML sitemap."
+msgstr "XML サイトマップからすべての URL を検出してキャッシュを事前生成します。"
+
+msgid "Early DNS resolution for external domains."
+msgstr "外部ドメインの DNS を事前解決します。"
+
+msgid "Enable Brotli compression via mod_brotli (Apache 2.4+). Brotli achieves 15-25% better compression than gzip. Requires mod_brotli and .htaccess Optimization to be enabled. Falls back to gzip via mod_deflate if Brotli is unavailable."
+msgstr "mod_brotli (Apache 2.4+) 経由で Brotli 圧縮を有効化します。Brotli は gzip より 15〜25% 優れた圧縮率を実現します。mod_brotli と .htaccess 最適化の有効化が必要です。Brotli が利用できない場合は mod_deflate 経由の gzip にフォールバックします。"
+
+msgid "Enter URL path patterns separated by <code>|</code>. Use <code>*</code> as a wildcard. Matched URLs are always dynamically generated by WordPress. Specify WooCommerce cart/checkout, my-account pages, or any page with user-specific content."
+msgstr "URL パスパターンを <code>|</code> で区切って入力します。<code>*</code> をワイルドカードとして使用できます。マッチした URL は常に WordPress が動的に生成します。WooCommerce のカート/チェックアウト、マイアカウントページ、またはユーザー固有のコンテンツを含むページを指定してください。"
+
+msgid "Enter cookie name patterns separated by <code>|</code>. Use <code>*</code> as a wildcard. When any listed cookie is present, the request is not cached. WordPress login cookies are excluded automatically."
+msgstr "Cookie 名パターンを <code>|</code> で区切って入力します。<code>*</code> をワイルドカードとして使用できます。リストされた Cookie が存在する場合、リクエストはキャッシュされません。WordPress ログイン Cookie は自動的に除外されます。"
+
+msgid "Enter referrer URL patterns separated by <code>|</code>. Use <code>*</code> as a wildcard. Requests from matching referrers are excluded from the cache."
+msgstr "リファラー URL パターンを <code>|</code> で区切って入力します。<code>*</code> をワイルドカードとして使用できます。マッチしたリファラーからのリクエストはキャッシュから除外されます。"
+
+msgid "Enter user-agent patterns separated by <code>|</code>. Use <code>*</code> as a wildcard. Matched browsers or crawlers receive uncached responses."
+msgstr "ユーザーエージェントパターンを <code>|</code> で区切って入力します。<code>*</code> をワイルドカードとして使用できます。マッチしたブラウザーやクローラーにはキャッシュされていないレスポンスが返されます。"
+
+msgid "Font Preloading"
+msgstr "フォントプリロード"
+
+msgid "Force browsers to use HTTPS for all future connections. Only enable if your site fully supports HTTPS. Includes includeSubDomains and preload directives. Requires .htaccess Optimization on the Page Cache tab."
+msgstr "ブラウザーに今後のすべての接続で HTTPS を使用するよう強制します。サイトが完全に HTTPS に対応している場合のみ有効化してください。includeSubDomains と preload ディレクティブを含みます。ページキャッシュタブの .htaccess 最適化が必要です。"
+
+msgid "Full DNS + TCP + TLS handshake in advance."
+msgstr "DNS + TCP + TLS ハンドシェイクを事前に完了します。"
+
+msgid "Host analytics scripts locally. Eliminates external connections."
+msgstr "アナリティクススクリプトをローカルでホスト。外部接続を排除します。"
+
+msgid "How long until cache files are automatically discarded. Expired caches are regenerated on the next visit and cleaned up hourly by WP-Cron. Set to 0 for unlimited (purge only on post updates, comments, and term changes). For frequently updated news sites, use 1-6 hours. For less active sites, use 1-7 days or unlimited. Note: When .htaccess Optimization is enabled, Apache serves cached files directly and cannot check file age. Expired files may continue to be served until the next WP-Cron cleanup (runs hourly)."
+msgstr "キャッシュファイルが自動的に破棄されるまでの時間。期限切れのキャッシュは次のアクセス時に再生成され、WP-Cron により毎時クリーンアップされます。0 に設定すると無制限 (投稿更新、コメント、タームの変更時のみパージ)。頻繁に更新されるニュースサイトには 1〜6 時間、更新が少ないサイトには 1〜7 日または無制限を推奨します。注意: .htaccess 最適化が有効な場合、Apache はキャッシュファイルを直接配信するため、ファイルの有効期限をチェックできません。期限切れファイルは次の WP-Cron クリーンアップ (毎時実行) まで配信され続ける場合があります。"
+
+msgid "Images / Media / Documents Cache Lifetime"
+msgstr "画像 / メディア / ドキュメントのキャッシュ期間"
+
+msgid "JS Optimization"
+msgstr "JS 最適化"
+
+msgid "Limit DNS Prefetch Hints"
+msgstr "DNS Prefetch ヒントを制限"
+
+msgid "Limit dns-prefetch and preconnect hints to 4 entries. WordPress auto-adds hints for every external domain, which wastes mobile connections. PageSpeed recommends 4 or fewer."
+msgstr "dns-prefetch と preconnect ヒントを 4 エントリーに制限します。WordPress は外部ドメインごとにヒントを自動追加しますが、モバイル接続を浪費します。PageSpeed は 4 つ以下を推奨しています。"
+
+msgid "Load stylesheets without blocking page rendering."
+msgstr "ページレンダリングをブロックせずにスタイルシートを読み込みます。"
+
+msgid "Log cache purge operations (PURGE ALL, PURGE URL) to wp-content/cache/prime-cache/debug.log. Useful for troubleshooting cache invalidation. Disable in production as it increases disk I/O."
+msgstr "キャッシュパージ操作 (PURGE ALL、PURGE URL) を wp-content/cache/prime-cache/debug.log に記録します。キャッシュ無効化のトラブルシューティングに便利です。ディスク I/O が増加するため、本番環境では無効化してください。"
+
+msgid "Merge JS files into one request. Reduces connection overhead."
+msgstr "JS ファイルを 1 つのリクエストに結合。接続オーバーヘッドを削減します。"
+
+msgid "Merge multiple CSS files into a single file to reduce HTTP requests."
+msgstr "複数の CSS ファイルを 1 つに結合して HTTP リクエストを削減します。"
+
+msgid "Next-gen image format with even better compression than WebP."
+msgstr "WebP よりさらに優れた圧縮率の次世代画像フォーマット。"
+
+msgid "Note: When .htaccess Optimization is enabled, only simple patterns are used in the .htaccess fast-path."
+msgstr "注意: .htaccess 最適化が有効な場合、.htaccess 高速パスでは単純なパターンのみが使用されます。"
+
+msgid "Preload hero images with fetchpriority=high for faster LCP."
+msgstr "fetchpriority=high でヒーロー画像をプリロードし、LCP を高速化します。"
+
+msgid "Prime Cache Pro"
+msgstr "Prime Cache Pro"
+
+msgid "Remove EXIF metadata (camera model, GPS coordinates, timestamps) from JPEG images on upload. Only JPEG images are processed. Images are re-encoded at quality 92, which may slightly change file size. Improves privacy by stripping location data."
+msgstr "アップロード時に JPEG 画像から EXIF メタデータ (カメラモデル、GPS 座標、タイムスタンプ) を削除します。JPEG 画像のみが処理されます。品質 92 で再エンコードされるため、ファイルサイズがわずかに変わる場合があります。位置情報を削除することでプライバシーを改善します。"
+
+msgid "Remove the WordPress version meta tag and feed generator tag. Minor security improvement — prevents version fingerprinting."
+msgstr "WordPress バージョンメタタグとフィードジェネレータータグを削除します。バージョンフィンガープリンティングを防ぐ軽微なセキュリティ改善です。"
+
+msgid "Remove version query strings (?ver=, ?v=) from local CSS and JS file URLs. Improves cacheability by CDNs and proxies that ignore query strings. External URLs are not affected."
+msgstr "ローカル CSS および JS ファイル URL からバージョンクエリ文字列 (?ver=, ?v=) を削除します。クエリ文字列を無視する CDN やプロキシによるキャッシュ効率を改善します。外部 URL には影響しません。"
+
+msgid "Remove wp-block-library, wp-block-library-theme, and WooCommerce block stylesheets. Use only if you are using the Classic Editor and not using any Gutenberg blocks."
+msgstr "wp-block-library、wp-block-library-theme、WooCommerce ブロックスタイルシートを削除します。クラシックエディターを使用し、Gutenberg ブロックを使用していない場合のみ使用してください。"
+
+msgid "Replace iframes with lightweight thumbnails. Save 500KB+ per embed."
+msgstr "iframe を軽量サムネイルに置換。埋め込みごとに 500KB 以上を節約。"
+
+msgid "Restore WordPress bundled jQuery when the theme loads it from an external CDN (e.g. cdnjs.cloudflare.com). Eliminates external connection overhead (~600ms on mobile) by serving jQuery from the same origin."
+msgstr "テーマが外部 CDN (例: cdnjs.cloudflare.com) から jQuery を読み込む場合に WordPress 同梱の jQuery に戻します。同一オリジンから jQuery を配信することで外部接続のオーバーヘッド (モバイルで約 600ms) を排除します。"
+
+msgid "Run OPTIMIZE TABLE on non-InnoDB WordPress tables with fragmented space. InnoDB tables are excluded because they handle fragmentation internally and OPTIMIZE can cause heavy table rebuilds on large tables."
+msgstr "断片化されたスペースを持つ非 InnoDB WordPress テーブルに OPTIMIZE TABLE を実行します。InnoDB テーブルは内部的に断片化を処理し、OPTIMIZE は大きなテーブルで重いテーブル再構築を引き起こす可能性があるため除外されます。"
+
+msgid "Run database cleanup now? Up to 1,000 items will be processed per run. This cannot be undone."
+msgstr "データベースクリーンアップを今すぐ実行しますか？ 1 回の実行で最大 1,000 アイテムが処理されます。この操作は元に戻せません。"
+
+msgid "Security headers require .htaccess Optimization to be enabled on the Page Cache tab. Without it, these headers will not be added to responses."
+msgstr "セキュリティヘッダーにはページキャッシュタブの .htaccess 最適化の有効化が必要です。有効化しないと、これらのヘッダーはレスポンスに追加されません。"
+
+msgid "Serve optimized CSS/JS files via clean URLs (/_pc-static/) instead of direct file paths. Uses WordPress rewrite rules for portability. Adds long-lived Cache-Control headers (1 year, immutable) for optimal browser caching. Permalinks are flushed automatically when this setting is changed."
+msgstr "最適化された CSS/JS ファイルを直接ファイルパスではなくクリーン URL (/_pc-static/) で配信します。WordPress リライトルールを使用して移植性を確保します。最適なブラウザーキャッシュのために長期間の Cache-Control ヘッダー (1 年、immutable) を追加します。この設定が変更されるとパーマリンクが自動的にフラッシュされます。"
+
+msgid "Speculation Rules API"
+msgstr "Speculation Rules API"
+
+msgid "Sucuri Firewall Sync"
+msgstr "Sucuri ファイアウォール同期"
+
+msgid "Use Local jQuery"
+msgstr "ローカル jQuery を使用"
+
+msgid "Varnish Cache Purging"
+msgstr "Varnish キャッシュパージ"
+
+msgid "Wildcard"
+msgstr "ワイルドカード"
+
+msgid "YouTube Thumbnails"
+msgstr "YouTube サムネイル"
+
+msgid "Settings imported but advanced-cache.php is managed by another plugin. Page caching will not work until the other plugin is deactivated."
+msgstr "設定をインポートしましたが、advanced-cache.php は別のプラグインによって管理されています。そのプラグインを無効化するまでページキャッシュは動作しません。"
+
+msgid "advanced-cache.php is managed by another active plugin. Prime Cache page caching will not work until the other plugin is deactivated."
+msgstr "advanced-cache.php は別の有効なプラグインによって管理されています。そのプラグインを無効化するまで Prime Cache のページキャッシュは動作しません。"
