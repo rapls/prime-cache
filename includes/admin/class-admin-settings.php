@@ -546,12 +546,12 @@ class Prime_Cache_Admin_Settings {
 	private function render_svg_preview_card( $title, $description ) {
 		$t = esc_html( $title );
 		$d = esc_html( $description );
-		// Word-wrap description into lines of ~50 chars.
+		// Word-wrap description into lines of ~44 chars.
 		$words = explode( ' ', $d );
 		$lines = array();
 		$line  = '';
 		foreach ( $words as $w ) {
-			if ( strlen( $line . ' ' . $w ) > 50 && '' !== $line ) {
+			if ( strlen( $line . ' ' . $w ) > 44 && '' !== $line ) {
 				$lines[] = $line;
 				$line = $w;
 			} else {
@@ -561,18 +561,21 @@ class Prime_Cache_Admin_Settings {
 		if ( '' !== $line ) {
 			$lines[] = $line;
 		}
-		$h = 48 + count( $lines ) * 16;
+		$h = 56 + count( $lines ) * 15;
 		$desc_svg = '';
 		foreach ( $lines as $i => $ln ) {
-			$y = 42 + $i * 16;
-			$desc_svg .= '<text x="12" y="' . $y . '" font-size="10.5" fill="#94a3b8">' . esc_html( $ln ) . '</text>';
+			$y = 46 + $i * 15;
+			$desc_svg .= '<text x="14" y="' . $y . '" font-size="10" fill="#64748b">' . esc_html( $ln ) . '</text>';
 		}
 		?>
-		<svg viewBox="0 0 340 <?php echo (int) $h; ?>" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
-			<rect width="340" height="<?php echo (int) $h; ?>" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
-			<text x="12" y="22" font-size="12.5" font-weight="600" fill="#334155" font-family="-apple-system,BlinkMacSystemFont,sans-serif"><?php echo $t; ?></text>
-			<rect x="296" y="8" width="32" height="18" rx="9" fill="#c4b5fd"/>
-			<circle cx="320" cy="17" r="7" fill="#fff"/>
+		<svg viewBox="0 0 340 <?php echo (int) $h; ?>" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;border-radius:6px;cursor:default">
+			<defs><linearGradient id="pcg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f5f3ff"/><stop offset="100%" stop-color="#ede9fe"/></linearGradient></defs>
+			<rect width="340" height="<?php echo (int) $h; ?>" rx="6" fill="url(#pcg)" stroke="#c4b5fd" stroke-width=".5"/>
+			<text x="14" y="22" font-size="12" font-weight="600" fill="#334155" font-family="-apple-system,BlinkMacSystemFont,sans-serif"><?php echo $t; ?></text>
+			<rect x="256" y="7" width="36" height="16" rx="3" fill="#6366f1" opacity=".9"/>
+			<text x="274" y="19" font-size="8" font-weight="700" fill="#fff" text-anchor="middle" font-family="-apple-system,sans-serif">PRO</text>
+			<rect x="298" y="8" width="30" height="14" rx="7" fill="#a5b4fc"/>
+			<circle cx="319" cy="15" r="5" fill="#fff"/>
 			<?php echo $desc_svg; ?>
 		</svg>
 		<?php
@@ -583,9 +586,11 @@ class Prime_Cache_Admin_Settings {
 	private function tab_upgrade() {
 		$url = 'https://raplsworks.com/prime-cache-pro/';
 		?>
-		<h2 class="pc-title"><?php esc_html_e( 'Prime Cache Pro', 'prime-cache' ); ?></h2>
-		<p style="font-size:15px;color:#475569;margin:0 0 24px;max-width:640px"><?php esc_html_e( 'Unlock the full potential of your site with advanced performance optimization features.', 'prime-cache' ); ?></p>
-		<a href="<?php echo esc_url( $url ); ?>" class="pc-btn pc-btn--p" target="_blank" rel="noopener"><?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
+		<div style="background:linear-gradient(135deg,#6366f1,#7c3aed);border-radius:12px;padding:32px 36px;margin-bottom:28px;color:#fff">
+			<h2 style="font-size:24px;font-weight:700;margin:0 0 8px;color:#fff">👑 Prime Cache Pro</h2>
+			<p style="font-size:15px;margin:0 0 20px;opacity:.9;max-width:540px"><?php esc_html_e( 'Unlock the full potential of your site with advanced performance optimization features.', 'prime-cache' ); ?></p>
+			<a href="<?php echo esc_url( $url ); ?>" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#6366f1;font-weight:700;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none;transition:opacity .2s" target="_blank" rel="noopener">⭐ <?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
+		</div>
 
 		<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px">
 
@@ -631,8 +636,9 @@ class Prime_Cache_Admin_Settings {
 
 		</div>
 
-		<div style="margin-top:28px;text-align:center">
-			<a href="<?php echo esc_url( $url ); ?>" class="pc-btn pc-btn--p" target="_blank" rel="noopener"><?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
+		<div style="margin-top:28px;text-align:center;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-radius:10px;padding:24px">
+			<p style="font-size:15px;font-weight:600;color:#334155;margin:0 0 14px"><?php esc_html_e( 'Ready to speed up your site?', 'prime-cache' ); ?></p>
+			<a href="<?php echo esc_url( $url ); ?>" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;font-weight:700;font-size:15px;padding:14px 32px;border-radius:8px;text-decoration:none;box-shadow:0 4px 12px rgba(99,102,241,.3);transition:opacity .2s" target="_blank" rel="noopener">⭐ <?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
 		</div>
 		<?php
 	}
@@ -963,14 +969,14 @@ class Prime_Cache_Admin_Settings {
 		</script>
 		<?php if ( ! prime_cache_is_pro() ) : ?>
 		<div class="pc-card pc-upsell">
-			<span class="pc-card__h"><?php esc_html_e( 'Available in Prime Cache Pro', 'prime-cache' ); ?></span>
+			<span class="pc-card__h" style="display:flex;align-items:center;gap:8px">👑 <?php esc_html_e( 'Unlock with Prime Cache Pro', 'prime-cache' ); ?></span>
 			<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0 16px">
 			<?php
 			$this->render_svg_preview_card( __( 'Varnish Cache Purging', 'prime-cache' ), __( 'Auto-purge Varnish reverse proxy when content changes.', 'prime-cache' ) );
 			$this->render_svg_preview_card( __( 'Sucuri Firewall Sync', 'prime-cache' ), __( 'Clear Sucuri firewall cache via API on content update.', 'prime-cache' ) );
 			?>
 			</div>
-			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
+			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:10px 20px">⭐ <?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
 		</div>
 		<?php endif; ?>
 		<?php
@@ -1213,7 +1219,7 @@ class Prime_Cache_Admin_Settings {
 		</script>
 		<?php if ( ! prime_cache_is_pro() ) : ?>
 		<div class="pc-card pc-upsell">
-			<span class="pc-card__h"><?php esc_html_e( 'Available in Prime Cache Pro', 'prime-cache' ); ?></span>
+			<span class="pc-card__h" style="display:flex;align-items:center;gap:8px">👑 <?php esc_html_e( 'Unlock with Prime Cache Pro', 'prime-cache' ); ?></span>
 			<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0 16px">
 			<?php
 			$this->render_svg_preview_card( __( 'Combine CSS Files', 'prime-cache' ), __( 'Merge multiple CSS files into a single file to reduce HTTP requests.', 'prime-cache' ) );
@@ -1224,7 +1230,7 @@ class Prime_Cache_Admin_Settings {
 			$this->render_svg_preview_card( __( 'Local Google Analytics', 'prime-cache' ), __( 'Host analytics scripts locally. Eliminates external connections.', 'prime-cache' ) );
 			?>
 			</div>
-			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
+			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:10px 20px">⭐ <?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
 		</div>
 		<?php endif; ?>
 		<?php
@@ -1293,7 +1299,7 @@ class Prime_Cache_Admin_Settings {
 		</form>
 		<?php if ( ! prime_cache_is_pro() ) : ?>
 		<div class="pc-card pc-upsell">
-			<span class="pc-card__h"><?php esc_html_e( 'Available in Prime Cache Pro', 'prime-cache' ); ?></span>
+			<span class="pc-card__h" style="display:flex;align-items:center;gap:8px">👑 <?php esc_html_e( 'Unlock with Prime Cache Pro', 'prime-cache' ); ?></span>
 			<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0 16px">
 			<?php
 			$this->render_svg_preview_card( __( 'WebP Conversion', 'prime-cache' ), __( 'Auto-convert images to WebP on upload. 25-80% smaller files.', 'prime-cache' ) );
@@ -1302,7 +1308,7 @@ class Prime_Cache_Admin_Settings {
 			$this->render_svg_preview_card( __( 'YouTube Thumbnails', 'prime-cache' ), __( 'Replace iframes with lightweight thumbnails. Save 500KB+ per embed.', 'prime-cache' ) );
 			?>
 			</div>
-			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
+			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:10px 20px">⭐ <?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
 		</div>
 		<?php endif; ?>
 		<?php
@@ -1449,7 +1455,7 @@ class Prime_Cache_Admin_Settings {
 		</form>
 		<?php if ( ! prime_cache_is_pro() ) : ?>
 		<div class="pc-card pc-upsell">
-			<span class="pc-card__h"><?php esc_html_e( 'Available in Prime Cache Pro', 'prime-cache' ); ?></span>
+			<span class="pc-card__h" style="display:flex;align-items:center;gap:8px">👑 <?php esc_html_e( 'Unlock with Prime Cache Pro', 'prime-cache' ); ?></span>
 			<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0 16px">
 			<?php
 			$this->render_svg_preview_card( __( 'Sitemap Preloading', 'prime-cache' ), __( 'Discover and warm all URLs from your XML sitemap.', 'prime-cache' ) );
@@ -1460,7 +1466,7 @@ class Prime_Cache_Admin_Settings {
 			$this->render_svg_preview_card( __( 'Preconnect', 'prime-cache' ), __( 'Full DNS + TCP + TLS handshake in advance.', 'prime-cache' ) );
 			?>
 			</div>
-			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
+			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:10px 20px">⭐ <?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
 		</div>
 		<?php endif; ?>
 		<?php
@@ -2376,9 +2382,9 @@ class Prime_Cache_Admin_Settings {
 .pc-nav__item:hover .dashicons{color:#64748b}
 .pc-nav__item--on{background:#ede9fe;color:var(--c-pri);font-weight:600}
 .pc-nav__item--on .dashicons{color:var(--c-pri)}
-.pc-nav__upgrade{color:#6366f1 !important;font-weight:600;border-top:1px solid var(--c-subtle);margin-top:8px;padding-top:8px}
-.pc-nav__upgrade .dashicons{color:#6366f1}
-.pc-nav__upgrade:hover{background:rgba(99,102,241,.08) !important;color:#4f46e5 !important}
+.pc-nav__upgrade{background:linear-gradient(135deg,#6366f1,#7c3aed) !important;color:#fff !important;font-weight:600;border-radius:6px;margin:12px 10px 0;padding:10px 14px !important;text-align:center;transition:opacity .2s}
+.pc-nav__upgrade .dashicons{color:#fbbf24}
+.pc-nav__upgrade:hover{opacity:.9;color:#fff !important;background:linear-gradient(135deg,#4f46e5,#6d28d9) !important}
 /* Pro badge — available for Pro plugin to use when injecting cards via hooks. */
 .pc-pro-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.5px;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;padding:1px 6px;border-radius:4px;margin-left:auto;line-height:16px}
 
@@ -2413,8 +2419,8 @@ class Prime_Cache_Admin_Settings {
 .pc-card__h{display:block;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--c-muted);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--c-subtle)}
 .pc-card__row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .pc-card__row .pc-card__h{margin:0;padding:0;border:none}
-.pc-upsell{background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 100%);border-color:#c4b5fd}
-.pc-upsell .pc-card__h{color:#6366f1}
+.pc-upsell{background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 100%);border:1.5px solid #c4b5fd;box-shadow:0 2px 8px rgba(99,102,241,.08)}
+.pc-upsell .pc-card__h{color:#6366f1;font-size:14px}
 .pc-upsell p{font-size:13px;color:#475569;line-height:1.7;margin:0 0 14px}
 
 /* hit bar */
