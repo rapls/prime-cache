@@ -111,6 +111,7 @@ function prime_cache_get_settings( $force = false ) {
 		'remove_html_comments'  => false,
 		'minify_css'            => false,
 		'combine_css'           => false,
+		'combine_mobile_only'   => false,
 		'optimize_css_delivery'  => false,
 		'css_delivery_method'   => 'remove_unused_css',
 		'async_css'             => false,

@@ -68,6 +68,7 @@ class Prime_Cache_Admin_Settings {
 		$s['remove_html_comments']  = ! empty( $input['remove_html_comments'] );
 		$s['minify_css']            = ! empty( $input['minify_css'] );
 		$s['combine_css']           = ! empty( $input['combine_css'] );
+		$s['combine_mobile_only']   = ! empty( $input['combine_mobile_only'] );
 		$s['optimize_css_delivery']  = ! empty( $input['optimize_css_delivery'] );
 		$s['css_delivery_method']   = isset( $input['css_delivery_method'] ) && in_array( $input['css_delivery_method'], array( 'remove_unused_css', 'async_css' ), true ) ? $input['css_delivery_method'] : 'remove_unused_css';
 		// Derive the individual flags from the master toggle + method.
@@ -998,7 +999,7 @@ class Prime_Cache_Admin_Settings {
 		);
 		if ( prime_cache_is_pro() ) {
 			$fo_keys = array_merge( $fo_keys, array(
-				'combine_css','optimize_css_delivery','css_delivery_method',
+				'combine_css','combine_mobile_only','optimize_css_delivery','css_delivery_method',
 				'async_css','critical_css','critical_css_auto','remove_unused_css','ucss_safelist',
 				'combine_js','combine_google_fonts','self_host_google_fonts','local_analytics',
 			) );
