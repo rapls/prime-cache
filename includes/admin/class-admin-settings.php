@@ -658,6 +658,10 @@ class Prime_Cache_Admin_Settings {
 		$sys = $this->get_system_status();
 		$total = $hs['hit'] + $hs['miss'];
 		$rate  = $total > 0 ? round( ( $hs['hit'] / $total ) * 100, 1 ) : 0;
+		// Detect fast-path serving (htaccess or Xアクセラレータ) where PHP-based
+		// hit stats are not recorded because pages are served without PHP.
+		$fast_path = ! empty( $settings['htaccess_enabled'] ) && Prime_Cache_Htaccess::has_rules();
+		$stats_limited = $fast_path && 0 === $hs['hit'] && $st['files'] > 0;
 		$oc    = Prime_Cache_Config::get_active_object_cache();
 		$n     = wp_create_nonce( 'prime_cache_admin_action' );
 
@@ -673,7 +677,11 @@ class Prime_Cache_Admin_Settings {
 
 		<!-- KPI Row -->
 		<div class="pc-grid pc-grid--4">
+			<?php if ( $stats_limited ) : ?>
+			<div class="pc-kpi"><span class="pc-kpi__val pc-kpi__val--g" style="font-size:16px">✓ <?php esc_html_e( 'Active', 'prime-cache' ); ?></span><span class="pc-kpi__lbl"><?php esc_html_e( 'Cache Status', 'prime-cache' ); ?></span></div>
+			<?php else : ?>
 			<div class="pc-kpi"><span class="pc-kpi__val"><?php echo esc_html( $rate ); ?>%</span><span class="pc-kpi__lbl"><?php esc_html_e( 'Hit Rate', 'prime-cache' ); ?></span></div>
+			<?php endif; ?>
 			<div class="pc-kpi"><span class="pc-kpi__val pc-kpi__val--g"><?php echo esc_html( number_format( $hs['hit'] ) ); ?></span><span class="pc-kpi__lbl">HIT</span></div>
 			<div class="pc-kpi"><span class="pc-kpi__val pc-kpi__val--a"><?php echo esc_html( number_format( $hs['miss'] ) ); ?></span><span class="pc-kpi__lbl">MISS</span></div>
 			<div class="pc-kpi"><span class="pc-kpi__val"><?php echo esc_html( number_format( $st['files'] ) ); ?></span><span class="pc-kpi__lbl"><?php esc_html_e( 'Pages', 'prime-cache' ); ?></span></div>
@@ -688,7 +696,14 @@ class Prime_Cache_Admin_Settings {
 					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=prime-cache&prime_cache_reset_stats=1' ), 'prime_cache_reset_stats' ) ); ?>" class="pc-btn pc-btn--o pc-btn--sm" style="font-size:11px;padding:3px 10px" onclick="return confirm(<?php echo esc_attr( wp_json_encode( __( 'Reset all hit/miss statistics to zero?', 'prime-cache' ) ) ); ?>)"><span class="dashicons dashicons-image-rotate" style="font-size:13px;width:13px;height:13px;line-height:13px"></span><?php esc_html_e( 'Reset', 'prime-cache' ); ?></a>
 				</div>
 			</div>
+			<?php if ( $stats_limited ) : ?>
+			<div style="display:flex;align-items:center;gap:8px;padding:10px 0">
+				<span class="dashicons dashicons-yes-alt" style="color:#22c55e;font-size:20px"></span>
+				<span style="font-size:13px;color:#475569"><?php printf( esc_html__( 'Cache is serving %s pages via .htaccess fast-path (PHP-free). Hit/miss stats are not tracked in this mode because pages are served directly by Apache without running PHP.', 'prime-cache' ), '<b>' . esc_html( number_format( $st['files'] ) ) . '</b>' ); ?></span>
+			</div>
+			<?php else : ?>
 			<div class="pc-bar"><div class="pc-bar__fill" style="width:<?php echo esc_attr( $rate ); ?>%"></div></div>
+			<?php endif; ?>
 			<div class="pc-bar__info">
 				<span><?php printf( esc_html__( 'Total: %s', 'prime-cache' ), '<b>' . esc_html( number_format( $total ) ) . '</b>' ); ?></span>
 				<span><?php printf( esc_html__( 'Size: %s', 'prime-cache' ), '<b>' . esc_html( $this->fmt( $st['size'] ) ) . '</b>' ); ?></span>
