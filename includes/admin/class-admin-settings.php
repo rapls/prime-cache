@@ -457,7 +457,6 @@ class Prime_Cache_Admin_Settings {
 			'page-cache'    => array( 'dashicons-admin-page',     __( 'Page Cache', 'prime-cache' ) ),
 			'file-opt'      => array( 'dashicons-editor-code',     __( 'File Optimization', 'prime-cache' ) ),
 			'media'         => array( 'dashicons-format-image',     __( 'Media', 'prime-cache' ) ),
-			'cdn'           => array( 'dashicons-cloud-saved',     __( 'CDN', 'prime-cache' ) ),
 			'preload'       => array( 'dashicons-controls-forward', __( 'Preload', 'prime-cache' ) ),
 			'cache-control' => array( 'dashicons-admin-generic',  __( 'Cache Control', 'prime-cache' ) ),
 			'auto-purge'    => array( 'dashicons-update',          __( 'Auto Purge', 'prime-cache' ) ),
@@ -505,17 +504,18 @@ class Prime_Cache_Admin_Settings {
 					case 'object-cache':
 					case 'heartbeat':
 					case 'database':
+					case 'cdn':
 						if ( isset( $tabs[ $tab ] ) ) {
 							if ( 'object-cache' === $tab ) { $this->tab_object(); }
 							elseif ( 'heartbeat' === $tab ) { $this->tab_heartbeat( $settings ); }
 							elseif ( 'database' === $tab ) { $this->tab_database( $settings ); }
+							elseif ( 'cdn' === $tab ) { $this->tab_cdn( $settings ); }
 						} else {
 							$this->tab_dashboard( $settings );
 						}
 						break;
 					case 'file-opt':      $this->tab_file_opt( $settings ); break;
 					case 'media':         $this->tab_media( $settings ); break;
-					case 'cdn':           $this->tab_cdn( $settings ); break;
 					case 'preload':       $this->tab_preload( $settings ); break;
 					case 'cache-control': $this->tab_control( $settings ); break;
 					case 'auto-purge':    $this->tab_auto_purge( $settings ); break;
@@ -1317,7 +1317,10 @@ class Prime_Cache_Admin_Settings {
 	/* ── tab: cdn ─────────────────────────────────────────── */
 
 	private function tab_cdn( $settings ) {
-		$vis = array( 'cdn_enabled','cdn_hostname','cdn_include_dirs','cdn_exclude','cdn_relative','cloudflare_enabled','cloudflare_email','cloudflare_api_key','cloudflare_auth_mode','cloudflare_zone_id' );
+		$vis = array();
+		if ( prime_cache_is_pro() ) {
+			$vis = array( 'cdn_enabled','cdn_hostname','cdn_include_dirs','cdn_exclude','cdn_relative','cloudflare_enabled','cloudflare_email','cloudflare_api_key','cloudflare_auth_mode','cloudflare_zone_id' );
+		}
 		?>
 		<h2 class="pc-title"><?php esc_html_e( 'CDN', 'prime-cache' ); ?></h2>
 		<form method="post" action="options.php">
