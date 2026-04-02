@@ -85,10 +85,10 @@ function _prime_cache_flush_stat() {
 	$stats_file = PRIME_CACHE_CACHE_DIR . 'stats.json';
 	$stats      = array( 'hit' => 0, 'miss' => 0, 'since' => time() );
 
-	$fp = fopen( $stats_file, 'c' );
+	$fp = @fopen( $stats_file, 'c' );
 	if ( $fp && flock( $fp, LOCK_EX | LOCK_NB ) ) {
 		fseek( $fp, 0 );
-		$current = stream_get_contents( $fp );
+		$current = @stream_get_contents( $fp );
 		if ( $current ) {
 			$current_data = json_decode( $current, true );
 			if ( is_array( $current_data ) ) {

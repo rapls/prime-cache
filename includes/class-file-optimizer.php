@@ -810,7 +810,7 @@ class Prime_Cache_File_Optimizer {
 				if ( false !== strpos( $attr, 'data-no-delay' ) ) return $full;
 
 				// Check type — skip non-JS types.
-				if ( preg_match( '/type\s*=\s*["\']([^"\']*)["\'/]/i', $attr, $type_m ) ) {
+				if ( preg_match( '#type\s*=\s*["\']([^"\']*)["\']#i', $attr, $type_m ) ) {
 					$type = strtolower( trim( $type_m[1] ) );
 					if ( $type && in_array( $type, $skip_types, true ) ) {
 						return $full;
@@ -846,7 +846,7 @@ class Prime_Cache_File_Optimizer {
 
 				// ── Transform ──
 				// Rename type to data-pc-type, set type to delay marker.
-				if ( preg_match( '/type\s*=\s*["\']([^"\']*)["\'/]/i', $attr, $type_m ) ) {
+				if ( preg_match( '#type\s*=\s*["\']([^"\']*)["\']#i', $attr, $type_m ) ) {
 					$attr = preg_replace(
 						'/type\s*=\s*["\'][^"\']*["\']/i',
 						'data-pc-type="' . esc_attr( $type_m[1] ) . '" type="pc-delay/javascript"',
