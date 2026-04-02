@@ -975,7 +975,7 @@ class Prime_Cache_Admin_Settings {
 		})();
 		</script>
 		<?php if ( ! prime_cache_is_pro() ) : ?>
-		<div class="pc-card pc-upsell" style="margin-top:24px">
+		<div class="pc-card pc-upsell">
 			<span class="pc-card__h" style="display:flex;align-items:center;gap:8px">👑 <?php esc_html_e( 'Unlock with Prime Cache Pro', 'prime-cache' ); ?></span>
 			<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0 16px">
 			<?php
@@ -1305,7 +1305,7 @@ class Prime_Cache_Admin_Settings {
 			<div class="pc-actions"><?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?></div>
 		</form>
 		<?php if ( ! prime_cache_is_pro() ) : ?>
-		<div class="pc-card pc-upsell" style="margin-top:24px">
+		<div class="pc-card pc-upsell">
 			<span class="pc-card__h" style="display:flex;align-items:center;gap:8px">👑 <?php esc_html_e( 'Unlock with Prime Cache Pro', 'prime-cache' ); ?></span>
 			<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0 16px">
 			<?php
@@ -2429,7 +2429,7 @@ class Prime_Cache_Admin_Settings {
 .pc-card__h{display:block;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--c-muted);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--c-subtle)}
 .pc-card__row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .pc-card__row .pc-card__h{margin:0;padding:0;border:none}
-.pc-upsell{background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 100%);border:1.5px solid #c4b5fd;box-shadow:0 2px 8px rgba(99,102,241,.08)}
+.pc-upsell{background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 100%);border:1.5px solid #c4b5fd;box-shadow:0 2px 8px rgba(99,102,241,.08);margin-top:28px}
 .pc-upsell .pc-card__h{color:#6366f1;font-size:14px}
 .pc-upsell p{font-size:13px;color:#475569;line-height:1.7;margin:0 0 14px}
 
