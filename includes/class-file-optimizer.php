@@ -1023,23 +1023,16 @@ class Prime_Cache_File_Optimizer {
 	}
 
 	public function minify_js_content( $js ) {
-		// Preserve string literals, template literals, and regex literals.
-		// These must be protected before any comment/whitespace removal.
+		// Conservative JS minification: only remove block comments and
+		// collapse blank lines. Does NOT remove single-line comments (//)
+		// because distinguishing them from regex literals (/.../flags) is
+		// unreliable with regex-based parsing. A proper JS parser (Terser,
+		// UglifyJS) is needed for safe single-line comment removal.
+
+		// Preserve string literals and template literals from block comment removal.
 		$preserved = array();
 		$js = preg_replace_callback(
-			'#'
-			// Double-quoted strings.
-			. '("(?:\\\\.|[^"\\\\])*")'
-			. '|'
-			// Single-quoted strings.
-			. "('(?:\\\\.|[^'\\\\])*')"
-			. '|'
-			// Template literals (backtick strings, may span lines).
-			. '(`(?:\\\\.|[^`\\\\])*`)'
-			. '|'
-			// Regex literals: preceded by operator/keyword context.
-			. '(?<=[=(:,;!&|?+\-~^%*/\[{}\n])\s*(/(?!\*)(?:\\\\.|[^/\\\\])+/[gimsuy]*)'
-			. '#s',
+			'#("(?:\\\\.|[^"\\\\])*"|\'(?:\\\\.|[^\'\\\\])*\'|`(?:\\\\.|[^`\\\\])*`)#s',
 			function( $m ) use ( &$preserved ) {
 				$key = '"__PC_P' . count( $preserved ) . '__"';
 				$preserved[ $key ] = $m[0];
@@ -1048,13 +1041,12 @@ class Prime_Cache_File_Optimizer {
 			$js
 		);
 
-		// Remove multi-line comments.
+		// Remove block comments only (/* ... */). Safe because strings are preserved.
 		$js = preg_replace( '#/\*.*?\*/#s', '', $js );
-		// Remove single-line comments. Safe because strings/regex are preserved.
-		$js = preg_replace( '#//[^\n]*#', '', $js );
-		// Collapse whitespace (preserve at least one newline where present).
-		$js = preg_replace( '#[\t ]+#', ' ', $js );
-		$js = preg_replace( '#\n[ ]*\n+#', "\n", $js );
+
+		// Collapse leading/trailing whitespace per line and remove blank lines.
+		$js = preg_replace( '#^[\t ]+|[\t ]+$#m', '', $js );
+		$js = preg_replace( '#\n{2,}#', "\n", $js );
 
 		// Restore preserved literals.
 		if ( $preserved ) {

@@ -135,8 +135,8 @@ class Prime_Cache {
 		}
 
 		// 5. Ensure built-in JS exclusions are present in saved settings.
-		$builtin_excl = array( 'raplsaich-chatbot', 'raplsaichConfig' );
-		$builtin_js   = array( 'raplsaich' );
+		$builtin_excl = array( 'raplsaich-chatbot', 'raplsaichConfig', 'wp-consent-api', 'consent_api' );
+		$builtin_js   = array( 'raplsaich', 'wp-consent-api' );
 		$needs_save   = false;
 		// Exclude from all JS optimization (minify, combine, defer, delay).
 		foreach ( array( 'exclude_js', 'exclude_inline_js' ) as $key ) {
