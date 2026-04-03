@@ -1023,35 +1023,15 @@ class Prime_Cache_File_Optimizer {
 	}
 
 	public function minify_js_content( $js ) {
-		// Conservative JS minification: only remove block comments and
-		// collapse blank lines. Does NOT remove single-line comments (//)
-		// because distinguishing them from regex literals (/.../flags) is
-		// unreliable with regex-based parsing. A proper JS parser (Terser,
-		// UglifyJS) is needed for safe single-line comment removal.
-
-		// Preserve string literals and template literals from block comment removal.
-		$preserved = array();
-		$js = preg_replace_callback(
-			'#("(?:\\\\.|[^"\\\\])*"|\'(?:\\\\.|[^\'\\\\])*\'|`(?:\\\\.|[^`\\\\])*`)#s',
-			function( $m ) use ( &$preserved ) {
-				$key = '"__PC_P' . count( $preserved ) . '__"';
-				$preserved[ $key ] = $m[0];
-				return $key;
-			},
-			$js
-		);
-
-		// Remove block comments only (/* ... */). Safe because strings are preserved.
-		$js = preg_replace( '#/\*.*?\*/#s', '', $js );
-
-		// Collapse leading/trailing whitespace per line and remove blank lines.
-		$js = preg_replace( '#^[\t ]+|[\t ]+$#m', '', $js );
-		$js = preg_replace( '#\n{2,}#', "\n", $js );
-
-		// Restore preserved literals.
-		if ( $preserved ) {
-			$js = str_replace( array_keys( $preserved ), array_values( $preserved ), $js );
-		}
+		// Ultra-conservative JS minification: only collapse blank lines
+		// and trim trailing whitespace. No comment removal at all.
+		//
+		// Regex-based JS minification is fundamentally unsafe because
+		// regex literals (/pattern/) are indistinguishable from division
+		// operators and comment starts (// and /*) without a full JS parser.
+		// Gzip compression handles the bulk of size reduction anyway.
+		$js = preg_replace( '#[\t ]+$#m', '', $js );
+		$js = preg_replace( '#\n{3,}#', "\n\n", $js );
 		return trim( $js );
 	}
 
