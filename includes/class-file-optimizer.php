@@ -600,13 +600,24 @@ class Prime_Cache_File_Optimizer {
 			return $list;
 		}
 		$list = self::$defer_never;
-		// Divi theme uses a webpack bundle that imports jQuery internally.
-		// wrap_inline_jquery() cannot fix webpack module imports.
+
+		// jQuery defer causes CLS ~1.0 on desktop (menus, sliders shift on load).
+		// On mobile, jQuery defer is safe (TBT improvement outweighs CLS risk
+		// because mobile layout is simpler and delay_all_scripts handles timing).
+		// Requires cache_mobile_separate for correct per-device caching.
+		$is_mobile = function_exists( 'wp_is_mobile' ) && wp_is_mobile();
+		if ( ! $is_mobile ) {
+			$list = array_merge( $list, array( 'jquery-core', 'jquery', 'jquery-migrate' ) );
+		}
+
+		// Divi theme: always block jQuery defer (webpack bundle requires sync jQuery).
 		$theme = wp_get_theme();
 		$is_divi = ( 'Divi' === $theme->get( 'Name' ) || 'Divi' === $theme->parent_theme );
 		if ( $is_divi ) {
 			$list = array_merge( $list, array( 'jquery-core', 'jquery', 'jquery-migrate' ) );
 		}
+
+		$list = array_unique( $list );
 		return $list;
 	}
 
