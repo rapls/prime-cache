@@ -819,15 +819,6 @@ class Prime_Cache_File_Optimizer {
 				if ( false !== strpos( $attr, 'data-pc-delayed' ) ) return $full;
 				if ( false !== strpos( $attr, 'pc-delay' ) ) return $full;
 
-				// Never delay wp_localize_script / wp_add_inline_script output.
-				// These inline config scripts define variables that their
-				// corresponding external scripts depend on (et_pb_custom,
-				// consent_api, raplsaichConfig, etc.). Delaying them breaks
-				// the execution order contract.
-				if ( preg_match( '#id=["\'][^"\']*-js-(?:extra|before|after)["\']#i', $attr ) ) {
-					return $full;
-				}
-
 				// Skip data-no-delay.
 				if ( false !== strpos( $attr, 'data-no-delay' ) ) return $full;
 
@@ -845,14 +836,19 @@ class Prime_Cache_File_Optimizer {
 					$src = $src_m[1];
 				}
 
-				// Check exclusion patterns (match against src or inline content).
-				$match_target = $src ? $src : $content;
+				// Never delay inline scripts (no src attribute).
+				// Inline scripts include wp_localize_script config (et_pb_custom,
+				// consent_api, raplsaichConfig, etc.) and wp_add_inline_script
+				// output. These must execute immediately to set up variables that
+				// their corresponding external scripts depend on.
+				// Only external scripts (with src) are delayed.
+				if ( empty( $src ) ) {
+					return $full;
+				}
+
+				// Check exclusion patterns (match against src URL).
 				foreach ( $excl as $pattern ) {
-					if ( false !== stripos( $match_target, $pattern ) ) {
-						return $full;
-					}
-					// Try as regex.
-					if ( @preg_match( '#' . $pattern . '#i', $match_target ) ) {
+					if ( false !== stripos( $src, $pattern ) ) {
 						return $full;
 					}
 				}
