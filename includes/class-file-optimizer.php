@@ -184,9 +184,10 @@ class Prime_Cache_File_Optimizer {
 		$html = apply_filters( 'prime_cache_process_js', $html, $s );
 
 		// Wrap inline jQuery scripts with DOMContentLoaded so jQuery can be deferred.
-		// Without this, deferred jQuery would break inline $(document).ready() calls
-		// that execute immediately after the script tag.
-		if ( $s['defer_js'] ) {
+		// Mobile only — on desktop jQuery is synchronous (not deferred) and inline
+		// scripts must execute immediately to avoid CLS from delayed layout changes.
+		$is_mobile = function_exists( 'wp_is_mobile' ) && wp_is_mobile();
+		if ( $s['defer_js'] && $is_mobile ) {
 			$html = $this->wrap_inline_jquery( $html );
 		}
 
