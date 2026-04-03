@@ -580,9 +580,6 @@ class Prime_Cache_File_Optimizer {
 	 * DOMContentLoaded by wrap_inline_jquery() to allow safe deferral.
 	 */
 	private static $defer_never = array(
-		'jquery-core',
-		'jquery',
-		'jquery-migrate',
 		'raplsaich-chatbot',
 		'raplsaich-recaptcha',
 		'divi-custom-script',
@@ -591,14 +588,36 @@ class Prime_Cache_File_Optimizer {
 		'wp-consent-api',
 	);
 
+	/**
+	 * Get the full defer-never list, including theme-specific entries.
+	 * jQuery is only excluded from defer on Divi (webpack bundle requires
+	 * synchronous jQuery). On other themes, wrap_inline_jquery() handles
+	 * inline jQuery code safely with DOMContentLoaded wrapping.
+	 */
+	private function get_defer_never() {
+		static $list = null;
+		if ( null !== $list ) {
+			return $list;
+		}
+		$list = self::$defer_never;
+		// Divi theme uses a webpack bundle that imports jQuery internally.
+		// wrap_inline_jquery() cannot fix webpack module imports.
+		$theme = wp_get_theme();
+		$is_divi = ( 'Divi' === $theme->get( 'Name' ) || 'Divi' === $theme->parent_theme );
+		if ( $is_divi ) {
+			$list = array_merge( $list, array( 'jquery-core', 'jquery', 'jquery-migrate' ) );
+		}
+		return $list;
+	}
+
 	public function filter_defer_script( $tag, $handle, $src ) {
 		// Skip if already has defer or async.
 		if ( false !== strpos( $tag, 'defer' ) || false !== strpos( $tag, 'async' ) ) {
 			return $tag;
 		}
 
-		// Never defer jQuery and critical dependencies.
-		if ( in_array( $handle, self::$defer_never, true ) ) {
+		// Never defer critical scripts (theme-aware list).
+		if ( in_array( $handle, $this->get_defer_never(), true ) ) {
 			return $tag;
 		}
 
@@ -628,9 +647,6 @@ class Prime_Cache_File_Optimizer {
 	 * Scripts that must NEVER be delayed (break core functionality).
 	 */
 	private static $delay_never = array(
-		'jquery-core',
-		'jquery',
-		'jquery-migrate',
 		'wp-hooks',
 		'wp-i18n',
 		'wp-element',
@@ -660,7 +676,8 @@ class Prime_Cache_File_Optimizer {
 
 		// Never delay critical scripts. Mark with data-no-delay so
 		// delay_all_scripts() HTML pipeline also skips them.
-		if ( in_array( $handle, self::$delay_never, true ) ) {
+		$never = array_merge( self::$delay_never, $this->get_defer_never() );
+		if ( in_array( $handle, $never, true ) ) {
 			if ( false === strpos( $tag, 'data-no-delay' ) ) {
 				$tag = str_replace( ' src=', ' data-no-delay src=', $tag );
 			}
