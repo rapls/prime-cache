@@ -133,6 +133,23 @@ class Prime_Cache {
 		if ( ! wp_next_scheduled( 'prime_cache_cleanup_expired' ) ) {
 			wp_schedule_event( time(), 'hourly', 'prime_cache_cleanup_expired' );
 		}
+
+		// 5. Ensure built-in JS exclusions are present in saved settings.
+		$builtin_excl = array( 'raplsaich-chatbot', 'raplsaichConfig' );
+		$needs_save   = false;
+		foreach ( array( 'exclude_defer_js', 'exclude_delay_js' ) as $key ) {
+			$current = $settings[ $key ] ?? '';
+			foreach ( $builtin_excl as $pattern ) {
+				if ( false === strpos( $current, $pattern ) ) {
+					$current   = trim( $current . "\n" . $pattern );
+					$needs_save = true;
+				}
+			}
+			$settings[ $key ] = $current;
+		}
+		if ( $needs_save ) {
+			update_option( 'prime_cache_settings', $settings );
+		}
 	}
 
 	/**

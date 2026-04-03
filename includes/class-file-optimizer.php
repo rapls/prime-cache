@@ -575,7 +575,10 @@ class Prime_Cache_File_Optimizer {
 	 * jQuery is no longer excluded — inline jQuery code is wrapped with
 	 * DOMContentLoaded by wrap_inline_jquery() to allow safe deferral.
 	 */
-	private static $defer_never = array();
+	private static $defer_never = array(
+		'raplsaich-chatbot',
+		'raplsaich-recaptcha',
+	);
 
 	public function filter_defer_script( $tag, $handle, $src ) {
 		// Skip if already has defer or async.
