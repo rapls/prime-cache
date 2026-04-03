@@ -630,6 +630,12 @@ class Prime_Cache_File_Optimizer {
 		'wp-dom-ready',
 		'raplsaich-chatbot',
 		'raplsaich-recaptcha',
+		// Theme main scripts (depend on wp_localize_script config at load time).
+		'divi-custom-script',
+		'et-builder-modules-script',
+		'et-frontend-builder',
+		// WP Consent API (loaded by many GDPR plugins).
+		'wp-consent-api',
 	);
 
 	/**
@@ -784,10 +790,14 @@ class Prime_Cache_File_Optimizer {
 		// Build exclusion patterns.
 		$excl = $this->parse_list( $s['exclude_delay_js'] );
 		$excl = array_merge( $excl, $this->get_delay_preset_patterns() );
-		// Built-in exclusions: chat widgets and interactive plugins that
-		// break when their initialization is delayed.
+		// Built-in exclusions: scripts that break when delayed because they
+		// depend on wp_localize_script config or immediate initialization.
 		$excl[] = 'raplsaich';
 		$excl[] = 'raplsaichConfig';
+		$excl[] = 'et-builder';
+		$excl[] = 'scripts.min.js'; // Divi combined script
+		$excl[] = 'wp-consent-api';
+		$excl[] = 'consent_api';
 
 		// Safe mode: exclude local scripts.
 		$safe_mode = ! empty( $s['delay_js_safe_mode'] );
