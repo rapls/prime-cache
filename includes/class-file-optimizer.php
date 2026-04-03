@@ -987,25 +987,42 @@ class Prime_Cache_File_Optimizer {
 	}
 
 	public function minify_js_content( $js ) {
-		// Preserve string literals and template literals.
-		$strings = array();
-		$js = preg_replace_callback( '#(["\'])(?:\\\\.|(?!\1).)*\1|`(?:\\\\.|[^`])*`#s', function( $m ) use ( &$strings ) {
-			$key = '"PC_STR_' . count( $strings ) . '"';
-			$strings[ $key ] = $m[0];
-			return $key;
-		}, $js );
+		// Preserve string literals, template literals, and regex literals.
+		// These must be protected before any comment/whitespace removal.
+		$preserved = array();
+		$js = preg_replace_callback(
+			'#'
+			// Double-quoted strings.
+			. '("(?:\\\\.|[^"\\\\])*")'
+			. '|'
+			// Single-quoted strings.
+			. "('(?:\\\\.|[^'\\\\])*')"
+			. '|'
+			// Template literals (backtick strings, may span lines).
+			. '(`(?:\\\\.|[^`\\\\])*`)'
+			. '|'
+			// Regex literals: preceded by operator/keyword context.
+			. '(?<=[=(:,;!&|?+\-~^%*/\[{}\n])\s*(/(?!\*)(?:\\\\.|[^/\\\\])+/[gimsuy]*)'
+			. '#s',
+			function( $m ) use ( &$preserved ) {
+				$key = '"__PC_P' . count( $preserved ) . '__"';
+				$preserved[ $key ] = $m[0];
+				return $key;
+			},
+			$js
+		);
 
 		// Remove multi-line comments.
 		$js = preg_replace( '#/\*.*?\*/#s', '', $js );
-		// Remove single-line comments (only at line start or after semicolons/braces).
-		$js = preg_replace( '#(^|[;{}()\n])\s*//[^\n]*#m', '$1', $js );
-		// Collapse whitespace.
+		// Remove single-line comments. Safe because strings/regex are preserved.
+		$js = preg_replace( '#//[^\n]*#', '', $js );
+		// Collapse whitespace (preserve at least one newline where present).
 		$js = preg_replace( '#[\t ]+#', ' ', $js );
-		$js = preg_replace( '#\n+#', "\n", $js );
+		$js = preg_replace( '#\n[ ]*\n+#', "\n", $js );
 
-		// Restore string literals.
-		if ( $strings ) {
-			$js = str_replace( array_keys( $strings ), array_values( $strings ), $js );
+		// Restore preserved literals.
+		if ( $preserved ) {
+			$js = str_replace( array_keys( $preserved ), array_values( $preserved ), $js );
 		}
 		return trim( $js );
 	}
