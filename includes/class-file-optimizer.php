@@ -658,8 +658,12 @@ class Prime_Cache_File_Optimizer {
 			return $tag;
 		}
 
-		// Never delay critical scripts.
+		// Never delay critical scripts. Mark with data-no-delay so
+		// delay_all_scripts() HTML pipeline also skips them.
 		if ( in_array( $handle, self::$delay_never, true ) ) {
+			if ( false === strpos( $tag, 'data-no-delay' ) ) {
+				$tag = str_replace( ' src=', ' data-no-delay src=', $tag );
+			}
 			return $tag;
 		}
 
@@ -797,14 +801,24 @@ class Prime_Cache_File_Optimizer {
 		// Build exclusion patterns.
 		$excl = $this->parse_list( $s['exclude_delay_js'] );
 		$excl = array_merge( $excl, $this->get_delay_preset_patterns() );
-		// Built-in exclusions: scripts that break when delayed because they
-		// depend on wp_localize_script config or immediate initialization.
+		// Built-in exclusions: must match $delay_never handles but as URL
+		// patterns for the HTML pipeline (which doesn't see WP handles).
+		// jQuery and core dependencies.
+		$excl[] = 'jquery';
+		$excl[] = 'jquery-migrate';
+		$excl[] = 'jquery.min.js';
+		$excl[] = 'jquery-migrate.min.js';
+		// Chat widgets.
 		$excl[] = 'raplsaich';
 		$excl[] = 'raplsaichConfig';
+		// Divi theme.
 		$excl[] = 'et-builder';
-		$excl[] = 'scripts.min.js'; // Divi combined script
+		$excl[] = 'scripts.min.js';
+		// WP Consent API.
 		$excl[] = 'wp-consent-api';
 		$excl[] = 'consent_api';
+		// Cocoon theme.
+		$excl[] = 'cocoon_localize_script_options';
 
 		// Safe mode: exclude local scripts.
 		$safe_mode = ! empty( $s['delay_js_safe_mode'] );
