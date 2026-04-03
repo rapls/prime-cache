@@ -819,6 +819,15 @@ class Prime_Cache_File_Optimizer {
 				if ( false !== strpos( $attr, 'data-pc-delayed' ) ) return $full;
 				if ( false !== strpos( $attr, 'pc-delay' ) ) return $full;
 
+				// Never delay wp_localize_script / wp_add_inline_script output.
+				// These inline config scripts define variables that their
+				// corresponding external scripts depend on (et_pb_custom,
+				// consent_api, raplsaichConfig, etc.). Delaying them breaks
+				// the execution order contract.
+				if ( preg_match( '#id=["\'][^"\']*-js-(?:extra|before|after)["\']#i', $attr ) ) {
+					return $full;
+				}
+
 				// Skip data-no-delay.
 				if ( false !== strpos( $attr, 'data-no-delay' ) ) return $full;
 
