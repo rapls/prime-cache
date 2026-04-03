@@ -580,8 +580,15 @@ class Prime_Cache_File_Optimizer {
 	 * DOMContentLoaded by wrap_inline_jquery() to allow safe deferral.
 	 */
 	private static $defer_never = array(
+		'jquery-core',
+		'jquery',
+		'jquery-migrate',
 		'raplsaich-chatbot',
 		'raplsaich-recaptcha',
+		'divi-custom-script',
+		'et-builder-modules-script',
+		'et-frontend-builder',
+		'wp-consent-api',
 	);
 
 	public function filter_defer_script( $tag, $handle, $src ) {
