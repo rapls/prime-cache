@@ -838,10 +838,11 @@ class Prime_Cache_File_Optimizer {
 			return $key;
 		}, $html );
 
-		// Transform script tags.
+		// Transform script tags. Track how many were actually delayed.
+		$delayed_count = 0;
 		$html = preg_replace_callback(
 			'#<\s*script(?<attr>\s[^>]*?)?>(?<content>.*?)?<\s*/\s*script\s*>#ims',
-			function( $m ) use ( $excl, $safe_mode, $skip_types ) {
+			function( $m ) use ( $excl, $safe_mode, $skip_types, &$delayed_count ) {
 				$full = $m[0];
 				$attr = isset( $m['attr'] ) ? $m['attr'] : '';
 				$content = isset( $m['content'] ) ? $m['content'] : '';
@@ -916,6 +917,7 @@ class Prime_Cache_File_Optimizer {
 
 				// Add marker.
 				$attr .= ' data-pc-delayed';
+				$delayed_count++;
 
 				return '<script' . $attr . '>' . $content . '</script>';
 			},
@@ -927,8 +929,10 @@ class Prime_Cache_File_Optimizer {
 			$html = str_replace( array_keys( $svg_placeholders ), array_values( $svg_placeholders ), $html );
 		}
 
-		// Inject loader script right after <head>.
-		$loader = $this->get_delay_loader_script();
+		// Only inject loader if at least one script was actually delayed.
+		// Without delayed scripts, the loader's DOMContentLoaded interception
+		// breaks jQuery's ready mechanism for no benefit.
+		$loader = ( $delayed_count > 0 ) ? $this->get_delay_loader_script() : '';
 		if ( $loader ) {
 			$html = preg_replace(
 				'/<head([^>]*)>/i',
