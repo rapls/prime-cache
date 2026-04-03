@@ -540,6 +540,10 @@ class Prime_Cache_File_Optimizer {
 				if ( '' === $trimmed ) {
 					return $m[0];
 				}
+				// Skip chatbot and other excluded inline scripts.
+				if ( false !== stripos( $code, 'raplsaich' ) ) {
+					return $m[0];
+				}
 				// Only wrap if it contains jQuery patterns.
 				if ( ! preg_match( '/\bjQuery\s*\(|\$\s*\(/', $code ) ) {
 					return $m[0];

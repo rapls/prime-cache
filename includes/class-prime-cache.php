@@ -136,7 +136,19 @@ class Prime_Cache {
 
 		// 5. Ensure built-in JS exclusions are present in saved settings.
 		$builtin_excl = array( 'raplsaich-chatbot', 'raplsaichConfig' );
+		$builtin_js   = array( 'raplsaich' );
 		$needs_save   = false;
+		// Exclude from all JS optimization (minify, combine, defer, delay).
+		foreach ( array( 'exclude_js', 'exclude_inline_js' ) as $key ) {
+			$current = $settings[ $key ] ?? '';
+			foreach ( $builtin_js as $pattern ) {
+				if ( false === strpos( $current, $pattern ) ) {
+					$current   = trim( $current . "\n" . $pattern );
+					$needs_save = true;
+				}
+			}
+			$settings[ $key ] = $current;
+		}
 		foreach ( array( 'exclude_defer_js', 'exclude_delay_js' ) as $key ) {
 			$current = $settings[ $key ] ?? '';
 			foreach ( $builtin_excl as $pattern ) {
