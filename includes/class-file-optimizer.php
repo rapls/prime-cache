@@ -621,6 +621,8 @@ class Prime_Cache_File_Optimizer {
 		'wp-i18n',
 		'wp-element',
 		'wp-dom-ready',
+		'raplsaich-chatbot',
+		'raplsaich-recaptcha',
 	);
 
 	/**
@@ -775,6 +777,10 @@ class Prime_Cache_File_Optimizer {
 		// Build exclusion patterns.
 		$excl = $this->parse_list( $s['exclude_delay_js'] );
 		$excl = array_merge( $excl, $this->get_delay_preset_patterns() );
+		// Built-in exclusions: chat widgets and interactive plugins that
+		// break when their initialization is delayed.
+		$excl[] = 'raplsaich';
+		$excl[] = 'raplsaichConfig';
 
 		// Safe mode: exclude local scripts.
 		$safe_mode = ! empty( $s['delay_js_safe_mode'] );
