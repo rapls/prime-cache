@@ -2104,3 +2104,138 @@ msgstr "キャッシュ状態"
 
 msgid "Cache is serving %s pages via .htaccess fast-path (PHP-free). Hit/miss stats are not tracked in this mode because pages are served directly by Apache without running PHP."
 msgstr ".htaccess 高速パス (PHP 不要) で %s ページをキャッシュ配信中です。このモードでは Apache が PHP を経由せずにページを直接配信するため、HIT/MISS 統計は追跡されません。"
+
+msgid "Ready to speed up your site?"
+msgstr "サイトを高速化しませんか？"
+
+msgid "Unlock with Prime Cache Pro"
+msgstr "Prime Cache Pro でロック解除"
+
+msgid "Enable Varnish Purge"
+msgstr "Varnish パージを有効化"
+
+msgid "Automatically purge the Varnish cache when WordPress content changes. Sends PURGE requests to the configured Varnish server."
+msgstr "WordPress のコンテンツが変更されたときに Varnish キャッシュを自動的にパージします。設定された Varnish サーバーに PURGE リクエストを送信します。"
+
+msgid "One IP address per line. If your Varnish server runs on a different host or port, specify here. Defaults to 127.0.0.1 (localhost)."
+msgstr "1行に1つの IP アドレスを入力します。Varnish サーバーが別のホストやポートで動作している場合はここで指定してください。デフォルトは 127.0.0.1 (localhost) です。"
+
+msgid "Enable Sucuri Purge"
+msgstr "Sucuri パージを有効化"
+
+msgid "Automatically clear the Sucuri firewall cache when WordPress content changes."
+msgstr "WordPress のコンテンツが変更されたときに Sucuri ファイアウォールのキャッシュを自動的にクリアします。"
+
+msgid "Sucuri API Key"
+msgstr "Sucuri API キー"
+
+msgid "Your Sucuri firewall API key. Found in the Sucuri dashboard under API section."
+msgstr "Sucuri ファイアウォールの API キーです。Sucuri ダッシュボードの API セクションで確認できます。"
+
+msgid "Merge multiple CSS files into fewer files to reduce HTTP requests. On HTTP/2 servers this may have minimal benefit. Test thoroughly after enabling."
+msgstr "複数の CSS ファイルを結合して HTTP リクエスト数を削減します。HTTP/2 サーバーでは効果が限定的な場合があります。有効化後は十分にテストしてください。"
+
+msgid "Mobile Only"
+msgstr "モバイルのみ"
+
+msgid "Apply CSS/JS combining only on mobile devices. Desktop uses HTTP/2 multiplexing efficiently without combining. Requires separate mobile cache."
+msgstr "モバイル端末でのみ CSS/JS の結合を適用します。デスクトップでは HTTP/2 の多重化により結合なしでも効率的に配信されます。モバイル専用キャッシュが必要です。"
+
+msgid "Improve render performance by optimizing how CSS is loaded. Choose a method below."
+msgstr "CSS の読み込み方法を最適化してレンダリングパフォーマンスを向上させます。以下の方法から選択してください。"
+
+msgid "Auto-Generate Critical CSS"
+msgstr "Critical CSS の自動生成"
+
+msgid "Automatically extract above-the-fold Critical CSS for each page to prevent flash of unstyled content (FOUC)."
+msgstr "ページごとにファーストビューの Critical CSS を自動抽出し、スタイル未適用のちらつき (FOUC) を防止します。"
+
+msgid "Manual critical CSS used as a fallback when auto-generation is not available for a page. Inlined in the <head> to render above-the-fold content immediately."
+msgstr "自動生成が利用できないページ向けの手動 Critical CSS です。<head> 内にインライン化され、ファーストビューのコンテンツを即座にレンダリングします。"
+
+msgid "Used CSS Safelist"
+msgstr "使用 CSS セーフリスト"
+
+msgid "CSS selectors or patterns that should never be removed (one per line). Use when Remove Unused CSS incorrectly strips needed styles."
+msgstr "削除してはならない CSS セレクターやパターンを1行に1つ入力します。未使用 CSS の削除が必要なスタイルを誤って除去する場合に使用してください。"
+
+msgid "Async CSS"
+msgstr "非同期 CSS"
+
+msgid "Load all CSS files asynchronously using link[rel=preload] to eliminate render-blocking stylesheets."
+msgstr "link[rel=preload] を使用してすべての CSS ファイルを非同期で読み込み、レンダリングブロックを解消します。"
+
+msgid "Merge multiple JS files into fewer files. May break some scripts — test thoroughly. On HTTP/2 the benefit is minimal."
+msgstr "複数の JS ファイルを結合します。一部のスクリプトが動作しなくなる可能性があるため、十分にテストしてください。HTTP/2 では効果が限定的です。"
+
+msgid "Host Google Analytics Locally"
+msgstr "Google Analytics のローカルホスティング"
+
+msgid "Download and serve the Google Analytics script from your own server. Reduces external requests and improves PageSpeed scores."
+msgstr "Google Analytics のスクリプトをダウンロードし、自サーバーから配信します。外部リクエストを削減し、PageSpeed スコアを改善します。"
+
+msgid "Merge multiple Google Fonts requests into a single request to reduce HTTP round-trips."
+msgstr "複数の Google Fonts リクエストを1つに結合し、HTTP ラウンドトリップを削減します。"
+
+msgid "Self-Host Google Fonts"
+msgstr "Google Fonts のセルフホスティング"
+
+msgid "Download Google Fonts and serve them from your own server. Eliminates external DNS lookups and connections to fonts.googleapis.com and fonts.gstatic.com."
+msgstr "Google Fonts をダウンロードし、自サーバーから配信します。fonts.googleapis.com と fonts.gstatic.com への外部 DNS ルックアップと接続を排除します。"
+
+msgid "YouTube Thumbnail Placeholder"
+msgstr "YouTube サムネイルプレースホルダー"
+
+msgid "Replace YouTube iframe embeds with a lightweight thumbnail image. The iframe loads only when the user clicks play, saving significant bandwidth and improving page load time."
+msgstr "YouTube の iframe 埋め込みを軽量なサムネイル画像に置き換えます。ユーザーが再生をクリックしたときにのみ iframe を読み込むため、帯域幅を大幅に節約しページの読み込み時間を改善します。"
+
+msgid "Format Conversion (WebP / AVIF)"
+msgstr "フォーマット変換 (WebP / AVIF)"
+
+msgid "Enable Image Conversion"
+msgstr "画像変換を有効化"
+
+msgid "Convert JPEG and PNG images to modern formats for smaller file sizes and faster loading."
+msgstr "JPEG・PNG 画像を最新フォーマットに変換し、ファイルサイズを削減して読み込みを高速化します。"
+
+msgid "WebP"
+msgstr "WebP"
+
+msgid "Convert images to WebP format. Supported by all modern browsers."
+msgstr "画像を WebP フォーマットに変換します。すべてのモダンブラウザーで対応しています。"
+
+msgid "AVIF"
+msgstr "AVIF"
+
+msgid "Convert images to AVIF format. Offers superior compression but requires more processing time."
+msgstr "画像を AVIF フォーマットに変換します。より高い圧縮率を実現しますが、変換に時間がかかります。"
+
+msgid "Uploads (wp-content/uploads)"
+msgstr "アップロード (wp-content/uploads)"
+
+msgid "Themes (wp-content/themes)"
+msgstr "テーマ (wp-content/themes)"
+
+msgid "Plugins (wp-content/plugins)"
+msgstr "プラグイン (wp-content/plugins)"
+
+msgid "Auto-Optimize on Upload"
+msgstr "アップロード時の自動最適化"
+
+msgid "Automatically convert images when they are uploaded to the media library."
+msgstr "メディアライブラリにアップロードされた画像を自動的に変換します。"
+
+msgid "Delete Larger Conversions"
+msgstr "サイズ増加時に変換ファイルを削除"
+
+msgid "If the converted file is larger than the original, delete it automatically."
+msgstr "変換後のファイルが元のファイルより大きい場合、自動的に削除します。"
+
+msgid "Bulk Image Optimization"
+msgstr "画像一括最適化"
+
+msgid "Scan and optimize existing images in your media library. Progress is saved — you can pause and resume at any time."
+msgstr "メディアライブラリ内の既存画像をスキャンして最適化します。進行状況は保存されるため、いつでも中断・再開できます。"
+
+msgid "Scan for Unoptimized Images"
+msgstr "未最適化の画像をスキャン"
