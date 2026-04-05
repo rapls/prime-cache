@@ -514,6 +514,7 @@ class Prime_Cache_Admin_Settings {
 							$this->tab_dashboard( $settings );
 						}
 						break;
+					case 'page-cache':    $this->tab_page( $settings, $on ); break;
 					case 'file-opt':      $this->tab_file_opt( $settings ); break;
 					case 'media':         $this->tab_media( $settings ); break;
 					case 'preload':       $this->tab_preload( $settings ); break;
@@ -525,11 +526,7 @@ class Prime_Cache_Admin_Settings {
 					case 'upgrade':       if ( ! prime_cache_is_pro() ) { $this->tab_upgrade(); } else { $this->tab_dashboard( $settings ); } break;
 					default:
 						// Unknown tab slug (e.g. bookmarked Pro tab URL when Pro is inactive).
-						if ( isset( $tabs[ $tab ] ) ) {
-							$this->tab_dashboard( $settings ); // Safety fallback.
-						} else {
-							$this->tab_page( $settings, $on );
-						}
+						$this->tab_dashboard( $settings );
 						break;
 				}
 				?>
