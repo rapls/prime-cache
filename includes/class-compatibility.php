@@ -65,6 +65,7 @@ class Prime_Cache_Compatibility {
 		printf(
 			/* translators: %s: list of plugin names */
 			esc_html__( 'Prime Cache: The following caching plugin(s) are also active: %s. Running multiple caching plugins simultaneously may cause conflicts, doubled caching, or unexpected behavior. Please deactivate other caching plugins for optimal performance.', 'prime-cache' ),
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $list is built from esc_html()-escaped values with HTML <strong> tags.
 			$list
 		);
 		echo '</p></div>';

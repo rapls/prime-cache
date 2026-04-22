@@ -477,7 +477,7 @@ class Prime_Cache_Admin_Settings {
 					<?php foreach ( $tabs as $slug => $t ) :
 						$cls = ( $slug === $tab ) ? ' pc-nav__item--on' : '';
 					?>
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=prime-cache&tab=' . $slug ) ); ?>" class="pc-nav__item<?php echo $cls; ?>">
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=prime-cache&tab=' . $slug ) ); ?>" class="pc-nav__item<?php echo esc_attr( $cls ); ?>">
 						<span class="dashicons <?php echo esc_attr( $t[0] ); ?>"></span><?php echo esc_html( $t[1] ); ?>
 					</a>
 					<?php endforeach; ?>
@@ -575,12 +575,15 @@ class Prime_Cache_Admin_Settings {
 		<svg viewBox="0 0 340 <?php echo (int) $h; ?>" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;border-radius:6px;cursor:default">
 			<defs><linearGradient id="pcg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f5f3ff"/><stop offset="100%" stop-color="#ede9fe"/></linearGradient></defs>
 			<rect width="340" height="<?php echo (int) $h; ?>" rx="6" fill="url(#pcg)" stroke="#c4b5fd" stroke-width=".5"/>
-			<text x="14" y="22" font-size="12" font-weight="600" fill="#334155" font-family="-apple-system,BlinkMacSystemFont,sans-serif"><?php echo $t; ?></text>
+			<text x="14" y="22" font-size="12" font-weight="600" fill="#334155" font-family="-apple-system,BlinkMacSystemFont,sans-serif"><?php echo esc_html( $t ); ?></text>
 			<rect x="256" y="7" width="36" height="16" rx="3" fill="#6366f1" opacity=".9"/>
 			<text x="274" y="19" font-size="8" font-weight="700" fill="#fff" text-anchor="middle" font-family="-apple-system,sans-serif">PRO</text>
 			<rect x="298" y="8" width="30" height="14" rx="7" fill="#a5b4fc"/>
 			<circle cx="319" cy="15" r="5" fill="#fff"/>
-			<?php echo $desc_svg; ?>
+			<?php
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $desc_svg is built from esc_html()-escaped values in SVG <text> elements above.
+			echo $desc_svg;
+			?>
 		</svg>
 		<?php
 	}
@@ -689,21 +692,35 @@ class Prime_Cache_Admin_Settings {
 			<div class="pc-card__row">
 				<span class="pc-card__h"><?php esc_html_e( 'Cache Hit Rate', 'prime-cache' ); ?></span>
 				<div style="display:flex;align-items:center;gap:12px">
-					<span class="pc-meta"><?php if ( $hs['since'] ) printf( esc_html__( 'Since: %s', 'prime-cache' ), esc_html( wp_date( 'Y/m/d H:i', $hs['since'] ) ) ); ?></span>
+					<span class="pc-meta"><?php
+					if ( $hs['since'] ) {
+						/* translators: %s: date when stats tracking started (e.g. "2024/01/15 09:30") */
+						printf( esc_html__( 'Since: %s', 'prime-cache' ), esc_html( wp_date( 'Y/m/d H:i', $hs['since'] ) ) );
+					}
+					?></span>
 					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=prime-cache&prime_cache_reset_stats=1' ), 'prime_cache_reset_stats' ) ); ?>" class="pc-btn pc-btn--o pc-btn--sm" style="font-size:11px;padding:3px 10px" onclick="return confirm(<?php echo esc_attr( wp_json_encode( __( 'Reset all hit/miss statistics to zero?', 'prime-cache' ) ) ); ?>)"><span class="dashicons dashicons-image-rotate" style="font-size:13px;width:13px;height:13px;line-height:13px"></span><?php esc_html_e( 'Reset', 'prime-cache' ); ?></a>
 				</div>
 			</div>
 			<?php if ( $stats_limited ) : ?>
 			<div style="display:flex;align-items:center;gap:8px;padding:10px 0">
 				<span class="dashicons dashicons-yes-alt" style="color:#22c55e;font-size:20px"></span>
-				<span style="font-size:13px;color:#475569"><?php printf( esc_html__( 'Cache is serving %s pages via .htaccess fast-path (PHP-free). Hit/miss stats are not tracked in this mode because pages are served directly by Apache without running PHP.', 'prime-cache' ), '<b>' . esc_html( number_format( $st['files'] ) ) . '</b>' ); ?></span>
+				<span style="font-size:13px;color:#475569"><?php
+				/* translators: %s: number of cached pages */
+				printf( esc_html__( 'Cache is serving %s pages via .htaccess fast-path (PHP-free). Hit/miss stats are not tracked in this mode because pages are served directly by Apache without running PHP.', 'prime-cache' ), '<b>' . esc_html( number_format( $st['files'] ) ) . '</b>' );
+				?></span>
 			</div>
 			<?php else : ?>
 			<div class="pc-bar"><div class="pc-bar__fill" style="width:<?php echo esc_attr( $rate ); ?>%"></div></div>
 			<?php endif; ?>
 			<div class="pc-bar__info">
-				<span><?php printf( esc_html__( 'Total: %s', 'prime-cache' ), '<b>' . esc_html( number_format( $total ) ) . '</b>' ); ?></span>
-				<span><?php printf( esc_html__( 'Size: %s', 'prime-cache' ), '<b>' . esc_html( $this->fmt( $st['size'] ) ) . '</b>' ); ?></span>
+				<span><?php
+				/* translators: %s: total number of cache requests */
+				printf( esc_html__( 'Total: %s', 'prime-cache' ), '<b>' . esc_html( number_format( $total ) ) . '</b>' );
+				?></span>
+				<span><?php
+				/* translators: %s: total cache size (e.g. "12 MB") */
+				printf( esc_html__( 'Size: %s', 'prime-cache' ), '<b>' . esc_html( $this->fmt( $st['size'] ) ) . '</b>' );
+				?></span>
 			</div>
 		</div>
 
@@ -1651,7 +1668,10 @@ class Prime_Cache_Admin_Settings {
 
 		<?php if ( isset( $_GET['prime_cache_db_cleaned'] ) ) : ?>
 			<div class="notice notice-success is-dismissible" style="margin:0 0 16px">
-				<p><?php printf( esc_html__( 'Database cleanup processed %s items (max 1,000 per task). Run again if more remain.', 'prime-cache' ), '<b>' . esc_html( (int) $_GET['prime_cache_db_cleaned'] ) . '</b>' ); ?></p>
+				<p><?php
+				/* translators: %s: number of items cleaned up */
+				printf( esc_html__( 'Database cleanup processed %s items (max 1,000 per task). Run again if more remain.', 'prime-cache' ), '<b>' . esc_html( (int) $_GET['prime_cache_db_cleaned'] ) . '</b>' );
+				?></p>
 			</div>
 		<?php endif; ?>
 
@@ -1886,7 +1906,10 @@ class Prime_Cache_Admin_Settings {
 		<?php endif; ?>
 
 		<?php if ( isset( $_GET['pc_preset'] ) ) : ?>
-			<div class="notice notice-success is-dismissible" style="margin:0 0 16px"><p><?php printf( esc_html__( '"%s" preset applied successfully.', 'prime-cache' ), esc_html( ucfirst( sanitize_key( $_GET['pc_preset'] ) ) ) ); ?></p></div>
+			<div class="notice notice-success is-dismissible" style="margin:0 0 16px"><p><?php
+			/* translators: %s: preset name (e.g. "Standard", "Aggressive") */
+			printf( esc_html__( '"%s" preset applied successfully.', 'prime-cache' ), esc_html( ucfirst( sanitize_key( $_GET['pc_preset'] ) ) ) );
+			?></p></div>
 		<?php endif; ?>
 
 		<!-- Presets -->
@@ -1915,6 +1938,7 @@ class Prime_Cache_Admin_Settings {
 					</div>
 					<?php endforeach; ?>
 				</div>
+				<?php /* translators: %s: preset name */ ?>
 				<a href="<?php echo esc_url( $auto_url ); ?>" class="pc-btn pc-btn--p pc-btn--sm" style="width:100%" onclick="return confirm(<?php echo esc_attr( wp_json_encode( sprintf( __( 'Apply the "%s" preset? This will overwrite your current settings.', 'prime-cache' ), __( 'Auto', 'prime-cache' ) ) ) ); ?>)">
 					<?php esc_html_e( 'Apply Auto Preset', 'prime-cache' ); ?>
 				</a>
@@ -1950,6 +1974,7 @@ class Prime_Cache_Admin_Settings {
 					<span class="dashicons <?php echo esc_attr( $pv[3] ); ?>" style="font-size:32px;width:32px;height:32px;color:<?php echo esc_attr( $pv[2] ); ?>;margin-bottom:8px"></span>
 					<h3 style="margin:0 0 8px;font-size:16px"><?php echo esc_html( $pv[0] ); ?></h3>
 					<p class="pc-help" style="margin:0 0 14px;font-size:12px;flex:1"><?php echo esc_html( $pv[1] ); ?></p>
+					<?php /* translators: %s: preset name */ ?>
 					<a href="<?php echo esc_url( $preset_url ); ?>" class="pc-btn pc-btn--p pc-btn--sm" style="width:100%" onclick="return confirm(<?php echo esc_attr( wp_json_encode( sprintf( __( 'Apply the "%s" preset? This will overwrite your current settings.', 'prime-cache' ), $pv[0] ) ) ); ?>)">
 						<?php esc_html_e( 'Apply', 'prime-cache' ); ?>
 					</a>
@@ -2049,7 +2074,10 @@ class Prime_Cache_Admin_Settings {
 					$log_size = filesize( $log_file );
 				?>
 				<div class="pc-field">
-					<p class="pc-meta"><?php printf( esc_html__( 'Log file size: %s', 'prime-cache' ), esc_html( size_format( $log_size ) ) ); ?></p>
+					<p class="pc-meta"><?php
+					/* translators: %s: log file size (e.g. "2.5 MB") */
+					printf( esc_html__( 'Log file size: %s', 'prime-cache' ), esc_html( size_format( $log_size ) ) );
+					?></p>
 				</div>
 				<?php endif; ?>
 			</div>
@@ -2247,7 +2275,10 @@ class Prime_Cache_Admin_Settings {
 		<div class="pc-card pc-oc-banner">
 			<span class="pc-dot pc-dot--<?php echo 'off'===$act?'m':'g'; ?> pc-dot--xl"></span>
 			<div class="pc-oc-banner__body">
-				<b><?php if('off'===$act) esc_html_e('Object Cache: Disabled','prime-cache'); elseif('external'===$act) esc_html_e('Object Cache: Managed by another plugin','prime-cache'); else printf(esc_html__('Object Cache: Active via %s','prime-cache'),esc_html(strtoupper($act))); ?></b>
+				<b><?php if('off'===$act) esc_html_e('Object Cache: Disabled','prime-cache'); elseif('external'===$act) esc_html_e('Object Cache: Managed by another plugin','prime-cache'); else {
+					/* translators: %s: object cache backend name (e.g. "REDIS", "MEMCACHED") */
+					printf(esc_html__('Object Cache: Active via %s','prime-cache'),esc_html(strtoupper($act)));
+				} ?></b>
 				<small><?php if('off'===$act) esc_html_e('Select a backend to enable object caching.','prime-cache'); elseif('external'===$act) esc_html_e("Another plugin's object-cache.php was detected.",'prime-cache'); else esc_html_e('Database query results are being cached in memory.','prime-cache'); ?></small>
 			</div>
 			<?php if('off'!==$act&&'external'!==$act): ?><a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?prime_cache_object_cache=off'),'prime_cache_object_cache')); ?>" class="pc-btn pc-btn--r pc-btn--sm"><?php esc_html_e('Disable','prime-cache'); ?></a><?php endif; ?>
@@ -2261,7 +2292,10 @@ class Prime_Cache_Admin_Settings {
 					<?php elseif(!$av): ?><span class="pc-badge pc-badge--m"><?php esc_html_e('Not Found','prime-cache'); ?></span>
 					<?php else: ?><span class="pc-badge pc-badge--b"><?php esc_html_e('Available','prime-cache'); ?></span><?php endif; ?></div>
 				<p class="pc-oc__desc"><?php echo esc_html($i[1]); ?></p>
-				<div class="pc-oc__foot"><span class="pc-meta"><?php printf(esc_html__('Ext: %s','prime-cache'),'<code>'.esc_html($i[2]).'</code>'); ?> <span class="pc-dot pc-dot--<?php echo $av?'g':'r'; ?> pc-dot--in"></span></span>
+				<div class="pc-oc__foot"><span class="pc-meta"><?php
+				/* translators: %s: PHP extension name (e.g. "redis", "memcached") */
+				printf(esc_html__('Ext: %s','prime-cache'),'<code>'.esc_html($i[2]).'</code>');
+				?> <span class="pc-dot pc-dot--<?php echo $av?'g':'r'; ?> pc-dot--in"></span></span>
 					<?php if($on): ?><a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?prime_cache_object_cache=off'),'prime_cache_object_cache')); ?>" class="pc-btn pc-btn--o pc-btn--sm"><?php esc_html_e('Disable','prime-cache'); ?></a>
 					<?php elseif($av): ?><a href="<?php echo esc_url($eu); ?>" class="pc-btn pc-btn--p pc-btn--sm"><?php esc_html_e('Enable','prime-cache'); ?></a>
 					<?php else: ?><span class="pc-btn pc-btn--o pc-btn--sm pc-btn--dis"><?php esc_html_e('PHP Extension Required','prime-cache'); ?></span><?php endif; ?></div>
@@ -2286,6 +2320,7 @@ class Prime_Cache_Admin_Settings {
 			$detail      = $fail_time ? sprintf( ' (%s — %s)', esc_html( $type_label ), esc_html( $fail_time ) ) : '';
 			echo '<div class="notice notice-error"><p><strong>Prime Cache:</strong> '
 				. esc_html__( 'Cloudflare cache purge failed after multiple retries. Cloudflare may still be serving stale content. Please check your API credentials and try purging again.', 'prime-cache' )
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $detail is built from esc_html()-escaped values above.
 				. $detail
 				. ' <a href="' . esc_url( $dismiss_url ) . '">' . esc_html__( 'Dismiss', 'prime-cache' ) . '</a>'
 				. '</p></div>';

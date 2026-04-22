@@ -156,6 +156,11 @@ class Prime_Cache_File_Optimizer {
 
 		$s = $this->settings;
 
+		// Mark scripts that must never be combined or delayed. Runs before
+		// minify/combine rewrites the src URL to a hashed cache filename,
+		// while the original handle/URL is still identifiable.
+		$html = $this->mark_preserved_scripts( $html );
+
 		// Pro hook: runs before Free optimizations (DNS prefetch, analytics, fonts, UCSS, critical CSS).
 		$html = apply_filters( 'prime_cache_before_optimize', $html, $s );
 
@@ -802,7 +807,10 @@ class Prime_Cache_File_Optimizer {
 			['scroll','click','keydown','touchstart','mousemove'].forEach(function(e){
 				window.addEventListener(e,run,{once:true,passive:true});
 			});
-			<?php echo $timeout_js; ?>
+			<?php
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $timeout_js is a static string built from an (int)-cast value: "setTimeout(run,{$timeout});" or empty.
+			echo $timeout_js;
+			?>
 		})();
 		</script>
 		<?php
@@ -812,6 +820,64 @@ class Prime_Cache_File_Optimizer {
 
 	/** @var string|null Cached loader script content. */
 	private static $delay_loader_cache = null;
+
+	/**
+	 * Mark scripts that must never be combined or delayed.
+	 *
+	 * Adds `data-no-delay` to script tags whose id or src matches a built-in
+	 * safelist. Runs BEFORE minify/combine rewrites the src URL to a hashed
+	 * cache filename, so matching is done against the original handle / URL
+	 * while they are still identifiable.
+	 *
+	 * Subsequent pipeline stages already honor this attribute:
+	 *   - Pro combine_js_files() skips any script with data-* attributes.
+	 *   - delay_all_scripts() skips any script with data-no-delay.
+	 *
+	 * The motivation is that script handles like `raplsaich-chatbot-js` have
+	 * a tightly coupled inline localize block (`raplsaichConfig = {...}`).
+	 * When combine merges the external script with jQuery/theme scripts and
+	 * delay defers execution, the inline config can be read before it has a
+	 * chance to set window.raplsaichConfig, leaving config undefined.
+	 */
+	private function mark_preserved_scripts( $html ) {
+		$patterns = array(
+			// Chat widgets — inline localize config is tightly coupled to
+			// the external src; combining / delaying breaks config snapshot.
+			'raplsaich-chatbot',
+			'raplsaich-recaptcha',
+			'raplsaichConfig',
+			// Core jQuery — dep order must be preserved for plugin scripts.
+			'id="jquery-js"',
+			'id="jquery-migrate-js"',
+			'/jquery.min.js',
+			'/jquery-migrate.min.js',
+			// Divi theme.
+			'divi-custom-script',
+			'et-builder-modules-script',
+			'et-core-common',
+			// Cocoon theme.
+			'cocoon_localize_script_options',
+			// WP Consent API.
+			'wp-consent-api',
+		);
+
+		return preg_replace_callback(
+			'#<script\b[^>]*>#i',
+			function ( $m ) use ( $patterns ) {
+				$tag = $m[0];
+				if ( false !== stripos( $tag, 'data-no-delay' ) ) {
+					return $tag;
+				}
+				foreach ( $patterns as $p ) {
+					if ( false !== stripos( $tag, $p ) ) {
+						return preg_replace( '#^<script\b#i', '<script data-no-delay', $tag, 1 );
+					}
+				}
+				return $tag;
+			},
+			$html
+		);
+	}
 
 	/**
 	 * Delay ALL JavaScript via HTML pipeline processing.

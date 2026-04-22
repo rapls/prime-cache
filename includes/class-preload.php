@@ -500,6 +500,9 @@ class Prime_Cache_Preload {
 		<script id="pc-preload-links">
 		(function(){
 			if(navigator.connection&&navigator.connection.saveData)return;
+			<?php
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $exclude_json and $site_url_json are from wp_json_encode() with JSON_HEX_TAG, safe for inline script.
+			?>
 			var done={},exc=<?php echo $exclude_json; ?>,rate=3,sent=0,queue=[],timer=null,origin=location.origin+'/',siteUrl=<?php echo $site_url_json; ?>;
 			function ok(u){
 				if(!u||done[u])return false;
@@ -584,7 +587,7 @@ class Prime_Cache_Preload {
 					break;
 			}
 
-			echo '<link rel="preload" href="' . $url . '"' . $as_attr . $type_attr . $cross . '>' . "\n";
+			echo '<link rel="preload" href="' . esc_url( $url ) . '"' . esc_attr( $as_attr ) . esc_attr( $type_attr ) . esc_attr( $cross ) . '>' . "\n";
 		}
 	}
 

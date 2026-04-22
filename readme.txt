@@ -10,11 +10,11 @@ Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A fast, stable, and feature-rich caching plugin for WordPress. Page cache, object cache, file optimization, media optimization, CDN, and more.
+All-in-one performance plugin for WordPress.
 
 == Description ==
 
-Prime Cache is a comprehensive WordPress performance optimization plugin that combines page caching, file optimization, media optimization, and advanced features into a single, easy-to-use package. Built by analyzing the best practices of leading caching plugins while maintaining completely original code.
+Prime Cache makes your WordPress site blazing fast. Page cache, file optimization, image conversion, preloading, CDN — all built in, zero configuration required. Just activate and go.
 
 = Core Caching =
 

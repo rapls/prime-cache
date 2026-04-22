@@ -1130,6 +1130,7 @@ class Prime_Cache {
 		</div>
 		<ul style="margin:0;font-size:13px;line-height:2">
 			<li><?php printf( 'HIT: <b>%s</b> / MISS: <b>%s</b>', esc_html( number_format( $hs['hit'] ) ), esc_html( number_format( $hs['miss'] ) ) ); ?></li>
+			<!-- translators: %s: total cache size (e.g. "12 MB") -->
 			<li><?php printf( esc_html__( 'Size: %s', 'prime-cache' ), '<b>' . esc_html( size_format( $size ) ) . '</b>' ); ?></li>
 			<li><?php esc_html_e( 'Object Cache', 'prime-cache' ); ?>: <b><?php echo 'off' === $oc ? esc_html__( 'Inactive', 'prime-cache' ) : esc_html( strtoupper( $oc ) ); ?></b></li>
 			<li><?php esc_html_e( 'Page Cache', 'prime-cache' ); ?>: <b><?php echo $s['cache_enabled'] ? esc_html__( 'Active', 'prime-cache' ) : esc_html__( 'Inactive', 'prime-cache' ); ?></b></li>
@@ -1194,6 +1195,7 @@ class Prime_Cache {
 		header( 'Content-Type: application/json' );
 		header( 'Content-Disposition: attachment; filename="prime-cache-settings-' . gmdate( 'Y-m-d' ) . '.json"' );
 		header( 'Content-Length: ' . strlen( $data ) );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $data is JSON from wp_json_encode(), output as file download with Content-Type: application/json header.
 		echo $data;
 		exit;
 	}
