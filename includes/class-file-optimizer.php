@@ -824,42 +824,51 @@ class Prime_Cache_File_Optimizer {
 	/**
 	 * Mark scripts that must never be combined or delayed.
 	 *
-	 * Adds `data-no-delay` to script tags whose id or src matches a built-in
-	 * safelist. Runs BEFORE minify/combine rewrites the src URL to a hashed
-	 * cache filename, so matching is done against the original handle / URL
-	 * while they are still identifiable.
+	 * Adds `data-no-delay` to script tags whose id or src matches a safelist.
+	 * Runs BEFORE minify/combine rewrites the src URL to a hashed cache
+	 * filename, so matching is done against the original handle / URL while
+	 * they are still identifiable.
 	 *
-	 * Subsequent pipeline stages already honor this attribute:
+	 * The safelist is built from two sources:
+	 *
+	 *  1. Auto-detected `wp_localize_script` / `wp_add_inline_script` pairs.
+	 *     Any external script whose handle has an associated inline block
+	 *     (`id="{handle}-js-before|extra|after"`) is protected, because
+	 *     combining or delaying it decouples the external from its inline
+	 *     config and breaks the config snapshot at module init time. This
+	 *     covers WooCommerce, Elementor, Contact Form 7, Yoast, and any
+	 *     other plugin that follows the standard WordPress enqueue pattern.
+	 *
+	 *  2. Hardcoded patterns for scripts known to have timing constraints
+	 *     that aren't expressible via the inline-block convention (e.g.
+	 *     jQuery core, where plugin code assumes its presence at parse time).
+	 *
+	 * Subsequent pipeline stages already honor `data-no-delay`:
 	 *   - Pro combine_js_files() skips any script with data-* attributes.
 	 *   - delay_all_scripts() skips any script with data-no-delay.
-	 *
-	 * The motivation is that script handles like `raplsaich-chatbot-js` have
-	 * a tightly coupled inline localize block (`raplsaichConfig = {...}`).
-	 * When combine merges the external script with jQuery/theme scripts and
-	 * delay defers execution, the inline config can be read before it has a
-	 * chance to set window.raplsaichConfig, leaving config undefined.
 	 */
 	private function mark_preserved_scripts( $html ) {
 		$patterns = array(
-			// Chat widgets — inline localize config is tightly coupled to
-			// the external src; combining / delaying breaks config snapshot.
-			'raplsaich-chatbot',
-			'raplsaich-recaptcha',
-			'raplsaichConfig',
-			// Core jQuery — dep order must be preserved for plugin scripts.
+			// Core jQuery — many plugins assume it's loaded at parse time.
 			'id="jquery-js"',
 			'id="jquery-migrate-js"',
 			'/jquery.min.js',
 			'/jquery-migrate.min.js',
-			// Divi theme.
-			'divi-custom-script',
-			'et-builder-modules-script',
-			'et-core-common',
-			// Cocoon theme.
-			'cocoon_localize_script_options',
-			// WP Consent API.
+			// WP Consent API (third-party scripts gate on its readiness).
 			'wp-consent-api',
 		);
+
+		// Auto-detect external scripts paired with inline localize / add-inline
+		// blocks. WordPress outputs these with id="{handle}-js-{before|extra|after}".
+		if ( preg_match_all(
+			'#<script\b[^>]*\bid=["\']([^"\']+)-js-(?:before|extra|after)["\'][^>]*>#i',
+			$html,
+			$m
+		) ) {
+			foreach ( array_unique( $m[1] ) as $handle ) {
+				$patterns[] = 'id="' . $handle . '-js"';
+			}
+		}
 
 		return preg_replace_callback(
 			'#<script\b[^>]*>#i',
@@ -867,6 +876,12 @@ class Prime_Cache_File_Optimizer {
 				$tag = $m[0];
 				if ( false !== stripos( $tag, 'data-no-delay' ) ) {
 					return $tag;
+				}
+				// Also preserve the inline extra/before/after blocks themselves.
+				// They should run immediately so their paired external script
+				// sees the localized globals.
+				if ( preg_match( '#\bid=["\'][^"\']+-js-(?:before|extra|after)["\']#i', $tag ) ) {
+					return preg_replace( '#^<script\b#i', '<script data-no-delay', $tag, 1 );
 				}
 				foreach ( $patterns as $p ) {
 					if ( false !== stripos( $tag, $p ) ) {
