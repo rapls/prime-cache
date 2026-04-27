@@ -695,7 +695,8 @@ class Prime_Cache_File_Optimizer {
 		// delay_all_scripts() HTML pipeline also skips them.
 		$never = array_merge( self::$delay_never, $this->get_defer_never() );
 		if ( in_array( $handle, $never, true ) ) {
-			if ( false === strpos( $tag, 'data-no-delay' ) ) {
+			// Case-insensitive: tolerate manually authored `DATA-NO-DELAY`.
+			if ( false === stripos( $tag, 'data-no-delay' ) ) {
 				$tag = str_replace( ' src=', ' data-no-delay src=', $tag );
 			}
 			return $tag;
@@ -707,7 +708,7 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		// Skip data-no-delay scripts.
-		if ( false !== strpos( $tag, 'data-no-delay' ) ) {
+		if ( false !== stripos( $tag, 'data-no-delay' ) ) {
 			return $tag;
 		}
 
@@ -848,10 +849,19 @@ class Prime_Cache_File_Optimizer {
 	 *   - delay_all_scripts() skips any script with data-no-delay.
 	 */
 	private function mark_preserved_scripts( $html ) {
-		$patterns = array(
+		// Exact handle names — compared against the {handle} prefix of an
+		// extracted id attribute (`id="{handle}-js"`), so substring noise such
+		// as `id="xfoo-js-y"` cannot trigger a false positive on `foo`.
+		$exact_handles = array(
 			// Core jQuery — many plugins assume it's loaded at parse time.
-			'id="jquery-js"',
-			'id="jquery-migrate-js"',
+			'jquery',
+			'jquery-migrate',
+		);
+
+		// URL substring patterns — case-insensitive match against the src
+		// attribute value only (not the whole tag), for scripts identified
+		// by path rather than enqueue handle.
+		$url_substrings = array(
 			'/jquery.min.js',
 			'/jquery-migrate.min.js',
 			// WP Consent API (third-party scripts gate on its readiness).
@@ -859,35 +869,63 @@ class Prime_Cache_File_Optimizer {
 		);
 
 		// Auto-detect external scripts paired with inline localize / add-inline
-		// blocks. WordPress outputs these with id="{handle}-js-{before|extra|after}".
+		// blocks. WordPress outputs these with id="{handle}-js-{before|extra|after}"
+		// (either single- or double-quoted). The matched handle is added to
+		// $exact_handles so the corresponding external script id gets protected
+		// regardless of which quote style the renderer uses.
 		if ( preg_match_all(
-			'#<script\b[^>]*\bid=["\']([^"\']+)-js-(?:before|extra|after)["\'][^>]*>#i',
+			'#<script\b[^>]*\bid\s*=\s*["\']([^"\']+)-js-(?:before|extra|after)["\'][^>]*>#i',
 			$html,
 			$m
 		) ) {
 			foreach ( array_unique( $m[1] ) as $handle ) {
-				$patterns[] = 'id="' . $handle . '-js"';
+				$exact_handles[] = $handle;
 			}
 		}
+		$exact_handles = array_values( array_unique( $exact_handles ) );
 
 		return preg_replace_callback(
 			'#<script\b[^>]*>#i',
-			function ( $m ) use ( $patterns ) {
-				$tag = $m[0];
+			function ( $tag_match ) use ( $exact_handles, $url_substrings ) {
+				$tag = $tag_match[0];
+
+				// Already marked — leave as-is (idempotent). Case-insensitive
+				// to tolerate manually authored `DATA-NO-DELAY` variants.
 				if ( false !== stripos( $tag, 'data-no-delay' ) ) {
 					return $tag;
 				}
-				// Also preserve the inline extra/before/after blocks themselves.
-				// They should run immediately so their paired external script
-				// sees the localized globals.
-				if ( preg_match( '#\bid=["\'][^"\']+-js-(?:before|extra|after)["\']#i', $tag ) ) {
+
+				// Inline extra/before/after blocks — must execute immediately
+				// so the paired external script sees the localized globals.
+				if ( preg_match( '#\bid\s*=\s*["\'][^"\']+-js-(?:before|extra|after)["\']#i', $tag ) ) {
 					return preg_replace( '#^<script\b#i', '<script data-no-delay', $tag, 1 );
 				}
-				foreach ( $patterns as $p ) {
-					if ( false !== stripos( $tag, $p ) ) {
-						return preg_replace( '#^<script\b#i', '<script data-no-delay', $tag, 1 );
+
+				// Strict id-attribute match: extract the id value, then compare
+				// the {handle} prefix exactly. Avoids the substring false-match
+				// possible with stripos on the raw tag, and handles both quote
+				// styles uniformly.
+				if ( preg_match( '#\bid\s*=\s*["\']([^"\']+)["\']#i', $tag, $id_m ) ) {
+					$id = $id_m[1];
+					if ( strlen( $id ) > 3 && substr( $id, -3 ) === '-js' ) {
+						$handle = substr( $id, 0, -3 );
+						if ( in_array( $handle, $exact_handles, true ) ) {
+							return preg_replace( '#^<script\b#i', '<script data-no-delay', $tag, 1 );
+						}
 					}
 				}
+
+				// URL substring match — scoped to the src attribute value only,
+				// so unrelated attributes containing similar text cannot trigger.
+				if ( preg_match( '#\bsrc\s*=\s*["\']([^"\']+)["\']#i', $tag, $src_m ) ) {
+					$src = $src_m[1];
+					foreach ( $url_substrings as $needle ) {
+						if ( false !== stripos( $src, $needle ) ) {
+							return preg_replace( '#^<script\b#i', '<script data-no-delay', $tag, 1 );
+						}
+					}
+				}
+
 				return $tag;
 			},
 			$html
@@ -961,8 +999,9 @@ class Prime_Cache_File_Optimizer {
 				if ( false !== strpos( $attr, 'data-pc-delayed' ) ) return $full;
 				if ( false !== strpos( $attr, 'pc-delay' ) ) return $full;
 
-				// Skip data-no-delay.
-				if ( false !== strpos( $attr, 'data-no-delay' ) ) return $full;
+				// Skip data-no-delay (case-insensitive — front-stage marker
+				// that may be authored manually in any case).
+				if ( false !== stripos( $attr, 'data-no-delay' ) ) return $full;
 
 				// Check type — skip non-JS types.
 				if ( preg_match( '#type\s*=\s*["\']([^"\']*)["\']#i', $attr, $type_m ) ) {
@@ -1000,8 +1039,9 @@ class Prime_Cache_File_Optimizer {
 					return $full;
 				}
 
-				// Skip the delay loader itself.
-				if ( false !== strpos( $attr, 'id="pc-delay-loader"' ) ) return $full;
+				// Skip the delay loader itself. Use a regex to tolerate either
+				// quote style if a downstream transformer rewrites quotes.
+				if ( preg_match( '#\bid\s*=\s*["\']pc-delay-loader["\']#i', $attr ) ) return $full;
 				if ( false !== strpos( $content, 'pcDelayTimeout' ) ) return $full;
 
 				// ── Transform ──
