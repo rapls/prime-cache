@@ -42,8 +42,9 @@ class Prime_Cache_File_Optimizer {
 			if ( ! empty( $this->settings['defer_js'] ) ) {
 				add_filter( 'script_loader_tag', array( $this, 'filter_defer_script' ), 10, 3 );
 			}
-			// Delay JS: now processed via HTML pipeline (ob_start) for full coverage.
-			// This captures ALL scripts (inline + external + CDN), not just enqueued.
+			// Delay JS is wired in the HTML pipeline (process_html →
+			// delay_all_scripts), which captures inline / external / CDN
+			// scripts that script_loader_tag does not see.
 		}
 
 		if ( ! $this->should_optimize_html() ) {
@@ -658,87 +659,6 @@ class Prime_Cache_File_Optimizer {
 		return str_replace( ' src=', ' defer src=', $tag );
 	}
 
-	// ── Delay JS (filter-based, no ob_start) ────────────────
-
-	/**
-	 * Scripts that must NEVER be delayed (break core functionality).
-	 */
-	private static $delay_never = array(
-		'wp-hooks',
-		'wp-i18n',
-		'wp-element',
-		'wp-dom-ready',
-		'raplsaich-chatbot',
-		'raplsaich-recaptcha',
-		// Theme main scripts (depend on wp_localize_script config at load time).
-		'divi-custom-script',
-		'et-builder-modules-script',
-		'et-frontend-builder',
-		// WP Consent API (loaded by many GDPR plugins).
-		'wp-consent-api',
-	);
-
-	/**
-	 * Delay enqueued scripts via script_loader_tag filter.
-	 * Changes script type to prevent execution, adds data-src.
-	 * A tiny loader script restores them on user interaction.
-	 *
-	 * No ob_start needed — compatible with Nginx-level caching.
-	 */
-	public function filter_delay_script( $tag, $handle, $src ) {
-		// Skip if already deferred/async (might be handled by filter_defer_script).
-		if ( false !== strpos( $tag, 'data-pc-delayed' ) ) {
-			return $tag;
-		}
-
-		// Never delay critical scripts. Mark with data-no-delay so
-		// delay_all_scripts() HTML pipeline also skips them.
-		$never = array_merge( self::$delay_never, $this->get_defer_never() );
-		if ( in_array( $handle, $never, true ) ) {
-			// Case-insensitive: tolerate manually authored `DATA-NO-DELAY`.
-			if ( false === stripos( $tag, 'data-no-delay' ) ) {
-				$tag = str_replace( ' src=', ' data-no-delay src=', $tag );
-			}
-			return $tag;
-		}
-
-		// Skip non-JS types.
-		if ( preg_match( '#type=["\'](?!text/javascript|module)[^"\']+["\']#i', $tag ) ) {
-			return $tag;
-		}
-
-		// Skip data-no-delay scripts.
-		if ( false !== stripos( $tag, 'data-no-delay' ) ) {
-			return $tag;
-		}
-
-		// Check delay exclusion list + presets.
-		$delay_excl = $this->parse_list( $this->settings['exclude_delay_js'] );
-		$preset_excl = $this->get_delay_preset_patterns();
-		$all_excl = array_merge( $delay_excl, $preset_excl );
-		if ( $this->matches_patterns( $src, $all_excl ) ) {
-			return $tag;
-		}
-
-		// Safe mode: only delay external (third-party) scripts.
-		// Scripts from the site's own domain load immediately.
-		if ( ! empty( $this->settings['delay_js_safe_mode'] ) ) {
-			if ( $this->is_local_url( $src ) ) {
-				return $tag;
-			}
-		}
-
-		// Replace type and src to prevent execution.
-		if ( false === strpos( $tag, 'type=' ) ) {
-			$tag = str_replace( '<script ', '<script type="pc-delay/js" ', $tag );
-		} else {
-			$tag = preg_replace( '#type=["\'][^"\']*["\']#i', 'type="pc-delay/js"', $tag );
-		}
-		$tag = str_replace( ' src=', ' data-pc-delayed data-src=', $tag );
-
-		return $tag;
-	}
-
 	/**
 	 * Get URL patterns from delay JS presets.
 	 *
@@ -778,43 +698,6 @@ class Prime_Cache_File_Optimizer {
 			}
 		}
 		return $patterns;
-	}
-
-	/**
-	 * Print the tiny delay loader script in the footer.
-	 * Restores delayed scripts on first user interaction.
-	 */
-	public function print_delay_loader() {
-		$timeout = (int) ( $this->settings['delay_js_timeout'] ?? 0 );
-		$timeout_js = $timeout > 0 ? "setTimeout(run,{$timeout});" : '';
-		?>
-		<script id="pc-delay-loader">
-		(function(){
-			var done=false;
-			function run(){
-				if(done)return;done=true;
-				document.querySelectorAll('script[type="pc-delay/js"]').forEach(function(el){
-					var n=document.createElement('script');
-					Array.from(el.attributes).forEach(function(a){
-						if(a.name==='type')return;
-						if(a.name==='data-src'){n.src=a.value;return;}
-						if(a.name==='data-pc-delayed')return;
-						n.setAttribute(a.name,a.value);
-					});
-					if(!n.src&&el.textContent)n.textContent=el.textContent;
-					el.parentNode.replaceChild(n,el);
-				});
-			}
-			['scroll','click','keydown','touchstart','mousemove'].forEach(function(e){
-				window.addEventListener(e,run,{once:true,passive:true});
-			});
-			<?php
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $timeout_js is a static string built from an (int)-cast value: "setTimeout(run,{$timeout});" or empty.
-			echo $timeout_js;
-			?>
-		})();
-		</script>
-		<?php
 	}
 
 	// ── Delay JS (ob_start pipeline — full HTML processing) ──
@@ -949,8 +832,8 @@ class Prime_Cache_File_Optimizer {
 		// Build exclusion patterns.
 		$excl = $this->parse_list( $s['exclude_delay_js'] );
 		$excl = array_merge( $excl, $this->get_delay_preset_patterns() );
-		// Built-in exclusions: must match $delay_never handles but as URL
-		// patterns for the HTML pipeline (which doesn't see WP handles).
+		// Built-in exclusions: URL patterns for scripts that must never be
+		// delayed (the HTML pipeline doesn't see WP enqueue handles).
 		// jQuery and core dependencies.
 		$excl[] = 'jquery';
 		$excl[] = 'jquery-migrate';
@@ -1126,8 +1009,8 @@ class Prime_Cache_File_Optimizer {
 		$excludes       = $this->parse_list( $s['exclude_js'] );
 		$inline_excl    = $this->parse_list( $s['exclude_inline_js'] );
 
-		// Note: Delay JS is now handled by delay_all_scripts() in the HTML pipeline.
-		// Defer JS is handled by filter_defer_script() via script_loader_tag filter.
+		// Defer JS is handled by filter_defer_script() via script_loader_tag.
+		// Delay JS is handled by delay_all_scripts() in the HTML pipeline.
 
 		// Process <script> tags.
 		$html = preg_replace_callback( '#<script\b([^>]*)>(.*?)</script>#si', function( $m ) use ( $s, $excludes, $inline_excl ) {
@@ -1143,7 +1026,7 @@ class Prime_Cache_File_Optimizer {
 				return $full;
 			}
 
-			// Skip already-delayed scripts (processed by filter_delay_script).
+			// Skip already-delayed scripts (processed by delay_all_scripts).
 			if ( false !== strpos( $attrs, 'data-pc-delayed' ) || false !== strpos( $attrs, 'pc-delay/' ) ) {
 				return $full;
 			}
@@ -1227,9 +1110,6 @@ class Prime_Cache_File_Optimizer {
 
 		return $out_url;
 	}
-
-	// Delay JS is handled entirely by filter_delay_script() + print_delay_loader().
-	// Convention: type="pc-delay/js", data-src, data-pc-delayed.
 
 	// ── Query String Removal ─────────────────────────────────
 
