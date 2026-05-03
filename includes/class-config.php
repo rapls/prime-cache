@@ -314,24 +314,26 @@ class Prime_Cache_Config {
 
 		$lines[] = '';
 
-		// Skip the write entirely when the resulting config data matches the
-		// existing file. The timestamp comment changes every call, so compare
-		// only the data lines ($prime_cache_config[...] = ...). This avoids
-		// pointless mtime updates that trigger backup tools and file watchers.
+		$content = implode( "\n", $lines );
+
+		// Skip the write entirely when the resulting config matches the existing
+		// file. The timestamp comment changes every call, so strip just that line
+		// from both sides and byte-compare the rest. Comparing the full body
+		// (rather than extracted data lines) is necessary because textarea values
+		// can contain literal newlines — addslashes() does not escape them.
 		if ( file_exists( $file ) ) {
 			$existing = @file_get_contents( $file ); // phpcs:ignore
 			if ( false !== $existing ) {
-				$pattern = '#^\$prime_cache_config\[[^\]]+\]\s*=\s*[^\n]+$#m';
-				if ( preg_match_all( $pattern, $existing, $m_existing )
-					&& preg_match_all( $pattern, implode( "\n", $lines ), $m_new )
-					&& $m_existing[0] === $m_new[0] ) {
+				$strip            = '#^/\*\* Prime Cache site config[^\n]*\*/\n?#m';
+				$new_normalized   = preg_replace( $strip, '', $content );
+				$exist_normalized = preg_replace( $strip, '', $existing );
+				if ( $new_normalized === $exist_normalized ) {
 					return true;
 				}
 			}
 		}
 
 		// Atomic write: temp file + rename.
-		$content  = implode( "\n", $lines );
 		$tempfile = $file . '.tmp.' . uniqid();
 		if ( false === file_put_contents( $tempfile, $content ) ) { // phpcs:ignore
 			return false;
