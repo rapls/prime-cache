@@ -47,6 +47,13 @@ class Prime_Cache_Config {
 			return false;
 		}
 
+		// Skip the write when the existing dropin already matches byte-for-byte.
+		// get_advanced_cache_content() is deterministic (no timestamps), so this
+		// makes the common admin_init self-heal pass a true no-op.
+		if ( isset( $existing ) && $existing === $content ) {
+			return true;
+		}
+
 		// Atomic write: temp file + rename.
 		$tempfile = $dropin_path . '.tmp.' . getmypid();
 		if ( false === file_put_contents( $tempfile, $content ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
@@ -297,6 +304,22 @@ class Prime_Cache_Config {
 		}
 
 		$lines[] = '';
+
+		// Skip the write entirely when the resulting config data matches the
+		// existing file. The timestamp comment changes every call, so compare
+		// only the data lines ($prime_cache_config[...] = ...). This avoids
+		// pointless mtime updates that trigger backup tools and file watchers.
+		if ( file_exists( $file ) ) {
+			$existing = @file_get_contents( $file ); // phpcs:ignore
+			if ( false !== $existing ) {
+				$pattern = '#^\$prime_cache_config\[[^\]]+\]\s*=\s*[^\n]+$#m';
+				if ( preg_match_all( $pattern, $existing, $m_existing )
+					&& preg_match_all( $pattern, implode( "\n", $lines ), $m_new )
+					&& $m_existing[0] === $m_new[0] ) {
+					return true;
+				}
+			}
+		}
 
 		// Atomic write: temp file + rename.
 		$content  = implode( "\n", $lines );

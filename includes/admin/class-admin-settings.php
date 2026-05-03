@@ -292,7 +292,36 @@ class Prime_Cache_Admin_Settings {
 			}
 
 			Prime_Cache_Config::write_config_file( $s );
-			$s['htaccess_enabled'] ? Prime_Cache_Htaccess::add_rules( $s ) : Prime_Cache_Htaccess::remove_rules();
+
+			// Only touch .htaccess when the toggle or any rule-affecting setting
+			// actually changed. Saving unrelated tabs (e.g. media, preload) no
+			// longer rewrites .htaccess.
+			$htaccess_keys = array(
+				'htaccess_enabled', 'cache_enabled', 'cache_mobile_separate',
+				'gzip_compression', 'brotli_compression',
+				'browser_cache', 'browser_cache_css_js', 'browser_cache_images',
+				'browser_cache_fonts', 'browser_cache_html', 'cache_control_immutable',
+				'hsts_enabled', 'hsts_max_age', 'security_headers',
+				'webp_enabled', 'avif_enabled', 'img_conversion_enabled', 'img_delivery_method',
+				'cache_vary_cookies', 'cache_query_strings',
+				'cache_reject_uri', 'cache_reject_ua', 'cache_reject_cookies', 'cache_reject_referrer',
+			);
+			$htaccess_was_on = ! empty( $old['htaccess_enabled'] );
+			$htaccess_now_on = ! empty( $s['htaccess_enabled'] );
+			if ( $htaccess_now_on ) {
+				$rules_dirty = false;
+				foreach ( $htaccess_keys as $k ) {
+					if ( ( $old[ $k ] ?? null ) !== ( $s[ $k ] ?? null ) ) {
+						$rules_dirty = true;
+						break;
+					}
+				}
+				if ( $rules_dirty ) {
+					Prime_Cache_Htaccess::add_rules( $s );
+				}
+			} elseif ( $htaccess_was_on ) {
+				Prime_Cache_Htaccess::remove_rules();
+			}
 		}
 
 		// Set transient AFTER all warnings are collected (including install_advanced_cache result).
