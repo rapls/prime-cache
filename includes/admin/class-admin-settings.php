@@ -405,6 +405,9 @@ class Prime_Cache_Admin_Settings {
 			// Migration: strip regex escape sequences from legacy patterns.
 			// e.g. example\.com → example.com, /path\-name → /path-name
 			$part = stripslashes( $part );
+			// Collapse runs of `*` so adjacent wildcards cannot expand to .*.*.*
+			// (which compiles fine but causes polynomial backtracking on long inputs).
+			$part = preg_replace( '#\*+#', '*', $part );
 			// Split on * (wildcard), escape each segment, rejoin with .*
 			$segments = explode( '*', $part );
 			$escaped  = array_map( function( $seg ) {

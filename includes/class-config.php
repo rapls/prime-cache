@@ -225,15 +225,6 @@ class Prime_Cache_Config {
 					'${1}true${2} ' . $prime_cache_marker,
 					$content
 				);
-			} elseif ( preg_match( '#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*true\s*\)#mi', $content )
-				&& false === strpos( $content, $prime_cache_marker ) ) {
-				// WP_CACHE is true but was set by another plugin (e.g. WP Rocket).
-				// Replace the entire line with our own marker.
-				$content = preg_replace(
-					'#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*true\s*\)\s*;[^\n]*\n?#mi',
-					"define( 'WP_CACHE', true ); " . $prime_cache_marker . "\n",
-					$content
-				);
 			} elseif ( ! preg_match( '#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,#mi', $content ) ) {
 				// No WP_CACHE definition exists — add after opening PHP tag.
 				$content = preg_replace(
@@ -243,6 +234,8 @@ class Prime_Cache_Config {
 					1
 				);
 			}
+			// Otherwise WP_CACHE is already true (possibly set by another caching
+			// plugin) — leave the existing line untouched to avoid ownership churn.
 		}
 
 		// Clean up double blank lines.
