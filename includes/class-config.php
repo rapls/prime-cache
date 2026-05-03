@@ -210,6 +210,7 @@ class Prime_Cache_Config {
 		if ( false === $content ) {
 			return false;
 		}
+		$original_content = $content;
 
 		$prime_cache_marker = '// Added by Prime Cache';
 		$has_prime_line     = false !== strpos( $content, $prime_cache_marker );
@@ -247,6 +248,14 @@ class Prime_Cache_Config {
 
 		// Clean up double blank lines.
 		$content = preg_replace( "#\n{3,}#", "\n\n", $content );
+
+		// Skip the rewrite when nothing actually changed. The self-heal pass on
+		// admin_init calls this on every admin page load — if the file already
+		// reflects the desired state, leave its mtime alone to avoid noise for
+		// backup tools and file watchers.
+		if ( $original_content === $content ) {
+			return true;
+		}
 
 		// Atomic write: temp file + rename.
 		$tempfile = $config_path . '.tmp.' . getmypid();
