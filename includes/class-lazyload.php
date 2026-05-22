@@ -57,19 +57,25 @@ class Prime_Cache_LazyLoad {
 				// Skip first N images (likely above the fold).
 				if ( $count <= $skip_first ) {
 					// Add fetchpriority="high" to the very first image (LCP candidate).
-					if ( 1 === $count && false === stripos( $tag, 'fetchpriority' ) ) {
+					// Word-boundary check so `data-fetchpriority="..."` doesn't
+					// suppress our attribute insertion.
+					if ( 1 === $count && ! preg_match( '#\bfetchpriority\s*=#i', $tag ) ) {
 						$tag = preg_replace( '#^(<img)\b#i', '$1 fetchpriority="high"', $tag );
 					}
 					return $tag;
 				}
 
 				// Skip if already has loading attribute.
-				if ( preg_match( '#loading\s*=#i', $tag ) ) {
+				if ( preg_match( '#\bloading\s*=#i', $tag ) ) {
 					return $tag;
 				}
 
-				// Skip if fetchpriority="high" (LCP image).
-				if ( false !== stripos( $tag, 'fetchpriority' ) ) {
+				// Skip if fetchpriority="high" (LCP image). Match the value
+				// specifically — `fetchpriority="low"` and `fetchpriority="auto"`
+				// are not LCP candidates and should still be lazy-loaded.
+				// Trailing boundary avoids matching non-spec values like
+				// `fetchpriority=highly` (whitespace, `>`, `/`, or quote terminator).
+				if ( preg_match( '#\bfetchpriority\s*=\s*(?:"high"|\'high\'|high(?=\s|/|>))#i', $tag ) ) {
 					return $tag;
 				}
 
@@ -88,7 +94,7 @@ class Prime_Cache_LazyLoad {
 			$html = preg_replace_callback( '#<iframe\s[^>]+>#i', function( $m ) use ( $excludes ) {
 				$tag = $m[0];
 
-				if ( preg_match( '#loading\s*=#i', $tag ) ) {
+				if ( preg_match( '#\bloading\s*=#i', $tag ) ) {
 					return $tag;
 				}
 

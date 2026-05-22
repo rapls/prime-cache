@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Prime Cache
  * Description: A fast and stable page caching plugin for WordPress.
- * Version: 1.9.9.4
+ * Version: 1.9.9.5
  * Author: rapls
  * License: GPL-2.0-or-later
  * Text Domain: prime-cache
@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PRIME_CACHE_VERSION', '1.9.9.4' );
+define( 'PRIME_CACHE_VERSION', '1.9.9.5' );
 define( 'PRIME_CACHE_FILE', __FILE__ );
 define( 'PRIME_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 
@@ -34,7 +34,6 @@ function prime_cache_is_pro() {
 
 // Core classes (always loaded).
 require_once PRIME_CACHE_PATH . 'includes/class-cache-storage.php';
-require_once PRIME_CACHE_PATH . 'includes/class-cache-tests.php';
 require_once PRIME_CACHE_PATH . 'includes/class-config.php';
 require_once PRIME_CACHE_PATH . 'includes/class-purge.php';
 require_once PRIME_CACHE_PATH . 'includes/class-htaccess.php';
@@ -125,14 +124,22 @@ function prime_cache_get_settings( $force = false ) {
 		'combine_js'            => false,
 		'defer_js'              => false,
 		'delay_js'              => false,
-		'delay_js_timeout'      => 0,
-		'exclude_js'            => "raplsaich\nwp-consent-api",
-		'exclude_inline_js'     => "raplsaich\nconsent_api",
-		'exclude_defer_js'      => "raplsaich-chatbot\nraplsaichConfig\nwp-consent-api\nconsent_api",
-		'exclude_delay_js'      => "raplsaich-chatbot\nraplsaichConfig\nwp-consent-api\nconsent_api",
+		// 5s default fallback so analytics/consent/ads on no-interaction
+		// sessions still fire. Set explicitly to 0 in the admin UI to revert
+		// to the "wait for interaction only" mode.
+		'delay_js_timeout'      => 5000,
+		'exclude_js'            => 'wp-consent-api',
+		'exclude_inline_js'     => 'consent_api',
+		'exclude_defer_js'      => "wp-consent-api\nconsent_api",
+		'exclude_delay_js'      => "wp-consent-api\nconsent_api",
 		'combine_google_fonts'  => false,
 		'self_host_google_fonts' => false,
-		'google_fonts_display'  => true,
+		// Default off: when set, every front-end response goes through the
+		// HTML pipeline (OB capture + scanning) just to detect Google Fonts
+		// links. Sites that don't use Google Fonts paid that cost on every
+		// page for no observable benefit. Operators who use Google Fonts
+		// can enable this in the admin UI.
+		'google_fonts_display'  => false,
 		'remove_query_strings'  => false,
 		'rewrite_file_optimizer' => false,
 		'preload_enabled'       => false,
@@ -233,6 +240,9 @@ function prime_cache_get_settings( $force = false ) {
 		'preload_resources'     => '',
 		'speculation_rules'     => false,
 		'cache_404'             => false,
+		// Default false: site has a single scheme — the dropin trusts wp_parse_url(home_url(), PHP_URL_SCHEME).
+		// Set true only for sites that intentionally serve both http:// and https:// versions of the same URL.
+		'cache_mixed_scheme'    => false,
 		'debug_log'             => false,
 		'db_revisions'          => false,
 		'db_auto_drafts'        => false,

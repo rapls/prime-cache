@@ -48,54 +48,74 @@ class Prime_Cache_Htaccess {
 	 * @return bool
 	 */
 	private static function insert_before_wordpress( $htaccess, $marker, $rules ) {
-		if ( ! file_exists( $htaccess ) ) {
-			// No .htaccess yet — use standard insert_with_markers.
-			return insert_with_markers( $htaccess, $marker, $rules );
+		// Settings save / activation / self-heal can race against each other.
+		// Without serialization the last writer wins and silently drops
+		// concurrent edits. Lock on a sibling file in WP_CONTENT_DIR (we may
+		// not have write permission to ABSPATH where .htaccess usually lives).
+		$lock_path = WP_CONTENT_DIR . '/.prime-cache-htaccess.lock';
+		$lock_fp   = @fopen( $lock_path, 'c' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		if ( $lock_fp ) {
+			@flock( $lock_fp, LOCK_EX );
 		}
 
-		$content = file_get_contents( $htaccess ); // phpcs:ignore
-		if ( false === $content ) {
-			return false;
+		try {
+			if ( ! file_exists( $htaccess ) ) {
+				// No .htaccess yet — use standard insert_with_markers.
+				return insert_with_markers( $htaccess, $marker, $rules );
+			}
+
+			$content = file_get_contents( $htaccess ); // phpcs:ignore
+			if ( false === $content ) {
+				return false;
+			}
+
+			$begin_marker = '# BEGIN ' . $marker;
+			$end_marker   = '# END ' . $marker;
+			$begin_wp     = '# BEGIN WordPress';
+
+			// Build the new block.
+			$block_lines   = array();
+			$block_lines[] = $begin_marker;
+			foreach ( $rules as $line ) {
+				$block_lines[] = $line;
+			}
+			$block_lines[] = $end_marker;
+			$new_block     = implode( "\n", $block_lines ) . "\n";
+
+			// Remove existing Prime Cache block if present.
+			$pattern = '#\s*' . preg_quote( $begin_marker, '#' ) . '.*?' . preg_quote( $end_marker, '#' ) . '\s*#si';
+			$content = preg_replace( $pattern, "\n", $content );
+
+			// Insert before the FIRST '# BEGIN WordPress'. str_replace would inject
+			// our block before every occurrence on a malformed .htaccess that lists
+			// the marker more than once.
+			$wp_pos = strpos( $content, $begin_wp );
+			if ( false !== $wp_pos ) {
+				$content = substr_replace( $content, $new_block . "\n", $wp_pos, 0 );
+			} else {
+				// No WordPress block — prepend to file.
+				$content = $new_block . "\n" . $content;
+			}
+
+			// Clean up multiple blank lines.
+			$content = preg_replace( "#\n{3,}#", "\n\n", $content );
+
+			// Atomic write.
+			$tempfile = $htaccess . '.tmp.' . getmypid();
+			if ( false === file_put_contents( $tempfile, $content ) ) { // phpcs:ignore
+				return false;
+			}
+			if ( ! rename( $tempfile, $htaccess ) ) { // phpcs:ignore
+				@unlink( $tempfile );
+				return false;
+			}
+			return true;
+		} finally {
+			if ( $lock_fp ) {
+				@flock( $lock_fp, LOCK_UN );
+				@fclose( $lock_fp );
+			}
 		}
-
-		$begin_marker = '# BEGIN ' . $marker;
-		$end_marker   = '# END ' . $marker;
-		$begin_wp     = '# BEGIN WordPress';
-
-		// Build the new block.
-		$block_lines   = array();
-		$block_lines[] = $begin_marker;
-		foreach ( $rules as $line ) {
-			$block_lines[] = $line;
-		}
-		$block_lines[] = $end_marker;
-		$new_block     = implode( "\n", $block_lines ) . "\n";
-
-		// Remove existing Prime Cache block if present.
-		$pattern = '#\s*' . preg_quote( $begin_marker, '#' ) . '.*?' . preg_quote( $end_marker, '#' ) . '\s*#si';
-		$content = preg_replace( $pattern, "\n", $content );
-
-		// Insert before # BEGIN WordPress.
-		if ( false !== strpos( $content, $begin_wp ) ) {
-			$content = str_replace( $begin_wp, $new_block . "\n" . $begin_wp, $content );
-		} else {
-			// No WordPress block — prepend to file.
-			$content = $new_block . "\n" . $content;
-		}
-
-		// Clean up multiple blank lines.
-		$content = preg_replace( "#\n{3,}#", "\n\n", $content );
-
-		// Atomic write.
-		$tempfile = $htaccess . '.tmp.' . getmypid();
-		if ( false === file_put_contents( $tempfile, $content ) ) { // phpcs:ignore
-			return false;
-		}
-		if ( ! rename( $tempfile, $htaccess ) ) { // phpcs:ignore
-			@unlink( $tempfile );
-			return false;
-		}
-		return true;
 	}
 
 	/**
@@ -109,29 +129,45 @@ class Prime_Cache_Htaccess {
 			return true;
 		}
 
-		$content = file_get_contents( $htaccess ); // phpcs:ignore
-		if ( false === $content ) {
-			return false;
+		// Share the same lock with insert_before_wordpress() so a concurrent
+		// add+remove (e.g. settings save racing against deactivation) cannot
+		// clobber each other's read-modify-write.
+		$lock_path = WP_CONTENT_DIR . '/.prime-cache-htaccess.lock';
+		$lock_fp   = @fopen( $lock_path, 'c' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		if ( $lock_fp ) {
+			@flock( $lock_fp, LOCK_EX );
 		}
 
-		$begin = '# BEGIN ' . self::MARKER;
-		$end   = '# END ' . self::MARKER;
+		try {
+			$content = file_get_contents( $htaccess ); // phpcs:ignore
+			if ( false === $content ) {
+				return false;
+			}
 
-		// Remove block wherever it is (before or after WordPress rules).
-		$pattern = '#\s*' . preg_quote( $begin, '#' ) . '.*?' . preg_quote( $end, '#' ) . '\s*#si';
-		$content = preg_replace( $pattern, "\n", $content );
-		$content = preg_replace( "#\n{3,}#", "\n\n", $content );
+			$begin = '# BEGIN ' . self::MARKER;
+			$end   = '# END ' . self::MARKER;
 
-		// Atomic write.
-		$tempfile = $htaccess . '.tmp.' . getmypid();
-		if ( false === file_put_contents( $tempfile, $content ) ) { // phpcs:ignore
-			return false;
+			// Remove block wherever it is (before or after WordPress rules).
+			$pattern = '#\s*' . preg_quote( $begin, '#' ) . '.*?' . preg_quote( $end, '#' ) . '\s*#si';
+			$content = preg_replace( $pattern, "\n", $content );
+			$content = preg_replace( "#\n{3,}#", "\n\n", $content );
+
+			// Atomic write.
+			$tempfile = $htaccess . '.tmp.' . getmypid();
+			if ( false === file_put_contents( $tempfile, $content ) ) { // phpcs:ignore
+				return false;
+			}
+			if ( ! rename( $tempfile, $htaccess ) ) { // phpcs:ignore
+				@unlink( $tempfile );
+				return false;
+			}
+			return true;
+		} finally {
+			if ( $lock_fp ) {
+				@flock( $lock_fp, LOCK_UN );
+				@fclose( $lock_fp );
+			}
 		}
-		if ( ! rename( $tempfile, $htaccess ) ) { // phpcs:ignore
-			@unlink( $tempfile );
-			return false;
-		}
-		return true;
 	}
 
 	/**
@@ -164,6 +200,9 @@ class Prime_Cache_Htaccess {
 		}
 
 		$content = file_get_contents( $htaccess ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( false === $content ) {
+			return false;
+		}
 
 		return false !== strpos( $content, '# BEGIN ' . self::MARKER );
 	}
@@ -204,11 +243,12 @@ class Prime_Cache_Htaccess {
 			$lines = array_merge( $lines, self::build_brotli_rules() );
 		}
 
-		$lines[] = '';
-		$lines = array_merge( $lines, self::build_expires_rules() );
-
-		// Browser cache (Cache-Control headers).
+		// Browser cache: Expires + Cache-Control headers are both gated behind the
+		// single "Enable Browser Cache Headers" toggle and use the same per-asset
+		// lifetime settings, so the two headers don't disagree on the same response.
 		if ( ! empty( $settings['browser_cache'] ) ) {
+			$lines[] = '';
+			$lines = array_merge( $lines, self::build_expires_rules( $settings ) );
 			$lines[] = '';
 			$lines = array_merge( $lines, self::build_cache_control_rules( $settings ) );
 		}
@@ -347,7 +387,34 @@ class Prime_Cache_Htaccess {
 		$has_vary_cookies  = ! empty( trim( $settings['cache_vary_cookies'] ?? '' ) );
 		$has_cache_qs      = ! empty( trim( $settings['cache_query_strings'] ?? '' ) );
 
-		if ( $has_vary_cookies || $has_cache_qs ) {
+		// Reject patterns containing meta chars the .htaccess sanitizer cannot
+		// preserve will diverge from the drop-in's regex. Disable the fast-path
+		// in those cases so the drop-in is the single source of truth.
+		//
+		// `\-` and `\.` are common preg_quote() artifacts from ordinary slugs
+		// (`my-account`, `wp-cron.php`) — both characters survive the .htaccess
+		// allowlist verbatim, and (for `.`, the only true regex difference) the
+		// resulting Apache regex matches the same URLs in practice. Strip those
+		// before checking so common WP slugs don't silently disable fast-path.
+		// Beyond `*` and `\\`, any quantifier or grouping construct (`+`, `?`,
+		// `(`, `)`, `{`, `}`, `|`, `[`, `]`, `^`, `$`) means Apache mod_rewrite
+		// could match a different URL set than PHP preg_match — drop the
+		// fast-path for those too.
+		$reject_fields   = array( 'cache_reject_uri', 'cache_reject_cookies', 'cache_reject_ua', 'cache_reject_referrer' );
+		$has_unsafe_meta = false;
+		foreach ( $reject_fields as $f ) {
+			$v = (string) ( $settings[ $f ] ?? '' );
+			if ( '' === $v ) {
+				continue;
+			}
+			$normalized = str_replace( array( '\\-', '\\.' ), array( '-', '.' ), $v );
+			if ( false !== strpbrk( $normalized, '*\\+?(){}|[]^$' ) ) {
+				$has_unsafe_meta = true;
+				break;
+			}
+		}
+
+		if ( $has_vary_cookies || $has_cache_qs || $has_unsafe_meta ) {
 			$reasons = array();
 			if ( $has_vary_cookies ) {
 				$reasons[] = 'cache_vary_cookies';
@@ -355,9 +422,12 @@ class Prime_Cache_Htaccess {
 			if ( $has_cache_qs ) {
 				$reasons[] = 'cache_query_strings';
 			}
+			if ( $has_unsafe_meta ) {
+				$reasons[] = 'wildcard or escape in reject pattern';
+			}
 			return array(
 				'# .htaccess fast-path disabled: ' . implode( ' and ', $reasons ) . ' active.',
-				'# Variant filenames (-vc_xxx, -qs_xxx) require PHP (drop-in) to determine the correct cache file.',
+				'# Drop-in handles these to ensure consistent variant selection / pattern matching.',
 			);
 		}
 
@@ -402,12 +472,66 @@ class Prime_Cache_Htaccess {
 		$r[] = '    RewriteBase /';
 		$r[] = '';
 
-		// Detect HTTPS → set environment variable for filename variant.
-		$r[] = '    # SSL detection';
-		$r[] = '    RewriteCond %{HTTPS} on [OR]';
-		$r[] = '    RewriteCond %{SERVER_PORT} ^443$ [OR]';
-		$r[] = '    RewriteCond %{HTTP:X-Forwarded-Proto} https';
-		$r[] = '    RewriteRule .* - [E=PC_SSL:-https]';
+		// SSL detection — must agree with the drop-in's _pc_is_ssl logic, otherwise
+		// .htaccess and PHP would pick different cache filenames for the same request.
+		$site_scheme = wp_parse_url( home_url(), PHP_URL_SCHEME );
+		$mixed       = ! empty( $settings['cache_mixed_scheme'] );
+		if ( ! $mixed && 'https' === $site_scheme ) {
+			// Single-scheme HTTPS site. Match the drop-in scheme detection:
+			// emit -https only when the request shows an actual HTTPS signal;
+			// otherwise mark PC_SKIP so the fast-path is bypassed and WP can
+			// issue its http→https redirect.
+			//
+			// Proxies that strip both `HTTPS` and `X-Forwarded-Proto` look
+			// identical to direct http at this layer. Operators must opt in:
+			//   - PRIME_CACHE_TRUST_X_FORWARDED_PROTO + proxy sending XFP
+			//   - PRIME_CACHE_PROXY_NO_XFP for "trust site_scheme blindly"
+			//   - cache_mixed_scheme=true for per-request scheme-aware cache
+			$trust_xfp    = defined( 'PRIME_CACHE_TRUST_X_FORWARDED_PROTO' ) && PRIME_CACHE_TRUST_X_FORWARDED_PROTO;
+			$proxy_no_xfp = defined( 'PRIME_CACHE_PROXY_NO_XFP' ) && PRIME_CACHE_PROXY_NO_XFP;
+			$r[] = '    # SSL detection (single-scheme HTTPS site)';
+			if ( $proxy_no_xfp ) {
+				// Back-compat: trust site_scheme regardless of request signals.
+				$r[] = '    RewriteRule .* - [E=PC_SSL:-https]';
+			} else {
+				// Default: only mark -https when the request actually signals https.
+				if ( $trust_xfp ) {
+					$r[] = '    RewriteCond %{HTTPS} on [OR]';
+					$r[] = '    RewriteCond %{SERVER_PORT} ^443$ [OR]';
+					$r[] = '    RewriteCond %{HTTP:X-Forwarded-Proto} https';
+				} else {
+					$r[] = '    RewriteCond %{HTTPS} on [OR]';
+					$r[] = '    RewriteCond %{SERVER_PORT} ^443$';
+				}
+				$r[] = '    RewriteRule .* - [E=PC_SSL:-https]';
+				// No HTTPS signal → skip the fast-path (let PHP/WP redirect).
+				$r[] = '    RewriteCond %{HTTPS} !on';
+				$r[] = '    RewriteCond %{SERVER_PORT} !^443$';
+				if ( $trust_xfp ) {
+					$r[] = '    RewriteCond %{HTTP:X-Forwarded-Proto} !https';
+				}
+				$r[] = '    RewriteRule .* - [E=PC_SKIP:1]';
+			}
+		} elseif ( ! $mixed && 'http' === $site_scheme ) {
+			// Single-scheme HTTP site: never set the -https variant.
+			$r[] = '    # SSL detection (single-scheme HTTP site — no -https variant)';
+		} else {
+			// Mixed-scheme site or unknown scheme: fall back to header detection.
+			// X-Forwarded-Proto is gated by the same constant the drop-in uses, so
+			// .htaccess and PHP agree on which requests count as HTTPS. The constant
+			// is read at rule-generation time (settings save) and baked in.
+			$trust_xfp = defined( 'PRIME_CACHE_TRUST_X_FORWARDED_PROTO' ) && PRIME_CACHE_TRUST_X_FORWARDED_PROTO;
+			$r[] = '    # SSL detection (mixed-scheme fallback)';
+			if ( $trust_xfp ) {
+				$r[] = '    RewriteCond %{HTTPS} on [OR]';
+				$r[] = '    RewriteCond %{SERVER_PORT} ^443$ [OR]';
+				$r[] = '    RewriteCond %{HTTP:X-Forwarded-Proto} https';
+			} else {
+				$r[] = '    RewriteCond %{HTTPS} on [OR]';
+				$r[] = '    RewriteCond %{SERVER_PORT} ^443$';
+			}
+			$r[] = '    RewriteRule .* - [E=PC_SSL:-https]';
+		}
 		$r[] = '';
 
 		// Detect mobile UA → set environment variable for filename variant.
@@ -434,13 +558,43 @@ class Prime_Cache_Htaccess {
 		}
 		$r[] = '    RewriteCond %{QUERY_STRING} ^$';
 
+		// Skip authenticated requests (matches drop-in: never cache responses to
+		// Authorization-bearing requests — Bearer tokens, Basic, Digest).
+		$r[] = '    RewriteCond %{HTTP:Authorization} ^$';
+		$r[] = '    RewriteCond %{ENV:REDIRECT_HTTP_AUTHORIZATION} ^$';
+
+		// Mobile bypass when cache_mobile=false: the drop-in already returns early
+		// for mobile UAs in this case, but without this rule .htaccess would still
+		// serve the desktop-generated cache file to mobile visitors directly.
+		if ( empty( $settings['cache_mobile'] ) ) {
+			$r[] = '    # Mobile cache disabled — bypass fast-path for mobile UAs (drop-in handles them)';
+			$r[] = '    RewriteCond %{HTTP_USER_AGENT} !(Mobile|Android|Silk/|Kindle|BlackBerry|Opera\sMini|Opera\sMobi|webOS) [NC]';
+		}
+
 		// Only match ASCII-safe URL paths (no percent-encoding, no special chars).
 		// URLs with encoded characters use different cache directory names (underscore-hex)
 		// which Apache rewrite cannot reproduce, so they fall through to the drop-in.
 		$r[] = '    RewriteCond %{REQUEST_URI} ^[a-zA-Z0-9/_\-\.]+$';
 
-		// Exclude logged-in users and comment authors.
-		$r[] = '    RewriteCond %{HTTP:Cookie} !wordpress_logged_in_ [NC]';
+		// Mirror the drop-in's admin/login/cron/xmlrpc bypass. The drop-in already
+		// returns early for these so no cache file should exist, but defense-in-
+		// depth: refuse to serve any stale or manually-placed file under those
+		// paths via mod_rewrite. Boundary-anchored to avoid false positives on
+		// /category/wp-admin-tutorials/ or similar.
+		$r[] = '    RewriteCond %{REQUEST_URI} !(?:^|/)wp-admin(?:/|$) [NC]';
+		$r[] = '    RewriteCond %{REQUEST_URI} !(?:^|/)wp-login\.php(?:$|\?) [NC]';
+		$r[] = '    RewriteCond %{REQUEST_URI} !(?:^|/)wp-cron\.php(?:$|\?) [NC]';
+		$r[] = '    RewriteCond %{REQUEST_URI} !(?:^|/)xmlrpc\.php(?:$|\?) [NC]';
+
+		// Exclude logged-in users (only when cache_logged_in is off — when it's on,
+		// the drop-in serves a single shared cache to logged-in and anonymous alike,
+		// so the fast-path should do the same).
+		if ( empty( $settings['cache_logged_in'] ) ) {
+			$r[] = '    RewriteCond %{HTTP:Cookie} !wordpress_logged_in_ [NC]';
+		}
+		// comment_author_ and wp-postpass_ always bypass — they alter the rendered
+		// page (pre-filled comment fields / unlocked post body) regardless of
+		// cache_logged_in's setting.
 		$r[] = '    RewriteCond %{HTTP:Cookie} !comment_author_ [NC]';
 		$r[] = '    RewriteCond %{HTTP:Cookie} !wp-postpass_ [NC]';
 
@@ -448,6 +602,15 @@ class Prime_Cache_Htaccess {
 		$r[] = '    RewriteCond %{HTTP:Cookie} !woocommerce_cart_hash [NC]';
 		$r[] = '    RewriteCond %{HTTP:Cookie} !wp_woocommerce_session_ [NC]';
 		$r[] = '    RewriteCond %{HTTP:Cookie} !woocommerce_items_in_cart [NC]';
+
+		// Exclude WooCommerce URIs (cart / checkout / my-account / wc-api). The drop-in
+		// always returns early for these; without the same rule here, a stale cache
+		// file could be served by Apache directly. Boundary-matched to avoid hitting
+		// unrelated slugs like /cartoon/ or /my-accounting/. (wc-ajax / add-to-cart
+		// are query-string params and are already excluded by the QUERY_STRING ^$
+		// condition above, so no extra rule is needed for them.)
+		$r[] = '    RewriteCond %{REQUEST_URI} !(?:^|/)(?:cart|checkout|my-account)(?:/|$) [NC]';
+		$r[] = '    RewriteCond %{REQUEST_URI} !(?:^|/)wc-api(?:/|$) [NC]';
 
 		// Exclude rejected cookies (user-configured).
 		if ( $reject_cookies ) {
@@ -476,13 +639,102 @@ class Prime_Cache_Htaccess {
 		// lowercase variables, so only lowercase Host headers use the fast-path.
 		// Uppercase hosts (rare in production) fall through to the PHP drop-in
 		// which normalizes correctly — this is by design, not a bug.
+		//
+		// Enforce the same allowlist the drop-in fail-closes against. Without
+		// this gate, an attacker-supplied Host header that happens to match an
+		// orphaned cache directory (left over from a domain change, manual file
+		// drop, or a previous install on shared wp-content) would be served by
+		// Apache directly without going through PHP validation.
+		// Build raw → normalized host pairs. Apache compares HTTP_HOST in raw
+		// form (`[2001:db8::1]` for IPv6, Punycode for IDN), but cache files
+		// live under the normalized directory name (`_5b2001_3a...` etc.). We
+		// emit one match-and-set rule per host so the regex matches the raw
+		// header while PC_HOST gets the literal normalized form for the path
+		// resolution below. For Unicode IDN hosts, browsers send Punycode in
+		// the Host header even if `home_url()` returns Unicode; emit both
+		// surface forms pointing at the same normalized PC_HOST value.
+		require_once PRIME_CACHE_PATH . 'includes/cache-key-functions.php';
+		// Collect built-in hosts, then ask the same filter the drop-in's
+		// allowed-hosts list uses so additional aliases get a fast-path
+		// rule too. Filter values may arrive in raw form; normalize each
+		// before consuming.
+		$builtin_hosts = array();
+		foreach ( array( home_url(), site_url() ) as $u ) {
+			$h = wp_parse_url( $u, PHP_URL_HOST );
+			if ( $h ) {
+				$builtin_hosts[] = $h;
+			}
+		}
+		$filtered_hosts = apply_filters( 'prime_cache_allowed_hosts', $builtin_hosts );
+		if ( ! is_array( $filtered_hosts ) ) {
+			$filtered_hosts = $builtin_hosts;
+		}
+		$host_pairs = array();
+		foreach ( $filtered_hosts as $raw ) {
+			if ( ! is_string( $raw ) || '' === $raw ) {
+				continue;
+			}
+			$normalized = _prime_cache_normalize_host( $raw );
+			if ( '' === $normalized ) {
+				continue;
+			}
+			// IPv6: wp_parse_url strips the surrounding `[ ]`, but Apache's
+			// %{HTTP_HOST} keeps them for bracketed-literal IPv6 requests.
+			// Re-add them when the raw host contains a colon so the
+			// RewriteCond regex actually matches inbound traffic.
+			$apache_host = ( false !== strpos( $raw, ':' ) ) ? '[' . $raw . ']' : $raw;
+			$key         = $apache_host . '|' . $normalized;
+			$host_pairs[ $key ] = array( 'raw' => $apache_host, 'normalized' => $normalized );
+
+			// IDN: also emit the Punycode form so a Unicode home_url()
+			// matches a Punycode Host header (and vice versa).
+			if ( function_exists( 'idn_to_ascii' ) && preg_match( '#[^\x00-\x7f]#', $raw ) ) {
+				$variant = defined( 'INTL_IDNA_VARIANT_UTS46' ) ? INTL_IDNA_VARIANT_UTS46 : 0;
+				$puny    = @idn_to_ascii( $raw, IDNA_DEFAULT, $variant );
+				if ( is_string( $puny ) && '' !== $puny && $puny !== $raw ) {
+					$puny_key = $puny . '|' . $normalized;
+					$host_pairs[ $puny_key ] = array( 'raw' => $puny, 'normalized' => $normalized );
+				}
+			}
+		}
+
 		$r[] = '';
-		$r[] = '    # Extract host: strip port, require lowercase (uppercase → drop-in fallback)';
-		$r[] = '    RewriteCond %{HTTP_HOST} ^([a-z0-9.\-]+)(:[0-9]+)?$';
-		$r[] = '    RewriteRule .* - [E=PC_HOST:%1]';
+		$emitted = 0;
+		foreach ( $host_pairs as $pair ) {
+			$raw_host = strtolower( $pair['raw'] );
+			// Restrict the normalized form to characters that are safe both
+			// inside an Apache regex (as a literal env-var value) and as a
+			// directory name. Normalized hosts already conform, but treat
+			// anything outside [a-z0-9._\-] as a belt-and-braces guard
+			// (e.g. against unexpected unicode survivors).
+			if ( ! preg_match( '#^[a-z0-9._\-]+$#', $pair['normalized'] ) ) {
+				continue;
+			}
+			// Validate the raw form too — IPv6 brackets and colons are
+			// expected here, IDN Punycode adds nothing surprising. Reject
+			// anything outside that printable set.
+			if ( ! preg_match( '#^[a-z0-9._:\-\[\]]+$#i', $raw_host ) ) {
+				continue;
+			}
+			// preg_quote with `#` covers the regex characters that appear in
+			// IPv6 (`:`, `[`, `]`) and IDN Punycode hosts (`-`, `.`).
+			$raw_pattern = preg_quote( $raw_host, '#' );
+			if ( 0 === $emitted ) {
+				$r[] = '    # Extract host: each known site host gets its normalized cache-dir name';
+			}
+			$r[] = '    RewriteCond %{HTTP_HOST} ^' . $raw_pattern . '(:[0-9]+)?$ [NC]';
+			$r[] = '    RewriteRule .* - [E=PC_HOST:' . $pair['normalized'] . ']';
+			$emitted++;
+		}
+		// No fallback: when no allowed hosts could be enumerated, fail closed —
+		// PC_HOST stays unset and the file-existence check below fails. Better
+		// to drop the fast-path entirely than serve a stale cache file under
+		// an attacker-supplied Host. The drop-in (which validates against
+		// $prime_cache_allowed_hosts) handles the request safely either way.
 		$r[] = '';
 		$r[] = '    # Check cached file exists and serve it';
 		$r[] = '    RewriteCond %{ENV:PC_HOST} !^$';
+		$r[] = '    RewriteCond %{ENV:PC_SKIP} !^1$';
 		$r[] = '    RewriteCond "%{DOCUMENT_ROOT}/' . $cache_path . '%{ENV:PC_HOST}%{REQUEST_URI}index%{ENV:PC_SSL}' . $mobile_env . '.html%{ENV:PC_GZ}" -f';
 		$r[] = '    RewriteRule .* "/' . $cache_path . '%{ENV:PC_HOST}%{REQUEST_URI}index%{ENV:PC_SSL}' . $mobile_env . '.html%{ENV:PC_GZ}" [L]';
 
@@ -520,35 +772,46 @@ class Prime_Cache_Htaccess {
 	 *
 	 * @return array
 	 */
-	private static function build_expires_rules() {
+	private static function build_expires_rules( $settings = array() ) {
+		// Lifetime values come from the same UI fields that drive Cache-Control
+		// max-age, so the two headers agree on every response.
+		$css_js = max( 0, (int) ( $settings['browser_cache_css_js'] ?? 31536000 ) );
+		$images = max( 0, (int) ( $settings['browser_cache_images'] ?? 15552000 ) );
+		$fonts  = max( 0, (int) ( $settings['browser_cache_fonts']  ?? 15552000 ) );
+		$html   = max( 0, (int) ( $settings['browser_cache_html']   ?? 0 ) );
+		$css_js_e = '"access plus ' . $css_js . ' seconds"';
+		$images_e = '"access plus ' . $images . ' seconds"';
+		$fonts_e  = '"access plus ' . $fonts  . ' seconds"';
+		$html_e   = '"access plus ' . $html   . ' seconds"';
+
 		return array(
 			'# Browser caching',
 			'<IfModule mod_expires.c>',
 			'    ExpiresActive On',
-			'    ExpiresByType text/html                     "access plus 0 seconds"',
+			'    ExpiresByType text/html                     ' . $html_e,
 			'    ExpiresByType text/xml                      "access plus 0 seconds"',
 			'    ExpiresByType application/xml               "access plus 0 seconds"',
 			'    ExpiresByType application/json              "access plus 0 seconds"',
 			'    ExpiresByType text/cache-manifest           "access plus 0 seconds"',
 			'    ExpiresByType application/rss+xml           "access plus 1 hour"',
 			'    ExpiresByType application/atom+xml          "access plus 1 hour"',
-			'    ExpiresByType image/x-icon                  "access plus 1 week"',
-			'    ExpiresByType image/gif                     "access plus 6 months"',
-			'    ExpiresByType image/jpeg                    "access plus 6 months"',
-			'    ExpiresByType image/png                     "access plus 6 months"',
-			'    ExpiresByType image/webp                    "access plus 6 months"',
-			'    ExpiresByType image/svg+xml                 "access plus 6 months"',
-			'    ExpiresByType video/mp4                     "access plus 6 months"',
-			'    ExpiresByType video/webm                    "access plus 6 months"',
-			'    ExpiresByType audio/ogg                     "access plus 6 months"',
-			'    ExpiresByType font/ttf                      "access plus 6 months"',
-			'    ExpiresByType font/otf                      "access plus 6 months"',
-			'    ExpiresByType font/woff                     "access plus 6 months"',
-			'    ExpiresByType font/woff2                    "access plus 6 months"',
-			'    ExpiresByType application/vnd.ms-fontobject "access plus 6 months"',
-			'    ExpiresByType text/css                      "access plus 1 year"',
-			'    ExpiresByType text/javascript               "access plus 1 year"',
-			'    ExpiresByType application/javascript        "access plus 1 year"',
+			'    ExpiresByType image/x-icon                  ' . $images_e,
+			'    ExpiresByType image/gif                     ' . $images_e,
+			'    ExpiresByType image/jpeg                    ' . $images_e,
+			'    ExpiresByType image/png                     ' . $images_e,
+			'    ExpiresByType image/webp                    ' . $images_e,
+			'    ExpiresByType image/svg+xml                 ' . $images_e,
+			'    ExpiresByType video/mp4                     ' . $images_e,
+			'    ExpiresByType video/webm                    ' . $images_e,
+			'    ExpiresByType audio/ogg                     ' . $images_e,
+			'    ExpiresByType font/ttf                      ' . $fonts_e,
+			'    ExpiresByType font/otf                      ' . $fonts_e,
+			'    ExpiresByType font/woff                     ' . $fonts_e,
+			'    ExpiresByType font/woff2                    ' . $fonts_e,
+			'    ExpiresByType application/vnd.ms-fontobject ' . $fonts_e,
+			'    ExpiresByType text/css                      ' . $css_js_e,
+			'    ExpiresByType text/javascript               ' . $css_js_e,
+			'    ExpiresByType application/javascript        ' . $css_js_e,
 			'</IfModule>',
 		);
 	}
@@ -651,10 +914,25 @@ class Prime_Cache_Htaccess {
 	 */
 	private static function build_hsts_rules( $settings ) {
 		$max_age = max( 0, (int) ( $settings['hsts_max_age'] ?? 31536000 ) );
+		$header  = 'max-age=' . $max_age . '; includeSubDomains; preload';
+
+		// On a single-scheme HTTPS site every request is HTTPS by definition, so
+		// omit `env=HTTPS`. That guard exists to avoid sending HSTS over HTTP, but
+		// behind a TLS-terminating reverse proxy Apache often doesn't see HTTPS=on
+		// even when the visitor connection is HTTPS — the env-gated rule would
+		// silently drop. Guarding by the canonical site scheme avoids both pitfalls.
+		$site_scheme = wp_parse_url( home_url(), PHP_URL_SCHEME );
+		$mixed       = ! empty( $settings['cache_mixed_scheme'] );
+		$single_https = ( ! $mixed && 'https' === $site_scheme );
+
+		$rule = $single_https
+			? '    Header always set Strict-Transport-Security "' . $header . '"'
+			: '    Header always set Strict-Transport-Security "' . $header . '" env=HTTPS';
+
 		return array(
 			'# HSTS',
 			'<IfModule mod_headers.c>',
-			'    Header always set Strict-Transport-Security "max-age=' . $max_age . '; includeSubDomains; preload" env=HTTPS',
+			$rule,
 			'</IfModule>',
 		);
 	}

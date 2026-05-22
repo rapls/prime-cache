@@ -135,8 +135,12 @@ class Prime_Cache_Media_Optimizer {
 			return false;
 		}
 
-		// Use transient cache to avoid repeated file reads.
-		$cache_key = 'pc_imgdim_' . md5( $path );
+		// Use transient cache to avoid repeated file reads. Include filemtime in
+		// the key so a re-uploaded image (same path, new bytes) does not return
+		// stale dimensions for up to a week — that would resurrect CLS shifts on
+		// the very pages this module is supposed to stabilize.
+		$mtime     = @filemtime( $path );
+		$cache_key = 'pc_imgdim_' . md5( $path . '|' . ( false === $mtime ? '0' : $mtime ) );
 		$cached    = get_transient( $cache_key );
 		if ( false !== $cached ) {
 			return $cached;
@@ -164,7 +168,7 @@ class Prime_Cache_Media_Optimizer {
 		}
 		$path = strtok( $path, '?' );
 		$real = realpath( $path );
-		return ( $real && 0 === strpos( $real, realpath( ABSPATH ) ) ) ? $real : false;
+		return ( $real && Prime_Cache_File_Optimizer::path_within( $real, realpath( ABSPATH ) ) ) ? $real : false;
 	}
 
 	/**

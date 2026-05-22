@@ -56,29 +56,55 @@ class Prime_Cache_CLI extends WP_CLI_Command {
 
 		switch ( $type ) {
 			case 'all':
-				$host = wp_parse_url( home_url(), PHP_URL_HOST );
-				if ( $host ) {
-					Prime_Cache_Storage::delete_host( $host );
-				}
-				if ( function_exists( 'wp_cache_flush' ) ) {
-					wp_cache_flush();
-				}
-				do_action( 'prime_cache_after_purge_all' );
+				// Same workflow as admin "Clear All Cache" button — multi-host page
+				// cache + minified CSS/JS + critical CSS + object cache flush.
+				$pc->clear_all_caches();
 				WP_CLI::success( 'All caches cleared.' );
 				break;
 
 			case 'page':
-				$host = wp_parse_url( home_url(), PHP_URL_HOST );
-				if ( $host ) {
+				// Multi-host page cache purge (matches Prime_Cache_Purge::purge_all()).
+				$hosts = array();
+				foreach ( array( home_url(), site_url() ) as $u ) {
+					$h = wp_parse_url( $u, PHP_URL_HOST );
+					if ( $h ) {
+						$hosts[] = $h;
+					}
+				}
+				/** This filter is documented in includes/class-config.php */
+				$hosts = apply_filters( 'prime_cache_allowed_hosts', $hosts );
+				if ( ! is_array( $hosts ) ) {
+					$hosts = array();
+				}
+				// Same defense-in-depth as Prime_Cache_Purge::purge_all() — a
+				// filter callback returning '' / null would otherwise pass
+				// straight through to delete_host('').
+				require_once PRIME_CACHE_PATH . 'includes/cache-key-functions.php';
+				$hosts = array_map(
+					function ( $h ) {
+						return is_string( $h ) ? _prime_cache_normalize_host( $h ) : '';
+					},
+					$hosts
+				);
+				$hosts = array_values( array_unique( array_filter( $hosts ) ) );
+				foreach ( $hosts as $host ) {
 					Prime_Cache_Storage::delete_host( $host );
 				}
+				delete_transient( 'prime_cache_dir_stats' );
 				do_action( 'prime_cache_after_purge_all' );
 				WP_CLI::success( 'Page cache cleared.' );
 				break;
 
 			case 'minified':
-				$fo_dir = WP_CONTENT_DIR . '/cache/prime-cache-fo/';
+				$fo_dir     = WP_CONTENT_DIR . '/cache/prime-cache-fo/';
+				$cache_root = WP_CONTENT_DIR . '/cache/';
 				if ( is_dir( $fo_dir ) ) {
+					// Boundary check: refuse to recurse if $fo_dir resolves
+					// outside our cache root (symlink target leak protection).
+					if ( ! class_exists( 'Prime_Cache_File_Optimizer' )
+						|| ! Prime_Cache_File_Optimizer::path_within( realpath( $fo_dir ), realpath( $cache_root ) ) ) {
+						WP_CLI::error( 'Refusing to clear: ' . $fo_dir . ' resolves outside ' . $cache_root . ' (symlink protection).' );
+					}
 					$it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $fo_dir, RecursiveDirectoryIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
 					foreach ( $it as $item ) {
 						$item->isDir() ? @rmdir( $item->getPathname() ) : @unlink( $item->getPathname() );
@@ -95,11 +121,61 @@ class Prime_Cache_CLI extends WP_CLI_Command {
 				break;
 
 			case 'url':
-				$url = isset( $args[1] ) ? $args[1] : '';
-				if ( empty( $url ) ) {
+				$url = isset( $args[1] ) ? trim( (string) $args[1] ) : '';
+				if ( '' === $url ) {
 					WP_CLI::error( 'Please provide a URL. Usage: wp prime-cache flush url <url>' );
 				}
-				Prime_Cache_Storage::delete_url( $url );
+				$parsed_host   = wp_parse_url( $url, PHP_URL_HOST );
+				$parsed_scheme = wp_parse_url( $url, PHP_URL_SCHEME );
+				if ( empty( $parsed_host ) || empty( $parsed_scheme )
+					|| ( 'http' !== $parsed_scheme && 'https' !== $parsed_scheme ) ) {
+					WP_CLI::error( "Invalid URL: {$url}. Provide an absolute URL with scheme and host (e.g. https://example.com/page/)." );
+				}
+				// Mirror the admin pc_action=clear_url same-host check. In a
+				// shared wp-content setup an unrestricted CLI flush could
+				// reach into another install's cache bucket. Use the shared
+				// host normalizer so IDN (Unicode vs Punycode) matches.
+				require_once PRIME_CACHE_PATH . 'includes/cache-key-functions.php';
+				$site_hosts = array();
+				foreach ( array( home_url(), site_url() ) as $u ) {
+					$h = wp_parse_url( $u, PHP_URL_HOST );
+					if ( $h ) {
+						$site_hosts[] = $h;
+					}
+				}
+				/** This filter is documented in includes/class-config.php */
+				$site_hosts = apply_filters( 'prime_cache_allowed_hosts', $site_hosts );
+				if ( ! is_array( $site_hosts ) ) {
+					$site_hosts = array();
+				}
+				$site_hosts = array_map(
+					function ( $h ) {
+						return is_string( $h ) ? _prime_cache_normalize_host( $h ) : '';
+					},
+					$site_hosts
+				);
+				$site_hosts = array_values( array_unique( array_filter( $site_hosts ) ) );
+				$norm_host  = _prime_cache_normalize_host( $parsed_host );
+				if ( '' === $norm_host || ! in_array( $norm_host, $site_hosts, true ) ) {
+					WP_CLI::error( "URL host {$parsed_host} does not match this install (" . implode( ', ', $site_hosts ) . "). Refusing to clear cross-host cache." );
+				}
+				// Path-prefix gate for shared-host multi-install setups
+				// (`/site-a/`, `/site-b/` on the same domain). Without this,
+				// `wp prime-cache flush url` from site-a could clear site-b's
+				// cached entries. Mirror the admin pc_action=clear_url guard.
+				$home_path = wp_parse_url( home_url( '/' ), PHP_URL_PATH );
+				$home_path = is_string( $home_path ) && '' !== $home_path ? $home_path : '/';
+				if ( '/' !== substr( $home_path, -1 ) ) {
+					$home_path .= '/';
+				}
+				$url_path = wp_parse_url( $url, PHP_URL_PATH );
+				$url_path = is_string( $url_path ) && '' !== $url_path ? $url_path : '/';
+				if ( '/' !== $home_path && 0 !== strpos( $url_path . '/', $home_path ) ) {
+					WP_CLI::error( "URL path {$url_path} is outside this install's base path ({$home_path}). Refusing to clear cross-install cache." );
+				}
+				if ( ! Prime_Cache_Storage::delete_url( $url ) ) {
+					WP_CLI::error( "Failed to clear cache for: {$url}. Check filesystem permissions on the cache directory." );
+				}
 				WP_CLI::success( "Cache cleared for: {$url}" );
 				break;
 
@@ -118,11 +194,29 @@ class Prime_Cache_CLI extends WP_CLI_Command {
 	 * @subcommand preload
 	 */
 	public function preload( $args, $assoc_args ) {
-		wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
-		wp_schedule_single_event( time() + 3, 'prime_cache_preload_batch' );
-		WP_CLI::success( 'Cache preloading scheduled.' );
-
 		$s = prime_cache_get_settings();
+		// Without these, the cron event fires but the batch handler is not
+		// registered (preload_enabled gates listener registration in
+		// Prime_Cache_Preload::__construct), or the dropin returns early before
+		// writing any cache file. Either way, scheduling would be a silent no-op.
+		if ( empty( $s['cache_enabled'] ) ) {
+			WP_CLI::error( 'Page caching is disabled. Enable "Cache Enabled" in Page Cache settings before starting preload.' );
+			return;
+		}
+		if ( empty( $s['preload_enabled'] ) ) {
+			WP_CLI::error( 'Preload is disabled. Enable "Cache Preload" in Preload settings before starting preload.' );
+			return;
+		}
+
+		if ( ! Prime_Cache_Preload::request() ) {
+			WP_CLI::error( 'Failed to schedule preload (request() returned false). Verify cache_enabled and preload_enabled in saved settings.' );
+			return;
+		}
+		WP_CLI::success( 'Cache preloading scheduled. Will start on the next WP-Cron tick.' );
+
+		if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) {
+			WP_CLI::warning( 'DISABLE_WP_CRON is set — the scheduled batch will not fire until your system cron runs `wp cron event run --due-now` (or you trigger it manually).' );
+		}
 		if ( ! empty( trim( $s['cache_vary_cookies'] ?? '' ) ) ) {
 			WP_CLI::warning( 'Vary Cookies active — preload warms default variant only. Cookie-specific variants are generated on first visitor request.' );
 		}
@@ -144,8 +238,20 @@ class Prime_Cache_CLI extends WP_CLI_Command {
 		WP_CLI::line( 'Cache Enabled: ' . ( $s['cache_enabled'] ? 'Yes' : 'No' ) );
 		WP_CLI::line( 'WP_CACHE:      ' . ( defined( 'WP_CACHE' ) && WP_CACHE ? 'Yes' : 'No' ) );
 
-		$dropin = WP_CONTENT_DIR . '/advanced-cache.php';
-		WP_CLI::line( 'Dropin:        ' . ( file_exists( $dropin ) && false !== strpos( file_get_contents( $dropin ), 'PRIME_CACHE_DROPIN_SIGNATURE' ) ? 'Installed' : 'Missing' ) );
+		// Distinguish Installed/External/Orphaned/Abandoned/Missing so operators
+		// can see when another caching plugin owns advanced-cache.php (the old
+		// strpos check reported External as Missing).
+		$dropin_owner_label = array(
+			'ours'      => 'Installed',
+			'external'  => 'External (another plugin owns advanced-cache.php)',
+			'orphaned'  => 'Orphaned (deactivated plugin left a dropin behind)',
+			'abandoned' => 'Abandoned (empty/near-empty dropin)',
+			'none'      => 'Missing',
+		);
+		$dropin_owner = class_exists( 'Prime_Cache_Config' )
+			? Prime_Cache_Config::get_advanced_cache_owner()
+			: 'none';
+		WP_CLI::line( 'Dropin:        ' . ( $dropin_owner_label[ $dropin_owner ] ?? $dropin_owner ) );
 
 		// Cache stats (DB baseline + file increments).
 		$db_stats = get_option( 'prime_cache_stats', array( 'hit' => 0, 'miss' => 0, 'since' => 0 ) );
@@ -181,8 +287,13 @@ class Prime_Cache_CLI extends WP_CLI_Command {
 
 		// Object cache.
 		$oc = Prime_Cache_Config::get_active_object_cache();
+		$oc_label = array(
+			'off'      => 'Disabled',
+			'external' => 'External (managed by another plugin)',
+			'broken'   => 'Broken (backend file missing — disable and re-enable to repair)',
+		);
 		WP_CLI::line( '' );
-		WP_CLI::line( 'Object Cache:  ' . ( 'off' === $oc ? 'Disabled' : strtoupper( $oc ) ) );
+		WP_CLI::line( 'Object Cache:  ' . ( $oc_label[ $oc ] ?? strtoupper( $oc ) ) );
 	}
 
 	/**
@@ -202,10 +313,25 @@ class Prime_Cache_CLI extends WP_CLI_Command {
 		$s = prime_cache_get_settings();
 		$optimizer = new Prime_Cache_Database_Optimizer();
 		$results = $optimizer->execute_cleanup( $s );
-		$total = array_sum( $results );
 
+		// Defensive validation — Pro implementation could in theory return
+		// WP_Error or a malformed shape. Reject anything other than an
+		// array of int-castable counts so array_sum / sprintf don't warning.
+		if ( is_wp_error( $results ) ) {
+			WP_CLI::error( 'Database cleanup failed: ' . $results->get_error_message() );
+		}
+		if ( ! is_array( $results ) ) {
+			WP_CLI::error( 'Database cleanup returned an unexpected value (' . gettype( $results ) . '). Cannot summarize.' );
+		}
+
+		$total = 0;
 		foreach ( $results as $key => $count ) {
-			if ( $count > 0 ) {
+			if ( ! is_numeric( $count ) ) {
+				continue;
+			}
+			$count = (int) $count;
+			$total += $count;
+			if ( $count > 0 && is_string( $key ) ) {
 				WP_CLI::line( ucfirst( str_replace( '_', ' ', $key ) ) . ": {$count} items" );
 			}
 		}

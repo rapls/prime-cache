@@ -10,6 +10,15 @@ defined( 'ABSPATH' ) || exit;
 class Prime_Cache {
 
 	/**
+	 * Bumped whenever Prime_Cache_Config::write_config_file() emits a new key
+	 * the dropin depends on. The constructor regenerates the config file when
+	 * the stored schema version is behind, so security-relevant keys (e.g.
+	 * $prime_cache_allowed_hosts, $prime_cache_site_scheme) become active
+	 * without waiting for an admin visit or a manual settings save.
+	 */
+	const CONFIG_SCHEMA_VERSION = 11;
+
+	/**
 	 * @var Prime_Cache|null
 	 */
 	private static $instance = null;
@@ -44,7 +53,22 @@ class Prime_Cache {
 		return self::$file_optimizer;
 	}
 
+	/**
+	 * Get the shared Purge instance (for callers that need post-related purge
+	 * with the central tree-purge / hierarchical-aware logic).
+	 *
+	 * @return Prime_Cache_Purge|null
+	 */
+	public function get_purge() {
+		return $this->purge;
+	}
+
 	private function __construct() {
+		// Migrate the dropin config file before anything else so security-relevant
+		// keys (e.g. $prime_cache_allowed_hosts) are present on the very next request.
+		// Cheap once migrated: a single autoloaded option compare.
+		$this->maybe_migrate_config_schema();
+
 		$this->purge = new Prime_Cache_Purge();
 		self::$file_optimizer = new Prime_Cache_File_Optimizer();
 		new Prime_Cache_Preload();
@@ -85,6 +109,22 @@ class Prime_Cache {
 		add_action( 'admin_init', array( $this, 'handle_import' ) );
 		add_action( 'admin_init', array( $this, 'handle_object_cache_switch' ) );
 
+		// Regenerate dropin config + .htaccess when WordPress URL or proxy
+		// constants change. Without this, $prime_cache_allowed_hosts and
+		// $prime_cache_site_scheme stay frozen at the values captured the
+		// last time settings were saved, and a domain move / scheme switch
+		// silently breaks caching on the new host.
+		add_action( 'update_option_home', array( $this, 'regenerate_env_dependent_files' ) );
+		add_action( 'update_option_siteurl', array( $this, 'regenerate_env_dependent_files' ) );
+		// Drift detection runs on every request (admin AND frontend) so
+		// wp-config.php constant changes (`PRIME_CACHE_TRUST_X_FORWARDED_PROTO`,
+		// `PRIME_CACHE_PROXY_NO_XFP`, `WP_HOME`, etc.) propagate without
+		// waiting for an admin visit. The check itself is one autoloaded
+		// option compare per request — cheap.
+		if ( ! is_multisite() ) {
+			add_action( 'init', array( $this, 'maybe_refresh_env_snapshot' ), 1 );
+		}
+
 		// Expired cache cleanup cron (handler only — scheduling done on activation).
 		add_action( 'prime_cache_cleanup_expired', array( $this, 'cleanup_expired_cache' ) );
 
@@ -93,6 +133,159 @@ class Prime_Cache {
 		if ( is_admin() && ! is_multisite() ) {
 			add_action( 'admin_init', array( $this, 'maybe_repair_setup' ) );
 		}
+	}
+
+	/**
+	 * Regenerate the dropin config file if the stored schema version is behind.
+	 *
+	 * Runs on every request via the constructor so security-relevant config keys
+	 * (added in newer plugin versions) become active without waiting for an admin
+	 * visit. Once migrated, the cost is one autoloaded option compare per request.
+	 */
+	/**
+	 * Regenerate the dropin config file + .htaccess so they reflect the
+	 * current WordPress home/site URL and proxy-related constants. Called
+	 * from update_option_home / update_option_siteurl hooks and the env-
+	 * snapshot drift detector below.
+	 */
+	public function regenerate_env_dependent_files() {
+		if ( is_multisite() ) {
+			return;
+		}
+		// Track every host we've ever cached for so uninstall can sweep up
+		// `wp-content/cache/prime-cache/<old-host>/` directories left behind
+		// by domain moves or www↔apex switches. Cap the list to keep the
+		// option compact; the install rarely owns more than a handful.
+		// Include filter-added aliases (`prime_cache_allowed_hosts`) so the
+		// history matches what the drop-in actually caches under.
+		require_once PRIME_CACHE_PATH . 'includes/cache-key-functions.php';
+		$history     = (array) get_option( 'prime_cache_host_history', array() );
+		$current_raw = array();
+		foreach ( array( home_url(), site_url() ) as $u ) {
+			$h = wp_parse_url( $u, PHP_URL_HOST );
+			if ( $h ) {
+				$current_raw[] = $h;
+			}
+		}
+		/** This filter is documented in includes/class-config.php */
+		$current_raw = apply_filters( 'prime_cache_allowed_hosts', $current_raw );
+		if ( ! is_array( $current_raw ) ) {
+			$current_raw = array();
+		}
+		foreach ( $current_raw as $raw_host ) {
+			if ( is_string( $raw_host ) && '' !== $raw_host ) {
+				$history[] = _prime_cache_normalize_host( $raw_host );
+			}
+		}
+		$history = array_values( array_unique( array_filter( $history ) ) );
+		if ( count( $history ) > 20 ) {
+			$history = array_slice( $history, -20 );
+		}
+		update_option( 'prime_cache_host_history', $history, false );
+
+		$settings = prime_cache_get_settings();
+		// Only advance the env-snapshot watermark after every required
+		// write succeeded — otherwise a transient permission failure would
+		// freeze the snapshot at the "we synced" state and the drift
+		// detector would stop retrying on later admin visits.
+		if ( ! Prime_Cache_Config::write_config_file( $settings ) ) {
+			return;
+		}
+		if ( ! empty( $settings['htaccess_enabled'] ) && class_exists( 'Prime_Cache_Htaccess' ) ) {
+			if ( ! Prime_Cache_Htaccess::add_rules( $settings ) ) {
+				return;
+			}
+		}
+		update_option( 'prime_cache_env_snapshot', $this->compute_env_snapshot(), false );
+	}
+
+	/**
+	 * Build a fingerprint of the environment values that get baked into the
+	 * dropin config / .htaccess at generation time. Comparing this against a
+	 * stored snapshot is how we notice that wp-config.php constants changed
+	 * (no hook fires for `define()`).
+	 */
+	private function compute_env_snapshot() {
+		return array(
+			'home'         => function_exists( 'home_url' ) ? home_url( '/' ) : '',
+			'site'         => function_exists( 'site_url' ) ? site_url( '/' ) : '',
+			'trust_xfp'    => defined( 'PRIME_CACHE_TRUST_X_FORWARDED_PROTO' ) && PRIME_CACHE_TRUST_X_FORWARDED_PROTO,
+			'proxy_no_xfp' => defined( 'PRIME_CACHE_PROXY_NO_XFP' ) && PRIME_CACHE_PROXY_NO_XFP,
+			'strict'       => defined( 'PRIME_CACHE_STRICT_SCHEME' ) && PRIME_CACHE_STRICT_SCHEME,
+		);
+	}
+
+	/**
+	 * Compare current environment fingerprint against the stored snapshot.
+	 * On mismatch, regenerate the env-dependent files so .htaccess and the
+	 * dropin config catch up to the new wp-config.php values.
+	 */
+	public function maybe_refresh_env_snapshot() {
+		$current = $this->compute_env_snapshot();
+		$stored  = get_option( 'prime_cache_env_snapshot', null );
+		if ( is_array( $stored ) && $stored === $current ) {
+			return;
+		}
+		$this->regenerate_env_dependent_files();
+	}
+
+	private function maybe_migrate_config_schema() {
+		if ( is_multisite() ) {
+			return;
+		}
+		$current = (int) get_option( 'prime_cache_config_schema', 0 );
+		if ( $current >= self::CONFIG_SCHEMA_VERSION ) {
+			return;
+		}
+		// One-time migration of the Delay JS timeout. Pre-upgrade installs
+		// saved the old default `0`, which used to mean "fire after the
+		// hardcoded 10s safety timer" — now that the hardcoded fallback is
+		// gone, `0` means "never fire until interaction" and breaks
+		// analytics/consent/ads on bounce sessions. Bump `0` to the new
+		// safer default once so existing sites recover; operators who
+		// genuinely want interaction-only mode can re-set it.
+		if ( $current < 10 ) {
+			$stored = get_option( 'prime_cache_settings', null );
+			if ( is_array( $stored )
+				&& array_key_exists( 'delay_js_timeout', $stored )
+				&& 0 === (int) $stored['delay_js_timeout'] ) {
+				$stored['delay_js_timeout'] = 5000;
+				update_option( 'prime_cache_settings', $stored, true );
+				// Defer the translated warning to `init` — this method runs from
+				// the constructor (before `init`), and calling __() here would
+				// trip WP 6.7+'s "translation loading triggered too early"
+				// (_load_textdomain_just_in_time) notice. The transient is read
+				// later on admin_notices, so setting it on init is in time.
+				add_action(
+					'init',
+					function () {
+						$warnings   = (array) get_transient( 'prime_cache_activation_warnings' );
+						$warnings[] = __( 'Prime Cache upgrade: "Delay JS Timeout" was 0 (no fallback) and has been bumped to 5000ms so delayed scripts still fire on no-interaction sessions. Set it back to 0 if you want interaction-only mode.', 'prime-cache' );
+						set_transient( 'prime_cache_activation_warnings', array_values( array_unique( $warnings ) ), 5 * MINUTE_IN_SECONDS );
+					},
+					11
+				);
+			}
+		}
+		$settings = prime_cache_get_settings();
+		// Only mark migrated when every write actually succeeded, otherwise
+		// transient failures (disk full, permission error) would leave the
+		// dropin / .htaccess permanently behind with no automatic retry.
+		if ( ! Prime_Cache_Config::write_config_file( $settings ) ) {
+			return;
+		}
+		// Regenerate .htaccess so existing installs pick up new fast-path rules
+		// (host allowlist, admin/login excludes, scheme gating, etc.) without
+		// waiting for the operator to re-save settings. Schema bumps are the
+		// only signal we have that the rule set has changed. If this fails
+		// (read-only .htaccess, missing file under tight perms, etc.), keep
+		// schema at the old version so we retry on the next request.
+		if ( ! empty( $settings['htaccess_enabled'] ) && class_exists( 'Prime_Cache_Htaccess' ) ) {
+			if ( ! Prime_Cache_Htaccess::add_rules( $settings ) ) {
+				return;
+			}
+		}
+		update_option( 'prime_cache_config_schema', self::CONFIG_SCHEMA_VERSION, true );
 	}
 
 	/**
@@ -120,47 +313,31 @@ class Prime_Cache {
 			Prime_Cache_Config::set_wp_cache( true );
 		}
 
-		// 3. Config file missing.
-		$install_seed = ABSPATH . '|' . DB_NAME . '|' . ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' );
+		// 3. Config file missing. Mirror the install_seed in Prime_Cache_Config
+		// exactly — if the two diverge, the self-heal "file exists" check
+		// finds the wrong filename and skips a needed regeneration.
+		global $table_prefix;
+		$install_seed = ABSPATH . '|' . DB_NAME . '|' . ( isset( $table_prefix ) ? $table_prefix : '' );
 		$install_key  = substr( md5( $install_seed ), 0, 8 );
 		$config_file  = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $install_key . '.php';
 
 		if ( ! file_exists( $config_file ) ) {
-			Prime_Cache_Config::write_config_file( $settings );
+			if ( ! Prime_Cache_Config::write_config_file( $settings ) ) {
+				// Surface the failure so admin sees why caching never engages
+				// instead of waiting for a self-heal that cannot happen. Reuse
+				// the existing activation_warnings transient so the message
+				// rides the already-rendered notice channel on the next admin
+				// page load.
+				$existing   = (array) get_transient( 'prime_cache_activation_warnings' );
+				$existing[] = __( 'Prime Cache configuration file could not be regenerated by the self-heal pass. Check that wp-content is writable.', 'prime-cache' );
+				set_transient( 'prime_cache_activation_warnings', array_values( array_unique( $existing ) ), 5 * MINUTE_IN_SECONDS );
+			}
 		}
+		// Schema migration is handled in the constructor via maybe_migrate_config_schema().
 
 		// 4. Cron not scheduled.
 		if ( ! wp_next_scheduled( 'prime_cache_cleanup_expired' ) ) {
 			wp_schedule_event( time(), 'hourly', 'prime_cache_cleanup_expired' );
-		}
-
-		// 5. Ensure built-in JS exclusions are present in saved settings.
-		$builtin_excl = array( 'raplsaich-chatbot', 'raplsaichConfig', 'wp-consent-api', 'consent_api' );
-		$builtin_js   = array( 'raplsaich', 'wp-consent-api' );
-		$needs_save   = false;
-		// Exclude from all JS optimization (minify, combine, defer, delay).
-		foreach ( array( 'exclude_js', 'exclude_inline_js' ) as $key ) {
-			$current = $settings[ $key ] ?? '';
-			foreach ( $builtin_js as $pattern ) {
-				if ( false === strpos( $current, $pattern ) ) {
-					$current   = trim( $current . "\n" . $pattern );
-					$needs_save = true;
-				}
-			}
-			$settings[ $key ] = $current;
-		}
-		foreach ( array( 'exclude_defer_js', 'exclude_delay_js' ) as $key ) {
-			$current = $settings[ $key ] ?? '';
-			foreach ( $builtin_excl as $pattern ) {
-				if ( false === strpos( $current, $pattern ) ) {
-					$current   = trim( $current . "\n" . $pattern );
-					$needs_save = true;
-				}
-			}
-			$settings[ $key ] = $current;
-		}
-		if ( $needs_save ) {
-			update_option( 'prime_cache_settings', $settings );
 		}
 	}
 
@@ -182,8 +359,12 @@ class Prime_Cache {
 		// Create cache directory.
 		wp_mkdir_p( PRIME_CACHE_CACHE_DIR );
 
-		// Write config file.
-		Prime_Cache_Config::write_config_file( $settings );
+		// Write config file. The dropin needs this to load settings; without it
+		// the page-cache layer silently no-ops, so surface the failure instead
+		// of leaving the admin to wonder why caching never engages.
+		if ( ! Prime_Cache_Config::write_config_file( $settings ) ) {
+			$warnings[] = __( 'Prime Cache configuration file could not be written. Check that wp-content is writable — the page cache will not engage until this is resolved.', 'prime-cache' );
+		}
 
 		// Install advanced-cache.php dropin.
 		$ac_result = Prime_Cache_Config::install_advanced_cache();
@@ -217,9 +398,11 @@ class Prime_Cache {
 			Prime_Cache_Htaccess::add_rules( $settings );
 		}
 
-		// Trigger cache preloading if enabled.
-		if ( ! empty( $settings['preload_enabled'] ) ) {
-			do_action( 'prime_cache_after_purge_all' );
+		// Trigger cache preloading if enabled. Use Prime_Cache_Preload::request()
+		// instead of prime_cache_after_purge_all to avoid logging a false PURGE ALL
+		// entry, and to avoid the listener-registration race during activation.
+		if ( ! empty( $settings['preload_enabled'] ) && ! empty( $settings['cache_enabled'] ) ) {
+			Prime_Cache_Preload::request();
 		}
 
 		if ( ! empty( $warnings ) ) {
@@ -261,9 +444,16 @@ class Prime_Cache {
 		// Delete config file.
 		Prime_Cache_Config::delete_config_file();
 
-		// Clear all cached files.
-		$host = wp_parse_url( home_url(), PHP_URL_HOST );
-		if ( $host ) {
+		// Clear all cached files across every host this install owns
+		// (matches Prime_Cache_Purge::purge_all() behavior).
+		$hosts = array();
+		foreach ( array( home_url(), site_url() ) as $u ) {
+			$h = wp_parse_url( $u, PHP_URL_HOST );
+			if ( $h ) {
+				$hosts[] = $h;
+			}
+		}
+		foreach ( array_unique( array_filter( $hosts ) ) as $host ) {
 			Prime_Cache_Storage::delete_host( $host );
 		}
 	}
@@ -345,9 +535,10 @@ class Prime_Cache {
 			) );
 		}
 
-		// Clear Object Cache.
+		// Clear Object Cache. 'broken' means the backend file is missing — the
+		// dropin no-ops at runtime so a Clear button would do nothing useful.
 		$oc = Prime_Cache_Config::get_active_object_cache();
-		if ( 'off' !== $oc && 'external' !== $oc ) {
+		if ( 'off' !== $oc && 'external' !== $oc && 'broken' !== $oc ) {
 			$wp_admin_bar->add_node( array(
 				'id' => 'pc-clear-oc', 'parent' => 'prime-cache',
 				'title' => __( 'Clear Object Cache', 'prime-cache' ),
@@ -408,7 +599,9 @@ class Prime_Cache {
 		}
 
 		// ── Preload ──────────────────────────────────────────
-		if ( prime_cache_is_pro() && $s['preload_enabled'] ) {
+		// Preload is a Free feature. Show the menu whenever it's enabled — the
+		// start_preload action handler enforces the cache_enabled precondition.
+		if ( $s['preload_enabled'] ) {
 			$wp_admin_bar->add_node( array(
 				'id' => 'pc-sep1', 'parent' => 'prime-cache',
 				'title' => '<hr style="margin:4px 0;border:none;border-top:1px solid rgba(255,255,255,.15)">',
@@ -461,25 +654,40 @@ class Prime_Cache {
 
 		switch ( $action ) {
 			case 'clear_all':
-				self::sync_stats_to_db(); // Persist stats before cache dir is cleared.
+				$this->clear_all_caches();
+				$msg = 'all';
+				break;
+
+			case 'clear_and_preload':
+				$s_tmp = prime_cache_get_settings();
+				// Match start_preload's precondition checks so we don't show a
+				// "preload scheduled" notice that silently no-ops.
+				if ( empty( $s_tmp['cache_enabled'] ) ) {
+					$msg = 'preload_no_cache';
+					break;
+				}
+				if ( empty( $s_tmp['preload_enabled'] ) ) {
+					$msg = 'preload_disabled';
+					break;
+				}
+				self::sync_stats_to_db();
 				$this->purge->purge_all();
 				$this->clear_minified_files();
 				$this->clear_critical_css_files();
 				if ( function_exists( 'wp_cache_flush' ) ) {
 					wp_cache_flush();
 				}
-				$msg = 'all';
-				break;
-
-			case 'clear_and_preload':
-				self::sync_stats_to_db();
-				$this->purge->purge_all();
-				$this->clear_minified_files();
-				if ( function_exists( 'wp_cache_flush' ) ) {
-					wp_cache_flush();
+				// Call request() directly instead of relying on prime_cache_after_purge_all,
+				// which only schedules preload when the listener was registered at bootstrap
+				// (i.e. preload_enabled was true at request start). request() works even on
+				// a false→true save earlier in the same request lifecycle.
+				if ( ! Prime_Cache_Preload::request() ) {
+					$msg = 'preload_schedule_failed';
+					break;
 				}
-				// Preload will start via the prime_cache_after_purge_all hook.
-				$msg = 'preload';
+				// Match start_preload's partial-variant note when cache_vary_cookies
+				// is configured: only the default variant is warmed by preload.
+				$msg = ! empty( trim( $s_tmp['cache_vary_cookies'] ?? '' ) ) ? 'preload_partial' : 'preload';
 				break;
 
 			case 'clear_page_cache':
@@ -506,10 +714,59 @@ class Prime_Cache {
 
 			case 'clear_url':
 				$url = isset( $_GET['pc_url'] ) ? esc_url_raw( rawurldecode( $_GET['pc_url'] ) ) : '';
+				$cleared = false;
 				if ( $url ) {
-					Prime_Cache_Storage::delete_url( $url );
+					// Mirror the CLI's flush url validation: require scheme +
+					// host that matches one of this install's site hosts.
+					// Otherwise a crafted pc_url could target other installs'
+					// buckets in shared wp-content setups. Use the shared
+					// host normalizer so IDN sites (Unicode vs Punycode mix
+					// between home_url() and the supplied URL) compare equal.
+					require_once PRIME_CACHE_PATH . 'includes/cache-key-functions.php';
+					$parsed_host   = wp_parse_url( $url, PHP_URL_HOST );
+					$parsed_scheme = wp_parse_url( $url, PHP_URL_SCHEME );
+					$site_hosts    = array();
+					foreach ( array( home_url(), site_url() ) as $u ) {
+						$h = wp_parse_url( $u, PHP_URL_HOST );
+						if ( $h ) {
+							$site_hosts[] = $h;
+						}
+					}
+					/** This filter is documented in includes/class-config.php */
+					$site_hosts = apply_filters( 'prime_cache_allowed_hosts', $site_hosts );
+					if ( ! is_array( $site_hosts ) ) {
+						$site_hosts = array();
+					}
+					$site_hosts = array_map(
+						function ( $h ) {
+							return is_string( $h ) ? _prime_cache_normalize_host( $h ) : '';
+						},
+						$site_hosts
+					);
+					$site_hosts = array_values( array_unique( array_filter( $site_hosts ) ) );
+					$norm_host  = $parsed_host ? _prime_cache_normalize_host( $parsed_host ) : '';
+					// Path-prefix gate for shared-host multi-install setups
+					// (`/site-a/` and `/site-b/` on the same domain). Without
+					// this, /site-a's pc_url could clear cached entries that
+					// belong to /site-b. home_url() reflects this install's
+					// base path; require the URL to fall under it.
+					$home_path = wp_parse_url( home_url( '/' ), PHP_URL_PATH );
+					$home_path = is_string( $home_path ) && '' !== $home_path ? $home_path : '/';
+					if ( '/' !== substr( $home_path, -1 ) ) {
+						$home_path .= '/';
+					}
+					$url_path = wp_parse_url( $url, PHP_URL_PATH );
+					$url_path = is_string( $url_path ) && '' !== $url_path ? $url_path : '/';
+					$path_ok  = ( '/' === $home_path ) || 0 === strpos( $url_path . '/', $home_path );
+					if ( '' !== $norm_host && $parsed_scheme
+						&& ( 'http' === $parsed_scheme || 'https' === $parsed_scheme )
+						&& in_array( $norm_host, $site_hosts, true )
+						&& $path_ok
+					) {
+						$cleared = (bool) Prime_Cache_Storage::delete_url( $url );
+					}
 				}
-				$msg = 'url';
+				$msg = $cleared ? 'url' : 'url_error';
 				break;
 
 			case 'clear_post':
@@ -545,9 +802,22 @@ class Prime_Cache {
 				break;
 
 			case 'start_preload':
-				wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
-				wp_schedule_single_event( time() + 3, 'prime_cache_preload_batch' );
 				$s_tmp = prime_cache_get_settings();
+				// Refuse if the preconditions for preload to actually do anything
+				// aren't met, so the user sees an error instead of a misleading
+				// "scheduled" success message that silently no-ops.
+				if ( empty( $s_tmp['cache_enabled'] ) ) {
+					$msg = 'preload_no_cache';
+					break;
+				}
+				if ( empty( $s_tmp['preload_enabled'] ) ) {
+					$msg = 'preload_disabled';
+					break;
+				}
+				if ( ! Prime_Cache_Preload::request() ) {
+					$msg = 'preload_schedule_failed';
+					break;
+				}
 				$msg = ! empty( trim( $s_tmp['cache_vary_cookies'] ?? '' ) ) ? 'preload_started_partial' : 'preload_started';
 				break;
 
@@ -555,13 +825,17 @@ class Prime_Cache {
 				delete_option( 'prime_cache_settings' );
 				$defaults = prime_cache_get_settings( true );
 				if ( ! is_multisite() ) {
-					Prime_Cache_Config::write_config_file( $defaults );
+					$reset_warnings = array();
+					if ( ! Prime_Cache_Config::write_config_file( $defaults ) ) {
+						$reset_warnings[] = __( 'Settings reset in the database, but the drop-in config file could not be written. Page caching may keep using the old config until the file is writable.', 'prime-cache' );
+					}
 					$ac_ok = Prime_Cache_Config::install_advanced_cache();
 					Prime_Cache_Htaccess::remove_rules();
 					if ( ! $ac_ok && 'external' === Prime_Cache_Config::get_advanced_cache_owner() ) {
-						set_transient( 'prime_cache_env_warnings', array(
-							__( 'Settings reset but advanced-cache.php is managed by another plugin. Page caching will not work until the other plugin is deactivated.', 'prime-cache' ),
-						), 60 );
+						$reset_warnings[] = __( 'Settings reset but advanced-cache.php is managed by another plugin. Page caching will not work until the other plugin is deactivated.', 'prime-cache' );
+					}
+					if ( ! empty( $reset_warnings ) ) {
+						set_transient( 'prime_cache_env_warnings', $reset_warnings, 60 );
 					}
 				}
 				$redirect = add_query_arg( array( 'tab' => 'tools', 'pc_cleared' => 'reset' ), admin_url( 'admin.php?page=prime-cache' ) );
@@ -571,7 +845,9 @@ class Prime_Cache {
 			case 'apply_preset':
 				$preset = sanitize_key( $_GET['preset'] ?? '' );
 				$preset_settings = self::get_preset( $preset );
+				$preset_applied  = false;
 				if ( $preset_settings ) {
+					$preset_applied = true;
 					$current = prime_cache_get_settings();
 					$merged  = array_merge( $current, $preset_settings );
 
@@ -581,9 +857,20 @@ class Prime_Cache {
 					$merged['async_css']        = $ocd && 'async_css' === $method;
 					$merged['remove_unused_css'] = $ocd && 'remove_unused_css' === $method;
 
+					// Same coupling as sanitize_settings(): delay_js needs both
+					// cache_mobile and cache_mobile_separate. Pro presets (via the
+					// prime_cache_preset_* filter) might set delay_js without these.
+					if ( ! empty( $merged['delay_js'] ) ) {
+						$merged['cache_mobile']          = true;
+						$merged['cache_mobile_separate'] = true;
+					}
+
 					update_option( 'prime_cache_settings', $merged );
 					if ( ! is_multisite() ) {
-						Prime_Cache_Config::write_config_file( $merged );
+						$preset_warnings = array();
+						if ( ! Prime_Cache_Config::write_config_file( $merged ) ) {
+							$preset_warnings[] = __( 'Preset applied to the database, but the drop-in config file could not be written. Page caching may not reflect the preset until the file is writable.', 'prime-cache' );
+						}
 						$ac_ok = Prime_Cache_Config::install_advanced_cache();
 						if ( $merged['htaccess_enabled'] ) {
 							Prime_Cache_Htaccess::add_rules( $merged );
@@ -591,13 +878,17 @@ class Prime_Cache {
 							Prime_Cache_Htaccess::remove_rules();
 						}
 						if ( ! $ac_ok && 'external' === Prime_Cache_Config::get_advanced_cache_owner() ) {
-							set_transient( 'prime_cache_env_warnings', array(
-								__( 'Preset applied but advanced-cache.php is managed by another plugin. Page caching will not work until the other plugin is deactivated.', 'prime-cache' ),
-							), 60 );
+							$preset_warnings[] = __( 'Preset applied but advanced-cache.php is managed by another plugin. Page caching will not work until the other plugin is deactivated.', 'prime-cache' );
+						}
+						if ( ! empty( $preset_warnings ) ) {
+							set_transient( 'prime_cache_env_warnings', $preset_warnings, 60 );
 						}
 					}
 				}
-				$redirect = add_query_arg( array( 'tab' => 'tools', 'pc_preset' => $preset ), admin_url( 'admin.php?page=prime-cache' ) );
+				$redirect_args = $preset_applied
+					? array( 'tab' => 'tools', 'pc_preset' => $preset )
+					: array( 'tab' => 'tools', 'pc_preset_error' => $preset );
+				$redirect = add_query_arg( $redirect_args, admin_url( 'admin.php?page=prime-cache' ) );
 				wp_safe_redirect( $redirect );
 				exit;
 
@@ -606,7 +897,23 @@ class Prime_Cache {
 				$s['cache_enabled'] = empty( $s['cache_enabled'] );
 				update_option( 'prime_cache_settings', $s );
 				if ( ! is_multisite() ) {
-					Prime_Cache_Config::write_config_file( $s );
+					if ( ! Prime_Cache_Config::write_config_file( $s ) ) {
+						set_transient( 'prime_cache_env_warnings', array(
+							__( 'Cache toggled in the database, but the drop-in config file could not be written. The change may not take effect until the file is writable.', 'prime-cache' ),
+						), 60 );
+					}
+					// Sync .htaccess fast-path with the new cache_enabled state.
+					// Without this, disabling cache leaves the rewrite rules in place
+					// and Apache keeps serving cached files directly, bypassing the
+					// drop-in's cache_enabled check entirely.
+					//
+					// Always re-emit via add_rules($s) — build_rules() already gates
+					// the rewrite block behind $settings['cache_enabled'], so the
+					// non-cache features (mod_deflate, mod_expires when browser_cache
+					// is on, security headers, HSTS, etc.) are preserved.
+					if ( ! empty( $s['htaccess_enabled'] ) ) {
+						Prime_Cache_Htaccess::add_rules( $s );
+					}
 				}
 				$tab = sanitize_key( $_GET['tab'] ?? 'dashboard' );
 				wp_safe_redirect( admin_url( 'admin.php?page=prime-cache&tab=' . $tab ) );
@@ -737,7 +1044,9 @@ class Prime_Cache {
 	private static function get_preset_auto() {
 
 		// ── Environment probes ───────────────────────────────────────
-		$htaccess_ok = is_writable( ABSPATH . '.htaccess' ) || ( file_exists( ABSPATH . '.htaccess' ) && is_writable( ABSPATH ) );
+		// Use the canonical helper so the writability check matches what the
+		// .htaccess writer actually does (file when it exists, parent dir when not).
+		$htaccess_ok = Prime_Cache_Htaccess::is_writable();
 
 		// HTTP/2 detection: check via headers_list() or SERVER_PROTOCOL.
 		$http2 = false;
@@ -772,7 +1081,7 @@ class Prime_Cache {
 			'cache_mobile'          => true,
 			'cache_mobile_separate' => true, // required: delay JS is mobile-only
 			'gzip_compression'      => true,
-			'cache_footprint'       => false, // production default
+			'cache_footprint'       => false, // Auto preset overrides the global default (true) — keep production HTML free of the cache-stamp comment.
 
 			// Lazy load — universally safe.
 			'lazyload_images'       => true,
@@ -872,9 +1181,10 @@ class Prime_Cache {
 		}
 		$info[ __( 'Web Server', 'prime-cache' ) ] = $server;
 
-		// .htaccess.
-		$ht_ok = is_writable( ABSPATH . '.htaccess' ) || ( file_exists( ABSPATH . '.htaccess' ) && is_writable( ABSPATH ) );
-		$info[ '.htaccess' ] = $ht_ok ? __( 'Writable', 'prime-cache' ) : __( 'Not writable', 'prime-cache' );
+		// .htaccess. Same logic as the rule writer (Prime_Cache_Htaccess::is_writable):
+		// when the file exists, only the file's writability matters; when missing,
+		// the parent directory's writability matters (so we can create it).
+		$info[ '.htaccess' ] = Prime_Cache_Htaccess::is_writable() ? __( 'Writable', 'prime-cache' ) : __( 'Not writable', 'prime-cache' );
 
 		// HTTP protocol.
 		$proto = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
@@ -923,11 +1233,37 @@ class Prime_Cache {
 	}
 
 	/**
+	 * Run the full "Clear All Cache" workflow used by the admin button.
+	 *
+	 * Persists stats, purges every host's page cache, deletes minified/critical
+	 * CSS files, and flushes the object cache. Public so the WP-CLI command and
+	 * other entry points can invoke the exact same sequence as the admin UI.
+	 */
+	public function clear_all_caches() {
+		self::sync_stats_to_db();
+		$this->purge->purge_all();
+		$this->clear_minified_files();
+		$this->clear_critical_css_files();
+		if ( function_exists( 'wp_cache_flush' ) ) {
+			wp_cache_flush();
+		}
+	}
+
+	/**
 	 * Delete all minified/combined CSS/JS files in the file optimizer cache.
 	 */
 	private function clear_minified_files() {
 		$fo_dir = WP_CONTENT_DIR . '/cache/prime-cache-fo/';
 		if ( ! is_dir( $fo_dir ) ) {
+			return;
+		}
+
+		// Boundary check: refuse to recurse if the dir is a symlink that
+		// resolves outside our cache root. Without this, an iterator would
+		// follow the link and unlink files in the target.
+		$cache_root = WP_CONTENT_DIR . '/cache/';
+		if ( class_exists( 'Prime_Cache_File_Optimizer' )
+			&& ! Prime_Cache_File_Optimizer::path_within( realpath( $fo_dir ), realpath( $cache_root ) ) ) {
 			return;
 		}
 
@@ -952,6 +1288,14 @@ class Prime_Cache {
 	private function clear_critical_css_files() {
 		$ccss_dir = WP_CONTENT_DIR . '/cache/prime-cache-fo/ccss/';
 		if ( ! is_dir( $ccss_dir ) ) {
+			return;
+		}
+		// Boundary check: refuse to glob into a symlinked target outside the
+		// cache root. Without this, ccss/ → /etc/ssl/private would let an
+		// admin-context purge unlink files outside our cache.
+		$cache_root = WP_CONTENT_DIR . '/cache/';
+		if ( ! class_exists( 'Prime_Cache_File_Optimizer' )
+			|| ! Prime_Cache_File_Optimizer::path_within( realpath( $ccss_dir ), realpath( $cache_root ) ) ) {
 			return;
 		}
 		$files = glob( $ccss_dir . '*.css' );
@@ -1011,7 +1355,10 @@ class Prime_Cache {
 			return;
 		}
 
-		$fp = fopen( $stats_file, 'c' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		// Mode 'c+' (read+write) — not 'c' (write-only). stream_get_contents()
+		// below reads the existing counters, which fails with "Bad file
+		// descriptor" on a write-only handle.
+		$fp = fopen( $stats_file, 'c+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 		if ( ! $fp ) {
 			return;
 		}
@@ -1179,7 +1526,11 @@ class Prime_Cache {
 			return;
 		}
 
-		$settings = get_option( 'prime_cache_settings', array() );
+		// Use the merged-with-defaults snapshot, not the raw stored option.
+		// get_option returns only the keys actually written to the DB; on a
+		// fresh install most settings live in defaults and the JSON would
+		// otherwise omit them, contradicting the UI promise of "all settings".
+		$settings = prime_cache_get_settings();
 
 		// Mask sensitive API keys/secrets before export.
 		// Remove API keys/secrets from export. Import will preserve existing
@@ -1242,14 +1593,20 @@ class Prime_Cache {
 		}
 
 		// MIME type validation via finfo (content-based, not trust client header).
+		// finfo_open can return false on hosts where the magic database is
+		// unavailable; calling finfo_file(false, ...) errors on PHP 8. Skip the
+		// MIME check entirely in that case rather than aborting the import,
+		// since extension + size + JSON-decode are still enforced below.
 		if ( function_exists( 'finfo_open' ) ) {
 			$finfo = finfo_open( FILEINFO_MIME_TYPE );
-			$mime  = finfo_file( $finfo, $_FILES['pc_import_file']['tmp_name'] );
-			finfo_close( $finfo );
-			// JSON files may report as application/json or text/plain.
-			if ( $mime && ! in_array( $mime, array( 'application/json', 'text/plain', 'text/json' ), true ) ) {
-				wp_safe_redirect( $error_url );
-				exit;
+			if ( false !== $finfo ) {
+				$mime = finfo_file( $finfo, $_FILES['pc_import_file']['tmp_name'] );
+				finfo_close( $finfo );
+				// JSON files may report as application/json or text/plain.
+				if ( $mime && ! in_array( $mime, array( 'application/json', 'text/plain', 'text/json' ), true ) ) {
+					wp_safe_redirect( $error_url );
+					exit;
+				}
 			}
 		}
 
@@ -1272,6 +1629,12 @@ class Prime_Cache {
 				$data[ $pk ] = $current[ $pk ];
 			}
 		}
+
+		// Backfill keys missing from the JSON with the user's current values so
+		// partial imports (older exports, hand-edited JSON, exports from a setup
+		// that didn't define every key) don't silently flip every absent boolean
+		// to false through `!empty($input[key])` in sanitize_settings().
+		$data = wp_parse_args( $data, $current );
 
 		// Sanitize imported data through the same pipeline as normal saves.
 		$admin = new Prime_Cache_Admin_Settings();

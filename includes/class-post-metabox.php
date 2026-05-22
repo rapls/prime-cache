@@ -66,11 +66,33 @@ class Prime_Cache_Post_Metabox {
 		}
 
 		$disabled = ! empty( $_POST['prime_cache_disabled'] );
+		$prev     = (bool) get_post_meta( $post_id, self::META_KEY, true );
 
 		if ( $disabled ) {
 			update_post_meta( $post_id, self::META_KEY, '1' );
 		} else {
 			delete_post_meta( $post_id, self::META_KEY );
+		}
+
+		// If the toggle actually changed, purge the existing cache for this URL.
+		// Without this, an already-cached page would keep being served (the meta
+		// only gates writes in the drop-in, not reads), and the user's "always
+		// dynamic" promise would silently fail until natural expiry. Use the
+		// shared post-purge path so /comment-page-N/ and /feed/ derivatives are
+		// also cleared (single-URL delete leaves them serving the old body).
+		if ( $disabled !== $prev ) {
+			$purge = class_exists( 'Prime_Cache' ) ? Prime_Cache::get_instance()->get_purge() : null;
+			if ( $purge && method_exists( $purge, 'purge_post_and_related' ) ) {
+				$purge->purge_post_and_related( $post_id );
+				return;
+			}
+			// Fallback when the main class isn't available (test contexts, etc.).
+			if ( class_exists( 'Prime_Cache_Storage' ) ) {
+				$permalink = get_permalink( $post_id );
+				if ( $permalink ) {
+					Prime_Cache_Storage::delete_url_tree( $permalink );
+				}
+			}
 		}
 	}
 

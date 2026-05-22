@@ -8,7 +8,8 @@
  *  - JS minification, combining, defer, delay
  *  - Google Fonts optimization
  *  - Query string removal from static resources
- *  - DNS prefetch injection
+ *
+ * (DNS prefetch and resource hints are handled by Prime_Cache_Preload, not here.)
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -47,6 +48,19 @@ class Prime_Cache_File_Optimizer {
 			// scripts that script_loader_tag does not see.
 		}
 
+		// Debug logging hooks must register independently of HTML optimization
+		// state — purges happen everywhere (admin actions, cron, CLI), so gating
+		// these behind should_optimize_html() (which returns false in admin and
+		// when no optimization is active) would silently lose most events.
+		if ( ! empty( $this->settings['debug_log'] ) ) {
+			add_action( 'prime_cache_after_purge_all', function() {
+				self::debug_log( 'PURGE ALL' );
+			} );
+			add_action( 'prime_cache_url_purged', function( $url ) {
+				self::debug_log( 'PURGE URL: ' . $url );
+			} );
+		}
+
 		if ( ! $this->should_optimize_html() ) {
 			return;
 		}
@@ -57,16 +71,6 @@ class Prime_Cache_File_Optimizer {
 			$prime_cache_html_pipeline->register( 'file_optimizer', array( $this, 'process_html' ), 60 );
 		} else {
 			add_action( 'template_redirect', array( $this, 'start_buffer' ), -1 );
-		}
-
-		// Debug logging.
-		if ( ! empty( $this->settings['debug_log'] ) ) {
-			add_action( 'prime_cache_after_purge_all', function() {
-				self::debug_log( 'PURGE ALL' );
-			} );
-			add_action( 'prime_cache_url_purged', function( $url ) {
-				self::debug_log( 'PURGE URL: ' . $url );
-			} );
 		}
 
 		// Rewrite file optimizer: serve combined files via clean URL.
@@ -140,6 +144,7 @@ class Prime_Cache_File_Optimizer {
 			|| $s['remove_query_strings'] || $s['delay_js']
 			|| ! empty( $s['inline_small_css'] ) || ! empty( $s['async_css_free'] )
 			|| ! empty( $s['defer_js'] )
+			|| ! empty( $s['google_fonts_display'] )
 			|| apply_filters( 'prime_cache_should_optimize_html', false );
 	}
 
@@ -173,10 +178,13 @@ class Prime_Cache_File_Optimizer {
 		// CSS optimizations (Free: minify, inline small, async non-first).
 		$html = $this->process_css( $html );
 
-		// Make Google Fonts CSS non-render-blocking (Free feature).
-		// Font CSS is never above-fold critical — text renders with fallback font
-		// via font-display: swap, then swaps when font loads.
-		$html = $this->async_google_fonts( $html );
+		// Google Fonts optimization (Free feature) — gated behind google_fonts_display
+		// so the toggle's effect matches what the UI advertises. Font CSS is never
+		// above-fold critical — text renders with fallback font via font-display: swap,
+		// then swaps when the font loads.
+		if ( ! empty( $s['google_fonts_display'] ) ) {
+			$html = $this->async_google_fonts( $html );
+		}
 
 		// Pro hook: CSS combine, async, critical CSS.
 		$html = apply_filters( 'prime_cache_process_css', $html, $s );
@@ -189,18 +197,26 @@ class Prime_Cache_File_Optimizer {
 		// Pro hook: JS combine.
 		$html = apply_filters( 'prime_cache_process_js', $html, $s );
 
+		// Mobile detection must match the cache-key side (dropin / .htaccess) so
+		// the HTML we generate ends up in the bucket the next request will look
+		// up. wp_is_mobile() differs slightly (no webOS, str_contains semantics)
+		// and is filterable, which would let a desktop-rendered HTML land in the
+		// mobile bucket on a webOS visitor or vice versa.
+		require_once PRIME_CACHE_PATH . 'includes/cache-key-functions.php';
+		$is_mobile = _prime_cache_is_mobile_ua( $_SERVER['HTTP_USER_AGENT'] ?? '' );
+
 		// Wrap inline jQuery scripts with DOMContentLoaded so jQuery can be deferred.
 		// Mobile only — on desktop jQuery is synchronous (not deferred) and inline
 		// scripts must execute immediately to avoid CLS from delayed layout changes.
-		$is_mobile = function_exists( 'wp_is_mobile' ) && wp_is_mobile();
 		if ( $s['defer_js'] && $is_mobile ) {
 			$html = $this->wrap_inline_jquery( $html );
 		}
 
-		// Delay JS: transform ALL script tags via HTML pipeline.
+		// Delay JS: transform every external <script src="..."> tag via HTML pipeline.
+		// Inline scripts are intentionally left alone (see delay_all_scripts docblock).
 		// Mobile only — desktop suffers CLS regression when scripts are delayed
 		// because layout-dependent JS (sliders, menus) runs late.
-		if ( $s['delay_js'] && wp_is_mobile() ) {
+		if ( $s['delay_js'] && $is_mobile ) {
 			$html = $this->delay_all_scripts( $html );
 		}
 
@@ -331,81 +347,74 @@ class Prime_Cache_File_Optimizer {
 		$do_inline  = ! $is_pro && ! empty( $s['inline_small_css'] );
 		$do_async   = ! $is_pro && ! empty( $s['async_css_free'] );
 		$threshold  = (int) ( $s['inline_css_threshold'] ?? 8192 );
-		$async_all  = false;
 
-		// Find all <link rel="stylesheet"> tags.
-		if ( ! preg_match_all( '#<link\s[^>]*rel=["\']stylesheet["\'][^>]*/?\s*>#i', $html, $matches, PREG_SET_ORDER ) ) {
-			return $html;
-		}
+		// One preg_replace_callback so each <link> tag is replaced exactly
+		// once in document order. The previous str_replace / strpos approach
+		// could clobber an earlier identical-string tag (theme that enqueues
+		// the same href twice) when processing a later tag, retroactively
+		// async-converting the sync stylesheet we wanted to preserve.
+		$async_eligible_index = 0;
+		$self                 = $this;
+		$original_html        = $html;
+		$html = preg_replace_callback(
+			'#<link\s[^>]*rel=["\']stylesheet["\'][^>]*/?\s*>#i',
+			function ( $m ) use ( $self, $excludes, $do_minify, $do_inline, $do_async, $threshold, &$async_eligible_index ) {
+				$tag = $m[0];
+				if ( ! preg_match( '#href=["\']([^"\']+)["\']#i', $tag, $href_match ) ) {
+					return $tag;
+				}
+				$href = $href_match[1];
+				if ( $self->matches_patterns( $href, $excludes ) ) {
+					return $tag;
+				}
 
-		$css_index  = 0;
-		$has_asyncd = false;
-		foreach ( $matches as $match ) {
-			$tag = $match[0];
-			if ( ! preg_match( '#href=["\']([^"\']+)["\']#i', $tag, $href_match ) ) {
-				continue;
-			}
-			$href = $href_match[1];
-			if ( $this->matches_patterns( $href, $excludes ) ) {
-				continue;
-			}
+				$is_local = $self->is_local_url( $href );
 
-			$is_local = $this->is_local_url( $href );
-			$css_index++;
-
-			// Inline small CSS files (eliminate HTTP request).
-			if ( $do_inline && $is_local ) {
-				$path = $this->url_to_path( $href );
-				if ( $path && is_readable( $path ) && filesize( $path ) <= $threshold ) {
-					$css = file_get_contents( $path ); // phpcs:ignore
-					if ( false !== $css ) {
-						$css = $this->rebase_css_urls( $css, $path );
-						if ( $do_minify ) {
-							$css = $this->minify_css_content( $css );
+				// Inline small CSS files (eliminate HTTP request).
+				if ( $do_inline && $is_local ) {
+					$path = $self->url_to_path( $href );
+					if ( $path && is_readable( $path ) && filesize( $path ) <= $threshold ) {
+						$css = file_get_contents( $path ); // phpcs:ignore
+						if ( false !== $css ) {
+							$css = $self->rebase_css_urls( $css, $path );
+							if ( $do_minify ) {
+								$css = $self->minify_css_content( $css );
+							}
+							return '<style>' . $css . '</style>';
 						}
-						$html = str_replace( $tag, '<style>' . $css . '</style>', $html );
-						continue;
 					}
 				}
-			}
 
-			// Minify individual CSS files (skip already minified .min.css).
-			if ( $do_minify && $is_local && false === strpos( $href, '.min.css' ) ) {
-				$minified_url = $this->minify_css_file( $href );
-				if ( $minified_url ) {
-					$new_tag = str_replace( $href, $minified_url, $tag );
-					$html = str_replace( $tag, $new_tag, $html );
-					$tag  = $new_tag;
+				// Minify individual CSS files (skip already minified .min.css).
+				if ( $do_minify && $is_local && false === strpos( $href, '.min.css' ) ) {
+					$minified_url = $self->minify_css_file( $href );
+					if ( $minified_url ) {
+						$tag = str_replace( $href, $minified_url, $tag );
+					}
 				}
-			}
 
-			// Async CSS: on mobile async ALL, on desktop async non-first only.
-			$should_async = $do_async && ( $async_all || $css_index > 1 );
-			if ( $should_async ) {
-				// Skip if already has non-"all" media (already non-blocking).
-				if ( preg_match( '#media=["\']([^"\']+)["\']#i', $tag, $media_m ) && 'all' !== strtolower( trim( $media_m[1] ) ) ) {
-					continue;
+				if ( $do_async ) {
+					// Already non-blocking (media=print, media=screen and (...), etc.)
+					// counts as neither eligible nor a candidate — leave as-is.
+					if ( preg_match( '#media=["\']([^"\']+)["\']#i', $tag, $media_m ) && 'all' !== strtolower( trim( $media_m[1] ) ) ) {
+						return $tag;
+					}
+					// First render-blocking stylesheet stays sync (likely critical /
+					// above-the-fold) to preserve LCP and avoid an unstyled flash.
+					$async_eligible_index++;
+					if ( $async_eligible_index > 1 ) {
+						$async_tag = preg_replace( '#\s*media=["\'][^"\']*["\']#i', '', $tag );
+						$async_tag = preg_replace( '#(/?\s*>)$#', ' media="print" onload="this.media=\'all\'"$1', $async_tag );
+						return $async_tag . '<noscript>' . $tag . '</noscript>';
+					}
 				}
-				$async_tag = preg_replace( '#\s*media=["\'][^"\']*["\']#i', '', $tag );
-				$async_tag = preg_replace( '#(/?\s*>)$#', ' media="print" onload="this.media=\'all\'"$1', $async_tag );
-				$html = str_replace( $tag, $async_tag . '<noscript>' . $tag . '</noscript>', $html );
-				$has_asyncd = true;
-			}
-		}
 
-		// On mobile with all-async: inject minimal inline CSS to prevent worst FOUC.
-		// Provides base font, background, box-sizing, and image max-width.
-		if ( $async_all && $has_asyncd ) {
-			$reset = '<style id="pc-css-reset">'
-				. 'body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;background:#fff;color:#333;line-height:1.8}'
-				. '*,::before,::after{box-sizing:border-box}'
-				. 'img{max-width:100%;height:auto}'
-				. 'a{color:#1967d2}'
-				. '</style>';
-			$html = str_replace( '</head>', $reset . "\n</head>", $html );
-		}
+				return $tag;
+			},
+			$html
+		);
 
-		return $html;
+		return null === $html ? $original_html : $html;
 	}
 
 	public function minify_css_content( $css ) {
@@ -442,7 +451,10 @@ class Prime_Cache_File_Optimizer {
 			return false;
 		}
 
-		$hash = md5( $url . filemtime( $path ) );
+		// Same-second redeploy with different content shares (url, mtime); add
+		// filesize so that path produces a fresh hash and doesn't serve the
+		// previous build from the cached output file.
+		$hash = md5( $url . '|' . filemtime( $path ) . '|' . filesize( $path ) );
 		$out  = $this->cache_dir . 'css/' . $hash . '.css';
 		$out_url = $this->cache_url . 'css/' . $hash . '.css';
 
@@ -463,21 +475,67 @@ class Prime_Cache_File_Optimizer {
 		$css = $this->rebase_css_urls( $css, $path );
 		$css = $this->minify_css_content( $css );
 
-		wp_mkdir_p( dirname( $out ) );
-		self::atomic_write( $out, $css );
+		// If we cannot create the cache dir or persist the file atomically,
+		// fall back to the original URL — returning $out_url would point to a
+		// 404 and break the page's stylesheet.
+		if ( ! wp_mkdir_p( dirname( $out ) ) ) {
+			return false;
+		}
+		if ( ! self::atomic_write( $out, $css ) ) {
+			return false;
+		}
 
 		return $out_url;
 	}
 
 	public function rebase_css_urls( $css, $css_path ) {
 		$css_dir = dirname( $css_path );
-		return preg_replace_callback( '#url\(\s*["\']?(?!data:|https?://|//)([^"\')\s]+)["\']?\s*\)#i', function( $m ) use ( $css_dir ) {
-			$abs = realpath( $css_dir . '/' . $m[1] );
-			if ( $abs && strpos( $abs, ABSPATH ) === 0 ) {
-				return 'url(' . site_url( '/' . ltrim( str_replace( ABSPATH, '', $abs ), '/' ) ) . ')';
+
+		$rebase = function ( $relative ) use ( $css_dir ) {
+			// Fragment-only references — `url(#mask)`, `url(#clipPath)` —
+			// point at an in-document SVG element, not a sibling file.
+			// Resolving them through realpath() would silently rewrite the
+			// fragment to a CSS-dir-rooted URL and break SVG masks/filters.
+			if ( '' !== $relative && '#' === $relative[0] ) {
+				return null;
 			}
-			return $m[0];
+			// Strip ?query / #fragment before resolving on disk — realpath
+			// would otherwise fail on common cache-buster URLs like
+			// `font.woff2?ver=1.2`. Re-attach the suffix to the rebased URL
+			// so the browser still receives the original query/fragment.
+			$suffix = '';
+			$path   = $relative;
+			if ( false !== strpbrk( $relative, '?#' ) ) {
+				$pos    = strcspn( $relative, '?#' );
+				$path   = substr( $relative, 0, $pos );
+				$suffix = substr( $relative, $pos );
+			}
+			if ( '' === $path ) {
+				return null; // Nothing to resolve (e.g. `?query` only).
+			}
+			$abs = realpath( $css_dir . '/' . $path );
+			if ( $abs && self::path_within( $abs, ABSPATH ) ) {
+				return site_url( '/' . ltrim( str_replace( ABSPATH, '', $abs ), '/' ) ) . $suffix;
+			}
+			return null;
+		};
+
+		// url(...) references in declarations.
+		$css = preg_replace_callback( '#url\(\s*["\']?(?!data:|https?://|//)([^"\')\s]+)["\']?\s*\)#i', function ( $m ) use ( $rebase ) {
+			$abs_url = $rebase( $m[1] );
+			return null !== $abs_url ? 'url(' . $abs_url . ')' : $m[0];
 		}, $css );
+
+		// @import "foo.css" / @import 'foo.css' (without url()). When the
+		// minified CSS is moved to /cache/prime-cache-fo/css/<hash>.css the
+		// relative @import target no longer resolves; rebase to an absolute
+		// site URL so the import keeps working from the new location.
+		$css = preg_replace_callback( '#@import\s+(["\'])(?!https?://|//|data:)([^"\']+)\1#i', function ( $m ) use ( $rebase ) {
+			$abs_url = $rebase( $m[2] );
+			return null !== $abs_url ? '@import ' . $m[1] . $abs_url . $m[1] : $m[0];
+		}, $css );
+
+		return $css;
 	}
 
 	// ── Google Fonts Async ──────────────────────────────────
@@ -498,9 +556,23 @@ class Prime_Cache_File_Optimizer {
 			return $html;
 		}
 
-		// Inject early preconnect for font file downloads.
+		// Inject early preconnect for font file downloads. Skip only when a
+		// preconnect link to fonts.gstatic.com specifically is already present —
+		// the previous coarse check (any fonts.gstatic.com substring + any
+		// preconnect tag) suppressed injection on sites that had unrelated
+		// preconnect tags (e.g. to www.google-analytics.com), even though no
+		// preconnect to fonts.gstatic.com existed.
+		// Two regexes handle both attribute orders (rel-first, href-first) and
+		// both quote styles since `<link>` attributes have no fixed order.
 		$preconnect = '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
-		if ( false === strpos( $html, 'fonts.gstatic.com' ) || false === strpos( $html, 'preconnect' ) ) {
+		$has_gstatic_preconnect = (bool) preg_match(
+			'#<link[^>]+rel\s*=\s*["\'][^"\']*preconnect[^"\']*["\'][^>]+href\s*=\s*["\'][^"\']*fonts\.gstatic\.com[^"\']*["\']#i',
+			$html
+		) || (bool) preg_match(
+			'#<link[^>]+href\s*=\s*["\'][^"\']*fonts\.gstatic\.com[^"\']*["\'][^>]+rel\s*=\s*["\'][^"\']*preconnect[^"\']*["\']#i',
+			$html
+		);
+		if ( ! $has_gstatic_preconnect ) {
 			$html = str_replace( '<head>', '<head>' . "\n" . $preconnect, $html );
 		}
 
@@ -539,16 +611,17 @@ class Prime_Cache_File_Optimizer {
 	 * @return string HTML with inline jQuery scripts wrapped.
 	 */
 	private function wrap_inline_jquery( $html ) {
+		// Honor the user's "Excluded Inline JavaScript" list — process_js() already
+		// uses it for minify, so the wrap step (which is a transformation, not a
+		// no-op) should respect the same opt-out. Without this, an inline script
+		// matching e.g. `wp_localize_script-some-handle` still gets wrapped.
+		$inline_excl = $this->parse_list( $this->settings['exclude_inline_js'] ?? '' );
 		return preg_replace_callback(
 			'#<script\b(?![^>]*\bsrc\b)[^>]*>(.*?)</script>#si',
-			function ( $m ) {
+			function ( $m ) use ( $inline_excl ) {
 				$code = $m[1];
 				$trimmed = trim( $code );
 				if ( '' === $trimmed ) {
-					return $m[0];
-				}
-				// Skip chatbot and other excluded inline scripts.
-				if ( false !== stripos( $code, 'raplsaich' ) ) {
 					return $m[0];
 				}
 				// Only wrap if it contains jQuery patterns.
@@ -562,6 +635,15 @@ class Prime_Cache_File_Optimizer {
 				// Skip JSON-LD and other non-JS types.
 				if ( preg_match( '#type=["\'](?!text/javascript|module)[^"\']+["\']#i', $m[0] ) ) {
 					return $m[0];
+				}
+				// Skip if any user-configured inline-JS exclusion pattern appears
+				// in the script body. process_js() uses strpos (case-sensitive) for
+				// the same setting; match that semantics so users only have to
+				// learn one rule about their exclusion list.
+				foreach ( $inline_excl as $pattern ) {
+					if ( '' !== $pattern && false !== strpos( $code, $pattern ) ) {
+						return $m[0];
+					}
 				}
 				return '<script>window.addEventListener("DOMContentLoaded",function(){' . $trimmed . '});</script>';
 			},
@@ -587,8 +669,6 @@ class Prime_Cache_File_Optimizer {
 	 * DOMContentLoaded by wrap_inline_jquery() to allow safe deferral.
 	 */
 	private static $defer_never = array(
-		'raplsaich-chatbot',
-		'raplsaich-recaptcha',
 		'divi-custom-script',
 		'et-builder-modules-script',
 		'et-frontend-builder',
@@ -612,7 +692,11 @@ class Prime_Cache_File_Optimizer {
 		// On mobile, jQuery defer is safe (TBT improvement outweighs CLS risk
 		// because mobile layout is simpler and delay_all_scripts handles timing).
 		// Requires cache_mobile_separate for correct per-device caching.
-		$is_mobile = function_exists( 'wp_is_mobile' ) && wp_is_mobile();
+		// Use the cache-key-side helper so this decision matches what the dropin
+		// puts in the mobile bucket (otherwise a desktop-defer'd script set could
+		// be served to a mobile UA the dropin already cached as "mobile").
+		require_once PRIME_CACHE_PATH . 'includes/cache-key-functions.php';
+		$is_mobile = _prime_cache_is_mobile_ua( $_SERVER['HTTP_USER_AGENT'] ?? '' );
 		if ( ! $is_mobile ) {
 			$list = array_merge( $list, array( 'jquery-core', 'jquery', 'jquery-migrate' ) );
 		}
@@ -629,8 +713,11 @@ class Prime_Cache_File_Optimizer {
 	}
 
 	public function filter_defer_script( $tag, $handle, $src ) {
-		// Skip if already has defer or async.
-		if ( false !== strpos( $tag, 'defer' ) || false !== strpos( $tag, 'async' ) ) {
+		// Skip if already has defer or async as an actual attribute. The
+		// previous strpos check matched src URLs containing "async" (e.g.
+		// /js/async-loader.js) and falsely declared them already-async,
+		// suppressing the intended defer transform.
+		if ( preg_match( '#\s(?:defer|async)(?:\s|=|/?>)#i', $tag ) ) {
 			return $tag;
 		}
 
@@ -647,6 +734,22 @@ class Prime_Cache_File_Optimizer {
 		// Skip data-no-defer scripts.
 		if ( false !== strpos( $tag, 'data-no-defer' ) ) {
 			return $tag;
+		}
+
+		// Skip when the script has wp_add_inline_script() data attached. The
+		// 'after' bucket emits a synchronous <script> right after the external
+		// tag and assumes the external script has already executed; deferring
+		// the external script breaks that dependency with a ReferenceError.
+		// 'before' is theoretically safe but plenty of plugins rely on it
+		// running in tight order with the script body, so be conservative.
+		$wp_scripts = wp_scripts();
+		if ( $handle && isset( $wp_scripts->registered[ $handle ] ) ) {
+			$reg   = $wp_scripts->registered[ $handle ];
+			$after = isset( $reg->extra['after'] ) ? array_filter( (array) $reg->extra['after'] ) : array();
+			$before = isset( $reg->extra['before'] ) ? array_filter( (array) $reg->extra['before'] ) : array();
+			if ( ! empty( $after ) || ! empty( $before ) ) {
+				return $tag;
+			}
 		}
 
 		// Check defer exclusion list.
@@ -816,15 +919,16 @@ class Prime_Cache_File_Optimizer {
 	}
 
 	/**
-	 * Delay ALL JavaScript via HTML pipeline processing.
+	 * Delay every external JavaScript via HTML pipeline processing.
 	 *
-	 * Transforms every <script> tag in the HTML output:
-	 * - External: type → pc-delay/javascript, src → data-pc-src
-	 * - Inline: type → pc-delay/javascript
-	 * Injects the delay loader script right after <head>.
+	 * Transforms external <script src="..."> tags so they only execute after user
+	 * interaction. Inline scripts (no src) are intentionally left alone — they
+	 * usually carry localize_script payloads / consent config / widget setup that
+	 * the external scripts depend on, so delaying them would break dependencies.
 	 *
-	 * This is the WP-Rocket-style approach: full HTML processing via ob_start
-	 * captures ALL scripts (inline + external + CDN), not just enqueued.
+	 * Compared to filter_defer_script (which only sees wp_enqueue_script handles),
+	 * this captures every external <script> in the HTML output, including
+	 * theme-template-injected and CDN-hosted ones.
 	 */
 	private function delay_all_scripts( $html ) {
 		$s = $this->settings;
@@ -839,9 +943,6 @@ class Prime_Cache_File_Optimizer {
 		$excl[] = 'jquery-migrate';
 		$excl[] = 'jquery.min.js';
 		$excl[] = 'jquery-migrate.min.js';
-		// Chat widgets.
-		$excl[] = 'raplsaich';
-		$excl[] = 'raplsaichConfig';
 		// Divi theme.
 		$excl[] = 'et-builder';
 		$excl[] = 'scripts.min.js';
@@ -902,9 +1003,9 @@ class Prime_Cache_File_Optimizer {
 
 				// Never delay inline scripts (no src attribute).
 				// Inline scripts include wp_localize_script config (et_pb_custom,
-				// consent_api, raplsaichConfig, etc.) and wp_add_inline_script
-				// output. These must execute immediately to set up variables that
-				// their corresponding external scripts depend on.
+				// consent_api, etc.) and wp_add_inline_script output. These must
+				// execute immediately to set up variables that their corresponding
+				// external scripts depend on.
 				// Only external scripts (with src) are delayed.
 				if ( empty( $src ) ) {
 					return $full;
@@ -1086,7 +1187,7 @@ class Prime_Cache_File_Optimizer {
 			return false;
 		}
 
-		$hash = md5( $url . filemtime( $path ) );
+		$hash = md5( $url . '|' . filemtime( $path ) . '|' . filesize( $path ) );
 		$out  = $this->cache_dir . 'js/' . $hash . '.js';
 		$out_url = $this->cache_url . 'js/' . $hash . '.js';
 
@@ -1105,8 +1206,12 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		$js = $this->minify_js_content( $js );
-		wp_mkdir_p( dirname( $out ) );
-		self::atomic_write( $out, $js );
+		if ( ! wp_mkdir_p( dirname( $out ) ) ) {
+			return false;
+		}
+		if ( ! self::atomic_write( $out, $js ) ) {
+			return false;
+		}
 
 		return $out_url;
 	}
@@ -1122,8 +1227,11 @@ class Prime_Cache_File_Optimizer {
 				$url   = $m[2];
 				$query = $m[3];
 
-				// Only strip from local (relative or same-host) URLs.
-				if ( 0 !== strpos( $url, '/' ) && ! $this->is_local_url( $url ) ) {
+				// Only strip from local URLs. The previous "starts with /" shortcut
+				// also accepted protocol-relative `//cdn.example.com/foo.js`, which
+				// is external. Defer to is_local_url() — it handles root-relative,
+				// protocol-relative, and absolute (any scheme) via host comparison.
+				if ( ! $this->is_local_url( $url ) ) {
 					return $m[0]; // External — keep query string.
 				}
 
@@ -1143,33 +1251,6 @@ class Prime_Cache_File_Optimizer {
 			},
 			$html
 		);
-	}
-
-	// ── DNS Prefetch ─────────────────────────────────────────
-
-	public function inject_dns_prefetch( $html ) {
-		$domains = $this->parse_list( $this->settings['prefetch_dns'] );
-		if ( empty( $domains ) ) {
-			return $html;
-		}
-
-		$tags = '';
-		foreach ( $domains as $domain ) {
-			$domain = trim( $domain );
-			if ( empty( $domain ) ) {
-				continue;
-			}
-			if ( 0 !== strpos( $domain, '//' ) && 0 !== strpos( $domain, 'http' ) ) {
-				$domain = '//' . $domain;
-			}
-			$tags .= '<link rel="dns-prefetch" href="' . esc_url( $domain ) . '">' . "\n";
-		}
-
-		if ( $tags ) {
-			$html = str_replace( '</head>', $tags . '</head>', $html );
-		}
-
-		return $html;
 	}
 
 	// ── Rewrite File Optimizer ────────────────────────────────
@@ -1194,9 +1275,20 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		$file = sanitize_file_name( $wp->query_vars['pc_static_file'] );
-		$ext  = pathinfo( $file, PATHINFO_EXTENSION );
+		$ext  = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) );
 
-		$type_map = array( 'css' => 'text/css', 'js' => 'application/javascript' );
+		// search_dirs below also looks under fonts/ (Pro local-font cache).
+		// type_map must cover those extensions or font URLs 404 with no
+		// indication that the file actually existed on disk.
+		$type_map = array(
+			'css'   => 'text/css',
+			'js'    => 'application/javascript',
+			'woff2' => 'font/woff2',
+			'woff'  => 'font/woff',
+			'ttf'   => 'font/ttf',
+			'otf'   => 'font/otf',
+			'eot'   => 'application/vnd.ms-fontobject',
+		);
 		if ( ! isset( $type_map[ $ext ] ) ) {
 			status_header( 404 );
 			exit;
@@ -1226,8 +1318,17 @@ class Prime_Cache_File_Optimizer {
 			exit;
 		}
 
-		header( 'Content-Type: ' . $type_map[ $ext ] . '; charset=UTF-8' );
-		header( 'Cache-Control: public, max-age=31536000, immutable' );
+		// charset only applies to text payloads; appending it to binary font
+		// MIME types is technically harmless but noisy. Limit to css/js.
+		$is_text     = in_array( $ext, array( 'css', 'js' ), true );
+		$content_type = $type_map[ $ext ] . ( $is_text ? '; charset=UTF-8' : '' );
+		header( 'Content-Type: ' . $content_type );
+		// `immutable` honors the global Immutable Cache-Control toggle even though
+		// the /_pc-static/ filename is content-hashed (so immutable is technically
+		// always safe). Users who turn the toggle off expect no immutable directive
+		// anywhere in the response set.
+		$immutable_suffix = ! empty( $this->settings['cache_control_immutable'] ) ? ', immutable' : '';
+		header( 'Cache-Control: public, max-age=31536000' . $immutable_suffix );
 		header( 'X-Prime-Cache-FO: HIT' );
 		readfile( $found );
 		exit;
@@ -1303,11 +1404,51 @@ class Prime_Cache_File_Optimizer {
 	}
 
 	public function is_local_url( $url ) {
-		$home = home_url();
+		// Root-relative path (/foo, /wp-content/...) — always local.
 		if ( 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ) {
 			return true;
 		}
-		return 0 === strpos( $url, $home );
+		// Host + port comparison handles all the cases below uniformly:
+		// - https://example.com/...        (absolute, matching scheme)
+		// - http://example.com/...         (absolute, mismatched scheme on HTTPS site)
+		// - //example.com/...              (protocol-relative)
+		// Port matters: `https://example.com:5173/app.js` (Vite/dev server on
+		// alt port) is technically same-host but a different origin we should
+		// not treat as local — minifying / stripping cache-busters from it
+		// would break the dev pipeline.
+		$home_host   = wp_parse_url( home_url(), PHP_URL_HOST );
+		$home_scheme = wp_parse_url( home_url(), PHP_URL_SCHEME );
+		$home_port   = wp_parse_url( home_url(), PHP_URL_PORT );
+		$url_host    = wp_parse_url( $url, PHP_URL_HOST );
+		$url_scheme  = wp_parse_url( $url, PHP_URL_SCHEME ) ?: $home_scheme;
+		$url_port    = wp_parse_url( $url, PHP_URL_PORT );
+
+		// Collapse the scheme's default port to "no port" so an explicit
+		// `:443` on https or `:80` on http compares equal to the bare host
+		// form. Without this, themes/plugins that emit
+		// `https://example.com:443/app.css` would be falsely marked
+		// external on a site whose home_url is `https://example.com/`.
+		$normalize_port = function ( $port, $scheme ) {
+			$port = (int) $port;
+			if ( 0 === $port ) {
+				return 0;
+			}
+			if ( 'https' === $scheme && 443 === $port ) {
+				return 0;
+			}
+			if ( 'http' === $scheme && 80 === $port ) {
+				return 0;
+			}
+			return $port;
+		};
+		$home_port_n = $normalize_port( $home_port, $home_scheme );
+		$url_port_n  = $normalize_port( $url_port, $url_scheme );
+
+		if ( $home_host && $url_host && 0 === strcasecmp( $home_host, $url_host )
+			&& $home_port_n === $url_port_n ) {
+			return true;
+		}
+		return false;
 	}
 
 	public function url_to_path( $url ) {
@@ -1326,10 +1467,27 @@ class Prime_Cache_File_Optimizer {
 		$path = strtok( $path, '?' );
 
 		$real = realpath( $path );
-		if ( $real && 0 === strpos( $real, realpath( ABSPATH ) ) ) {
+		if ( $real && self::path_within( $real, realpath( ABSPATH ) ) ) {
 			return $real;
 		}
 
 		return false;
+	}
+
+	/**
+	 * Directory-boundary "is $candidate inside $root" check.
+	 *
+	 * A naked strpos prefix match accepts `/var/www/site2` when $root is
+	 * `/var/www/site` because realpath strips trailing slashes. Append the
+	 * separator on both sides so the comparison only matches at a directory
+	 * boundary.
+	 */
+	public static function path_within( $candidate, $root ) {
+		if ( ! $candidate || ! $root ) {
+			return false;
+		}
+		$root      = rtrim( $root, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR;
+		$candidate = rtrim( $candidate, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR;
+		return 0 === strpos( $candidate, $root );
 	}
 }

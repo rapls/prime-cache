@@ -66,14 +66,89 @@ class Prime_Cache_Preload {
 
 	/**
 	 * Schedule the preload batch to start.
+	 *
+	 * Action callback for `prime_cache_after_purge_all`. Delegates to the static
+	 * `request()` so callers outside this class (settings save, activation, CLI,
+	 * admin actions) can trigger an identical reset+schedule without depending
+	 * on a Prime_Cache_Preload instance being constructed with preload_enabled=true
+	 * (which gates listener registration).
 	 */
 	public function schedule_preload() {
-		// Clear existing schedule, queue, and stale lock.
-		wp_clear_scheduled_hook( 'prime_cache_preload_batch' );
+		self::request();
+	}
+
+	/**
+	 * Reset preload state and schedule a fresh batch run.
+	 *
+	 * Use from anywhere a "start preload now" intent originates. This is the
+	 * single source of truth for what "starting preload" means: clear the queue,
+	 * clear attempt history, drop any stale 2-minute lock, then schedule the
+	 * batch handler 5 seconds out so the next WP-Cron tick picks it up.
+	 *
+	 * Returns false (without scheduling) when the request would be a no-op:
+	 * cache_enabled=false makes the drop-in return early so warming does
+	 * nothing, and preload_enabled=false leaves the batch handler unregistered.
+	 * This is belt-and-braces — `prime_cache_after_purge_all` listener gating
+	 * already prevents most no-op calls, but settings can change between
+	 * bootstrap and purge within the same request.
+	 *
+	 * @param array|null $settings Optional. Settings to validate against. When
+	 *                             omitted, reads the current saved settings.
+	 *                             Pass the new (about-to-be-saved) settings from
+	 *                             sanitize_settings() so a false→true toggle
+	 *                             works on the same request — the memoized
+	 *                             cache still holds the OLD value at that point.
+	 * @return bool True when scheduled, false when preconditions fail.
+	 */
+	public static function request( $settings = null ) {
+		$s = is_array( $settings ) ? $settings : prime_cache_get_settings();
+		if ( empty( $s['cache_enabled'] ) || empty( $s['preload_enabled'] ) ) {
+			return false;
+		}
+
+		// Schedule first; the queue/attempts/lock reset only happens when a
+		// new event lands cleanly. wp_schedule_single_event() returns false
+		// for two distinct reasons:
+		//   (a) `pre_schedule_event` filter rejected (real failure, e.g.
+		//       DISABLE_WP_CRON or third-party blocker)
+		//   (b) an event for the same hook+args is already queued in the
+		//       dedup window (transient "already scheduled" — not a failure
+		//       for our purposes; the existing batch already honors the
+		//       request)
+		// Never clear an existing event when (a) might be in play —
+		// removing it would leave the install with no scheduled preload at
+		// all, which is exactly the failure mode this helper is supposed
+		// to prevent.
+		$scheduled = wp_schedule_single_event( time() + 5, 'prime_cache_preload_batch' );
+		if ( false === $scheduled ) {
+			$already = wp_next_scheduled( 'prime_cache_preload_batch' );
+			if ( ! $already ) {
+				// No event queued and we couldn't schedule one — real rejection.
+				return false;
+			}
+			// Existing batch will run — request implicitly honored. Fall
+			// through to the state reset below so a post-purge request()
+			// still picks up the fresh URL set instead of replaying the
+			// stale queue from before the purge.
+		}
+
+		// Reset queue/attempts so the next batch starts clean against
+		// whatever state the caller just changed (purge, settings save).
+		// The scheduled event itself is preserved either way: a fresh
+		// schedule above, or the existing one that the dedup short-circuit
+		// returned to us. The lock — if held by an in-flight
+		// `run_preload_batch()` — must NOT be deleted here; clearing a
+		// live lock would let a second batch start in parallel and
+		// trample queue/attempts updates. The lock TTL (120s) means a
+		// stale lock self-recovers on the next run.
+		$existing_lock = (int) get_option( 'prime_cache_preload_lock', 0 );
+		$lock_is_live  = ( $existing_lock > 0 ) && ( ( time() - $existing_lock ) < 120 );
 		delete_option( 'prime_cache_preload_queue' );
 		delete_option( 'prime_cache_preload_attempts' );
-		delete_transient( 'prime_cache_preload_lock' );
-		wp_schedule_single_event( time() + 5, 'prime_cache_preload_batch' );
+		if ( ! $lock_is_live ) {
+			delete_option( 'prime_cache_preload_lock' );
+		}
+		return true;
 	}
 
 	/**
@@ -81,10 +156,26 @@ class Prime_Cache_Preload {
 	 */
 	public function run_preload_batch() {
 		// Prevent concurrent execution (cron overlap, manual trigger overlap).
-		if ( get_transient( 'prime_cache_preload_lock' ) ) {
-			return;
+		// Use add_option() for atomic acquire — wp_options.option_name has a
+		// UNIQUE index so concurrent inserts cannot both succeed. A plain
+		// get-then-set transient race could let two batches run side-by-side
+		// and double-write the queue/attempts options.
+		$lock_key = 'prime_cache_preload_lock';
+		$lock_ttl = 120; // 2-minute TTL.
+		$now      = time();
+		if ( ! add_option( $lock_key, $now, '', 'no' ) ) {
+			$existing = (int) get_option( $lock_key, 0 );
+			if ( $existing > 0 && ( $now - $existing ) < $lock_ttl ) {
+				return; // Another batch holds a fresh lock.
+			}
+			// Stale lock — drop and retry once. Two concurrent stale-claimants
+			// could both pass here, but stale claims are rare and TTL bounds
+			// the damage.
+			delete_option( $lock_key );
+			if ( ! add_option( $lock_key, $now, '', 'no' ) ) {
+				return;
+			}
 		}
-		set_transient( 'prime_cache_preload_lock', 1, 120 ); // 2-minute TTL.
 
 		$interval = max( 1, (int) $this->settings['preload_interval'] );
 		$limit    = 10;
@@ -94,7 +185,7 @@ class Prime_Cache_Preload {
 		if ( empty( $queue ) ) {
 			$urls = $this->collect_preload_urls();
 			if ( empty( $urls ) ) {
-				delete_transient( 'prime_cache_preload_lock' );
+				delete_option( $lock_key );
 				return;
 			}
 			$excludes = $this->parse_patterns( $this->settings['preload_excluded_uri'] );
@@ -106,7 +197,7 @@ class Prime_Cache_Preload {
 				}
 			}
 			if ( empty( $queue ) ) {
-				delete_transient( 'prime_cache_preload_lock' );
+				delete_option( $lock_key );
 				return;
 			}
 			update_option( 'prime_cache_preload_queue', $queue, false );
@@ -145,9 +236,10 @@ class Prime_Cache_Preload {
 			$need_desktop = ! $this->is_variant_cached( $url, false );
 			$need_mobile  = $mobile_sep && ! $this->is_variant_cached( $url, true );
 
-			// Fully cached — skip permanently.
+			// Fully cached — skip permanently. Drop the cooldown marker too
+			// or it lingers in $attempts indefinitely on long-running sites.
 			if ( ! $need_desktop && ! $need_mobile ) {
-				unset( $attempts[ $url ], $attempts[ $mobile_key ] );
+				unset( $attempts[ $url ], $attempts[ $mobile_key ], $attempts[ $url . ':next' ] );
 				$idx++;
 				continue;
 			}
@@ -163,7 +255,7 @@ class Prime_Cache_Preload {
 			$m_exhausted = ! $mobile_sep || $m_info['count'] >= $max_attempts;
 
 			if ( $d_exhausted && $m_exhausted ) {
-				unset( $attempts[ $url ], $attempts[ $mobile_key ] );
+				unset( $attempts[ $url ], $attempts[ $mobile_key ], $attempts[ $url . ':next' ] );
 				$idx++;
 				continue;
 			}
@@ -253,15 +345,24 @@ class Prime_Cache_Preload {
 
 		if ( ! empty( $remaining ) ) {
 			update_option( 'prime_cache_preload_queue', array_values( $remaining ), false );
-			// Schedule next batch after interval — no sleep() needed.
-			wp_schedule_single_event( time() + $interval, 'prime_cache_preload_batch' );
+			// Schedule next batch after interval — no sleep() needed. Honor the
+			// return value so we can surface a stuck queue when WP-Cron is
+			// disabled or a `pre_schedule_event` filter rejects (otherwise the
+			// queue would silently halt mid-preload with no signal).
+			$next = wp_schedule_single_event( time() + $interval, 'prime_cache_preload_batch' );
+			if ( false === $next && class_exists( 'Prime_Cache_File_Optimizer' )
+				&& ! empty( $this->settings['debug_log'] ) ) {
+				Prime_Cache_File_Optimizer::debug_log(
+					'PRELOAD CONTINUATION SCHEDULE FAILED — queue size: ' . count( $remaining )
+				);
+			}
 		} else {
 			// Queue exhausted — cleanup.
 			delete_option( 'prime_cache_preload_queue' );
 			delete_option( 'prime_cache_preload_attempts' );
 		}
 
-		delete_transient( 'prime_cache_preload_lock' );
+		delete_option( $lock_key );
 	}
 
 	/**
@@ -271,9 +372,11 @@ class Prime_Cache_Preload {
 		$urls = array();
 		$s    = $this->settings;
 
-		// Sitemap-based preload.
+		// Sitemap-based preload (Pro-only — the UI exposes these settings only when
+		// Pro is active. Without this gate, importing settings from a Pro install
+		// would silently enable sitemap preloading on Free with no UI to control it).
 		$sitemap_url = trim( $s['preload_sitemap'] );
-		if ( ! empty( $s['preload_sitemap_enabled'] ) && $sitemap_url ) {
+		if ( prime_cache_is_pro() && ! empty( $s['preload_sitemap_enabled'] ) && $sitemap_url ) {
 			$sitemap_urls = $this->parse_sitemap( $sitemap_url );
 			if ( ! empty( $sitemap_urls ) ) {
 				return $sitemap_urls; // Sitemap takes priority.
@@ -353,7 +456,21 @@ class Prime_Cache_Preload {
 			return array();
 		}
 
-		$response = wp_remote_get( $sitemap_url, array( 'timeout' => 15, 'sslverify' => true, 'limit_response_size' => 5 * 1024 * 1024 ) );
+		// Use wp_safe_remote_get so wp_http_validate_url runs against every
+		// redirect target (rejects private/loopback IPs at each hop). That
+		// covers the original SSRF concern — open-redirect bouncing to an
+		// internal address — while still allowing the legitimate same-host
+		// /sitemap.xml → real sitemap URL redirect that SEO plugins commonly
+		// configure. Cap redirects to keep loops short.
+		$response = wp_safe_remote_get(
+			$sitemap_url,
+			array(
+				'timeout'             => 15,
+				'sslverify'           => true,
+				'redirection'         => 3,
+				'limit_response_size' => 5 * 1024 * 1024,
+			)
+		);
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return array();
 		}
@@ -374,31 +491,33 @@ class Prime_Cache_Preload {
 
 		$urls = array();
 
-		// Sitemap index — recurse into child sitemaps.
-		if ( isset( $xml->sitemap ) ) {
-			foreach ( $xml->sitemap as $entry ) {
-				if ( isset( $entry->loc ) ) {
-					$child_urls = $this->parse_sitemap( (string) $entry->loc, $depth + 1 );
-					$urls = array_merge( $urls, $child_urls );
-					if ( count( $urls ) > 1000 ) {
-						break;
-					}
+		// Standard sitemap XML uses the xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+		// default namespace. SimpleXML property access (`$xml->sitemap`) only works for
+		// children sharing the parent's namespace, which is fragile across sitemap
+		// generators. Use XPath with local-name() so we collect entries regardless of
+		// namespace declaration.
+		$sitemap_locs = $xml->xpath( '/*[local-name()="sitemapindex"]/*[local-name()="sitemap"]/*[local-name()="loc"]' );
+		if ( is_array( $sitemap_locs ) ) {
+			foreach ( $sitemap_locs as $loc_node ) {
+				$child_urls = $this->parse_sitemap( (string) $loc_node, $depth + 1 );
+				$urls = array_merge( $urls, $child_urls );
+				if ( count( $urls ) > 1000 ) {
+					break;
 				}
 			}
 		}
 
 		// Standard sitemap — collect <loc> URLs (same-host only).
-		if ( isset( $xml->url ) ) {
-			foreach ( $xml->url as $entry ) {
-				if ( isset( $entry->loc ) ) {
-					$loc      = (string) $entry->loc;
-					$loc_host = wp_parse_url( $loc, PHP_URL_HOST );
-					if ( $loc_host && strtolower( $loc_host ) === strtolower( $site_host ) ) {
-						$urls[] = $loc;
-					}
-					if ( count( $urls ) > 1000 ) {
-						break;
-					}
+		$url_locs = $xml->xpath( '/*[local-name()="urlset"]/*[local-name()="url"]/*[local-name()="loc"]' );
+		if ( is_array( $url_locs ) ) {
+			foreach ( $url_locs as $loc_node ) {
+				$loc      = (string) $loc_node;
+				$loc_host = wp_parse_url( $loc, PHP_URL_HOST );
+				if ( $loc_host && strtolower( $loc_host ) === strtolower( $site_host ) ) {
+					$urls[] = $loc;
+				}
+				if ( count( $urls ) > 1000 ) {
+					break;
 				}
 			}
 		}
@@ -414,7 +533,7 @@ class Prime_Cache_Preload {
 	 */
 	private function is_variant_cached( $url, $is_mobile = false ) {
 		$dir = Prime_Cache_Storage::get_cache_dir( $url );
-		if ( ! is_dir( $dir ) ) {
+		if ( false === $dir || ! is_dir( $dir ) ) {
 			return false;
 		}
 
@@ -493,20 +612,67 @@ class Prime_Cache_Preload {
 			return;
 		}
 
-		$exclude_patterns = array( '/wp-admin', '/wp-login', '/cart', '/checkout', '#', 'mailto:', 'tel:', 'javascript:' );
-		$exclude_json  = wp_json_encode( $exclude_patterns, JSON_HEX_TAG );
-		$site_url_json = wp_json_encode( home_url(), JSON_HEX_TAG );
+		// Substring patterns matched against the absolute URL.
+		// `/cart`, `/checkout`, `/my-account` mirror the page-cache WooCommerce
+		// URI guard. Query-string entries cover state-changing GET endpoints
+		// (add-to-cart, wc-ajax, wp_logout, action=) — prefetching these would
+		// silently submit cart adds, trigger logouts, etc. since browsers honor
+		// `<link rel="prefetch">` as a real GET.
+		$exclude_patterns = array(
+			'/wp-admin', '/wp-login', '/cart', '/checkout', '/my-account', '/wc-api',
+			'#', 'mailto:', 'tel:', 'javascript:',
+			'add-to-cart=', 'wc-ajax=', 'remove_item=', 'undo_item=',
+			'wp_logout', 'action=logout', '_wpnonce=',
+		);
+		// Build "host[:port]" + path prefix so the JS can compare URL.host
+		// directly and also confirm the URL falls under our WordPress base
+		// path. For subdirectory installs (`https://example.com/blog/`) a
+		// bare host check would happily prefetch `/shop/checkout` on the
+		// same domain, hitting an unrelated sibling app.
+		$home_parsed     = wp_parse_url( home_url() );
+		$home_host_only  = isset( $home_parsed['host'] ) ? $home_parsed['host'] : '';
+		$home_port       = isset( $home_parsed['port'] ) ? (int) $home_parsed['port'] : 0;
+		$home_host_full  = $home_host_only . ( $home_port > 0 ? ':' . $home_port : '' );
+		$home_path       = isset( $home_parsed['path'] ) ? $home_parsed['path'] : '/';
+		if ( '' === $home_path || '/' !== $home_path[0] ) {
+			$home_path = '/' . ltrim( $home_path, '/' );
+		}
+		if ( '/' !== substr( $home_path, -1 ) ) {
+			$home_path .= '/';
+		}
+		$exclude_json    = wp_json_encode( $exclude_patterns, JSON_HEX_TAG );
+		$site_host_json  = wp_json_encode( $home_host_full, JSON_HEX_TAG );
+		$site_proto_json = wp_json_encode( ( wp_parse_url( home_url(), PHP_URL_SCHEME ) ?: 'https' ) . ':', JSON_HEX_TAG );
+		$site_path_json  = wp_json_encode( $home_path, JSON_HEX_TAG );
 		?>
 		<script id="pc-preload-links">
 		(function(){
 			if(navigator.connection&&navigator.connection.saveData)return;
 			<?php
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $exclude_json and $site_url_json are from wp_json_encode() with JSON_HEX_TAG, safe for inline script.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $exclude_json, $site_host_json, $site_proto_json and $site_path_json are from wp_json_encode() with JSON_HEX_TAG, safe for inline script.
 			?>
-			var done={},exc=<?php echo $exclude_json; ?>,rate=3,sent=0,queue=[],timer=null,origin=location.origin+'/',siteUrl=<?php echo $site_url_json; ?>;
+			var done={},exc=<?php echo $exclude_json; ?>,rate=3,sent=0,queue=[],timer=null,siteHost=<?php echo $site_host_json; ?>,siteProto=<?php echo $site_proto_json; ?>,sitePath=<?php echo $site_path_json; ?>;
+			// Strict same-origin check via URL parser. URL.host carries the
+			// non-default port automatically, so comparing it directly catches
+			// both host and port mismatches. Scheme is compared separately to
+			// catch http vs https mixed-content cases. The path prefix check
+			// keeps subdirectory installs (e.g. `/blog/`) from prefetching
+			// sibling apps (`/shop/...`) on the same host.
+			function sameHost(u){
+				try{
+					var p=new URL(u,location.href);
+					if(p.host!==siteHost&&p.host!==location.host)return false;
+					if(p.protocol!==siteProto&&p.protocol!==location.protocol)return false;
+					if(sitePath!=='/'){
+						var pp=p.pathname||'/';
+						if(pp.indexOf(sitePath)!==0&&(pp+'/').indexOf(sitePath)!==0)return false;
+					}
+					return true;
+				}catch(e){return false;}
+			}
 			function ok(u){
 				if(!u||done[u])return false;
-				if(u.indexOf(siteUrl)!==0&&u.indexOf(origin)!==0)return false;
+				if(!sameHost(u))return false;
 				for(var i=0;i<exc.length;i++){if(u.indexOf(exc[i])!==-1)return false;}
 				return true;
 			}
@@ -535,7 +701,11 @@ class Prime_Cache_Preload {
 				var obs=new IntersectionObserver(function(entries){
 					entries.forEach(function(en){if(en.isIntersecting){var a=en.target;pf(a.href);obs.unobserve(a);}});
 				},{rootMargin:'200px'});
-				document.querySelectorAll('a[href^="'+siteUrl+'"],a[href^="/"]').forEach(function(a){if(a.getAttribute('href').indexOf('//')===0)return;obs.observe(a);});
+				// Observe every <a> with an href; sameHost() in pf()→ok() does the
+				// real filtering. Earlier code narrowed the selector via the
+				// (now-removed) siteUrl prefix; keeping observation broad and
+				// rejecting in pf() keeps the JS simpler and host-equality strict.
+				document.querySelectorAll('a[href]').forEach(function(a){obs.observe(a);});
 			}
 		})();
 		</script>
@@ -587,7 +757,11 @@ class Prime_Cache_Preload {
 					break;
 			}
 
-			echo '<link rel="preload" href="' . esc_url( $url ) . '"' . esc_attr( $as_attr ) . esc_attr( $type_attr ) . esc_attr( $cross ) . '>' . "\n";
+			// $as_attr / $type_attr / $cross are pre-built literal fragments
+			// from the hardcoded switch above — they already contain the
+			// surrounding quotes. Wrapping them in esc_attr() would entity-
+			// encode those quotes (` as=&quot;style&quot;`) and break parsing.
+			echo '<link rel="preload" href="' . esc_url( $url ) . '"' . $as_attr . $type_attr . $cross . '>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 
@@ -667,10 +841,12 @@ class Prime_Cache_Preload {
 		}
 
 		foreach ( $blocks[0] as $block ) {
-			// Prefer woff2.
-			if ( preg_match( '#url\(\s*["\']?([^"\')\s]+\.woff2)["\']?\s*\)#i', $block, $m ) ) {
+			// Prefer woff2. Allow trailing ?ver=... (cache-busters) and #iefix
+			// (legacy fragment from font generators) so common real-world URLs
+			// aren't silently skipped from the preload list.
+			if ( preg_match( '#url\(\s*["\']?([^"\')\s]+\.woff2(?:[?\#][^"\')\s]*)?)["\']?\s*\)#i', $block, $m ) ) {
 				$urls[] = $this->resolve_font_url( $m[1], $css_dir );
-			} elseif ( preg_match( '#url\(\s*["\']?([^"\')\s]+\.woff)["\']?\s*\)#i', $block, $m ) ) {
+			} elseif ( preg_match( '#url\(\s*["\']?([^"\')\s]+\.woff(?:[?\#][^"\')\s]*)?)["\']?\s*\)#i', $block, $m ) ) {
 				$urls[] = $this->resolve_font_url( $m[1], $css_dir );
 			}
 		}
@@ -694,10 +870,18 @@ class Prime_Cache_Preload {
 		if ( 0 === strpos( $url, '/' ) ) {
 			return home_url( $url );
 		}
-		// Relative path.
-		$abs = realpath( $css_dir . '/' . $url );
-		if ( $abs && 0 === strpos( $abs, ABSPATH ) ) {
-			return home_url( '/' . ltrim( str_replace( ABSPATH, '', $abs ), '/' ) );
+		// Relative path. Strip ?query / #fragment before realpath; reattach so
+		// the browser receives the original cache-buster URL.
+		$suffix = '';
+		$path   = $url;
+		if ( false !== strpbrk( $url, '?#' ) ) {
+			$pos    = strcspn( $url, '?#' );
+			$path   = substr( $url, 0, $pos );
+			$suffix = substr( $url, $pos );
+		}
+		$abs = realpath( $css_dir . '/' . $path );
+		if ( $abs && Prime_Cache_File_Optimizer::path_within( $abs, ABSPATH ) ) {
+			return home_url( '/' . ltrim( str_replace( ABSPATH, '', $abs ), '/' ) ) . $suffix;
 		}
 		return '';
 	}
@@ -716,7 +900,7 @@ class Prime_Cache_Preload {
 		}
 		$path = strtok( $path, '?' );
 		$real = realpath( $path );
-		return ( $real && 0 === strpos( $real, realpath( ABSPATH ) ) ) ? $real : false;
+		return ( $real && Prime_Cache_File_Optimizer::path_within( $real, realpath( ABSPATH ) ) ) ? $real : false;
 	}
 
 	// ── Preconnect ───────────────────────────────────────────
@@ -733,14 +917,22 @@ class Prime_Cache_Preload {
 		$domains = array_filter( array_map( 'trim', $domains ) );
 
 		foreach ( $domains as $domain ) {
-			if ( empty( $domain ) ) {
+			if ( '' === $domain ) {
 				continue;
 			}
-			// Ensure scheme.
+			// Ensure scheme so wp_parse_url returns a host segment.
 			if ( 0 !== strpos( $domain, 'http' ) && 0 !== strpos( $domain, '//' ) ) {
 				$domain = 'https://' . $domain;
 			}
-			$hints[] = array( 'href' => $domain, 'crossorigin' => '' );
+			$parsed = wp_parse_url( $domain );
+			if ( empty( $parsed['host'] ) ) {
+				continue; // Path-only / malformed entry — emitting it would be a noop hint.
+			}
+			$origin = ( $parsed['scheme'] ?? 'https' ) . '://' . $parsed['host'];
+			if ( ! empty( $parsed['port'] ) ) {
+				$origin .= ':' . (int) $parsed['port'];
+			}
+			$hints[] = array( 'href' => $origin, 'crossorigin' => '' );
 		}
 
 		return $hints;
@@ -760,9 +952,22 @@ class Prime_Cache_Preload {
 			return;
 		}
 
-		$site_url = home_url();
-		$parsed   = wp_parse_url( $site_url );
-		$host     = $parsed['host'] ?? '';
+		// Normalize home_url to scheme+host(+port)+path only. A filtered
+		// home_url that includes ?query or #fragment would otherwise leak
+		// into href_matches patterns and either break the JSON shape or
+		// over-match unrelated URLs.
+		$parsed = wp_parse_url( home_url() );
+		$host   = $parsed['host'] ?? '';
+		if ( '' === $host ) {
+			return; // Cannot build same-origin matchers without a host.
+		}
+		$site_url = ( $parsed['scheme'] ?? 'https' ) . '://' . $host;
+		if ( ! empty( $parsed['port'] ) ) {
+			$site_url .= ':' . (int) $parsed['port'];
+		}
+		if ( ! empty( $parsed['path'] ) ) {
+			$site_url .= rtrim( $parsed['path'], '/' );
+		}
 
 		$rules = array(
 			'prerender' => array(
@@ -811,13 +1016,18 @@ class Prime_Cache_Preload {
 		$domains = array_filter( array_map( 'trim', $domains ) );
 
 		foreach ( $domains as $domain ) {
-			if ( empty( $domain ) ) {
+			if ( '' === $domain ) {
 				continue;
 			}
-			// Strip scheme and trailing slash for dns-prefetch.
-			$domain = preg_replace( '#^https?://#i', '', $domain );
-			$domain = rtrim( $domain, '/' );
-			$hints[] = '//' . $domain;
+			// Normalize to host only — dns-prefetch resolves a name, paths and
+			// query strings on the supplied URL are meaningless and the browser
+			// silently ignores invalid hint values.
+			$probe  = ( 0 !== strpos( $domain, 'http' ) && 0 !== strpos( $domain, '//' ) ) ? 'https://' . $domain : $domain;
+			$parsed = wp_parse_url( $probe );
+			if ( empty( $parsed['host'] ) ) {
+				continue;
+			}
+			$hints[] = '//' . $parsed['host'];
 		}
 
 		return $hints;

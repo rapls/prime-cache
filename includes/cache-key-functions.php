@@ -44,6 +44,21 @@ function _prime_cache_normalize_host( $host ) {
 		}
 	}
 
+	// IDN normalization: convert Unicode hostnames to Punycode (UTS#46) so that
+	// `日本.example` and `xn--wgv71a.example` map to the same cache bucket. Without
+	// this, the allow-list (built from home_url() in WP context as Punycode) would
+	// fail to match a Unicode Host: header, and vice versa.
+	// Requires the intl extension; without it we keep the lowercased ASCII fallback
+	// (Unicode chars then get hex-encoded by the unsafe-char step below — still
+	// collision-free, but won't match a Punycode allow-list entry).
+	if ( function_exists( 'idn_to_ascii' ) && preg_match( '#[^\x00-\x7f]#', $host ) ) {
+		$variant = defined( 'INTL_IDNA_VARIANT_UTS46' ) ? INTL_IDNA_VARIANT_UTS46 : 0;
+		$ascii   = @idn_to_ascii( $host, IDNA_DEFAULT, $variant );
+		if ( is_string( $ascii ) && '' !== $ascii ) {
+			$host = $ascii;
+		}
+	}
+
 	// Encode unsafe chars with underscore-hex (same approach as path segments).
 	// This preserves IPv6 colons as _3a instead of stripping them, preventing
 	// distinct addresses from collapsing to the same string.
@@ -88,6 +103,32 @@ function _prime_cache_config_host_key( $host ) {
  * @param string $path Raw URL path.
  * @return string Normalized path with trailing slash.
  */
+/**
+ * Detect whether a User-Agent string represents a mobile device.
+ *
+ * Single source of truth shared between:
+ *  - dropins/page-cache.php (cache key — picks the mobile bucket)
+ *  - includes/class-file-optimizer.php (HTML transforms — wraps inline jQuery,
+ *    applies delay JS — must apply to exactly the same requests the cache key
+ *    treats as mobile, otherwise a desktop-rendered HTML can land in the mobile
+ *    bucket or vice versa)
+ *
+ * The Apache .htaccess fast-path uses an equivalent literal regex (it can't
+ * call PHP); keep both lists in sync when adding agents.
+ *
+ * @param string $ua Raw User-Agent string ($_SERVER['HTTP_USER_AGENT']).
+ * @return bool True for mobile/tablet UAs.
+ */
+function _prime_cache_is_mobile_ua( $ua ) {
+	if ( ! is_string( $ua ) || '' === $ua ) {
+		return false;
+	}
+	return (bool) preg_match(
+		'#(Mobile|Android|Silk/|Kindle|BlackBerry|Opera Mini|Opera Mobi|webOS)#i',
+		$ua
+	);
+}
+
 function _prime_cache_normalize_path( $path ) {
 	$segments = explode( '/', $path );
 	$safe = array();

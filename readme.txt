@@ -4,8 +4,8 @@ Contributors: rapls
 Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
-Tested up to: 6.9
-Stable tag: 1.9.9.4
+Tested up to: 7.0
+Stable tag: 1.9.9.5
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -246,6 +246,14 @@ Start with page caching and basic file optimization. Test your site after each c
 
 == Changelog ==
 
+= 1.9.9.5 =
+* Tested: Confirmed compatible with WordPress 7.0
+* Fix: Resolve "preg_match(): Unknown modifier" warning in font preload detection — woff/woff2 URLs containing a query string or fragment were silently skipped, breaking font preloading on PHP 8.x
+* Fix: Cache hit/miss statistics now accumulate correctly. The stats file was opened write-only, so reads failed and the dashboard counters could not grow
+* Fix: Prevent the "translation loading triggered too early" notice on WordPress 6.7+ during the one-time Delay JS Timeout migration
+* Fix: 3rd-Party Script Delay preset checkboxes now save reliably in the Free version (their JavaScript handler was blocked by an unrelated Pro-only control guard)
+* Improved: Pro feature upsell is now shown in-place as locked feature rows with a PRO badge, matching the surrounding settings UI
+
 = 1.9.3 =
 * Fix: Place .htaccess cache rewrite rules before WordPress rewrite block for PHP-less serving
 * Fix: Defer jQuery safely by wrapping inline jQuery code with DOMContentLoaded
@@ -319,6 +327,9 @@ Start with page caching and basic file optimization. Test your site after each c
 * English + Japanese translation (WordPress style guide compliant)
 
 == Upgrade Notice ==
+
+= 1.9.9.5 =
+WordPress 7.0 compatibility plus fixes for font preloading, dashboard statistics, and the Delay JS preset controls. Recommended for all users.
 
 = 1.9.3 =
 Major PageSpeed improvement. jQuery defer, .htaccess fast-path fix, Google Fonts async, cache preloading for Free, and multiple CSS optimization features. Clear all caches after update.

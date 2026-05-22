@@ -32,11 +32,17 @@ class Prime_Cache_Performance_Tweaks {
 		}
 
 		if ( $this->s['disable_dashicons'] ) {
+			// Run late so themes/plugins that enqueue dashicons in their own
+			// wp_enqueue_scripts callback have already registered/queued it
+			// by the time we strip it. dequeue handles the already-enqueued
+			// case; deregister prevents later-priority callbacks from
+			// re-enqueueing under the same handle.
 			add_action( 'wp_enqueue_scripts', function() {
 				if ( ! is_user_logged_in() ) {
+					wp_dequeue_style( 'dashicons' );
 					wp_deregister_style( 'dashicons' );
 				}
-			} );
+			}, 100 );
 		}
 
 		if ( $this->s['disable_wp_version'] ) {
@@ -54,10 +60,37 @@ class Prime_Cache_Performance_Tweaks {
 
 		if ( $this->s['disable_self_pingback'] ) {
 			add_action( 'pre_ping', function( &$links ) {
-				$home = home_url();
+				// Compare host AND path prefix. A naive strpos URL match
+				// would catch `example.com.attacker.tld`; a host-only match
+				// would catch sibling sites (`example.com/site-b/`) on
+				// shared-host installs. Require both to overlap with this
+				// install's home_url.
+				$home_host = wp_parse_url( home_url(), PHP_URL_HOST );
+				$home_path = wp_parse_url( home_url( '/' ), PHP_URL_PATH );
+				if ( ! is_string( $home_path ) || '' === $home_path ) {
+					$home_path = '/';
+				}
+				if ( '/' !== substr( $home_path, -1 ) ) {
+					$home_path .= '/';
+				}
+				if ( ! $home_host ) {
+					return;
+				}
 				foreach ( $links as $i => $link ) {
-					if ( 0 === strpos( $link, $home ) ) {
-						unset( $links[ $i ] );
+					$link_host = wp_parse_url( $link, PHP_URL_HOST );
+					if ( ! $link_host || 0 !== strcasecmp( $link_host, $home_host ) ) {
+						continue;
+					}
+					if ( '/' === $home_path ) {
+						unset( $links[ $i ] ); // Whole-host install — strip.
+						continue;
+					}
+					$link_path = wp_parse_url( $link, PHP_URL_PATH );
+					if ( ! is_string( $link_path ) || '' === $link_path ) {
+						$link_path = '/';
+					}
+					if ( 0 === strpos( $link_path . '/', $home_path ) ) {
+						unset( $links[ $i ] ); // Path overlaps our install.
 					}
 				}
 			} );
@@ -71,6 +104,11 @@ class Prime_Cache_Performance_Tweaks {
 		}
 
 		if ( $this->s['disable_rss_feeds'] ) {
+			// WordPress fires `do_feed_{$feed}` (e.g. do_feed_rss2) for both post
+			// and comment feeds — the second argument distinguishes them. Hooking
+			// the per-type actions therefore covers /feed/, /comments/feed/, and
+			// /post-name/feed/ in one shot. (do_feed_rss2_comments etc. are NOT
+			// real WordPress hooks.)
 			add_action( 'do_feed', array( $this, 'disable_feed' ), 1 );
 			add_action( 'do_feed_rdf', array( $this, 'disable_feed' ), 1 );
 			add_action( 'do_feed_rss', array( $this, 'disable_feed' ), 1 );
@@ -184,7 +222,7 @@ class Prime_Cache_Performance_Tweaks {
 			return;
 		}
 		$wp_scripts = wp_scripts();
-		$site       = site_url();
+		$site_host  = wp_parse_url( site_url(), PHP_URL_HOST );
 
 		// Handles to check: Cocoon may override 'jquery' directly or 'jquery-core'.
 		$jquery_handles = array(
@@ -201,9 +239,13 @@ class Prime_Cache_Performance_Tweaks {
 			if ( ! $src ) {
 				continue;
 			}
-			// Check if src is external (starts with // or http and is not our site).
-			$is_external = ( 0 === strpos( $src, '//' ) || 0 === strpos( $src, 'http' ) )
-				&& false === strpos( $src, $site );
+			// Strict host comparison — substring match against site_url() previously
+			// treated `https://example.com.evil.tld/jquery.js` as same-host (since
+			// the site URL appears as a substring) and skipped restoration. Parse
+			// the URL host explicitly. Root-relative `/foo` and protocol-relative
+			// `//same-host/foo` are considered local.
+			$src_host = wp_parse_url( $src, PHP_URL_HOST );
+			$is_external = $src_host && $site_host && 0 !== strcasecmp( $src_host, $site_host );
 			if ( $is_external ) {
 				$wp_scripts->registered[ $handle ]->src = $local_src;
 				$wp_scripts->registered[ $handle ]->ver = null; // use WP default version

@@ -383,11 +383,10 @@
 		watchInlineHandlers();
 		setupTriggers();
 
-		// Auto-trigger via timeout.
+		// Auto-trigger via timeout. timeout === 0 means "wait for interaction only" —
+		// no fallback fires. To guarantee scripts eventually run regardless of
+		// interaction, configure a non-zero "Delay Timeout (ms)" in the admin UI.
 		if (timeout > 0) setTimeout(function () { triggered = true; teardownTriggers(); }, timeout);
-
-		// Safety: force-trigger after 10 seconds no matter what.
-		setTimeout(function () { if (!triggered) { triggered = true; teardownTriggers(); } }, 10000);
 
 		// Wait for DOM ready.
 		if (document.readyState === 'loading' || pcReadyState === 'loading') {
