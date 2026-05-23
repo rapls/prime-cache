@@ -220,7 +220,11 @@ class Prime_Cache_Htaccess {
 		$lines = array_merge( $lines, self::build_mime_rules() );
 		$lines[] = '';
 
-		// WebP/AVIF rewrite (Pro feature — only when conversion is active).
+		// Image rewrite (server-level next-gen image serving). Free emits WebP
+		// rules; an add-on may add more formats via the
+		// prime_cache_image_htaccess_rules filter inside build_image_rewrite_rules().
+		// The avif_enabled clause keeps the block reachable so that filter can
+		// still fire when an add-on drives an additional format on its own.
 		if ( ( ! empty( $settings['webp_enabled'] ) || ! empty( $settings['avif_enabled'] ) )
 			&& ! empty( $settings['img_conversion_enabled'] )
 			&& 'rewrite' === ( $settings['img_delivery_method'] ?? '' ) ) {
@@ -333,34 +337,38 @@ class Prime_Cache_Htaccess {
 	}
 
 	/**
-	 * Rewrite rules to serve WebP/AVIF images when browser supports them.
+	 * Rewrite rules to serve WebP images when the browser supports them.
+	 *
+	 * The prime_cache_image_htaccess_rules filter lets an add-on prepend
+	 * higher-priority rewrite rules (e.g. AVIF) before Free's WebP rules.
 	 */
 	private static function build_image_rewrite_rules( $settings ) {
 		$r = array();
-		$r[] = '# WebP/AVIF image serving';
+		$r[] = '# WebP image serving';
 		$r[] = '# Only rewrites when the converted file actually exists on disk.';
 		$r[] = '# Falls through to serve the original image if no converted version is found.';
 		$r[] = '<IfModule mod_rewrite.c>';
 		$r[] = '    RewriteEngine On';
 
-		// AVIF: serve .avif if browser accepts and file exists.
-		if ( ! empty( $settings['avif_enabled'] ) ) {
-			$r[] = '';
-			$r[] = '    # AVIF';
-			$r[] = '    RewriteCond %{HTTP_ACCEPT} image/avif';
-			$r[] = '    RewriteCond %{REQUEST_URI} \.(jpe?g|png)$ [NC]';
-			$r[] = '    RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.avif -f';
-			$r[] = '    RewriteRule ^(.+)\.(jpe?g|png)$ $1.$2.avif [T=image/avif,E=REQUEST_image,L]';
-		}
+		// Collect the per-format image rewrite rule lines so they can be filtered
+		// before emission. Free contributes the WebP rules; an add-on may prepend
+		// additional-format rules (e.g. AVIF) so they win negotiation.
+		$rules = array();
 
 		// WebP: serve .webp if browser accepts and file exists.
 		if ( ! empty( $settings['webp_enabled'] ) ) {
-			$r[] = '';
-			$r[] = '    # WebP';
-			$r[] = '    RewriteCond %{HTTP_ACCEPT} image/webp';
-			$r[] = '    RewriteCond %{REQUEST_URI} \.(jpe?g|png)$ [NC]';
-			$r[] = '    RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.webp -f';
-			$r[] = '    RewriteRule ^(.+)\.(jpe?g|png)$ $1.$2.webp [T=image/webp,E=REQUEST_image,L]';
+			$rules[] = '';
+			$rules[] = '    # WebP';
+			$rules[] = '    RewriteCond %{HTTP_ACCEPT} image/webp';
+			$rules[] = '    RewriteCond %{REQUEST_URI} \.(jpe?g|png)$ [NC]';
+			$rules[] = '    RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.webp -f';
+			$rules[] = '    RewriteRule ^(.+)\.(jpe?g|png)$ $1.$2.webp [T=image/webp,E=REQUEST_image,L]';
+		}
+
+		$rules = apply_filters( 'prime_cache_image_htaccess_rules', $rules, $settings );
+
+		foreach ( (array) $rules as $line ) {
+			$r[] = $line;
 		}
 
 		$r[] = '</IfModule>';

@@ -1,6 +1,6 @@
 <?php
 /**
- * Media Optimizer — YouTube thumbnail replacement & missing image dimensions.
+ * Media Optimizer — adds missing image dimensions to prevent CLS.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -22,21 +22,15 @@ class Prime_Cache_Media_Optimizer {
 			return;
 		}
 
-		// YouTube thumbnails = Pro. Image dimensions = Free.
-		$yt_active  = prime_cache_is_pro() && $this->settings['youtube_thumbnail'];
-		$dim_active = $this->settings['add_missing_dimensions'];
-		if ( $yt_active || $dim_active ) {
+		// Add missing image dimensions (Free). An add-on registers its own
+		// pipeline transforms for additional media optimizations.
+		if ( ! empty( $this->settings['add_missing_dimensions'] ) ) {
 			global $prime_cache_html_pipeline;
 			if ( $prime_cache_html_pipeline ) {
 				$prime_cache_html_pipeline->register( 'media_optimizer', array( $this, 'process' ), 20 );
 			} else {
 				add_action( 'template_redirect', function() { ob_start( array( $this, 'process' ) ); }, 4 );
 			}
-		}
-
-		// [Pro] Enqueue YouTube click handler.
-		if ( prime_cache_is_pro() && $this->settings['youtube_thumbnail'] ) {
-			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_yt_script' ) );
 		}
 	}
 
@@ -45,39 +39,9 @@ class Prime_Cache_Media_Optimizer {
 			return $html;
 		}
 
-		if ( prime_cache_is_pro() && $this->settings['youtube_thumbnail'] ) {
-			$html = $this->replace_youtube_iframes( $html );
-		}
-
-		if ( $this->settings['add_missing_dimensions'] ) {
+		if ( ! empty( $this->settings['add_missing_dimensions'] ) ) {
 			$html = $this->add_image_dimensions( $html );
 		}
-
-		return $html;
-	}
-
-	/**
-	 * Replace YouTube iframes with lightweight thumbnail placeholders.
-	 * Video loads only on click — dramatically reduces page weight.
-	 */
-	private function replace_youtube_iframes( $html ) {
-		$pattern = '#<iframe[^>]+src=["\'](?:https?:)?//(?:www\.)?youtube(?:-nocookie)?\.com/embed/([a-zA-Z0-9_-]+)([^"\']*)["\'][^>]*></iframe>#i';
-
-		$html = preg_replace_callback( $pattern, function( $m ) {
-			$vid    = $m[1];
-			$params = $m[2];
-			$thumb  = "https://i.ytimg.com/vi/{$vid}/hqdefault.jpg";
-
-			// Build embed URL for when user clicks.
-			$embed_url = "https://www.youtube.com/embed/{$vid}?autoplay=1" . ( $params ? '&' . ltrim( $params, '?' ) : '' );
-
-			// No inline onclick — use data attributes + event delegation for CSP compatibility.
-			return '<div class="pc-yt-wrap" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;cursor:pointer;background:#000" data-pc-yt-src="' . esc_attr( $embed_url ) . '">'
-				. '<img src="' . esc_url( $thumb ) . '" alt="YouTube video" loading="lazy" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">'
-				. '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:68px;height:48px;background:rgba(255,0,0,.8);border-radius:14px;display:flex;align-items:center;justify-content:center">'
-				. '<svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>'
-				. '</div></div>';
-		}, $html );
 
 		return $html;
 	}
@@ -169,19 +133,6 @@ class Prime_Cache_Media_Optimizer {
 		$path = strtok( $path, '?' );
 		$real = realpath( $path );
 		return ( $real && Prime_Cache_File_Optimizer::path_within( $real, realpath( ABSPATH ) ) ) ? $real : false;
-	}
-
-	/**
-	 * Print YouTube click handler script in footer.
-	 */
-	public function enqueue_yt_script() {
-		wp_enqueue_script(
-			'pc-yt',
-			plugins_url( 'assets/pc-yt.js', dirname( __FILE__ ) ),
-			array(),
-			PRIME_CACHE_VERSION,
-			array( 'strategy' => 'defer', 'in_footer' => true )
-		);
 	}
 
 	// ── Upload-time Image Processing ────────────────────────

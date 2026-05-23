@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Prime Cache
  * Description: A fast and stable page caching plugin for WordPress.
- * Version: 1.9.9.5
+ * Version: 1.10.0
  * Author: rapls
  * License: GPL-2.0-or-later
  * Text Domain: prime-cache
@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PRIME_CACHE_VERSION', '1.9.9.5' );
+define( 'PRIME_CACHE_VERSION', '1.10.0' );
 define( 'PRIME_CACHE_FILE', __FILE__ );
 define( 'PRIME_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 
@@ -41,6 +41,7 @@ require_once PRIME_CACHE_PATH . 'includes/class-file-optimizer.php';
 require_once PRIME_CACHE_PATH . 'includes/class-preload.php';
 require_once PRIME_CACHE_PATH . 'includes/class-lazyload.php';
 require_once PRIME_CACHE_PATH . 'includes/class-media-optimizer.php';
+require_once PRIME_CACHE_PATH . 'includes/class-image-converter.php';
 require_once PRIME_CACHE_PATH . 'includes/class-post-metabox.php';
 require_once PRIME_CACHE_PATH . 'includes/class-compatibility.php';
 require_once PRIME_CACHE_PATH . 'includes/class-performance-tweaks.php';

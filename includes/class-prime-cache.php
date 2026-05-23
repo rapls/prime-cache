@@ -74,6 +74,7 @@ class Prime_Cache {
 		new Prime_Cache_Preload();
 		new Prime_Cache_LazyLoad();
 		new Prime_Cache_Media_Optimizer();
+		new Prime_Cache_Image_Converter();
 
 		// Pro classes — initialized by prime-cache-pro add-on:
 		// Database_Optimizer, Varnish, Sucuri, Heartbeat, CDN, Cloudflare, WebP

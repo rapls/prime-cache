@@ -936,6 +936,30 @@ class Prime_Cache_Admin_Settings {
 			</div>
 
 			<?php do_action( 'prime_cache_page_settings_after_general', $settings ); ?>
+			<?php if ( ! prime_cache_is_pro() ) : ?>
+			<!-- Varnish (Pro, grayed) -->
+			<div class="pc-card">
+				<span class="pc-card__h">Varnish</span>
+				<?php $this->render_pro_row( __( 'Enable Varnish Purge', 'prime-cache' ), __( 'Automatically purge the Varnish cache when WordPress content changes. Sends PURGE requests to the configured Varnish server.', 'prime-cache' ) ); ?>
+				<div class="pc-field" style="opacity:.5">
+					<label class="pc-lbl"><?php esc_html_e( 'Varnish Server IP', 'prime-cache' ); ?></label>
+					<textarea rows="2" class="pc-ta" placeholder="127.0.0.1" disabled></textarea>
+					<p class="pc-help"><?php esc_html_e( 'One IP address per line. If your Varnish server runs on a different host or port, specify here. Defaults to 127.0.0.1 (localhost).', 'prime-cache' ); ?></p>
+				</div>
+			</div>
+
+			<!-- Sucuri (Pro, grayed) -->
+			<div class="pc-card">
+				<span class="pc-card__h">Sucuri</span>
+				<?php $this->render_pro_row( __( 'Enable Sucuri Purge', 'prime-cache' ), __( 'Automatically clear the Sucuri firewall cache when WordPress content changes.', 'prime-cache' ) ); ?>
+				<div class="pc-field" style="opacity:.5">
+					<label class="pc-lbl"><?php esc_html_e( 'Sucuri API Key', 'prime-cache' ); ?></label>
+					<input type="text" class="pc-inp" style="width:100%" disabled>
+					<p class="pc-help"><?php esc_html_e( 'Your Sucuri firewall API key. Found in the Sucuri dashboard under API section.', 'prime-cache' ); ?></p>
+				</div>
+				<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Unlock these with Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
+			</div>
+			<?php endif; ?>
 
 			<!-- Browser Cache -->
 			<div class="pc-card">
@@ -1061,16 +1085,6 @@ class Prime_Cache_Admin_Settings {
 			});
 		})();
 		</script>
-		<?php if ( ! prime_cache_is_pro() ) : ?>
-		<div class="pc-card">
-			<span class="pc-card__h"><?php esc_html_e( 'Reverse Proxy &amp; Firewall', 'prime-cache' ); ?></span>
-			<?php
-			$this->render_pro_row( __( 'Varnish Cache Purging', 'prime-cache' ), __( 'Auto-purge Varnish reverse proxy when content changes.', 'prime-cache' ) );
-			$this->render_pro_row( __( 'Sucuri Firewall Sync', 'prime-cache' ), __( 'Clear Sucuri firewall cache via API on content update.', 'prime-cache' ) );
-			?>
-			<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Unlock these with Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
-		</div>
-		<?php endif; ?>
 		<?php
 	}
 
@@ -1122,6 +1136,12 @@ class Prime_Cache_Admin_Settings {
 				<span class="pc-card__h">CSS</span>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[minify_css]" value="1" <?php checked( $settings['minify_css'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Minify CSS', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Remove whitespace, comments, and unnecessary characters from CSS files to reduce file size.', 'prime-cache' ); ?></small></span></label>
 				<?php do_action( 'prime_cache_file_opt_css_controls', $settings ); ?>
+				<?php if ( ! prime_cache_is_pro() ) : ?>
+				<?php $this->render_pro_row( __( 'Combine CSS Files', 'prime-cache' ), __( 'Merge multiple CSS files into fewer files to reduce HTTP requests. On HTTP/2 servers this may have minimal benefit. Test thoroughly after enabling.', 'prime-cache' ) ); ?>
+				<div style="margin-left:24px">
+					<?php $this->render_pro_row( __( 'Mobile Only', 'prime-cache' ), __( 'Apply CSS/JS combining only on mobile devices. Desktop uses HTTP/2 multiplexing efficiently without combining. Requires separate mobile cache.', 'prime-cache' ) ); ?>
+				</div>
+				<?php endif; ?>
 				<div class="pc-field">
 					<label class="pc-lbl"><?php esc_html_e( 'Excluded CSS Files', 'prime-cache' ); ?></label>
 					<textarea name="prime_cache_settings[exclude_css]" rows="3" class="pc-ta" placeholder="/wp-content/plugins/some-plugin/*.css&#10;some-handle.min.css"><?php echo esc_textarea( $settings['exclude_css'] ); ?></textarea>
@@ -1139,6 +1159,36 @@ class Prime_Cache_Admin_Settings {
 			</div>
 
 			<?php do_action( 'prime_cache_file_opt_css_delivery', $settings ); ?>
+			<?php if ( ! prime_cache_is_pro() ) : ?>
+			<!-- Optimize CSS Delivery (Pro, grayed) -->
+			<div class="pc-card">
+				<span class="pc-card__h"><?php esc_html_e( 'Optimize CSS Delivery', 'prime-cache' ); ?></span>
+				<?php $this->render_pro_row( __( 'Optimize CSS Delivery', 'prime-cache' ), __( 'Improve render performance by optimizing how CSS is loaded. Choose a method below.', 'prime-cache' ) ); ?>
+				<div class="pc-field" style="margin-left:52px;opacity:.5">
+					<label style="display:block;margin-bottom:6px">
+						<input type="radio" disabled checked>
+						<?php esc_html_e( 'Remove Unused CSS', 'prime-cache' ); ?>
+					</label>
+					<label style="display:block;margin-bottom:6px">
+						<input type="radio" disabled>
+						<?php esc_html_e( 'Load CSS Asynchronously', 'prime-cache' ); ?>
+					</label>
+				</div>
+				<?php $this->render_pro_row( __( 'Auto-Generate Critical CSS', 'prime-cache' ), __( 'Automatically extract above-the-fold Critical CSS for each page to prevent flash of unstyled content (FOUC).', 'prime-cache' ) ); ?>
+				<div class="pc-field" style="opacity:.5">
+					<label class="pc-lbl"><?php esc_html_e( 'Fallback Critical CSS', 'prime-cache' ); ?></label>
+					<textarea rows="5" class="pc-ta" placeholder="/* Paste your critical CSS here */" disabled></textarea>
+					<p class="pc-help"><?php esc_html_e( 'Manual critical CSS used as a fallback when auto-generation is not available for a page. Inlined in the <head> to render above-the-fold content immediately.', 'prime-cache' ); ?></p>
+				</div>
+				<div class="pc-field" style="opacity:.5">
+					<label class="pc-lbl"><?php esc_html_e( 'Used CSS Safelist', 'prime-cache' ); ?></label>
+					<textarea rows="3" class="pc-ta" placeholder=".my-class&#10;#my-id&#10;/pattern/" disabled></textarea>
+					<p class="pc-help"><?php esc_html_e( 'CSS selectors or patterns that should never be removed (one per line). Use when Remove Unused CSS incorrectly strips needed styles.', 'prime-cache' ); ?></p>
+				</div>
+				<?php $this->render_pro_row( __( 'Async CSS', 'prime-cache' ), __( 'Load all CSS files asynchronously using link[rel=preload] to eliminate render-blocking stylesheets.', 'prime-cache' ) ); ?>
+				<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Unlock these with Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
+			</div>
+			<?php endif; ?>
 
 			<!-- JavaScript -->
 			<div class="pc-card">
@@ -1154,6 +1204,12 @@ class Prime_Cache_Admin_Settings {
 				</div>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js_safe_mode]" value="1" <?php checked( $settings['delay_js_safe_mode'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Delay JS Safe Mode', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Only delay external (third-party) scripts. All internal scripts from your site (wp-includes, wp-content) load immediately. Reduces performance gains but prevents most compatibility issues.', 'prime-cache' ); ?></small></span></label>
 				<?php do_action( 'prime_cache_file_opt_js_controls', $settings ); ?>
+				<?php if ( ! prime_cache_is_pro() ) : ?>
+				<?php $this->render_pro_row( __( 'Combine JavaScript Files', 'prime-cache' ), __( 'Merge multiple JS files into fewer files. May break some scripts — test thoroughly. On HTTP/2 the benefit is minimal.', 'prime-cache' ) ); ?>
+				<div style="margin-left:24px">
+					<?php $this->render_pro_row( __( 'Mobile Only', 'prime-cache' ), __( 'Apply CSS/JS combining only on mobile devices. Desktop uses HTTP/2 multiplexing efficiently without combining. Requires separate mobile cache.', 'prime-cache' ) ); ?>
+				</div>
+				<?php endif; ?>
 				<div class="pc-field">
 					<label class="pc-lbl"><?php esc_html_e( 'Excluded JS Files', 'prime-cache' ); ?></label>
 					<textarea name="prime_cache_settings[exclude_js]" rows="3" class="pc-ta" placeholder="jquery.min.js&#10;/wp-includes/js/wp-embed.min.js"><?php echo esc_textarea( $settings['exclude_js'] ); ?></textarea>
@@ -1180,6 +1236,14 @@ class Prime_Cache_Admin_Settings {
 			<div class="pc-card">
 				<span class="pc-card__h"><?php esc_html_e( 'Fonts & Other', 'prime-cache' ); ?></span>
 				<?php do_action( 'prime_cache_file_opt_fonts_controls', $settings ); ?>
+				<?php if ( ! prime_cache_is_pro() ) : ?>
+				<?php
+				$this->render_pro_row( __( 'Combine Google Fonts', 'prime-cache' ), __( 'Merge multiple Google Fonts requests into a single request to reduce HTTP round-trips.', 'prime-cache' ) );
+				$this->render_pro_row( __( 'Self-Host Google Fonts', 'prime-cache' ), __( 'Download Google Fonts and serve them from your own server. Eliminates external DNS lookups and connections to fonts.googleapis.com and fonts.gstatic.com.', 'prime-cache' ) );
+				$this->render_pro_row( __( 'Host Google Analytics Locally', 'prime-cache' ), __( 'Download and serve the Google Analytics script from your own server. Reduces external requests and improves PageSpeed scores.', 'prime-cache' ) );
+				?>
+				<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Unlock these with Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
+				<?php endif; ?>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[google_fonts_display]" value="1" <?php checked( $settings['google_fonts_display'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Optimize Google Fonts', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Improves Google Fonts loading: (1) appends display=swap to font URLs so text remains visible during font load (prevents FOIT), (2) loads font CSS asynchronously via media="print"+onload so it does not block rendering, (3) injects a preconnect hint to fonts.gstatic.com to start the connection earlier.', 'prime-cache' ); ?></small></span></label>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[remove_query_strings]" value="1" <?php checked( $settings['remove_query_strings'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Remove Query Strings', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Remove version query strings (?ver=, ?v=) from local CSS and JS file URLs. Improves cacheability by CDNs and proxies that ignore query strings. External URLs are not affected.', 'prime-cache' ); ?></small></span></label>
 
@@ -1320,41 +1384,37 @@ class Prime_Cache_Admin_Settings {
 			cbs.forEach(function(c){c.addEventListener('change',syncPresets);});
 		})();
 		</script>
-		<?php if ( ! prime_cache_is_pro() ) : ?>
-		<div class="pc-card">
-			<span class="pc-card__h"><?php esc_html_e( 'Advanced CSS &amp; JavaScript', 'prime-cache' ); ?></span>
-			<?php
-			$this->render_pro_row( __( 'Combine CSS Files', 'prime-cache' ), __( 'Merge multiple CSS files into a single file to reduce HTTP requests.', 'prime-cache' ) );
-			$this->render_pro_row( __( 'Combine JavaScript', 'prime-cache' ), __( 'Merge JS files into one request. Reduces connection overhead.', 'prime-cache' ) );
-			$this->render_pro_row( __( 'Remove Unused CSS', 'prime-cache' ), __( 'Analyze each page and strip CSS rules that are never used.', 'prime-cache' ) );
-			$this->render_pro_row( __( 'Critical CSS', 'prime-cache' ), __( 'Auto-generate above-the-fold CSS for instant first paint.', 'prime-cache' ) );
-			$this->render_pro_row( __( 'Async CSS Delivery', 'prime-cache' ), __( 'Load stylesheets without blocking page rendering.', 'prime-cache' ) );
-			$this->render_pro_row( __( 'Local Google Analytics', 'prime-cache' ), __( 'Host analytics scripts locally. Eliminates external connections.', 'prime-cache' ) );
-			?>
-			<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Unlock these with Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
-		</div>
-		<?php endif; ?>
 		<?php
 	}
 
 	/* ── tab: media ───────────────────────────────────────── */
 
 	private function tab_media( $settings ) {
+		$is_pro = prime_cache_is_pro();
+		// Format Conversion / Bulk Optimization are now FREE features. WebP and the
+		// shared conversion controls render as real inputs for everyone, so their
+		// keys are always "visible" (not re-emitted as hidden duplicates).
 		$vis = array(
 			'lazyload_images','lazyload_iframes','lazyload_videos','lazyload_disable_native','lazyload_skip_first','lazyload_exclude',
 			'add_missing_dimensions',
 			'img_strip_exif','img_resize','img_max_width','img_max_height',
+			'img_conversion_enabled','webp_enabled','img_quality_mode','webp_quality',
+			'img_auto_optimize','img_auto_remove_larger','img_exclude_png',
+			'img_include_uploads','img_include_themes','img_include_plugins',
+			'img_delivery_method','img_converter',
 		);
-		if ( prime_cache_is_pro() ) {
+		if ( $is_pro ) {
+			// AVIF + YouTube thumbnail stay Pro: their real inputs only render under Pro.
 			$vis = array_merge( $vis, array(
 				'youtube_thumbnail',
-				'img_conversion_enabled','webp_enabled','avif_enabled','img_quality_mode','webp_quality','avif_quality',
-				'img_auto_optimize','img_auto_remove_larger','img_exclude_png',
-				'img_include_uploads','img_include_themes','img_include_plugins','img_include_custom','img_exclude_folders',
-				'img_delivery_method','img_converter',
+				'avif_enabled','avif_quality',
+				'img_include_custom','img_exclude_folders',
 			) );
 		}
-		$caps = class_exists( 'Prime_Cache_WebP' ) ? Prime_Cache_WebP::get_capabilities() : array( 'gd_webp' => false, 'imagick_webp' => false, 'gd_avif' => false, 'imagick_avif' => false );
+		// AVIF keys deliberately omitted from $vis when NOT pro so hidden() preserves
+		// any stored avif_enabled / avif_quality value (the grayed control is disabled
+		// and never submits), rather than the disabled control silently clearing it.
+		$avif_supported = class_exists( 'Prime_Cache_Image_Converter' ) ? Prime_Cache_Image_Converter::avif_supported() : false;
 		?>
 		<h2 class="pc-title"><?php esc_html_e( 'Media', 'prime-cache' ); ?></h2>
 		<form method="post" action="options.php">
@@ -1384,6 +1444,11 @@ class Prime_Cache_Admin_Settings {
 			<div class="pc-card">
 				<span class="pc-card__h"><?php esc_html_e( 'Image Optimization', 'prime-cache' ); ?></span>
 				<?php do_action( 'prime_cache_media_image_controls', $settings ); ?>
+				<?php if ( $is_pro ) : ?>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[youtube_thumbnail]" value="1" <?php checked( ! empty( $settings['youtube_thumbnail'] ) ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'YouTube Thumbnail Placeholder', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Replace YouTube iframe embeds with a lightweight thumbnail image. The iframe loads only when the user clicks play, saving significant bandwidth and improving page load time.', 'prime-cache' ); ?></small></span></label>
+				<?php else : ?>
+				<?php $this->render_pro_row( __( 'YouTube Thumbnail Placeholder', 'prime-cache' ), __( 'Replace YouTube iframe embeds with a lightweight thumbnail image. The iframe loads only when the user clicks play, saving significant bandwidth and improving page load time.', 'prime-cache' ) ); ?>
+				<?php endif; ?>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[add_missing_dimensions]" value="1" <?php checked( $settings['add_missing_dimensions'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Add Missing Image Dimensions', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Automatically add width and height attributes to images that are missing them. Prevents Cumulative Layout Shift (CLS) — a Core Web Vitals metric. Only works for locally hosted images.', 'prime-cache' ); ?></small></span></label>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[img_strip_exif]" value="1" <?php checked( $settings['img_strip_exif'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Strip EXIF Data', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Remove EXIF metadata (camera model, GPS coordinates, timestamps) from JPEG images on upload. Only JPEG images are processed. Images are re-encoded at quality 92, which may slightly change file size. Improves privacy by stripping location data.', 'prime-cache' ); ?></small></span></label>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[img_resize]" value="1" <?php checked( $settings['img_resize'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Resize Oversized Images', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Automatically resize JPEG and PNG images that exceed the maximum dimensions on upload. WebP, GIF, and AVIF images are not affected. Prevents unnecessarily large images from being stored and served.', 'prime-cache' ); ?></small></span></label>
@@ -1399,22 +1464,276 @@ class Prime_Cache_Admin_Settings {
 				</div>
 			</div>
 
-			<?php do_action( 'prime_cache_media_after_optimization', $settings ); ?>
+			<?php
+			// Pro's handler for this hook is removed; the Format Conversion + Bulk
+			// Optimization cards are rendered directly below for ALL users (WebP is a
+			// Free feature). The hook call is kept for forward-compat / 3rd-party use.
+			do_action( 'prime_cache_media_after_optimization', $settings );
+			?>
+
+			<!-- Format Conversion (WebP / AVIF) — WebP is Free, AVIF is Pro -->
+			<div class="pc-card">
+				<span class="pc-card__h"><?php esc_html_e( 'Format Conversion (WebP / AVIF)', 'prime-cache' ); ?></span>
+				<label class="pc-sw">
+					<input type="checkbox" name="prime_cache_settings[img_conversion_enabled]" value="1" <?php checked( ! empty( $settings['img_conversion_enabled'] ) ); ?>>
+					<span class="pc-sw__track"></span>
+					<span class="pc-sw__body">
+						<b><?php esc_html_e( 'Enable Image Conversion', 'prime-cache' ); ?></b>
+						<small><?php esc_html_e( 'Convert JPEG and PNG images to modern formats for smaller file sizes and faster loading.', 'prime-cache' ); ?></small>
+					</span>
+				</label>
+				<label class="pc-sw">
+					<input type="checkbox" name="prime_cache_settings[webp_enabled]" value="1" <?php checked( ! empty( $settings['webp_enabled'] ) ); ?>>
+					<span class="pc-sw__track"></span>
+					<span class="pc-sw__body">
+						<b><?php esc_html_e( 'WebP', 'prime-cache' ); ?></b>
+						<small><?php esc_html_e( 'Convert images to WebP format. Supported by all modern browsers.', 'prime-cache' ); ?></small>
+					</span>
+				</label>
+
+				<?php if ( $is_pro ) : ?>
+				<label class="pc-sw">
+					<input type="checkbox" name="prime_cache_settings[avif_enabled]" value="1" <?php checked( ! empty( $settings['avif_enabled'] ) ); ?>>
+					<span class="pc-sw__track"></span>
+					<span class="pc-sw__body">
+						<b><?php esc_html_e( 'AVIF', 'prime-cache' ); ?></b>
+						<small><?php esc_html_e( 'Convert images to AVIF format. Offers superior compression but requires more processing time.', 'prime-cache' ); ?></small>
+					</span>
+				</label>
+				<?php else : ?>
+				<?php $this->render_pro_row( __( 'AVIF', 'prime-cache' ), __( 'Convert images to AVIF format. Offers superior compression but requires more processing time.', 'prime-cache' ) ); ?>
+				<?php endif; ?>
+
+				<?php if ( ! $avif_supported ) : ?>
+				<p class="pc-help" style="margin-top:6px;color:#92400e;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:8px 12px"><?php esc_html_e( 'Your server does not support AVIF conversion — AVIF will be skipped even if enabled. (Requires GD with AVIF support or ImageMagick with AVIF.)', 'prime-cache' ); ?></p>
+				<?php endif; ?>
+
+				<div class="pc-field" style="display:flex;gap:16px;flex-wrap:wrap">
+					<div>
+						<label class="pc-lbl"><?php esc_html_e( 'Quality Mode', 'prime-cache' ); ?></label>
+						<select name="prime_cache_settings[img_quality_mode]" class="pc-inp">
+							<option value="lossy" <?php selected( $settings['img_quality_mode'] ?? 'lossy', 'lossy' ); ?>><?php esc_html_e( 'Lossy', 'prime-cache' ); ?></option>
+							<option value="lossless" <?php selected( $settings['img_quality_mode'] ?? 'lossy', 'lossless' ); ?>><?php esc_html_e( 'Lossless', 'prime-cache' ); ?></option>
+							<option value="custom" <?php selected( $settings['img_quality_mode'] ?? 'lossy', 'custom' ); ?>><?php esc_html_e( 'Custom', 'prime-cache' ); ?></option>
+						</select>
+					</div>
+					<div>
+						<label class="pc-lbl"><?php esc_html_e( 'WebP Quality', 'prime-cache' ); ?></label>
+						<input type="number" name="prime_cache_settings[webp_quality]" value="<?php echo esc_attr( $settings['webp_quality'] ?? 80 ); ?>" min="1" max="100" class="pc-inp" style="width:80px">
+					</div>
+					<div<?php echo $is_pro ? '' : ' style="opacity:.5"'; ?>>
+						<label class="pc-lbl"><?php esc_html_e( 'AVIF Quality', 'prime-cache' ); ?> <?php if ( ! $is_pro ) : ?><span class="pc-tag-pro"><?php esc_html_e( 'PRO', 'prime-cache' ); ?></span><?php endif; ?></label>
+						<?php if ( $is_pro ) : ?>
+						<input type="number" name="prime_cache_settings[avif_quality]" value="<?php echo esc_attr( $settings['avif_quality'] ?? 60 ); ?>" min="1" max="100" class="pc-inp" style="width:80px">
+						<?php else : ?>
+						<input type="number" value="<?php echo esc_attr( $settings['avif_quality'] ?? 60 ); ?>" min="1" max="100" class="pc-inp" style="width:80px" disabled>
+						<?php endif; ?>
+					</div>
+				</div>
+
+				<div class="pc-field" style="display:flex;gap:16px;flex-wrap:wrap">
+					<div>
+						<label class="pc-lbl"><?php esc_html_e( 'Delivery Method', 'prime-cache' ); ?></label>
+						<select name="prime_cache_settings[img_delivery_method]" class="pc-inp">
+							<option value="rewrite" <?php selected( $settings['img_delivery_method'] ?? 'rewrite', 'rewrite' ); ?>><?php esc_html_e( 'Rewrite (.htaccess)', 'prime-cache' ); ?></option>
+							<option value="picture" <?php selected( $settings['img_delivery_method'] ?? 'rewrite', 'picture' ); ?>><?php esc_html_e( '<picture> Tag', 'prime-cache' ); ?></option>
+							<option value="url" <?php selected( $settings['img_delivery_method'] ?? 'rewrite', 'url' ); ?>><?php esc_html_e( 'URL Replacement', 'prime-cache' ); ?></option>
+						</select>
+					</div>
+					<div>
+						<label class="pc-lbl"><?php esc_html_e( 'Conversion Engine', 'prime-cache' ); ?></label>
+						<select name="prime_cache_settings[img_converter]" class="pc-inp">
+							<option value="auto" <?php selected( $settings['img_converter'] ?? 'auto', 'auto' ); ?>><?php esc_html_e( 'Auto (Imagick, then GD)', 'prime-cache' ); ?></option>
+							<option value="gd" <?php selected( $settings['img_converter'] ?? 'auto', 'gd' ); ?>>GD</option>
+							<option value="imagick" <?php selected( $settings['img_converter'] ?? 'auto', 'imagick' ); ?>>ImageMagick</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="pc-field">
+					<label class="pc-lbl"><?php esc_html_e( 'Target Folders', 'prime-cache' ); ?></label>
+					<label style="display:block;margin-bottom:4px">
+						<input type="checkbox" name="prime_cache_settings[img_include_uploads]" value="1" <?php checked( ! empty( $settings['img_include_uploads'] ) ); ?>>
+						<?php esc_html_e( 'Uploads (wp-content/uploads)', 'prime-cache' ); ?>
+					</label>
+					<label style="display:block;margin-bottom:4px">
+						<input type="checkbox" name="prime_cache_settings[img_include_themes]" value="1" <?php checked( ! empty( $settings['img_include_themes'] ) ); ?>>
+						<?php esc_html_e( 'Themes (wp-content/themes)', 'prime-cache' ); ?>
+					</label>
+					<label style="display:block;margin-bottom:4px">
+						<input type="checkbox" name="prime_cache_settings[img_include_plugins]" value="1" <?php checked( ! empty( $settings['img_include_plugins'] ) ); ?>>
+						<?php esc_html_e( 'Plugins (wp-content/plugins)', 'prime-cache' ); ?>
+					</label>
+				</div>
+
+				<label class="pc-sw">
+					<input type="checkbox" name="prime_cache_settings[img_auto_optimize]" value="1" <?php checked( ! empty( $settings['img_auto_optimize'] ) ); ?>>
+					<span class="pc-sw__track"></span>
+					<span class="pc-sw__body">
+						<b><?php esc_html_e( 'Auto-Optimize on Upload', 'prime-cache' ); ?></b>
+						<small><?php esc_html_e( 'Automatically convert images when they are uploaded to the media library.', 'prime-cache' ); ?></small>
+					</span>
+				</label>
+				<label class="pc-sw">
+					<input type="checkbox" name="prime_cache_settings[img_auto_remove_larger]" value="1" <?php checked( ! empty( $settings['img_auto_remove_larger'] ) ); ?>>
+					<span class="pc-sw__track"></span>
+					<span class="pc-sw__body">
+						<b><?php esc_html_e( 'Delete Larger Conversions', 'prime-cache' ); ?></b>
+						<small><?php esc_html_e( 'If the converted file is larger than the original, delete it automatically.', 'prime-cache' ); ?></small>
+					</span>
+				</label>
+				<label class="pc-sw">
+					<input type="checkbox" name="prime_cache_settings[img_exclude_png]" value="1" <?php checked( ! empty( $settings['img_exclude_png'] ) ); ?>>
+					<span class="pc-sw__track"></span>
+					<span class="pc-sw__body">
+						<b><?php esc_html_e( 'Exclude PNG Files', 'prime-cache' ); ?></b>
+						<small><?php esc_html_e( 'Skip PNG images during conversion. Useful for PNGs with transparency or sharp graphics where WebP/AVIF offers little benefit. JPEG images are still converted.', 'prime-cache' ); ?></small>
+					</span>
+				</label>
+			</div>
 
 			<div class="pc-actions"><?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?></div>
 		</form>
-		<?php if ( ! prime_cache_is_pro() ) : ?>
-		<div class="pc-card">
-			<span class="pc-card__h"><?php esc_html_e( 'Format Conversion &amp; Media', 'prime-cache' ); ?></span>
-			<?php
-			$this->render_pro_row( __( 'WebP Conversion', 'prime-cache' ), __( 'Auto-convert images to WebP on upload. 25-80% smaller files.', 'prime-cache' ) );
-			$this->render_pro_row( __( 'AVIF Conversion', 'prime-cache' ), __( 'Next-gen image format with even better compression than WebP.', 'prime-cache' ) );
-			$this->render_pro_row( __( 'Bulk Optimization', 'prime-cache' ), __( 'Batch convert your entire media library in one click.', 'prime-cache' ) );
-			$this->render_pro_row( __( 'YouTube Thumbnails', 'prime-cache' ), __( 'Replace iframes with lightweight thumbnails. Save 500KB+ per embed.', 'prime-cache' ) );
-			?>
-			<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Unlock these with Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
+
+		<!-- Bulk Image Optimization (Free) -->
+		<div class="pc-card" data-pc-bulk-nonce="<?php echo esc_attr( wp_create_nonce( 'pc_img_nonce' ) ); ?>">
+			<span class="pc-card__h"><?php esc_html_e( 'Bulk Image Optimization', 'prime-cache' ); ?></span>
+			<p class="pc-help"><?php esc_html_e( 'Scan and optimize existing images in your media library. Progress is saved — you can pause and resume at any time.', 'prime-cache' ); ?></p>
+			<div class="pc-field">
+				<button type="button" class="button" id="pc-bulk-scan"><?php esc_html_e( 'Scan for Unoptimized Images', 'prime-cache' ); ?></button>
+				<span id="pc-bulk-status" style="margin-left:8px"></span>
+			</div>
+			<div class="pc-field" id="pc-bulk-progress-wrap" style="display:none;margin-top:8px">
+				<div class="pc-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+					<div class="pc-bar__fill" id="pc-bulk-progress-fill" style="width:0%"></div>
+				</div>
+				<div class="pc-bar__info">
+					<span><?php esc_html_e( 'Progress', 'prime-cache' ); ?>: <b id="pc-bulk-progress-pct">0%</b></span>
+					<span><b id="pc-bulk-progress-count">0</b> / <b id="pc-bulk-progress-total">0</b></span>
+				</div>
+			</div>
 		</div>
-		<?php endif; ?>
+		<script>
+		(function(){
+			if (typeof jQuery === 'undefined') return;
+			jQuery(function($){
+				var $btn = $('#pc-bulk-scan');
+				if (!$btn.length || $btn.data('pcBound')) return;
+				$btn.data('pcBound', true);
+				var $status   = $('#pc-bulk-status');
+				var $wrap     = $('#pc-bulk-progress-wrap');
+				var $fill     = $('#pc-bulk-progress-fill');
+				var $pct      = $('#pc-bulk-progress-pct');
+				var $count    = $('#pc-bulk-progress-count');
+				var $totalEl  = $('#pc-bulk-progress-total');
+				var nonce     = $btn.closest('.pc-card').data('pc-bulk-nonce') || '';
+				if (!nonce) return;
+
+				function showBar(total){
+					$totalEl.text(total);
+					$count.text(0);
+					$pct.text('0%');
+					$fill.css('width', '0%');
+					$wrap.find('.pc-bar').attr('aria-valuenow', 0);
+					$wrap.show();
+				}
+				function updateBar(done, total){
+					var p = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
+					$fill.css('width', p + '%');
+					$pct.text(p + '%');
+					$count.text(done);
+					$wrap.find('.pc-bar').attr('aria-valuenow', p);
+				}
+
+				var i18n = {
+					scanning:   <?php echo wp_json_encode( __( 'Scanning…', 'prime-cache' ) ); ?>,
+					none:       <?php echo wp_json_encode( __( 'No unoptimized images found.', 'prime-cache' ) ); ?>,
+					converting: <?php echo wp_json_encode( __( 'Converting %1$d / %2$d…', 'prime-cache' ) ); ?>,
+					done:       <?php echo wp_json_encode( __( 'Done. Processed %d images.', 'prime-cache' ) ); ?>,
+					error:      <?php echo wp_json_encode( __( 'Error: %s', 'prime-cache' ) ); ?>,
+					unknown:    <?php echo wp_json_encode( __( 'unknown error', 'prime-cache' ) ); ?>,
+					ajaxErr:    <?php echo wp_json_encode( __( 'network error', 'prime-cache' ) ); ?>
+				};
+
+				function fmt(tpl){
+					var args = [].slice.call(arguments, 1), i = 0;
+					return tpl.replace(/%(?:(\d+)\$)?[ds]/g, function(_, p){
+						return args[p ? (parseInt(p, 10) - 1) : (i++)];
+					});
+				}
+
+				var BATCH = 30;
+
+				$btn.on('click', function(e){
+					e.preventDefault();
+					$btn.prop('disabled', true);
+					$status.text(i18n.scanning);
+					$wrap.hide();
+
+					$.post(ajaxurl, { action: 'pc_img_scan', nonce: nonce })
+						.done(function(resp){
+							if (!resp || !resp.success) {
+								var m = (resp && resp.data && resp.data.message) ? resp.data.message : i18n.unknown;
+								$status.text(fmt(i18n.error, m));
+								$btn.prop('disabled', false);
+								return;
+							}
+							var items = (resp.data && resp.data.items) ? resp.data.items.slice() : [];
+							var total = items.length;
+							if (!total) {
+								$status.text(i18n.none);
+								$btn.prop('disabled', false);
+								return;
+							}
+							var done = 0;
+							showBar(total);
+
+							function step(){
+								if (!items.length) {
+									updateBar(done, total);
+									$status.text(fmt(i18n.done, done));
+									$btn.prop('disabled', false);
+									return;
+								}
+								var batch = items.splice(0, BATCH);
+								$.post(ajaxurl, { action: 'pc_img_batch', nonce: nonce, items: batch })
+									.done(function(r){
+										if (r && r.success && r.data) {
+											var n = parseInt(r.data.processed, 10) || 0;
+											done += n;
+											// Server may stop early at its 25s time budget — re-queue the remainder.
+											if (n < batch.length) {
+												items = batch.slice(n).concat(items);
+											}
+											updateBar(done, total);
+											$status.text(fmt(i18n.converting, done, total));
+											step();
+										} else {
+											items = batch.concat(items);
+											var m2 = (r && r.data && r.data.message) ? r.data.message : i18n.unknown;
+											$status.text(fmt(i18n.error, m2));
+											$btn.prop('disabled', false);
+										}
+									})
+									.fail(function(){
+										items = batch.concat(items);
+										$status.text(fmt(i18n.error, i18n.ajaxErr));
+										$btn.prop('disabled', false);
+									});
+							}
+
+							updateBar(0, total);
+							$status.text(fmt(i18n.converting, 0, total));
+							step();
+						})
+						.fail(function(){
+							$status.text(fmt(i18n.error, i18n.ajaxErr));
+							$btn.prop('disabled', false);
+						});
+				});
+			});
+		})();
+		</script>
 		<?php
 	}
 
@@ -1557,23 +1876,75 @@ class Prime_Cache_Admin_Settings {
 			</div>
 
 			<?php do_action( 'prime_cache_preload_after_links', $settings ); ?>
+			<?php if ( ! prime_cache_is_pro() ) : ?>
+			<!-- Sitemap Preloading (Pro, grayed) -->
+			<div class="pc-card">
+				<span class="pc-card__h"><?php esc_html_e( 'Sitemap Preloading', 'prime-cache' ); ?></span>
+				<?php $this->render_pro_row( __( 'Enable Sitemap Preloading', 'prime-cache' ), __( 'Use your XML sitemap to discover and preload all URLs. More reliable than the default post/taxonomy crawl for sites with custom post types or complex URL structures.', 'prime-cache' ) ); ?>
+				<div class="pc-field" style="opacity:.5">
+					<label class="pc-lbl"><?php esc_html_e( 'Sitemap URL', 'prime-cache' ); ?></label>
+					<input type="url" class="pc-inp" style="width:100%" placeholder="https://example.com/sitemap.xml" disabled>
+					<p class="pc-help"><?php esc_html_e( 'Full URL to your XML sitemap. Leave empty to use the WordPress default sitemap.', 'prime-cache' ); ?></p>
+				</div>
+			</div>
+
+			<!-- Speculation Rules (Pro, grayed) -->
+			<div class="pc-card">
+				<span class="pc-card__h"><?php esc_html_e( 'Speculation Rules', 'prime-cache' ); ?></span>
+				<?php $this->render_pro_row( __( 'Enable Speculation Rules', 'prime-cache' ), __( 'Use the Speculation Rules API to prerender or prefetch pages. Supported by Chromium-based browsers (Chrome, Edge). Provides near-instant page transitions.', 'prime-cache' ) ); ?>
+			</div>
+
+			<!-- Font Preloading (Pro, grayed) -->
+			<div class="pc-card">
+				<span class="pc-card__h"><?php esc_html_e( 'Font Preloading', 'prime-cache' ); ?></span>
+				<?php $this->render_pro_row( __( 'Preload Fonts', 'prime-cache' ), __( 'Add preload hints for font files used in above-the-fold content. Reduces font loading delay and prevents flash of invisible text (FOIT).', 'prime-cache' ) ); ?>
+			</div>
+
+			<!-- LCP Optimization (Pro, grayed) -->
+			<div class="pc-card">
+				<span class="pc-card__h"><?php esc_html_e( 'LCP Optimization', 'prime-cache' ); ?></span>
+				<?php $this->render_pro_row( __( 'Optimize Largest Contentful Paint', 'prime-cache' ), __( 'Automatically detect and preload the LCP image for each page. Adds fetchpriority="high" and a preload link to accelerate the largest visible element.', 'prime-cache' ) ); ?>
+				<div class="pc-field" style="opacity:.5">
+					<label class="pc-lbl"><?php esc_html_e( 'Excluded URLs', 'prime-cache' ); ?></label>
+					<textarea rows="2" class="pc-ta" placeholder="/landing-page/&#10;/special-hero/" disabled></textarea>
+					<p class="pc-help"><?php esc_html_e( 'URL patterns to exclude from LCP optimization. One per line.', 'prime-cache' ); ?></p>
+				</div>
+			</div>
+
+			<!-- Preload Critical Resources (Pro, grayed) -->
+			<div class="pc-card">
+				<span class="pc-card__h"><?php esc_html_e( 'Preload Critical Resources', 'prime-cache' ); ?></span>
+				<div class="pc-field" style="opacity:.5">
+					<label class="pc-lbl"><?php esc_html_e( 'Resources to Preload', 'prime-cache' ); ?> <span class="pc-tag-pro"><?php esc_html_e( 'PRO', 'prime-cache' ); ?></span></label>
+					<textarea rows="3" class="pc-ta" placeholder="https://example.com/fonts/custom.woff2&#10;/wp-content/themes/theme/images/hero.webp" disabled></textarea>
+					<p class="pc-help"><?php esc_html_e( 'One URL per line. These resources will be preloaded via <link rel="preload"> in the page head. Use for critical fonts, images, or scripts that are discovered late by the browser.', 'prime-cache' ); ?></p>
+				</div>
+			</div>
+
+			<!-- Prefetch DNS (Pro, grayed) -->
+			<div class="pc-card">
+				<span class="pc-card__h"><?php esc_html_e( 'Prefetch DNS', 'prime-cache' ); ?></span>
+				<div class="pc-field" style="opacity:.5">
+					<label class="pc-lbl"><?php esc_html_e( 'Domains to Prefetch', 'prime-cache' ); ?> <span class="pc-tag-pro"><?php esc_html_e( 'PRO', 'prime-cache' ); ?></span></label>
+					<textarea rows="3" class="pc-ta" placeholder="//fonts.googleapis.com&#10;//cdn.example.com" disabled></textarea>
+					<p class="pc-help"><?php esc_html_e( 'One domain per line (with //). DNS resolution is performed in advance so that external resources load faster when requested.', 'prime-cache' ); ?></p>
+				</div>
+			</div>
+
+			<!-- Preconnect (Pro, grayed) -->
+			<div class="pc-card">
+				<span class="pc-card__h"><?php esc_html_e( 'Preconnect', 'prime-cache' ); ?></span>
+				<div class="pc-field" style="opacity:.5">
+					<label class="pc-lbl"><?php esc_html_e( 'Origins to Preconnect', 'prime-cache' ); ?> <span class="pc-tag-pro"><?php esc_html_e( 'PRO', 'prime-cache' ); ?></span></label>
+					<textarea rows="3" class="pc-ta" placeholder="https://fonts.gstatic.com&#10;https://cdn.example.com" disabled></textarea>
+					<p class="pc-help"><?php esc_html_e( 'One origin per line. Establishes early connections (DNS + TCP + TLS) to important third-party origins before the browser needs them.', 'prime-cache' ); ?></p>
+				</div>
+				<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Unlock these with Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
+			</div>
+			<?php endif; ?>
 
 			<div class="pc-actions"><?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?></div>
 		</form>
-		<?php if ( ! prime_cache_is_pro() ) : ?>
-		<div class="pc-card">
-			<span class="pc-card__h"><?php esc_html_e( 'Advanced Preloading', 'prime-cache' ); ?></span>
-			<?php
-			$this->render_pro_row( __( 'Sitemap Preloading', 'prime-cache' ), __( 'Discover and warm all URLs from your XML sitemap.', 'prime-cache' ) );
-			$this->render_pro_row( __( 'Speculation Rules API', 'prime-cache' ), __( 'Chrome prerendering for instant page navigation.', 'prime-cache' ) );
-			$this->render_pro_row( __( 'Font Preloading', 'prime-cache' ), __( 'Auto-detect and preload @font-face fonts used above the fold.', 'prime-cache' ) );
-			$this->render_pro_row( __( 'LCP Optimization', 'prime-cache' ), __( 'Preload hero images with fetchpriority=high for faster LCP.', 'prime-cache' ) );
-			$this->render_pro_row( __( 'DNS Prefetch', 'prime-cache' ), __( 'Early DNS resolution for external domains.', 'prime-cache' ) );
-			$this->render_pro_row( __( 'Preconnect', 'prime-cache' ), __( 'Full DNS + TCP + TLS handshake in advance.', 'prime-cache' ) );
-			?>
-			<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Unlock these with Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
-		</div>
-		<?php endif; ?>
 		<?php
 	}
 
@@ -2178,7 +2549,7 @@ class Prime_Cache_Admin_Settings {
 	private function render_system_info() {
 		global $wpdb, $wp_version;
 
-		$caps = class_exists( 'Prime_Cache_WebP' ) ? Prime_Cache_WebP::get_capabilities() : array( 'gd_webp' => false, 'imagick_webp' => false, 'gd_avif' => false, 'imagick_avif' => false );
+		$caps = class_exists( 'Prime_Cache_Image_Converter' ) ? Prime_Cache_Image_Converter::get_capabilities() : array( 'gd_webp' => false, 'imagick_webp' => false, 'gd_avif' => false, 'imagick_avif' => false );
 		$s    = prime_cache_get_settings();
 		$oc   = Prime_Cache_Config::get_active_object_cache();
 
