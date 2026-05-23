@@ -273,8 +273,8 @@ delete_option( 'prime_cache_host_history' );
 delete_option( 'prime_cache_flush_rewrite' );
 delete_option( 'prime_cache_img_stats' );
 global $wpdb;
-$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_prime_cache_img_opt' ) );
-$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_prime_cache_disabled' ) );
+$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_prime_cache_img_opt' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Uninstall cleanup; runs once on deletion, not cacheable.
+$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_prime_cache_disabled' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Uninstall cleanup; runs once on deletion, not cacheable.
 
 // Remove scheduled cron events (#19).
 wp_clear_scheduled_hook( 'prime_cache_cleanup_expired' );
@@ -288,8 +288,8 @@ delete_option( 'prime_cache_cf_full_purge_retries' );
 delete_option( 'prime_cache_cf_purge_failed' );
 wp_clear_scheduled_hook( 'prime_cache_cleanup_gf_options' );
 // Clean up any remaining Google Fonts pending options.
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%'" );
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall cleanup of leftover options; runs once on deletion, not cacheable.
 
 // Remove transients (#20).
 delete_transient( 'prime_cache_preload_fonts' );
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_pc_imgdim_%' OR option_name LIKE '_transient_timeout_pc_imgdim_%'" );
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_pc_imgdim_%' OR option_name LIKE '_transient_timeout_pc_imgdim_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall cleanup of leftover transients; runs once on deletion, not cacheable.

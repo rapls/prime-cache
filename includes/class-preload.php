@@ -518,9 +518,12 @@ class Prime_Cache_Preload {
 		(function(){
 			if(navigator.connection&&navigator.connection.saveData)return;
 			<?php
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $exclude_json, $site_host_json, $site_proto_json and $site_path_json are from wp_json_encode() with JSON_HEX_TAG, safe for inline script.
+			// The four values below are all wp_json_encode() output (JSON_HEX_TAG),
+			// already safe for embedding directly in an inline <script>.
+			// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 			?>
 			var done={},exc=<?php echo $exclude_json; ?>,rate=3,sent=0,queue=[],timer=null,siteHost=<?php echo $site_host_json; ?>,siteProto=<?php echo $site_proto_json; ?>,sitePath=<?php echo $site_path_json; ?>;
+			<?php // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			// Strict same-origin check via URL parser. URL.host carries the
 			// non-default port automatically, so comparing it directly catches
 			// both host and port mismatches. Scheme is compared separately to

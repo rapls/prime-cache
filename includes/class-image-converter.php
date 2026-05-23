@@ -686,7 +686,7 @@ class Prime_Cache_Image_Converter {
 		// a permanent LIMIT hiding older attachments. Only lightweight ID ints
 		// are loaded here; the per-file work is what the cap bounds.
 		global $wpdb;
-		$ids = $wpdb->get_col(
+		$ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-off admin bulk-scan over all image attachments; not cacheable.
 			"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'attachment' AND post_mime_type IN ('image/jpeg','image/png') ORDER BY ID DESC"
 		);
 
@@ -1004,13 +1004,13 @@ class Prime_Cache_Image_Converter {
 		}
 
 		global $wpdb;
-		$total = (int) $wpdb->get_var( "SELECT COUNT(ID) FROM {$wpdb->posts} WHERE post_type='attachment' AND post_mime_type IN ('image/jpeg','image/png')" );
+		$total = (int) $wpdb->get_var( "SELECT COUNT(ID) FROM {$wpdb->posts} WHERE post_type='attachment' AND post_mime_type IN ('image/jpeg','image/png')" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Admin stats count over attachments; not cacheable.
 
 		$webp_count = 0;
 		$avif_count = 0;
 		$total_saved = 0;
 
-		$ids = $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type='attachment' AND post_mime_type IN ('image/jpeg','image/png') LIMIT 1000" );
+		$ids = $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type='attachment' AND post_mime_type IN ('image/jpeg','image/png') LIMIT 1000" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Admin stats scan over attachments; not cacheable.
 		foreach ( $ids as $id ) {
 			$file = get_attached_file( $id );
 			if ( ! $file ) continue;

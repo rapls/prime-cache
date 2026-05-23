@@ -519,7 +519,8 @@ class Prime_Cache_Admin_Settings {
 	private function hidden( $settings, $visible ) {
 		foreach ( $settings as $k => $v ) {
 			if ( in_array( $k, $visible, true ) ) continue;
-			printf( '<input type="hidden" name="prime_cache_settings[%s]" value="%s">', esc_attr( $k ), esc_attr( is_bool( $v ) ? ( $v ? '1' : '0' ) : $v ) );
+			$value = is_bool( $v ) ? ( $v ? '1' : '0' ) : $v;
+			printf( '<input type="hidden" name="prime_cache_settings[%s]" value="%s">', esc_attr( $k ), esc_attr( $value ) );
 		}
 	}
 
@@ -818,7 +819,7 @@ class Prime_Cache_Admin_Settings {
 						$ok = $sys[ $chk[0] ] ?? false;
 						$is_ext = ( 'advanced_cache' === $chk[0] && ! empty( $sys['advanced_cache_external'] ) );
 					?>
-					<div class="pc-sys__row"><span class="pc-dot pc-dot--<?php echo $ok ? 'g' : ( $is_ext ? 'a' : 'r' ); ?>"></span><span class="pc-sys__lbl"><?php echo esc_html( $chk[1] ); ?></span><span class="pc-sys__val"><?php echo $is_ext ? esc_html__( 'External', 'prime-cache' ) : ( $ok ? esc_html__( 'Active', 'prime-cache' ) : esc_html__( 'Inactive', 'prime-cache' ) ); ?></span></div>
+					<div class="pc-sys__row"><span class="pc-dot pc-dot--<?php echo esc_attr( $ok ? 'g' : ( $is_ext ? 'a' : 'r' ) ); ?>"></span><span class="pc-sys__lbl"><?php echo esc_html( $chk[1] ); ?></span><span class="pc-sys__val"><?php echo esc_html( $is_ext ? __( 'External', 'prime-cache' ) : ( $ok ? __( 'Active', 'prime-cache' ) : __( 'Inactive', 'prime-cache' ) ) ); ?></span></div>
 					<?php endforeach; ?>
 				</div>
 			</div>
@@ -1154,7 +1155,7 @@ class Prime_Cache_Admin_Settings {
 					<span class="pc-meta"><?php echo esc_html( size_format( $settings['inline_css_threshold'] ) ); ?></span>
 				</div>
 				<?php if ( ! prime_cache_is_pro() ) : ?>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[async_css_free]" value="1" <?php checked( $settings['async_css_free'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Load CSS Asynchronously (Free)', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Convert non-first <link rel="stylesheet"> tags to non-render-blocking loading via media="print" + onload swap. The first stylesheet on the page is intentionally left synchronous to preserve LCP and prevent unstyled flash for above-the-fold content. Use the "Excluded CSS Files" list above for additional stylesheets that must remain render-blocking. Pro users get more sophisticated CSS delivery options (Critical CSS, Remove Unused CSS) and should leave this off.', 'prime-cache' ); ?></small></span></label>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[async_css_free]" value="1" <?php checked( $settings['async_css_free'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Load CSS Asynchronously (Free)', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Convert non-first <link rel="stylesheet"> tags to non-render-blocking loading via media="print" + onload swap. The first stylesheet on the page is intentionally left synchronous to preserve LCP and prevent unstyled flash for above-the-fold content. Use the "Excluded CSS Files" list above for additional stylesheets that must remain render-blocking. Pro users get more sophisticated CSS delivery options (Critical CSS, Remove Unused CSS) and should leave this off.', 'prime-cache' ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- Literal tag is descriptive text inside a translated label, not an actual stylesheet. ?></small></span></label>
 				<?php endif; ?>
 			</div>
 
@@ -1195,7 +1196,7 @@ class Prime_Cache_Admin_Settings {
 				<span class="pc-card__h">JavaScript</span>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[minify_js]" value="1" <?php checked( $settings['minify_js'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Minify JavaScript', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Conservative JavaScript size reduction: trims trailing whitespace and collapses blank lines. Comments are preserved (regex-based comment removal is unsafe without a JS parser — gzip handles the bulk of size reduction). Already minified files (.min.js) are skipped.', 'prime-cache' ); ?></small></span></label>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[defer_js]" value="1" <?php checked( $settings['defer_js'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Load JavaScript Deferred', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Add the defer attribute to enqueued scripts (wp_enqueue_script) to eliminate render-blocking JavaScript. Scripts are downloaded in parallel and executed after HTML parsing. Manually inserted scripts in theme templates are not affected on desktop. Note: on mobile, inline jQuery patterns ($(document).ready, $(function(){...})) are automatically wrapped in DOMContentLoaded so they keep working when jQuery itself is deferred.', 'prime-cache' ); ?></small></span></label>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js]" value="1" <?php checked( $settings['delay_js'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Delay JavaScript Execution', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Delay every external <script src="..."> tag in the HTML output (including third-party / CDN — not limited to wp_enqueue_script handles) until user interaction (scroll, click, keydown, touchstart, mousemove). Inline scripts (no src) are never delayed because they typically set up variables that external scripts depend on (wp_localize_script output, consent_api config, chat widget configs, etc.). Applied on mobile devices only to avoid CLS regression on desktop. Separate mobile cache is automatically enabled when this setting is on. Significantly improves mobile page load metrics but may cause a brief delay on first interaction. Use the exclusion list below for external scripts that must run before interaction.', 'prime-cache' ); ?></small></span></label>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js]" value="1" <?php checked( $settings['delay_js'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Delay JavaScript Execution', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Delay every external <script src="..."> tag in the HTML output (including third-party / CDN — not limited to wp_enqueue_script handles) until user interaction (scroll, click, keydown, touchstart, mousemove). Inline scripts (no src) are never delayed because they typically set up variables that external scripts depend on (wp_localize_script output, consent_api config, chat widget configs, etc.). Applied on mobile devices only to avoid CLS regression on desktop. Separate mobile cache is automatically enabled when this setting is on. Significantly improves mobile page load metrics but may cause a brief delay on first interaction. Use the exclusion list below for external scripts that must run before interaction.', 'prime-cache' ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Literal tag is descriptive text inside a translated label, not an actual script. ?></small></span></label>
 
 				<div class="pc-field">
 					<label class="pc-lbl"><?php esc_html_e( 'Delay Timeout (ms)', 'prime-cache' ); ?></label>
@@ -1648,9 +1649,9 @@ class Prime_Cache_Admin_Settings {
 				var i18n = {
 					scanning:   <?php echo wp_json_encode( __( 'Scanning…', 'prime-cache' ) ); ?>,
 					none:       <?php echo wp_json_encode( __( 'No unoptimized images found.', 'prime-cache' ) ); ?>,
-					converting: <?php echo wp_json_encode( __( 'Converting %1$d / %2$d…', 'prime-cache' ) ); ?>,
-					done:       <?php echo wp_json_encode( __( 'Done. Processed %d images.', 'prime-cache' ) ); ?>,
-					error:      <?php echo wp_json_encode( __( 'Error: %s', 'prime-cache' ) ); ?>,
+					converting: <?php echo wp_json_encode( /* translators: %1$d: number of images processed so far, %2$d: total number of images. */ __( 'Converting %1$d / %2$d…', 'prime-cache' ) ); ?>,
+					done:       <?php echo wp_json_encode( /* translators: %d: number of images processed. */ __( 'Done. Processed %d images.', 'prime-cache' ) ); ?>,
+					error:      <?php echo wp_json_encode( /* translators: %s: error message. */ __( 'Error: %s', 'prime-cache' ) ); ?>,
 					unknown:    <?php echo wp_json_encode( __( 'unknown error', 'prime-cache' ) ); ?>,
 					ajaxErr:    <?php echo wp_json_encode( __( 'network error', 'prime-cache' ) ); ?>
 				};
