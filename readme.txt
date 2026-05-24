@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.0
+Stable tag: 1.10.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -245,6 +245,14 @@ On upload (if auto-convert is enabled), JPG/PNG images are converted to WebP and
 Start with page caching and basic file optimization. Test your site after each change. CSS/JS combining and delay may cause issues with some themes/plugins — test thoroughly.
 
 == Changelog ==
+
+= 1.10.1 =
+* Security: The .htaccess fast-path now rejects path-traversal sequences ("..") in the request URI.
+* Security: The query-string / Vary-cookie cache-key suffix is widened to 64-bit to prevent collision-based cache poisoning.
+* Security: The "Logged-in User Cache" setting description now states clearly that it serves one shared cached copy to all visitors — only enable it on sites that serve identical content to everyone.
+* Fix: URL image-delivery mode no longer rewrites src/srcset inside <script>, <template> (including nested templates) or <textarea>, preventing corruption of client-side templates; real <picture>/<source>/<noscript> markup is still rewritten.
+* Fix: Images whose source file was replaced are re-converted instead of being suppressed by a stale ".skip" marker, and a stale "optimized" record is cleared when a replaced image can no longer produce a variant.
+* Fix: WordPress Coding Standards compliance (output escaping, i18n translator comments, intentional direct-DB-query annotations).
 
 = 1.10.0 =
 * New: WebP image conversion is now a free feature — convert on upload, bulk-optimize the media library, serve via .htaccess rewrite / <picture> tag / URL replacement, and view per-image savings in the Media Library column.

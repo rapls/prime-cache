@@ -584,6 +584,13 @@ class Prime_Cache_Htaccess {
 		// which Apache rewrite cannot reproduce, so they fall through to the drop-in.
 		$r[] = '    RewriteCond %{REQUEST_URI} ^[a-zA-Z0-9/_\-\.]+$';
 
+		// Reject path traversal. The pattern above permits "." and "/", so a literal
+		// ".." could otherwise be concatenated into the served file path and resolve
+		// a file outside the cache directory. Apache normally collapses "..", but
+		// config/encoding edge cases must not be relied on, so refuse it explicitly
+		// (such requests fall through to the drop-in, which hex-encodes path segments).
+		$r[] = '    RewriteCond %{REQUEST_URI} !\.\.';
+
 		// Mirror the drop-in's admin/login/cron/xmlrpc bypass. The drop-in already
 		// returns early for these so no cache file should exist, but defense-in-
 		// depth: refuse to serve any stale or manually-placed file under those

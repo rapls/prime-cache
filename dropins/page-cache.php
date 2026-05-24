@@ -243,7 +243,9 @@ if ( ! empty( $_GET ) ) {
 		// Build a deterministic suffix for the filename.
 		if ( ! empty( $_pc_qs_to_cache ) ) {
 			ksort( $_pc_qs_to_cache );
-			$_pc_qs_suffix = '-qs_' . substr( md5( http_build_query( $_pc_qs_to_cache ) ), 0, 8 );
+			// 16 hex (64-bit) so an attacker can't cheaply craft a query-string
+			// value that collides with a victim's variant to poison its cache.
+			$_pc_qs_suffix = '-qs_' . substr( md5( http_build_query( $_pc_qs_to_cache ) ), 0, 16 );
 		}
 	}
 }
@@ -429,7 +431,9 @@ if ( ! empty( $prime_cache_config['cache_vary_cookies'] ) && ! empty( $_COOKIE )
 		// UTF-8 cookie values, and md5(false) === md5('') would collapse
 		// distinct cookie sets into the same vary bucket and serve the wrong
 		// variant.
-		$_pc_vary_suffix = '-vc_' . substr( md5( serialize( $_pc_vary_vals ) ), 0, 8 );
+		// 16 hex (64-bit) so a colliding cookie value can't be crafted to overwrite
+		// another visitor's cached variant.
+		$_pc_vary_suffix = '-vc_' . substr( md5( serialize( $_pc_vary_vals ) ), 0, 16 );
 	}
 }
 

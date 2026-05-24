@@ -423,7 +423,10 @@ class Prime_Cache_Preload {
 				if ( ! empty( $unknown ) ) return false;
 				if ( ! empty( $to_cache ) ) {
 					ksort( $to_cache );
-					$qs_suffix = '-qs_' . substr( md5( http_build_query( $to_cache ) ), 0, 8 );
+					// Must match the dropin's page-cache filename suffix width (16 hex)
+					// or this existence check never finds query-string variants and
+					// preload retries them forever.
+					$qs_suffix = '-qs_' . substr( md5( http_build_query( $to_cache ) ), 0, 16 );
 				}
 			}
 		}
