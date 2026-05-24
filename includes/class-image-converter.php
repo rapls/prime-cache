@@ -518,17 +518,31 @@ class Prime_Cache_Image_Converter {
 		};
 
 		// Shield ONLY content that is not real page markup to rewrite: inline
-		// scripts (avoid corrupting JS string literals) and client-side templates
-		// (<template>, <script type="text/html">) and <textarea> (literal text /
-		// code samples). Unlike the <picture> wrapping in rewrite_to_picture_tags(),
-		// URL mode MUST still rewrite real <picture>/<source>/<noscript> <img>
-		// markup, so those are intentionally NOT shielded here.
+		// scripts (avoid corrupting JS string literals), <textarea> (literal text /
+		// code samples) and client-side templates (<template>, incl. nested ones).
+		// Unlike the <picture> wrapping in rewrite_to_picture_tags(), URL mode MUST
+		// still rewrite real <picture>/<source>/<noscript> <img> markup, so those
+		// are intentionally NOT shielded here.
 		$placeholders = array();
-		$html = preg_replace_callback( '#<(?:script|template|textarea)[^>]*>.*?</(?:script|template|textarea)>#is', function( $m ) use ( &$placeholders ) {
-			$key = '<!--PC_PROTECT_' . count( $placeholders ) . '-->';
+		$shield = function ( $m ) use ( &$placeholders ) {
+			$key                  = '<!--PC_PROTECT_' . count( $placeholders ) . '-->';
 			$placeholders[ $key ] = $m[0];
 			return $key;
-		}, $html );
+		};
+		// <script>/<textarea> are raw-text elements: they can't nest and their first
+		// matching close tag ends them, so a lazy match with a backreference to the
+		// same tag name is correct.
+		$shielded = preg_replace_callback( '#<(script|textarea)\b[^>]*>.*?</\1>#is', $shield, $html );
+		if ( null !== $shielded ) {
+			$html = $shielded;
+		}
+		// <template> has element content and may nest, so match balanced templates
+		// recursively. On a PCRE failure (e.g. backtrack limit) keep the HTML from
+		// the previous step rather than risk corrupting it.
+		$shielded = preg_replace_callback( '#<template\b[^>]*+>(?:[^<]++|<(?!/?template\b)|(?R))*+</template>#is', $shield, $html );
+		if ( null !== $shielded ) {
+			$html = $shielded;
+		}
 
 		$html = preg_replace_callback( '#((?:src|srcset)\s*=\s*["\'])([^"\']+)(["\'])#i', function( $m ) use ( $pick ) {
 			$attr  = $m[1];
@@ -570,7 +584,10 @@ class Prime_Cache_Image_Converter {
 		}, $html );
 
 		if ( ! empty( $placeholders ) ) {
-			$html = str_replace( array_keys( $placeholders ), array_values( $placeholders ), $html );
+			// Restore in reverse insertion order so a placeholder nested inside a
+			// later one (e.g. a <script> shielded inside a <template>) is put back
+			// before its own key is resolved.
+			$html = str_replace( array_reverse( array_keys( $placeholders ) ), array_reverse( array_values( $placeholders ) ), $html );
 		}
 
 		return $html;
