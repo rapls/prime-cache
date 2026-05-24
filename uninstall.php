@@ -290,6 +290,6 @@ wp_clear_scheduled_hook( 'prime_cache_cleanup_gf_options' );
 // Clean up any remaining Google Fonts pending options.
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall cleanup of leftover options; runs once on deletion, not cacheable.
 
-// Remove transients (#20).
-delete_transient( 'prime_cache_preload_fonts' );
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_pc_imgdim_%' OR option_name LIKE '_transient_timeout_pc_imgdim_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall cleanup of leftover transients; runs once on deletion, not cacheable.
+// Remove transients (#20). Font-preload transients are keyed per loaded
+// stylesheet set (prime_cache_preload_fonts_<hash>), so match by prefix.
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_pc_imgdim_%' OR option_name LIKE '_transient_timeout_pc_imgdim_%' OR option_name LIKE '_transient_prime\_cache\_preload\_fonts%' OR option_name LIKE '_transient_timeout_prime\_cache\_preload\_fonts%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall cleanup of leftover transients; runs once on deletion, not cacheable.

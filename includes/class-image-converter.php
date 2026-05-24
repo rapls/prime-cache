@@ -189,6 +189,19 @@ class Prime_Cache_Image_Converter {
 		// so it shows as not-optimized, isn't counted in stats, and is re-detected
 		// by a later successful conversion.
 		if ( ! $has_webp && ! $has_avif ) {
+			// If this attachment was previously recorded as optimized (e.g. the
+			// source was later replaced with one that can't be converted), clear
+			// the stale record and roll back its contribution to the aggregate
+			// stats so the Media Library doesn't show a phantom "optimized" badge.
+			if ( is_array( $old_meta ) ) {
+				if ( ! empty( $old_meta['stats_counted'] ) ) {
+					$stats              = get_option( 'prime_cache_img_stats', array( 'converted' => 0, 'saved' => 0 ) );
+					$stats['converted'] = max( 0, ( $stats['converted'] ?? 0 ) - 1 );
+					$stats['saved']     = max( 0, ( $stats['saved'] ?? 0 ) - (int) ( $old_meta['stats_saved'] ?? 0 ) );
+					update_option( 'prime_cache_img_stats', $stats, false );
+				}
+				delete_post_meta( $attachment_id, '_prime_cache_img_opt' );
+			}
 			return $metadata;
 		}
 
@@ -304,8 +317,13 @@ class Prime_Cache_Image_Converter {
 		// variants are now acceptable, so previously-skipped images must be
 		// re-detected and converted instead of being suppressed forever.
 		$honor_skip = ! empty( $this->settings['img_auto_remove_larger'] );
-		$webp_need  = $want_webp && ! file_exists( $base . '.webp' )
-			&& ! ( $honor_skip && file_exists( $base . '.webp.skip' ) );
+		// A skip marker is only valid while it is at least as new as the source.
+		// If the source image was replaced (or its mtime bumped) after the marker
+		// was written, the marker is stale and the image must be re-evaluated —
+		// otherwise a replaced original could never be re-converted by the scanner.
+		$skip_valid = $honor_skip && file_exists( $base . '.webp.skip' )
+			&& @filemtime( $base . '.webp.skip' ) >= @filemtime( $base );
+		$webp_need  = $want_webp && ! file_exists( $base . '.webp' ) && ! $skip_valid;
 
 		// Extension point: an add-on may OR-in a need for additional formats
 		// (e.g. a missing AVIF variant). Free computes the WebP need only.
@@ -499,7 +517,20 @@ class Prime_Cache_Image_Converter {
 			return apply_filters( 'prime_cache_url_rewrite_format', $webp_pick, $base, $accept );
 		};
 
-		return preg_replace_callback( '#((?:src|srcset)\s*=\s*["\'])([^"\']+)(["\'])#i', function( $m ) use ( $pick ) {
+		// Shield ONLY content that is not real page markup to rewrite: inline
+		// scripts (avoid corrupting JS string literals) and client-side templates
+		// (<template>, <script type="text/html">) and <textarea> (literal text /
+		// code samples). Unlike the <picture> wrapping in rewrite_to_picture_tags(),
+		// URL mode MUST still rewrite real <picture>/<source>/<noscript> <img>
+		// markup, so those are intentionally NOT shielded here.
+		$placeholders = array();
+		$html = preg_replace_callback( '#<(?:script|template|textarea)[^>]*>.*?</(?:script|template|textarea)>#is', function( $m ) use ( &$placeholders ) {
+			$key = '<!--PC_PROTECT_' . count( $placeholders ) . '-->';
+			$placeholders[ $key ] = $m[0];
+			return $key;
+		}, $html );
+
+		$html = preg_replace_callback( '#((?:src|srcset)\s*=\s*["\'])([^"\']+)(["\'])#i', function( $m ) use ( $pick ) {
 			$attr  = $m[1];
 			$value = $m[2];
 			$close = $m[3];
@@ -537,6 +568,12 @@ class Prime_Cache_Image_Converter {
 
 			return $m[0];
 		}, $html );
+
+		if ( ! empty( $placeholders ) ) {
+			$html = str_replace( array_keys( $placeholders ), array_values( $placeholders ), $html );
+		}
+
+		return $html;
 	}
 
 	/**
