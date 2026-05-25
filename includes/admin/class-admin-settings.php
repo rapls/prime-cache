@@ -628,11 +628,11 @@ class Prime_Cache_Admin_Settings {
 	 * @param string $description Setting description.
 	 */
 	/**
-	 * Render a locked Pro feature as an in-place, disabled setting row with a
-	 * "PRO" badge — the same visual language as a real toggle, just greyed out.
-	 * Shown to Free users where the Pro control would naturally live, so the
-	 * upsell reads as "this feature exists here, upgrade to unlock" rather than
-	 * a separate marketing card.
+	 * Render an add-on feature as an in-place, disabled (informational) setting
+	 * row with a "PRO" badge, using the same visual language as a real toggle.
+	 * Shown to Free users where the corresponding add-on control would naturally
+	 * live, so the information appears next to the related settings rather than
+	 * in a separate marketing card.
 	 *
 	 * @param string $label       Feature name.
 	 * @param string $description One-line explanation.
@@ -653,8 +653,8 @@ class Prime_Cache_Admin_Settings {
 		?>
 		<div style="background:linear-gradient(135deg,#6366f1,#7c3aed);border-radius:12px;padding:32px 36px;margin-bottom:28px;color:#fff">
 			<h2 style="font-size:24px;font-weight:700;margin:0 0 8px;color:#fff">👑 Prime Cache Pro</h2>
-			<p style="font-size:15px;margin:0 0 20px;opacity:.9;max-width:540px"><?php esc_html_e( 'Unlock the full potential of your site with advanced performance optimization features.', 'prime-cache' ); ?></p>
-			<a href="<?php echo esc_url( $url ); ?>" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#6366f1;font-weight:700;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none;transition:opacity .2s" target="_blank" rel="noopener">⭐ <?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
+			<p style="font-size:15px;margin:0 0 20px;opacity:.9;max-width:540px"><?php esc_html_e( 'Additional performance features are available as a separate add-on.', 'prime-cache' ); ?></p>
+			<a href="<?php echo esc_url( $url ); ?>" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#6366f1;font-weight:700;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none;transition:opacity .2s" target="_blank" rel="noopener"><?php esc_html_e( 'Learn more about Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
 		</div>
 
 		<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px">
@@ -701,9 +701,8 @@ class Prime_Cache_Admin_Settings {
 
 		</div>
 
-		<div style="margin-top:28px;text-align:center;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-radius:10px;padding:24px">
-			<p style="font-size:15px;font-weight:600;color:#334155;margin:0 0 14px"><?php esc_html_e( 'Ready to speed up your site?', 'prime-cache' ); ?></p>
-			<a href="<?php echo esc_url( $url ); ?>" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;font-weight:700;font-size:15px;padding:14px 32px;border-radius:8px;text-decoration:none;box-shadow:0 4px 12px rgba(99,102,241,.3);transition:opacity .2s" target="_blank" rel="noopener">⭐ <?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
+		<div style="margin-top:24px;text-align:center">
+			<a href="<?php echo esc_url( $url ); ?>" style="font-size:14px;color:#6366f1;text-decoration:none" target="_blank" rel="noopener"><?php esc_html_e( 'Learn more about Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a>
 		</div>
 		<?php
 	}
@@ -958,7 +957,7 @@ class Prime_Cache_Admin_Settings {
 					<input type="text" class="pc-inp" style="width:100%" disabled>
 					<p class="pc-help"><?php esc_html_e( 'Your Sucuri firewall API key. Found in the Sucuri dashboard under API section.', 'prime-cache' ); ?></p>
 				</div>
-				<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Unlock these with Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
+				<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Available in Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
 			</div>
 			<?php endif; ?>
 
@@ -1187,7 +1186,7 @@ class Prime_Cache_Admin_Settings {
 					<p class="pc-help"><?php esc_html_e( 'CSS selectors or patterns that should never be removed (one per line). Use when Remove Unused CSS incorrectly strips needed styles.', 'prime-cache' ); ?></p>
 				</div>
 				<?php $this->render_pro_row( __( 'Async CSS', 'prime-cache' ), __( 'Load all CSS files asynchronously using link[rel=preload] to eliminate render-blocking stylesheets.', 'prime-cache' ) ); ?>
-				<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Unlock these with Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
+				<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Available in Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
 			</div>
 			<?php endif; ?>
 
@@ -1243,7 +1242,7 @@ class Prime_Cache_Admin_Settings {
 				$this->render_pro_row( __( 'Self-Host Google Fonts', 'prime-cache' ), __( 'Download Google Fonts and serve them from your own server. Eliminates external DNS lookups and connections to fonts.googleapis.com and fonts.gstatic.com.', 'prime-cache' ) );
 				$this->render_pro_row( __( 'Host Google Analytics Locally', 'prime-cache' ), __( 'Download and serve the Google Analytics script from your own server. Reduces external requests and improves PageSpeed scores.', 'prime-cache' ) );
 				?>
-				<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Unlock these with Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
+				<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Available in Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
 				<?php endif; ?>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[google_fonts_display]" value="1" <?php checked( $settings['google_fonts_display'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Optimize Google Fonts', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Improves Google Fonts loading: (1) appends display=swap to font URLs so text remains visible during font load (prevents FOIT), (2) loads font CSS asynchronously via media="print"+onload so it does not block rendering, (3) injects a preconnect hint to fonts.gstatic.com to start the connection earlier.', 'prime-cache' ); ?></small></span></label>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[remove_query_strings]" value="1" <?php checked( $settings['remove_query_strings'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Remove Query Strings', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Remove version query strings (?ver=, ?v=) from local CSS and JS file URLs. Improves cacheability by CDNs and proxies that ignore query strings. External URLs are not affected.', 'prime-cache' ); ?></small></span></label>
@@ -1940,7 +1939,7 @@ class Prime_Cache_Admin_Settings {
 					<textarea rows="3" class="pc-ta" placeholder="https://fonts.gstatic.com&#10;https://cdn.example.com" disabled></textarea>
 					<p class="pc-help"><?php esc_html_e( 'One origin per line. Establishes early connections (DNS + TCP + TLS) to important third-party origins before the browser needs them.', 'prime-cache' ); ?></p>
 				</div>
-				<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Unlock these with Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
+				<span class="pc-pro-hint"><a href="https://raplsworks.com/prime-cache-pro/" target="_blank" rel="noopener"><?php esc_html_e( 'Available in Prime Cache Pro', 'prime-cache' ); ?> &rarr;</a></span>
 			</div>
 			<?php endif; ?>
 

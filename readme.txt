@@ -258,7 +258,7 @@ Start with page caching and basic file optimization. Test your site after each c
 * New: WebP image conversion is now a free feature — convert on upload, bulk-optimize the media library, serve via .htaccess rewrite / <picture> tag / URL replacement, and view per-image savings in the Media Library column.
 * New: Extension hooks (prime_cache_convert_image_extra, prime_cache_picture_extra_sources, prime_cache_url_rewrite_format, prime_cache_image_needs_conversion, prime_cache_image_htaccess_rules, prime_cache_image_has_extra_formats, prime_cache_preload_urls) let the Pro add-on layer AVIF, YouTube thumbnails, and advanced preload on top.
 * Change: AVIF conversion, YouTube thumbnail replacement, and advanced preload (sitemap, Speculation Rules, LCP, font preloading, DNS-prefetch/preconnect) are provided by the separate Prime Cache Pro add-on; the free plugin no longer bundles that premium code.
-* Improved: Pro-only features appear as in-place, greyed-out controls with a PRO badge in their natural settings location.
+* Improved: The settings screen now includes clearer information about optional add-on features near the related settings.
 * Fix: AVIF server-support is detected and warned about on the Media tab.
 
 = 1.9.9.5 =
@@ -267,7 +267,7 @@ Start with page caching and basic file optimization. Test your site after each c
 * Fix: Cache hit/miss statistics now accumulate correctly. The stats file was opened write-only, so reads failed and the dashboard counters could not grow
 * Fix: Prevent the "translation loading triggered too early" notice on WordPress 6.7+ during the one-time Delay JS Timeout migration
 * Fix: 3rd-Party Script Delay preset checkboxes now save reliably in the Free version (their JavaScript handler was blocked by an unrelated Pro-only control guard)
-* Improved: Pro feature upsell is now shown in-place as locked feature rows with a PRO badge, matching the surrounding settings UI
+* Improved: Add-on feature information is now shown near the related settings for easier discovery
 
 = 1.9.3 =
 * Fix: Place .htaccess cache rewrite rules before WordPress rewrite block for PHP-less serving
