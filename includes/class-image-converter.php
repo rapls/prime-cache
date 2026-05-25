@@ -907,7 +907,7 @@ class Prime_Cache_Image_Converter {
 					continue;
 				}
 				$allowed = false;
-				if ( 0 === strpos( $real, realpath( ABSPATH ) ) ) {
+				if ( 0 === strpos( rtrim( $real, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR, rtrim( (string) realpath( ABSPATH ), DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR ) ) {
 					$allowed = true;
 				} else {
 					// Check against configured custom include directories.
@@ -1391,6 +1391,6 @@ class Prime_Cache_Image_Converter {
 		}
 		$path = strtok( $path, '?' );
 		$real = realpath( $path );
-		return ( $real && 0 === strpos( $real, realpath( ABSPATH ) ) ) ? $real : false;
+		return ( $real && 0 === strpos( rtrim( $real, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR, rtrim( (string) realpath( ABSPATH ), DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR ) ) ? $real : false;
 	}
 }

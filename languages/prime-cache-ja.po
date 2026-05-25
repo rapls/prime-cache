@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Prime Cache\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-24 22:49+0900\n"
+"POT-Creation-Date: 2026-05-25 18:00+0900\n"
 "PO-Revision-Date: 2026-05-23 00:00+0900\n"
 "Last-Translator: rapls\n"
 "Language-Team: Japanese\n"
@@ -199,8 +199,9 @@ msgid "Tools"
 msgstr "ツール"
 
 #: includes/admin/class-admin-settings.php:566
-msgid "Go Pro"
-msgstr "Pro を入手"
+#: includes/class-prime-cache.php:475
+msgid "Add-ons"
+msgstr "アドオン"
 
 #: includes/admin/class-admin-settings.php:574
 msgid "Cache Enabled"
@@ -502,18 +503,16 @@ msgid "Theme"
 msgstr "テーマ"
 
 #: includes/admin/class-admin-settings.php:891
-msgid "Want more speed?"
-msgstr "さらに高速化しませんか？"
+msgid "Optional add-ons"
+msgstr "オプションのアドオン"
 
 #: includes/admin/class-admin-settings.php:892
 msgid ""
-"You're using Prime Cache Free. Upgrade to Pro for Object Cache, WebP/AVIF "
-"conversion, Remove Unused CSS, database optimization, and 30+ additional "
-"features."
+"Additional performance features — such as object caching, advanced CSS/JS "
+"optimization, and database cleanup — are available as a separate add-on."
 msgstr ""
-"Prime Cache Free をご利用中です。Pro にアップグレードすると、オブジェクト"
-"キャッシュ、WebP/AVIF 変換、未使用 CSS 削除、データベース最適化など 30 以上の"
-"機能が利用可能になります。"
+"オブジェクトキャッシュ、高度な CSS/JS 最適化、データベース掃除などの追加のパ"
+"フォーマンス機能は、別のアドオンとして提供されています。"
 
 #: includes/admin/class-admin-settings.php:893
 msgid "Learn More"
@@ -3711,11 +3710,6 @@ msgstr ""
 msgid "Settings"
 msgstr "設定"
 
-# ── Upsell strings ─────────────────────────────────────
-#: includes/class-prime-cache.php:475
-msgid "Get Pro"
-msgstr "Pro を入手"
-
 #: includes/class-prime-cache.php:519
 msgid "Clear Page Cache Only"
 msgstr "ページキャッシュのみクリア"
@@ -3858,6 +3852,25 @@ msgstr ""
 "Prime Cache の設定は保存されましたが、設定ファイルを再生成できませんでした。"
 "ファイルの書き込みが成功するまで、キャッシュは以前の設定で動作し続けます。wp-"
 "content が書き込み可能かどうかを確認してください。"
+
+#~ msgid "Go Pro"
+#~ msgstr "Pro を入手"
+
+#~ msgid "Want more speed?"
+#~ msgstr "さらに高速化しませんか？"
+
+#~ msgid ""
+#~ "You're using Prime Cache Free. Upgrade to Pro for Object Cache, WebP/AVIF "
+#~ "conversion, Remove Unused CSS, database optimization, and 30+ additional "
+#~ "features."
+#~ msgstr ""
+#~ "Prime Cache Free をご利用中です。Pro にアップグレードすると、オブジェクト"
+#~ "キャッシュ、WebP/AVIF 変換、未使用 CSS 削除、データベース最適化など 30 以"
+#~ "上の機能が利用可能になります。"
+
+# ── Upsell strings ─────────────────────────────────────
+#~ msgid "Get Pro"
+#~ msgstr "Pro を入手"
 
 #~ msgid ""
 #~ "Unlock the full potential of your site with advanced performance "

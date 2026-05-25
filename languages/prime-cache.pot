@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Prime Cache\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-24 22:49+0900\n"
+"POT-Creation-Date: 2026-05-25 18:00+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -181,7 +181,8 @@ msgid "Tools"
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:566
-msgid "Go Pro"
+#: includes/class-prime-cache.php:475
+msgid "Add-ons"
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:574
@@ -465,14 +466,13 @@ msgid "Theme"
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:891
-msgid "Want more speed?"
+msgid "Optional add-ons"
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:892
 msgid ""
-"You're using Prime Cache Free. Upgrade to Pro for Object Cache, WebP/AVIF "
-"conversion, Remove Unused CSS, database optimization, and 30+ additional "
-"features."
+"Additional performance features — such as object caching, advanced CSS/JS "
+"optimization, and database cleanup — are available as a separate add-on."
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:893
@@ -3117,10 +3117,6 @@ msgstr ""
 #: includes/class-prime-cache.php:472 includes/class-prime-cache.php:624
 #: includes/class-prime-cache.php:1492
 msgid "Settings"
-msgstr ""
-
-#: includes/class-prime-cache.php:475
-msgid "Get Pro"
 msgstr ""
 
 #: includes/class-prime-cache.php:519

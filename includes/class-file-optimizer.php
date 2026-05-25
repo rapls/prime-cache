@@ -1313,7 +1313,7 @@ class Prime_Cache_File_Optimizer {
 		// Verify path is within cache dir.
 		$real = realpath( $found );
 		$real_cache = realpath( $this->cache_dir );
-		if ( ! $real || ! $real_cache || 0 !== strpos( $real, $real_cache ) ) {
+		if ( ! self::path_within( $real, $real_cache ) ) {
 			status_header( 403 );
 			exit;
 		}

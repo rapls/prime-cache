@@ -563,7 +563,7 @@ class Prime_Cache_Admin_Settings {
 					<?php endforeach; ?>
 				<?php if ( ! prime_cache_is_pro() ) : ?>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=prime-cache&tab=upgrade' ) ); ?>" class="pc-nav__item pc-nav__upgrade<?php echo 'upgrade' === $tab ? ' pc-nav__item--on' : ''; ?>">
-					<span class="dashicons dashicons-star-filled"></span><?php esc_html_e( 'Go Pro', 'prime-cache' ); ?>
+					<span class="dashicons dashicons-admin-plugins"></span><?php esc_html_e( 'Add-ons', 'prime-cache' ); ?>
 				</a>
 				<?php endif; ?>
 				</nav>
@@ -888,8 +888,8 @@ class Prime_Cache_Admin_Settings {
 		</div>
 		<?php if ( ! prime_cache_is_pro() ) : ?>
 		<div class="pc-card pc-upsell">
-			<span class="pc-card__h"><?php esc_html_e( 'Want more speed?', 'prime-cache' ); ?></span>
-			<p><?php esc_html_e( 'You\'re using Prime Cache Free. Upgrade to Pro for Object Cache, WebP/AVIF conversion, Remove Unused CSS, database optimization, and 30+ additional features.', 'prime-cache' ); ?></p>
+			<span class="pc-card__h"><?php esc_html_e( 'Optional add-ons', 'prime-cache' ); ?></span>
+			<p><?php esc_html_e( 'Additional performance features — such as object caching, advanced CSS/JS optimization, and database cleanup — are available as a separate add-on.', 'prime-cache' ); ?></p>
 			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Learn More', 'prime-cache' ); ?> &rarr;</a>
 		</div>
 		<?php endif; ?>

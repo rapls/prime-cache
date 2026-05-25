@@ -89,7 +89,7 @@ class Prime_Cache_Storage {
 		// Verify the resolved path is within cache directory.
 		$real_dir = realpath( $dir );
 		$real_cache = realpath( PRIME_CACHE_CACHE_DIR );
-		if ( false === $real_dir || false === $real_cache || strpos( $real_dir, $real_cache ) !== 0 ) {
+		if ( false === $real_dir || false === $real_cache || 0 !== strpos( rtrim( $real_dir, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR, rtrim( $real_cache, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR ) ) {
 			return false;
 		}
 
@@ -136,7 +136,7 @@ class Prime_Cache_Storage {
 		// directory even if a caller hands us a malformed $dir.
 		$real_dir   = realpath( $dir );
 		$real_cache = realpath( PRIME_CACHE_CACHE_DIR );
-		if ( false === $real_dir || false === $real_cache || strpos( $real_dir, $real_cache ) !== 0 ) {
+		if ( false === $real_dir || false === $real_cache || 0 !== strpos( rtrim( $real_dir, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR, rtrim( $real_cache, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR ) ) {
 			return false;
 		}
 
@@ -329,7 +329,7 @@ class Prime_Cache_Storage {
 		// Verify the path is within cache directory.
 		$real_dir   = realpath( $dir );
 		$real_cache = realpath( PRIME_CACHE_CACHE_DIR );
-		if ( false === $real_dir || false === $real_cache || strpos( $real_dir, $real_cache ) !== 0 ) {
+		if ( false === $real_dir || false === $real_cache || 0 !== strpos( rtrim( $real_dir, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR, rtrim( $real_cache, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR ) ) {
 			return false;
 		}
 
