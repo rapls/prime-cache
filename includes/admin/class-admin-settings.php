@@ -359,11 +359,14 @@ class Prime_Cache_Admin_Settings {
 						break;
 					}
 				}
-				if ( $rules_dirty ) {
-					Prime_Cache_Htaccess::add_rules( $s );
+				// Surface a non-writable .htaccess. Without this the DB option is
+				// saved but the rewrite rules the fast-path relies on are never
+				// written, and the admin still sees a "settings saved" message.
+				if ( $rules_dirty && ! Prime_Cache_Htaccess::add_rules( $s ) ) {
+					$warnings[] = __( 'Settings saved, but the .htaccess optimization rules could not be written. Check that the .htaccess file in your site root exists and is writable by PHP, or turn off .htaccess Optimization on the Page Cache tab.', 'prime-cache' );
 				}
-			} elseif ( $htaccess_was_on ) {
-				Prime_Cache_Htaccess::remove_rules();
+			} elseif ( $htaccess_was_on && ! Prime_Cache_Htaccess::remove_rules() ) {
+				$warnings[] = __( 'Settings saved, but the Prime Cache rules could not be removed from .htaccess. Check that the .htaccess file in your site root is writable by PHP, or remove the block between "# BEGIN Prime Cache" and "# END Prime Cache" manually.', 'prime-cache' );
 			}
 		}
 

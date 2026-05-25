@@ -128,6 +128,7 @@ No. The free plugin does not send your data or API requests to any third-party s
 = 1.10.5 =
 * Changed: Optional add-on features are no longer shown as disabled setting controls inside the free plugin's tabs; the "Add-ons" screen is now a plain text feature list.
 * Changed: While the add-on is inactive, its option keys are forced off/empty when settings are saved or imported, so they are never stored by the free plugin.
+* Improved: When saving settings cannot write or remove the .htaccess optimization rules (for example a read-only .htaccess), an admin notice now explains the problem instead of silently reporting success.
 * Added: FAQ note clarifying that this version does not send data to third-party services.
 
 = 1.10.4 =
