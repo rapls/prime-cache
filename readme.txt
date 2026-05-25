@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.4
+Stable tag: 1.10.5
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -119,17 +119,25 @@ On upload (if auto-convert is enabled), JPG/PNG images are converted to WebP. Al
 
 Start with page caching and basic file optimization. Test your site after each change. JavaScript defer and delay may affect some themes or plugins — test thoroughly.
 
+= Does Prime Cache send data to external services? =
+
+No. The free plugin does not send your data or API requests to any third-party service. Cache preloading only requests URLs on your own site. Some optional features may add browser resource hints (such as preconnect) for external assets your site already uses, but Prime Cache itself does not transmit data to external services.
+
 == Changelog ==
+
+= 1.10.5 =
+* Changed: Optional add-on features are no longer shown as disabled setting controls inside the free plugin's tabs; the "Add-ons" screen is now a plain text feature list.
+* Changed: While the add-on is inactive, its option keys are forced off/empty when settings are saved or imported, so they are never stored by the free plugin.
+* Added: FAQ note clarifying that this version does not send data to third-party services.
 
 = 1.10.4 =
 * Changed: Preload URL exclusions now use simple wildcard (*) / substring matching instead of raw regular expressions (safer and avoids heavy patterns).
 * Hardening: The uninstall routine's recursive directory removal is now constrained to Prime Cache's own cache directories.
-* Improved: Internal cleanup — renamed the add-on preview helper, removed leftover "Go Pro" / "locked" wording from code comments, and stripped obsolete entries from the bundled Japanese translation.
+* Improved: Internal cleanup of add-on information text and the bundled Japanese translation files.
 
 = 1.10.3 =
-* Improved: The readme and in-plugin wording now describe only the features included in the free plugin; optional features provided by the separate add-on are listed separately.
-* Improved: "Go Pro" / "Get Pro" / "Upgrade to Pro" links reworded to neutral "Add-ons" / "Learn about optional add-ons".
-* Hardening: Cache-file path containment now uses a strict directory-boundary check (no functional change).
+* Improved: The readme and in-plugin wording now clearly separate free features from optional add-on information.
+* Hardening: Cache-file path containment now uses a strict directory-boundary check.
 
 = 1.10.2 =
 * Improved: Reworded the optional add-on information shown in the settings screen — neutral, informational phrasing (e.g. "Available in Prime Cache Pro", "Learn more about Prime Cache Pro") in place of upgrade/unlock prompts, and a single, low-key link on the add-on information tab. No change to the free feature set.

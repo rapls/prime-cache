@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Prime Cache\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-25 18:33+0900\n"
+"POT-Creation-Date: 2026-05-25 21:39+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,23 +18,22 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: includes/admin/class-admin-settings.php:51
-#: includes/admin/class-admin-settings.php:1899
-#: includes/admin/class-admin-settings.php:2288
+#: includes/admin/class-admin-settings.php:2112
 msgid "Excluded URLs"
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:52
-#: includes/admin/class-admin-settings.php:2289
+#: includes/admin/class-admin-settings.php:2113
 msgid "Excluded Cookies"
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:53
-#: includes/admin/class-admin-settings.php:2290
+#: includes/admin/class-admin-settings.php:2114
 msgid "Excluded User Agents"
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:54
-#: includes/admin/class-admin-settings.php:2291
+#: includes/admin/class-admin-settings.php:2115
 msgid "Excluded Referrers"
 msgstr ""
 
@@ -84,7 +83,6 @@ msgid ""
 "with WP-CLI if needed."
 msgstr ""
 
-#. translators: %s: comma-separated list of exclusion field labels
 #: includes/admin/class-admin-settings.php:385
 #, php-format
 msgid ""
@@ -93,255 +91,186 @@ msgid ""
 "fields — open the field, fix the pattern, and save again."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:512
-#: includes/admin/class-admin-settings.php:1042
-#: includes/admin/class-admin-settings.php:1067
-#: includes/admin/class-admin-settings.php:2493
+#: includes/admin/class-admin-settings.php:542
+#: includes/admin/class-admin-settings.php:988
+#: includes/admin/class-admin-settings.php:1013
+#: includes/admin/class-admin-settings.php:2317
 msgid "year(s)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:513
-#: includes/admin/class-admin-settings.php:1042
-#: includes/admin/class-admin-settings.php:1068
-#: includes/admin/class-admin-settings.php:2493
+#: includes/admin/class-admin-settings.php:543
+#: includes/admin/class-admin-settings.php:988
+#: includes/admin/class-admin-settings.php:1014
+#: includes/admin/class-admin-settings.php:2317
 msgid "month(s)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:514
-#: includes/admin/class-admin-settings.php:1042
-#: includes/admin/class-admin-settings.php:1069
-#: includes/admin/class-admin-settings.php:2493
+#: includes/admin/class-admin-settings.php:544
+#: includes/admin/class-admin-settings.php:988
+#: includes/admin/class-admin-settings.php:1015
+#: includes/admin/class-admin-settings.php:2317
 msgid "day(s)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:515
-#: includes/admin/class-admin-settings.php:1042
-#: includes/admin/class-admin-settings.php:1070
-#: includes/admin/class-admin-settings.php:2493
+#: includes/admin/class-admin-settings.php:545
+#: includes/admin/class-admin-settings.php:988
+#: includes/admin/class-admin-settings.php:1016
+#: includes/admin/class-admin-settings.php:2317
 msgid "hour(s)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:516
-#: includes/admin/class-admin-settings.php:1025
-#: includes/admin/class-admin-settings.php:1042
-#: includes/admin/class-admin-settings.php:1071
-#: includes/admin/class-admin-settings.php:2011
-#: includes/admin/class-admin-settings.php:2032
-#: includes/admin/class-admin-settings.php:2493
+#: includes/admin/class-admin-settings.php:546
+#: includes/admin/class-admin-settings.php:971
+#: includes/admin/class-admin-settings.php:988
+#: includes/admin/class-admin-settings.php:1017
+#: includes/admin/class-admin-settings.php:1835
+#: includes/admin/class-admin-settings.php:1856
+#: includes/admin/class-admin-settings.php:2317
 msgid "sec"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:536
-#: includes/admin/class-admin-settings.php:724
+#: includes/admin/class-admin-settings.php:566
+#: includes/admin/class-admin-settings.php:694
 msgid "Dashboard"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:537
-#: includes/admin/class-admin-settings.php:823
-#: includes/admin/class-admin-settings.php:847
-#: includes/admin/class-admin-settings.php:895
+#: includes/admin/class-admin-settings.php:567
+#: includes/admin/class-admin-settings.php:793
+#: includes/admin/class-admin-settings.php:817
+#: includes/admin/class-admin-settings.php:865
 #: includes/class-prime-cache.php:1488
 msgid "Page Cache"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:538
-#: includes/admin/class-admin-settings.php:824
-#: includes/admin/class-admin-settings.php:1111
+#: includes/admin/class-admin-settings.php:568
+#: includes/admin/class-admin-settings.php:794
+#: includes/admin/class-admin-settings.php:1057
 msgid "File Optimization"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:539
-#: includes/admin/class-admin-settings.php:1410
+#: includes/admin/class-admin-settings.php:569
+#: includes/admin/class-admin-settings.php:1306
 msgid "Media"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:540
-#: includes/admin/class-admin-settings.php:1815
+#: includes/admin/class-admin-settings.php:570
+#: includes/admin/class-admin-settings.php:1705
 msgid "Preload"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:541
-#: includes/admin/class-admin-settings.php:1947
+#: includes/admin/class-admin-settings.php:571
+#: includes/admin/class-admin-settings.php:1771
 msgid "Cache Control"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:542
-#: includes/admin/class-admin-settings.php:2259
+#: includes/admin/class-admin-settings.php:572
+#: includes/admin/class-admin-settings.php:2083
 msgid "Auto Purge"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:543
-#: includes/admin/class-admin-settings.php:2294
+#: includes/admin/class-admin-settings.php:573
+#: includes/admin/class-admin-settings.php:2118
 msgid "Exclusion Rules"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:544
-#: includes/admin/class-admin-settings.php:2312
+#: includes/admin/class-admin-settings.php:574
+#: includes/admin/class-admin-settings.php:2136
 msgid "Tools"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:566
+#: includes/admin/class-admin-settings.php:596
 #: includes/class-prime-cache.php:475
 msgid "Add-ons"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:574
+#: includes/admin/class-admin-settings.php:604
 msgid "Cache Enabled"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:574
+#: includes/admin/class-admin-settings.php:604
 msgid "Cache Disabled"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:633
-#: includes/admin/class-admin-settings.php:951
-#: includes/admin/class-admin-settings.php:1180
-#: includes/admin/class-admin-settings.php:1236
-#: includes/admin/class-admin-settings.php:1933
-msgid "Available in Prime Cache Pro"
+#: includes/admin/class-admin-settings.php:656
+#: includes/admin/class-admin-settings.php:852
+msgid "Optional add-ons"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:635
-#: includes/admin/class-admin-settings.php:1516
-#: includes/admin/class-admin-settings.php:1909
-#: includes/admin/class-admin-settings.php:1919
-#: includes/admin/class-admin-settings.php:1929
-msgid "PRO"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:647
-msgid "Additional performance features are available as a separate add-on."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:648
-#: includes/admin/class-admin-settings.php:696
-msgid "Learn more about Prime Cache Pro"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:654
-#: includes/admin/class-admin-settings.php:2739
-#: includes/class-prime-cache.php:1211 includes/class-prime-cache.php:1487
-msgid "Object Cache"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:655
+#: includes/admin/class-admin-settings.php:657
 msgid ""
-"Persistent object caching with Redis, Memcached, or APCu. Dramatically "
-"reduces database queries and speeds up dynamic pages."
+"Additional performance features are available as a separate add-on from the "
+"author website. They are not included in this WordPress.org version and are "
+"not required for the free plugin to work."
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:659
-msgid "WebP & AVIF Conversion"
+msgid "Object cache integration (Redis, Memcached, APCu)"
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:660
-msgid ""
-"Auto-convert images to modern formats on upload. Bulk optimize your entire "
-"media library. Reduce image sizes by 25-80%."
+msgid "AVIF image conversion"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:661
+msgid "Advanced CSS and JavaScript optimization"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:662
+msgid "Advanced preloading options"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:663
+msgid "External cache service integrations"
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:664
-msgid "Advanced CSS & JS"
+msgid "Database optimization and Heartbeat control"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:665
-msgid ""
-"Combine CSS/JS files, Remove Unused CSS, auto-generate Critical CSS, "
-"Optimize CSS Delivery, and host Google Analytics locally."
+#: includes/admin/class-admin-settings.php:666
+msgid "Learn more about optional add-ons"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:669
-msgid "Database Optimization"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:670
-msgid ""
-"Clean up revisions, drafts, spam comments, expired transients, and optimize "
-"tables. Schedule automatic cleanup."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:674
-msgid "Heartbeat Control"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:675
-msgid ""
-"Control the WordPress Heartbeat API per location (frontend, admin, editor). "
-"Reduce server load by disabling or throttling."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:679
-msgid "Advanced Preloading"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:680
-msgid ""
-"Sitemap preloading, Speculation Rules API, font preloading, LCP "
-"optimization, DNS prefetch, and preconnect."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:684
-msgid "Varnish, Sucuri & Cloudflare"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:685
-msgid ""
-"Automatic cache sync with Varnish reverse proxies, Sucuri firewalls, and "
-"Cloudflare CDN zones when content changes."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:689
-msgid "YouTube & Media"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:690
-msgid ""
-"Replace YouTube iframes with lightweight thumbnails. Save 500KB-1MB per "
-"embed on initial page load."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:729
-#: includes/admin/class-admin-settings.php:812
-#: includes/admin/class-admin-settings.php:835
-#: includes/admin/class-admin-settings.php:2777
+#: includes/admin/class-admin-settings.php:699
+#: includes/admin/class-admin-settings.php:782
+#: includes/admin/class-admin-settings.php:805
+#: includes/admin/class-admin-settings.php:2601
 #: includes/class-prime-cache.php:1230 includes/class-prime-cache.php:1488
 msgid "Active"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:729
+#: includes/admin/class-admin-settings.php:699
 msgid "Cache Status"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:731
+#: includes/admin/class-admin-settings.php:701
 #: includes/class-prime-cache.php:1476
 msgid "Hit Rate"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:735
+#: includes/admin/class-admin-settings.php:705
 #: includes/class-prime-cache.php:1477
 msgid "Pages"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:741
+#: includes/admin/class-admin-settings.php:711
 msgid "Cache Hit Rate"
 msgstr ""
 
-#. translators: %s: date when stats tracking started (e.g. "2024/01/15 09:30")
-#: includes/admin/class-admin-settings.php:746
+#: includes/admin/class-admin-settings.php:716
 #, php-format
 msgid "Since: %s"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:749
+#: includes/admin/class-admin-settings.php:719
 msgid "Reset all hit/miss statistics to zero?"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:749
+#: includes/admin/class-admin-settings.php:719
 msgid "Reset"
 msgstr ""
 
-#. translators: %s: number of cached pages
-#: includes/admin/class-admin-settings.php:757
+#: includes/admin/class-admin-settings.php:727
 #, php-format
 msgid ""
 "Cache is serving %s pages via .htaccess fast-path (PHP-free). Hit/miss stats "
@@ -349,165 +278,158 @@ msgid ""
 "without running PHP."
 msgstr ""
 
-#. translators: %s: total number of cache requests
-#: includes/admin/class-admin-settings.php:766
+#: includes/admin/class-admin-settings.php:736
 #, php-format
 msgid "Total: %s"
 msgstr ""
 
-#. translators: %s: total cache size (e.g. "12 MB")
-#. translators: %s: total cache size (e.g. "12 MB").
-#: includes/admin/class-admin-settings.php:770
+#: includes/admin/class-admin-settings.php:740
 #: includes/class-prime-cache.php:1484
 #, php-format
 msgid "Size: %s"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:777
+#: includes/admin/class-admin-settings.php:747
 msgid "Quick Actions"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:779
+#: includes/admin/class-admin-settings.php:749
 #: includes/class-prime-cache.php:503
 msgid "Clear All Cache"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:781
+#: includes/admin/class-admin-settings.php:751
 #: includes/class-prime-cache.php:511
 msgid "Clear Cache & Preload"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:783
+#: includes/admin/class-admin-settings.php:753
 msgid "Default variant only"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:786
+#: includes/admin/class-admin-settings.php:756
 #: includes/class-prime-cache.php:526
 msgid "Clear Minified CSS/JS"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:788
+#: includes/admin/class-admin-settings.php:758
 #: includes/class-prime-cache.php:545
 msgid "Clear Object Cache"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:796
+#: includes/admin/class-admin-settings.php:766
 msgid "System Status"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:800
+#: includes/admin/class-admin-settings.php:770
 msgid "WP_CACHE Constant"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:802
+#: includes/admin/class-admin-settings.php:772
 msgid "Cache Directory"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:803
+#: includes/admin/class-admin-settings.php:773
 msgid "Gzip Support"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:806
+#: includes/admin/class-admin-settings.php:776
 msgid ".htaccess Rules"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:812
+#: includes/admin/class-admin-settings.php:782
 msgid "External"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:812
-#: includes/admin/class-admin-settings.php:835
+#: includes/admin/class-admin-settings.php:782
+#: includes/admin/class-admin-settings.php:805
 #: includes/class-prime-cache.php:1231 includes/class-prime-cache.php:1487
 #: includes/class-prime-cache.php:1488
 msgid "Inactive"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:819
+#: includes/admin/class-admin-settings.php:789
 msgid "Feature Status"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:825
+#: includes/admin/class-admin-settings.php:795
 msgid "JS Optimization"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:826
-#: includes/admin/class-admin-settings.php:1417
+#: includes/admin/class-admin-settings.php:796
+#: includes/admin/class-admin-settings.php:1313
 msgid "Lazy Load"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:827
+#: includes/admin/class-admin-settings.php:797
 msgid "Cache Preload"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:829
-#: includes/admin/class-admin-settings.php:957
+#: includes/admin/class-admin-settings.php:799
+#: includes/admin/class-admin-settings.php:903
 msgid "Browser Cache"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:843
+#: includes/admin/class-admin-settings.php:813
 msgid "Cache Storage"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:851
+#: includes/admin/class-admin-settings.php:821
 msgid "Minified Files"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:855
+#: includes/admin/class-admin-settings.php:825
 msgid "Total"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:862
+#: includes/admin/class-admin-settings.php:832
 msgid "Environment"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:872
+#: includes/admin/class-admin-settings.php:842
 #: includes/class-prime-cache.php:1218
 msgid "Theme"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:882
-msgid "Optional add-ons"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:883
+#: includes/admin/class-admin-settings.php:853
 msgid ""
 "Additional performance features — such as object caching, advanced CSS/JS "
 "optimization, and database cleanup — are available as a separate add-on."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:884
+#: includes/admin/class-admin-settings.php:854
 msgid "Learn More"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:909
+#: includes/admin/class-admin-settings.php:879
 msgid "General Settings"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:912
+#: includes/admin/class-admin-settings.php:882
 msgid "Mobile Cache"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:912
+#: includes/admin/class-admin-settings.php:882
 msgid ""
 "Serve cached pages to smartphones and tablets. When disabled, WordPress "
 "dynamically generates every page for mobile visitors."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:913
+#: includes/admin/class-admin-settings.php:883
 msgid "Separate Mobile Cache"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:913
+#: includes/admin/class-admin-settings.php:883
 msgid ""
 "For themes that output different HTML for desktop and mobile. Maintains "
 "separate cache files per device type. Not needed for responsive themes."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:914
+#: includes/admin/class-admin-settings.php:884
 msgid "Logged-in User Cache"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:914
+#: includes/admin/class-admin-settings.php:884
 msgid ""
 "Serve cached pages to logged-in users. SECURITY WARNING: all logged-in users "
 "and anonymous visitors share one cached copy of each page, so a page "
@@ -517,22 +439,22 @@ msgid ""
 "membership sites with no per-user output)."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:915
+#: includes/admin/class-admin-settings.php:885
 msgid "Gzip Compression"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:915
+#: includes/admin/class-admin-settings.php:885
 msgid ""
 "Pre-compress cache files with gzip. Supported browsers receive the "
 "compressed version, reducing transfer size by 60-80%. Recommended for most "
 "environments."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:916
+#: includes/admin/class-admin-settings.php:886
 msgid "Brotli Compression"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:916
+#: includes/admin/class-admin-settings.php:886
 msgid ""
 "Enable Brotli compression via mod_brotli (Apache 2.4+). Brotli achieves "
 "15-25% better compression than gzip. Requires mod_brotli and .htaccess "
@@ -540,11 +462,11 @@ msgid ""
 "unavailable."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:917
+#: includes/admin/class-admin-settings.php:887
 msgid ".htaccess Optimization"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:917
+#: includes/admin/class-admin-settings.php:887
 msgid ""
 "Write optimization rules to .htaccess. Apache serves cached files directly "
 "without invoking PHP, significantly improving response time. Also enables "
@@ -553,11 +475,11 @@ msgid ""
 "effect on Nginx."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:918
+#: includes/admin/class-admin-settings.php:888
 msgid "Cache 404 Pages"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:918
+#: includes/admin/class-admin-settings.php:888
 msgid ""
 "Cache 404 (Not Found) pages. Reduces server load from repeated requests to "
 "non-existent URLs. The cached 404 page is served with proper 404 HTTP status "
@@ -565,11 +487,11 @@ msgid ""
 "404 pages (they always go through PHP to ensure the correct status code)."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:919
+#: includes/admin/class-admin-settings.php:889
 msgid "Mixed HTTP/HTTPS Site"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:919
+#: includes/admin/class-admin-settings.php:889
 msgid ""
 "Enable only if your site intentionally serves both http:// and https:// "
 "versions of the same URL. When disabled (recommended), the cache scheme "
@@ -579,68 +501,29 @@ msgid ""
 "PRIME_CACHE_TRUST_X_FORWARDED_PROTO in wp-config.php."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:920
+#: includes/admin/class-admin-settings.php:890
 msgid "Cache Footprint"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:920
+#: includes/admin/class-admin-settings.php:890
 msgid ""
 "Append an HTML comment with cache generation time to the source. Useful for "
 "verifying cache behavior via \"View Source\". Can be disabled in production."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:925
+#: includes/admin/class-admin-settings.php:895
 msgid ".htaccess Active"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:926
+#: includes/admin/class-admin-settings.php:896
 msgid ".htaccess Not Writable"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:934
-msgid "Enable Varnish Purge"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:934
-msgid ""
-"Automatically purge the Varnish cache when WordPress content changes. Sends "
-"PURGE requests to the configured Varnish server."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:936
-msgid "Varnish Server IP"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:938
-msgid ""
-"One IP address per line. If your Varnish server runs on a different host or "
-"port, specify here. Defaults to 127.0.0.1 (localhost)."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:945
-msgid "Enable Sucuri Purge"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:945
-msgid ""
-"Automatically clear the Sucuri firewall cache when WordPress content changes."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:947
-msgid "Sucuri API Key"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:949
-msgid ""
-"Your Sucuri firewall API key. Found in the Sucuri dashboard under API "
-"section."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:958
+#: includes/admin/class-admin-settings.php:904
 msgid "Enable Browser Cache Headers"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:958
+#: includes/admin/class-admin-settings.php:904
 msgid ""
 "Add Cache-Control and Expires headers to cached responses, both using the "
 "lifetimes configured below. HTML Cache-Control is applied by the PHP drop-"
@@ -648,116 +531,116 @@ msgid ""
 "to be enabled."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:959
+#: includes/admin/class-admin-settings.php:905
 msgid "Immutable Cache-Control"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:959
+#: includes/admin/class-admin-settings.php:905
 msgid ""
 "Add \"immutable\" directive to Cache-Control for CSS, JS, images, and fonts. "
 "Tells the browser the file will never change during its lifetime, preventing "
 "conditional revalidation requests (304 checks)."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:963
+#: includes/admin/class-admin-settings.php:909
 msgid "CSS & JS Cache Lifetime"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:964
+#: includes/admin/class-admin-settings.php:910
 msgid "Images / Media / Documents Cache Lifetime"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:965
+#: includes/admin/class-admin-settings.php:911
 msgid "Fonts Cache Lifetime"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:966
+#: includes/admin/class-admin-settings.php:912
 msgid "HTML Cache Lifetime"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:966
+#: includes/admin/class-admin-settings.php:912
 msgid ""
 "0 = no-cache (recommended for HTML). Non-zero values cache HTML in the "
 "browser."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:985
-#: includes/admin/class-admin-settings.php:1017
-#: includes/admin/class-admin-settings.php:2477
+#: includes/admin/class-admin-settings.php:931
+#: includes/admin/class-admin-settings.php:963
+#: includes/admin/class-admin-settings.php:2301
 msgid "Years"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:986
-#: includes/admin/class-admin-settings.php:1018
-#: includes/admin/class-admin-settings.php:2478
+#: includes/admin/class-admin-settings.php:932
+#: includes/admin/class-admin-settings.php:964
+#: includes/admin/class-admin-settings.php:2302
 msgid "Months"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:987
-#: includes/admin/class-admin-settings.php:1019
-#: includes/admin/class-admin-settings.php:2479
+#: includes/admin/class-admin-settings.php:933
+#: includes/admin/class-admin-settings.php:965
+#: includes/admin/class-admin-settings.php:2303
 msgid "Weeks"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:988
-#: includes/admin/class-admin-settings.php:1020
-#: includes/admin/class-admin-settings.php:2480
+#: includes/admin/class-admin-settings.php:934
+#: includes/admin/class-admin-settings.php:966
+#: includes/admin/class-admin-settings.php:2304
 msgid "Days"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:989
-#: includes/admin/class-admin-settings.php:1021
-#: includes/admin/class-admin-settings.php:2481
+#: includes/admin/class-admin-settings.php:935
+#: includes/admin/class-admin-settings.php:967
+#: includes/admin/class-admin-settings.php:2305
 msgid "Hours"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:990
-#: includes/admin/class-admin-settings.php:1022
-#: includes/admin/class-admin-settings.php:2482
+#: includes/admin/class-admin-settings.php:936
+#: includes/admin/class-admin-settings.php:968
+#: includes/admin/class-admin-settings.php:2306
 msgid "Minutes"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:991
-#: includes/admin/class-admin-settings.php:1023
-#: includes/admin/class-admin-settings.php:2483
+#: includes/admin/class-admin-settings.php:937
+#: includes/admin/class-admin-settings.php:969
+#: includes/admin/class-admin-settings.php:2307
 msgid "Seconds"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1002
+#: includes/admin/class-admin-settings.php:948
 msgid "Cache Lifespan"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1004
-#: includes/admin/class-admin-settings.php:1025
-#: includes/admin/class-admin-settings.php:1041
+#: includes/admin/class-admin-settings.php:950
+#: includes/admin/class-admin-settings.php:971
+#: includes/admin/class-admin-settings.php:987
 msgid "Unlimited"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1004
+#: includes/admin/class-admin-settings.php:950
 msgid "1 Hour"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1004
+#: includes/admin/class-admin-settings.php:950
 msgid "6 Hours"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1004
+#: includes/admin/class-admin-settings.php:950
 msgid "12 Hours"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1004
+#: includes/admin/class-admin-settings.php:950
 msgid "1 Day"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1004
+#: includes/admin/class-admin-settings.php:950
 msgid "2 Days"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1004
+#: includes/admin/class-admin-settings.php:950
 msgid "7 Days"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1028
+#: includes/admin/class-admin-settings.php:974
 msgid ""
 "How long until cache files are automatically discarded. Expired caches are "
 "regenerated on the next visit and cleaned up hourly by WP-Cron. Set to 0 for "
@@ -771,50 +654,50 @@ msgid ""
 "cleanup will not run and expired files will keep being served indefinitely."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1032
-#: includes/admin/class-admin-settings.php:1336
-#: includes/admin/class-admin-settings.php:1586
-#: includes/admin/class-admin-settings.php:1795
-#: includes/admin/class-admin-settings.php:1937
-#: includes/admin/class-admin-settings.php:1959
-#: includes/admin/class-admin-settings.php:2056
-#: includes/admin/class-admin-settings.php:2219
-#: includes/admin/class-admin-settings.php:2277
-#: includes/admin/class-admin-settings.php:2301
-#: includes/admin/class-admin-settings.php:2519
+#: includes/admin/class-admin-settings.php:978
+#: includes/admin/class-admin-settings.php:1232
+#: includes/admin/class-admin-settings.php:1476
+#: includes/admin/class-admin-settings.php:1685
+#: includes/admin/class-admin-settings.php:1761
+#: includes/admin/class-admin-settings.php:1783
+#: includes/admin/class-admin-settings.php:1880
+#: includes/admin/class-admin-settings.php:2043
+#: includes/admin/class-admin-settings.php:2101
+#: includes/admin/class-admin-settings.php:2125
+#: includes/admin/class-admin-settings.php:2343
 msgid "Save Settings"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1033
+#: includes/admin/class-admin-settings.php:979
 #: includes/class-prime-cache.php:1491
 msgid "Clear Cache"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1042
-#: includes/admin/class-admin-settings.php:2493
+#: includes/admin/class-admin-settings.php:988
+#: includes/admin/class-admin-settings.php:2317
 msgid "week(s)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1042
-#: includes/admin/class-admin-settings.php:2493
+#: includes/admin/class-admin-settings.php:988
+#: includes/admin/class-admin-settings.php:2317
 msgid "minute(s)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1119
+#: includes/admin/class-admin-settings.php:1065
 msgid "Minify HTML"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1119
+#: includes/admin/class-admin-settings.php:1065
 msgid ""
 "Remove unnecessary whitespace from the HTML output to reduce page size. "
 "Content inside pre, script, style, and textarea tags is preserved."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1120
+#: includes/admin/class-admin-settings.php:1066
 msgid "Optimize HTML via DOM Parser"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1120
+#: includes/admin/class-admin-settings.php:1066
 msgid ""
 "Requires \"Minify HTML\" above to be enabled. Switches the minification "
 "engine from regex to DOMDocument for deeper optimization — parses the "
@@ -823,87 +706,65 @@ msgid ""
 "parsing fails."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1121
+#: includes/admin/class-admin-settings.php:1067
 msgid "Remove HTML Comments"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1121
+#: includes/admin/class-admin-settings.php:1067
 msgid ""
 "Strip HTML comments from the output. IE conditional comments are preserved."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1122
+#: includes/admin/class-admin-settings.php:1068
 msgid "Disable WordPress Emoji"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1122
+#: includes/admin/class-admin-settings.php:1068
 msgid ""
 "Remove the emoji inline CSS, wp-emoji-release.min.js script, and DNS "
 "prefetch for s.w.org from all pages. Reduces 2 HTTP requests and ~16 KB from "
 "every page load. Does not affect actual emoji display in modern browsers."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1128
+#: includes/admin/class-admin-settings.php:1074
 msgid "Minify CSS"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1128
+#: includes/admin/class-admin-settings.php:1074
 msgid ""
 "Remove whitespace, comments, and unnecessary characters from CSS files to "
 "reduce file size."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1131
-msgid "Combine CSS Files"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1131
-msgid ""
-"Merge multiple CSS files into fewer files to reduce HTTP requests. On HTTP/2 "
-"servers this may have minimal benefit. Test thoroughly after enabling."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1133
-#: includes/admin/class-admin-settings.php:1201
-msgid "Mobile Only"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1133
-#: includes/admin/class-admin-settings.php:1201
-msgid ""
-"Apply CSS/JS combining only on mobile devices. Desktop uses HTTP/2 "
-"multiplexing efficiently without combining. Requires separate mobile cache."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1137
+#: includes/admin/class-admin-settings.php:1077
 msgid "Excluded CSS Files"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1139
+#: includes/admin/class-admin-settings.php:1079
 msgid ""
 "One pattern per line. These CSS files will not be minified, combined, or "
 "loaded asynchronously. Supports wildcards (*)."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1141
+#: includes/admin/class-admin-settings.php:1081
 msgid "Inline Small CSS Files"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1141
+#: includes/admin/class-admin-settings.php:1081
 msgid ""
 "Inline CSS files smaller than the threshold directly into the HTML as "
 "<style> tags, eliminating HTTP requests for small stylesheets."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1143
+#: includes/admin/class-admin-settings.php:1083
 msgid "Threshold (bytes)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1148
+#: includes/admin/class-admin-settings.php:1088
 msgid "Load CSS Asynchronously (Free)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1148
+#: includes/admin/class-admin-settings.php:1088
 msgid ""
 "Convert non-first <link rel=\"stylesheet\"> tags to non-render-blocking "
 "loading via media=\"print\" + onload swap. The first stylesheet on the page "
@@ -914,71 +775,11 @@ msgid ""
 "should leave this off."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1156
-#: includes/admin/class-admin-settings.php:1157
-msgid "Optimize CSS Delivery"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1157
-msgid ""
-"Improve render performance by optimizing how CSS is loaded. Choose a method "
-"below."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1161
-msgid "Remove Unused CSS"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1165
-msgid "Load CSS Asynchronously"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1168
-msgid "Auto-Generate Critical CSS"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1168
-msgid ""
-"Automatically extract above-the-fold Critical CSS for each page to prevent "
-"flash of unstyled content (FOUC)."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1170
-msgid "Fallback Critical CSS"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1172
-msgid ""
-"Manual critical CSS used as a fallback when auto-generation is not available "
-"for a page. Inlined in the <head> to render above-the-fold content "
-"immediately."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1175
-msgid "Used CSS Safelist"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1177
-msgid ""
-"CSS selectors or patterns that should never be removed (one per line). Use "
-"when Remove Unused CSS incorrectly strips needed styles."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1179
-msgid "Async CSS"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1179
-msgid ""
-"Load all CSS files asynchronously using link[rel=preload] to eliminate "
-"render-blocking stylesheets."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1187
+#: includes/admin/class-admin-settings.php:1097
 msgid "Minify JavaScript"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1187
+#: includes/admin/class-admin-settings.php:1097
 msgid ""
 "Conservative JavaScript size reduction: trims trailing whitespace and "
 "collapses blank lines. Comments are preserved (regex-based comment removal "
@@ -986,11 +787,11 @@ msgid ""
 "Already minified files (.min.js) are skipped."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1188
+#: includes/admin/class-admin-settings.php:1098
 msgid "Load JavaScript Deferred"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1188
+#: includes/admin/class-admin-settings.php:1098
 msgid ""
 "Add the defer attribute to enqueued scripts (wp_enqueue_script) to eliminate "
 "render-blocking JavaScript. Scripts are downloaded in parallel and executed "
@@ -1000,11 +801,11 @@ msgid ""
 "DOMContentLoaded so they keep working when jQuery itself is deferred."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1189
+#: includes/admin/class-admin-settings.php:1099
 msgid "Delay JavaScript Execution"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1189
+#: includes/admin/class-admin-settings.php:1099
 msgid ""
 "Delay every external <script src=\"...\"> tag in the HTML output (including "
 "third-party / CDN — not limited to wp_enqueue_script handles) until user "
@@ -1018,115 +819,74 @@ msgid ""
 "external scripts that must run before interaction."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1192
+#: includes/admin/class-admin-settings.php:1102
 msgid "Delay Timeout (ms)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1194
+#: includes/admin/class-admin-settings.php:1104
 msgid ""
 "Auto-load delayed scripts after this many milliseconds even without user "
 "interaction. 0 = wait for interaction only."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1196
+#: includes/admin/class-admin-settings.php:1106
 msgid "Delay JS Safe Mode"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1196
+#: includes/admin/class-admin-settings.php:1106
 msgid ""
 "Only delay external (third-party) scripts. All internal scripts from your "
 "site (wp-includes, wp-content) load immediately. Reduces performance gains "
 "but prevents most compatibility issues."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1199
-msgid "Combine JavaScript Files"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1199
-msgid ""
-"Merge multiple JS files into fewer files. May break some scripts — test "
-"thoroughly. On HTTP/2 the benefit is minimal."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1205
+#: includes/admin/class-admin-settings.php:1109
 msgid "Excluded JS Files"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1207
+#: includes/admin/class-admin-settings.php:1111
 msgid ""
 "One pattern per line. These JS files will not be minified or combined. "
 "Supports wildcards (*)."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1210
+#: includes/admin/class-admin-settings.php:1114
 msgid "Excluded Inline JavaScript"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1212
+#: includes/admin/class-admin-settings.php:1116
 msgid ""
 "Keywords to identify inline scripts to exclude from optimization. One per "
 "line."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1215
+#: includes/admin/class-admin-settings.php:1119
 msgid "Excluded from Defer"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1217
+#: includes/admin/class-admin-settings.php:1121
 msgid "JS files that should not be deferred. One pattern per line."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1220
+#: includes/admin/class-admin-settings.php:1124
 msgid "Excluded from Delay"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1222
+#: includes/admin/class-admin-settings.php:1126
 msgid ""
 "JS files that should not be delayed. One pattern per line. Scripts with data-"
 "no-delay attribute are always excluded."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1228
+#: includes/admin/class-admin-settings.php:1132
 msgid "Fonts & Other"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1232
-msgid "Combine Google Fonts"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1232
-msgid ""
-"Merge multiple Google Fonts requests into a single request to reduce HTTP "
-"round-trips."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1233
-msgid "Self-Host Google Fonts"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1233
-msgid ""
-"Download Google Fonts and serve them from your own server. Eliminates "
-"external DNS lookups and connections to fonts.googleapis.com and "
-"fonts.gstatic.com."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1234
-msgid "Host Google Analytics Locally"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1234
-msgid ""
-"Download and serve the Google Analytics script from your own server. Reduces "
-"external requests and improves PageSpeed scores."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1238
+#: includes/admin/class-admin-settings.php:1134
 msgid "Optimize Google Fonts"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1238
+#: includes/admin/class-admin-settings.php:1134
 msgid ""
 "Improves Google Fonts loading: (1) appends display=swap to font URLs so text "
 "remains visible during font load (prevents FOIT), (2) loads font CSS "
@@ -1135,26 +895,26 @@ msgid ""
 "earlier."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1239
+#: includes/admin/class-admin-settings.php:1135
 msgid "Remove Query Strings"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1239
+#: includes/admin/class-admin-settings.php:1135
 msgid ""
 "Remove version query strings (?ver=, ?v=) from local CSS and JS file URLs. "
 "Improves cacheability by CDNs and proxies that ignore query strings. "
 "External URLs are not affected."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1245
+#: includes/admin/class-admin-settings.php:1141
 msgid "Advanced"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1246
+#: includes/admin/class-admin-settings.php:1142
 msgid "Enable Rewrite for File Optimizer"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1246
+#: includes/admin/class-admin-settings.php:1142
 msgid ""
 "Serve optimized CSS/JS files via clean URLs (/_pc-static/) instead of direct "
 "file paths. Uses WordPress rewrite rules for portability. Adds a 1-year "
@@ -1163,36 +923,36 @@ msgid ""
 "Permalinks are flushed automatically when this setting is changed."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1251
+#: includes/admin/class-admin-settings.php:1147
 msgid "Performance Tweaks"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1254
+#: includes/admin/class-admin-settings.php:1150
 msgid "Use Local jQuery"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1254
+#: includes/admin/class-admin-settings.php:1150
 msgid ""
 "Restore WordPress bundled jQuery when the theme loads it from an external "
 "CDN (e.g. cdnjs.cloudflare.com). Eliminates external connection overhead "
 "(~600ms on mobile) by serving jQuery from the same origin."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1255
+#: includes/admin/class-admin-settings.php:1151
 msgid "Disable jQuery Migrate"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1255
+#: includes/admin/class-admin-settings.php:1151
 msgid ""
 "Remove jquery-migrate.min.js from the frontend. Most modern jQuery code and "
 "plugins no longer need it. Saves ~10 KB per page."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1256
+#: includes/admin/class-admin-settings.php:1152
 msgid "Disable WP Embed"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1256
+#: includes/admin/class-admin-settings.php:1152
 msgid ""
 "Remove wp-embed.min.js and oEmbed discovery links from your pages. Saves ~6 "
 "KB of JavaScript per page and makes your content harder to auto-embed via "
@@ -1200,31 +960,31 @@ msgid ""
 "\"Disable oEmbed\" below for full embed prevention."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1257
+#: includes/admin/class-admin-settings.php:1153
 msgid "Disable Dashicons (Frontend)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1257
+#: includes/admin/class-admin-settings.php:1153
 msgid ""
 "Remove the Dashicons stylesheet for non-logged-in visitors. Saves ~46 KB. "
 "Icons remain available for logged-in users and the admin area."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1258
+#: includes/admin/class-admin-settings.php:1154
 msgid "Remove WordPress Version"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1258
+#: includes/admin/class-admin-settings.php:1154
 msgid ""
 "Remove the WordPress version meta tag and feed generator tag. Minor security "
 "improvement — prevents version fingerprinting."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1259
+#: includes/admin/class-admin-settings.php:1155
 msgid "Disable XML-RPC"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1259
+#: includes/admin/class-admin-settings.php:1155
 msgid ""
 "Disable the XML-RPC API via the xmlrpc_enabled filter and remove the X-"
 "Pingback header. This does not block access to xmlrpc.php at the server "
@@ -1232,113 +992,113 @@ msgid ""
 "if you use the REST API."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1260
+#: includes/admin/class-admin-settings.php:1156
 msgid "Disable Self-Pingbacks"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1260
+#: includes/admin/class-admin-settings.php:1156
 msgid ""
 "Prevent WordPress from sending pingback requests to your own site when you "
 "link to your own posts."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1261
+#: includes/admin/class-admin-settings.php:1157
 msgid "Disable RSS Feeds"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1261
+#: includes/admin/class-admin-settings.php:1157
 msgid ""
 "Disable all RSS/Atom feeds and redirect feed URLs to the homepage. Use only "
 "if your site does not need feeds."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1262
+#: includes/admin/class-admin-settings.php:1158
 msgid "Disable oEmbed"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1262
+#: includes/admin/class-admin-settings.php:1158
 msgid ""
 "Remove oEmbed discovery links, host JavaScript, and REST API route. Prevents "
 "remote embedding of your content."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1263
+#: includes/admin/class-admin-settings.php:1159
 msgid "Disable Gutenberg Block CSS"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1263
+#: includes/admin/class-admin-settings.php:1159
 msgid ""
 "Remove wp-block-library, wp-block-library-theme, and WooCommerce block "
 "stylesheets. Use only if you are using the Classic Editor and not using any "
 "Gutenberg blocks."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1264
+#: includes/admin/class-admin-settings.php:1160
 msgid "Disable Google Fonts"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1264
+#: includes/admin/class-admin-settings.php:1160
 msgid ""
 "Dequeue all Google Fonts (fonts.googleapis.com and fonts.bunny.net) loaded "
 "by themes and plugins. Use if you self-host fonts or do not need external "
 "fonts."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1265
+#: includes/admin/class-admin-settings.php:1161
 msgid "Disable Global Styles (SVG)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1265
+#: includes/admin/class-admin-settings.php:1161
 msgid ""
 "Remove the global-styles inline CSS and SVG filters added by WordPress 6.1+. "
 "Saves ~2 KB of inline markup on every page."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1266
+#: includes/admin/class-admin-settings.php:1162
 msgid "Limit DNS Prefetch Hints"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1266
+#: includes/admin/class-admin-settings.php:1162
 msgid ""
 "Limit dns-prefetch and preconnect hints to 4 entries. WordPress auto-adds "
 "hints for every external domain, which wastes mobile connections. PageSpeed "
 "recommends 4 or fewer."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1274
+#: includes/admin/class-admin-settings.php:1170
 msgid "Limit Post Revisions"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1274
+#: includes/admin/class-admin-settings.php:1170
 msgid ""
 "Limit the maximum number of revisions stored per post. Reduces database "
 "bloat over time."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1276
+#: includes/admin/class-admin-settings.php:1172
 msgid "Max Revisions"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1278
+#: includes/admin/class-admin-settings.php:1174
 msgid "0 = disable revisions entirely"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1283
+#: includes/admin/class-admin-settings.php:1179
 msgid "WooCommerce Script Optimization"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1283
+#: includes/admin/class-admin-settings.php:1179
 msgid ""
 "Disable WooCommerce CSS and JavaScript on non-WooCommerce pages (shop, "
 "product, archive, cart, checkout, and account pages are excluded). Saves "
 "~100 KB+ on regular blog/pages."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1284
+#: includes/admin/class-admin-settings.php:1180
 msgid "Disable Cart Fragments AJAX"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1284
+#: includes/admin/class-admin-settings.php:1180
 msgid ""
 "Disable WooCommerce cart fragments AJAX request (wc-"
 "ajax=get_refreshed_fragments) on non-cart/checkout pages. This AJAX call "
@@ -1346,116 +1106,116 @@ msgid ""
 "bottlenecks."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1289
+#: includes/admin/class-admin-settings.php:1185
 msgid "WP Head Cleanup"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1292
+#: includes/admin/class-admin-settings.php:1188
 msgid "Remove Shortlink"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1292
+#: includes/admin/class-admin-settings.php:1188
 msgid ""
 "Remove the shortlink tag and HTTP header. Not needed if you use pretty "
 "permalinks."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1293
+#: includes/admin/class-admin-settings.php:1189
 msgid "Remove RSD & WLW Manifest"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1293
+#: includes/admin/class-admin-settings.php:1189
 msgid ""
 "Remove Really Simple Discovery and Windows Live Writer manifest links. Only "
 "needed for XML-RPC clients."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1294
+#: includes/admin/class-admin-settings.php:1190
 msgid "Remove REST API Link"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1294
+#: includes/admin/class-admin-settings.php:1190
 msgid ""
 "Remove the REST API discovery link tag and HTTP header from the frontend."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1295
+#: includes/admin/class-admin-settings.php:1191
 msgid "Disable WordPress Sitemap"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1295
+#: includes/admin/class-admin-settings.php:1191
 msgid ""
 "Disable the built-in WordPress XML sitemap (/wp-sitemap.xml). Use if you "
 "have a sitemap plugin like Yoast SEO or Rank Math."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1296
+#: includes/admin/class-admin-settings.php:1192
 msgid "Add Blank Favicon"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1296
+#: includes/admin/class-admin-settings.php:1192
 msgid ""
 "Add an inline SVG favicon to prevent the browser from requesting a missing "
 "favicon.ico (404). Only applied when no site icon is set."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1306
+#: includes/admin/class-admin-settings.php:1202
 msgid "3rd-Party Script Delay Presets"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1307
+#: includes/admin/class-admin-settings.php:1203
 msgid ""
 "Select known third-party scripts to exclude from JavaScript delay execution. "
 "These scripts will load immediately instead of waiting for user interaction."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1418
+#: includes/admin/class-admin-settings.php:1314
 msgid "Lazy Load Images"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1418
+#: includes/admin/class-admin-settings.php:1314
 msgid ""
 "Add loading=\"lazy\" attribute to images below the fold. The first N images "
 "(configurable below) are skipped to preserve above-the-fold LCP performance. "
 "Images with fetchpriority=\"high\" are never lazy loaded."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1420
+#: includes/admin/class-admin-settings.php:1316
 msgid "Skip First N Images"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1422
+#: includes/admin/class-admin-settings.php:1318
 msgid ""
 "Number of leading images per page that bypass lazy loading (typically the "
 "LCP candidate and adjacent above-the-fold images). Default 3. Set 0 to lazy-"
 "load every image."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1424
+#: includes/admin/class-admin-settings.php:1320
 msgid "Lazy Load Iframes"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1424
+#: includes/admin/class-admin-settings.php:1320
 msgid ""
 "Add loading=\"lazy\" to iframes (YouTube embeds, Google Maps, etc.). "
 "Significantly reduces initial page weight for embed-heavy pages."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1425
+#: includes/admin/class-admin-settings.php:1321
 msgid "Lazy Load Videos"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1425
+#: includes/admin/class-admin-settings.php:1321
 msgid ""
 "Set preload=\"none\" on video elements to prevent auto-downloading video "
 "files until playback is requested."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1426
+#: includes/admin/class-admin-settings.php:1322
 msgid "Disable WordPress Native Lazy Load"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1426
+#: includes/admin/class-admin-settings.php:1322
 msgid ""
 "Disable the built-in lazy loading added by WordPress 5.5+. Use this if you "
 "want Prime Cache to have full control over which images are lazy loaded, or "
@@ -1463,49 +1223,47 @@ msgid ""
 "automatically add loading=\"lazy\" to images and iframes."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1428
+#: includes/admin/class-admin-settings.php:1324
 msgid "Excluded Patterns"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1430
+#: includes/admin/class-admin-settings.php:1326
 msgid ""
 "One pattern per line. Images, iframes, and videos containing these strings "
 "will not be lazy loaded."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1436
+#: includes/admin/class-admin-settings.php:1332
 msgid "Image Optimization"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1439
-#: includes/admin/class-admin-settings.php:1441
+#: includes/admin/class-admin-settings.php:1335
 msgid "YouTube Thumbnail Placeholder"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1439
-#: includes/admin/class-admin-settings.php:1441
+#: includes/admin/class-admin-settings.php:1335
 msgid ""
 "Replace YouTube iframe embeds with a lightweight thumbnail image. The iframe "
 "loads only when the user clicks play, saving significant bandwidth and "
 "improving page load time."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1443
+#: includes/admin/class-admin-settings.php:1337
 msgid "Add Missing Image Dimensions"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1443
+#: includes/admin/class-admin-settings.php:1337
 msgid ""
 "Automatically add width and height attributes to images that are missing "
 "them. Prevents Cumulative Layout Shift (CLS) — a Core Web Vitals metric. "
 "Only works for locally hosted images."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1444
+#: includes/admin/class-admin-settings.php:1338
 msgid "Strip EXIF Data"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1444
+#: includes/admin/class-admin-settings.php:1338
 msgid ""
 "Remove EXIF metadata (camera model, GPS coordinates, timestamps) from JPEG "
 "images on upload. Only JPEG images are processed. Images are re-encoded at "
@@ -1513,274 +1271,269 @@ msgid ""
 "stripping location data."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1445
+#: includes/admin/class-admin-settings.php:1339
 msgid "Resize Oversized Images"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1445
+#: includes/admin/class-admin-settings.php:1339
 msgid ""
 "Automatically resize JPEG and PNG images that exceed the maximum dimensions "
 "on upload. WebP, GIF, and AVIF images are not affected. Prevents "
 "unnecessarily large images from being stored and served."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1448
+#: includes/admin/class-admin-settings.php:1342
 msgid "Max Width (px)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1452
+#: includes/admin/class-admin-settings.php:1346
 msgid "Max Height (px)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1467
+#: includes/admin/class-admin-settings.php:1361
 msgid "Format Conversion (WebP / AVIF)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1472
+#: includes/admin/class-admin-settings.php:1366
 msgid "Enable Image Conversion"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1473
+#: includes/admin/class-admin-settings.php:1367
 msgid ""
 "Convert JPEG and PNG images to modern formats for smaller file sizes and "
 "faster loading."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1480
+#: includes/admin/class-admin-settings.php:1374
 msgid "WebP"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1481
+#: includes/admin/class-admin-settings.php:1375
 msgid "Convert images to WebP format. Supported by all modern browsers."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1490
-#: includes/admin/class-admin-settings.php:1495
+#: includes/admin/class-admin-settings.php:1384
 msgid "AVIF"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1491
-#: includes/admin/class-admin-settings.php:1495
+#: includes/admin/class-admin-settings.php:1385
 msgid ""
 "Convert images to AVIF format. Offers superior compression but requires more "
 "processing time."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1499
+#: includes/admin/class-admin-settings.php:1391
 msgid ""
 "Your server does not support AVIF conversion — AVIF will be skipped even if "
 "enabled. (Requires GD with AVIF support or ImageMagick with AVIF.)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1504
+#: includes/admin/class-admin-settings.php:1396
 msgid "Quality Mode"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1506
+#: includes/admin/class-admin-settings.php:1398
 msgid "Lossy"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1507
+#: includes/admin/class-admin-settings.php:1399
 msgid "Lossless"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1508
+#: includes/admin/class-admin-settings.php:1400
 msgid "Custom"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1512
+#: includes/admin/class-admin-settings.php:1404
 msgid "WebP Quality"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1516
+#: includes/admin/class-admin-settings.php:1409
 msgid "AVIF Quality"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1527
+#: includes/admin/class-admin-settings.php:1417
 msgid "Delivery Method"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1529
+#: includes/admin/class-admin-settings.php:1419
 msgid "Rewrite (.htaccess)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1530
+#: includes/admin/class-admin-settings.php:1420
 msgid "<picture> Tag"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1531
+#: includes/admin/class-admin-settings.php:1421
 msgid "URL Replacement"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1535
+#: includes/admin/class-admin-settings.php:1425
 msgid "Conversion Engine"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1537
+#: includes/admin/class-admin-settings.php:1427
 msgid "Auto (Imagick, then GD)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1545
+#: includes/admin/class-admin-settings.php:1435
 msgid "Target Folders"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1548
+#: includes/admin/class-admin-settings.php:1438
 msgid "Uploads (wp-content/uploads)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1552
+#: includes/admin/class-admin-settings.php:1442
 msgid "Themes (wp-content/themes)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1556
+#: includes/admin/class-admin-settings.php:1446
 msgid "Plugins (wp-content/plugins)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1564
+#: includes/admin/class-admin-settings.php:1454
 msgid "Auto-Optimize on Upload"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1565
+#: includes/admin/class-admin-settings.php:1455
 msgid ""
 "Automatically convert images when they are uploaded to the media library."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1572
+#: includes/admin/class-admin-settings.php:1462
 msgid "Delete Larger Conversions"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1573
+#: includes/admin/class-admin-settings.php:1463
 msgid ""
 "If the converted file is larger than the original, delete it automatically."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1580
+#: includes/admin/class-admin-settings.php:1470
 msgid "Exclude PNG Files"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1581
+#: includes/admin/class-admin-settings.php:1471
 msgid ""
 "Skip PNG images during conversion. Useful for PNGs with transparency or "
 "sharp graphics where WebP/AVIF offers little benefit. JPEG images are still "
 "converted."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1591
+#: includes/admin/class-admin-settings.php:1481
 msgid "Bulk Image Optimization"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1592
+#: includes/admin/class-admin-settings.php:1482
 msgid ""
 "Scan and optimize existing images in your media library. Progress is saved — "
 "you can pause and resume at any time."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1594
+#: includes/admin/class-admin-settings.php:1484
 msgid "Scan for Unoptimized Images"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1602
+#: includes/admin/class-admin-settings.php:1492
 msgid "Progress"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1640
+#: includes/admin/class-admin-settings.php:1530
 msgid "Scanning…"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1641
+#: includes/admin/class-admin-settings.php:1531
 msgid "No unoptimized images found."
 msgstr ""
 
-#. translators: %1$d: number of images processed so far, %2$d: total number of images.
-#: includes/admin/class-admin-settings.php:1642
+#: includes/admin/class-admin-settings.php:1532
 #, php-format
 msgid "Converting %1$d / %2$d…"
 msgstr ""
 
-#. translators: %d: number of images processed.
-#: includes/admin/class-admin-settings.php:1643
+#: includes/admin/class-admin-settings.php:1533
 #, php-format
 msgid "Done. Processed %d images."
 msgstr ""
 
-#. translators: %s: error message.
-#: includes/admin/class-admin-settings.php:1644
+#: includes/admin/class-admin-settings.php:1534
 #, php-format
 msgid "Error: %s"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1645
+#: includes/admin/class-admin-settings.php:1535
 msgid "unknown error"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1646
+#: includes/admin/class-admin-settings.php:1536
 msgid "network error"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1739
+#: includes/admin/class-admin-settings.php:1629
 msgid "CDN"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1746
+#: includes/admin/class-admin-settings.php:1636
 msgid "CDN URL Rewriting"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1747
+#: includes/admin/class-admin-settings.php:1637
 msgid "Enable CDN"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1747
+#: includes/admin/class-admin-settings.php:1637
 msgid ""
 "Rewrite URLs for static assets (images, CSS, JS) to be served from your CDN "
 "hostname. Works with any pull-zone CDN (BunnyCDN, CloudFront, KeyCDN, "
 "StackPath, etc.)."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1748
+#: includes/admin/class-admin-settings.php:1638
 msgid "Rewrite Relative URLs"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1748
+#: includes/admin/class-admin-settings.php:1638
 msgid ""
 "Also rewrite relative URLs (starting with /) in src and href attributes. "
 "Disable if your theme uses relative URLs for non-asset links."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1750
+#: includes/admin/class-admin-settings.php:1640
 msgid "CDN Hostname(s)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1752
+#: includes/admin/class-admin-settings.php:1642
 msgid ""
 "One hostname per line (without https://). Multiple hostnames enable domain "
 "sharding — assets are distributed across them in round-robin."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1755
+#: includes/admin/class-admin-settings.php:1645
 msgid "Include Directories"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1757
+#: includes/admin/class-admin-settings.php:1647
 msgid ""
 "Comma-separated directory names. Only URLs containing these paths will be "
 "rewritten. Default: wp-content,wp-includes"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1760
+#: includes/admin/class-admin-settings.php:1650
 msgid "Exclude Patterns"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1762
+#: includes/admin/class-admin-settings.php:1652
 msgid ""
 "One pattern per line. URLs containing these strings will not be rewritten to "
 "the CDN."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1769
+#: includes/admin/class-admin-settings.php:1659
 msgid "Cloudflare Cache Sync"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1769
+#: includes/admin/class-admin-settings.php:1659
 msgid ""
 "Automatically purge Cloudflare cache when Prime Cache is cleared. Supports "
 "full zone purge and per-URL purge (up to 30 URLs per API call, batched "
@@ -1788,57 +1541,57 @@ msgid ""
 "deferred to a background task."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1771
+#: includes/admin/class-admin-settings.php:1661
 msgid "Zone ID"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1773
+#: includes/admin/class-admin-settings.php:1663
 msgid ""
 "Find this in Cloudflare dashboard > your domain > Overview (right sidebar)."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1776
+#: includes/admin/class-admin-settings.php:1666
 msgid "Authentication Method"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1778
+#: includes/admin/class-admin-settings.php:1668
 msgid "API Token (recommended)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1779
+#: includes/admin/class-admin-settings.php:1669
 msgid "Global API Key + Email"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1783
+#: includes/admin/class-admin-settings.php:1673
 msgid "API Token or Global API Key"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1786
+#: includes/admin/class-admin-settings.php:1676
 msgid ""
 "API Token: Create a custom token with \"Zone > Cache Purge > Purge\" "
 "permission. Global API Key: Use with the email address below. Can also be "
 "set via PRIME_CACHE_CF_API_TOKEN constant."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1789
+#: includes/admin/class-admin-settings.php:1679
 msgid "Cloudflare Account Email"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1791
+#: includes/admin/class-admin-settings.php:1681
 msgid ""
 "Required only when using Global API Key authentication. Not needed for API "
 "Token."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1822
+#: includes/admin/class-admin-settings.php:1712
 msgid "Cache Preloading"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1825
+#: includes/admin/class-admin-settings.php:1715
 msgid "Partial preload:"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1825
+#: includes/admin/class-admin-settings.php:1715
 msgid ""
 "Vary Cookies are active. Preloading can only warm the default (no-cookie) "
 "variant for each URL. Cookie-specific cache files (e.g. for currency, "
@@ -1847,69 +1600,69 @@ msgid ""
 "— not a bug."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1828
+#: includes/admin/class-admin-settings.php:1718
 msgid "Enable Cache Preloading"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1830
+#: includes/admin/class-admin-settings.php:1720
 msgid ""
 "Automatically crawl your site to warm the default cache variant (desktop and "
 "mobile). Cookie-specific variants cannot be preloaded and are generated on "
 "the first real visitor request with that cookie value."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1832
+#: includes/admin/class-admin-settings.php:1722
 msgid ""
 "Automatically crawl your site in the background to warm the page cache. "
 "Pages are preloaded via non-blocking HTTP requests so visitors always "
 "receive cached pages. Preloading restarts after a full cache purge."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1835
+#: includes/admin/class-admin-settings.php:1725
 msgid "Preload Homepage"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1835
+#: includes/admin/class-admin-settings.php:1725
 msgid "Include the front page, posts page, and home URL in the preload queue."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1836
+#: includes/admin/class-admin-settings.php:1726
 msgid "Preload Public Posts"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1836
+#: includes/admin/class-admin-settings.php:1726
 msgid ""
 "Preload published posts, pages, and custom post types (most recently "
 "modified first)."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1837
+#: includes/admin/class-admin-settings.php:1727
 msgid "Preload Taxonomies"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1837
+#: includes/admin/class-admin-settings.php:1727
 msgid "Preload category, tag, and custom taxonomy archive pages."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1841
+#: includes/admin/class-admin-settings.php:1731
 msgid "Max Posts"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1845
+#: includes/admin/class-admin-settings.php:1735
 msgid "Max Terms"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1849
+#: includes/admin/class-admin-settings.php:1739
 msgid ""
 "Maximum number of posts and taxonomy terms to include in each preload cycle. "
 "Higher values warm more pages but take longer to complete."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1852
+#: includes/admin/class-admin-settings.php:1742
 msgid "Preloader Request Interval (seconds)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1854
+#: includes/admin/class-admin-settings.php:1744
 msgid ""
 "Delay between each preload batch. Each batch sends up to 10 URLs in "
 "sequence, then waits this many seconds before the next batch via WP-Cron. "
@@ -1919,26 +1672,26 @@ msgid ""
 "is detected."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1857
+#: includes/admin/class-admin-settings.php:1747
 msgid "Preload Excluded URLs"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1859
+#: includes/admin/class-admin-settings.php:1749
 msgid ""
 "URL path patterns to skip during preloading, one per line. A line matches "
 "when it appears anywhere in the URL path; use * as a wildcard for any "
 "sequence (for example, /private-area/*)."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1865
+#: includes/admin/class-admin-settings.php:1755
 msgid "Preload Links"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1866
+#: includes/admin/class-admin-settings.php:1756
 msgid "Enable Link Prefetching"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1866
+#: includes/admin/class-admin-settings.php:1756
 msgid ""
 "Inject a lightweight JavaScript that prefetches internal links when the user "
 "hovers over them or when they enter the viewport. The browser downloads the "
@@ -1946,131 +1699,15 @@ msgid ""
 "second. Excluded: admin, login, cart, checkout, and external links."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1873
-msgid "Sitemap Preloading"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1874
-msgid "Enable Sitemap Preloading"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1874
-msgid ""
-"Use your XML sitemap to discover and preload all URLs. More reliable than "
-"the default post/taxonomy crawl for sites with custom post types or complex "
-"URL structures."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1876
-msgid "Sitemap URL"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1878
-msgid ""
-"Full URL to your XML sitemap. Leave empty to use the WordPress default "
-"sitemap."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1884
-msgid "Speculation Rules"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1885
-msgid "Enable Speculation Rules"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1885
-msgid ""
-"Use the Speculation Rules API to prerender or prefetch pages. Supported by "
-"Chromium-based browsers (Chrome, Edge). Provides near-instant page "
-"transitions."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1890
-msgid "Font Preloading"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1891
-msgid "Preload Fonts"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1891
-msgid ""
-"Add preload hints for font files used in above-the-fold content. Reduces "
-"font loading delay and prevents flash of invisible text (FOIT)."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1896
-msgid "LCP Optimization"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1897
-msgid "Optimize Largest Contentful Paint"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1897
-msgid ""
-"Automatically detect and preload the LCP image for each page. Adds "
-"fetchpriority=\"high\" and a preload link to accelerate the largest visible "
-"element."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1901
-msgid "URL patterns to exclude from LCP optimization. One per line."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1907
-msgid "Preload Critical Resources"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1909
-msgid "Resources to Preload"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1911
-msgid ""
-"One URL per line. These resources will be preloaded via <link "
-"rel=\"preload\"> in the page head. Use for critical fonts, images, or "
-"scripts that are discovered late by the browser."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1917
-msgid "Prefetch DNS"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1919
-msgid "Domains to Prefetch"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1921
-msgid ""
-"One domain per line (with //). DNS resolution is performed in advance so "
-"that external resources load faster when requested."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1927
-msgid "Preconnect"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1929
-msgid "Origins to Preconnect"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1931
-msgid ""
-"One origin per line. Establishes early connections (DNS + TCP + TLS) to "
-"important third-party origins before the browser needs them."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:1949
+#: includes/admin/class-admin-settings.php:1773
 msgid "Query Parameters"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1950
+#: includes/admin/class-admin-settings.php:1774
 msgid "Ignored Query Parameters"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1950
+#: includes/admin/class-admin-settings.php:1774
 msgid ""
 "Comma-separated parameter names. These parameters are stripped and the same "
 "cache is served as if they were absent. Register ad-tracking parameters "
@@ -2080,11 +1717,11 @@ msgid ""
 "fast but not zero-PHP."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1951
+#: includes/admin/class-admin-settings.php:1775
 msgid "Cached Query Parameters"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1951
+#: includes/admin/class-admin-settings.php:1775
 msgid ""
 "Comma-separated parameter names. Each unique value generates a separate "
 "cache file. For example, specifying <code>lang</code> creates separate "
@@ -2095,15 +1732,15 @@ msgid ""
 "in to ensure correct variant selection (still very fast, but not zero-PHP)."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1953
+#: includes/admin/class-admin-settings.php:1777
 msgid "Cookie-based Cache Splitting"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1954
+#: includes/admin/class-admin-settings.php:1778
 msgid "Vary Cookie Names"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1954
+#: includes/admin/class-admin-settings.php:1778
 msgid ""
 "Comma-separated cookie names. Different cache files are generated based on "
 "each cookie's value, even for the same URL. For example, specifying the "
@@ -2114,15 +1751,15 @@ msgid ""
 "served via the drop-in to ensure correct variant selection."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1956
+#: includes/admin/class-admin-settings.php:1780
 msgid "Purge Settings"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1957
+#: includes/admin/class-admin-settings.php:1781
 msgid "Always Purge URLs"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1957
+#: includes/admin/class-admin-settings.php:1781
 msgid ""
 "One URL per line. Whenever any post is published, updated, trashed, or "
 "deleted, caches for these URLs are also cleared in addition to the standard "
@@ -2131,33 +1768,33 @@ msgid ""
 "are not auto-detected."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1972
+#: includes/admin/class-admin-settings.php:1796
 msgid "Allow"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1973
+#: includes/admin/class-admin-settings.php:1797
 msgid "Reduce Frequency"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1974
-#: includes/admin/class-admin-settings.php:2770
-#: includes/admin/class-admin-settings.php:2785
+#: includes/admin/class-admin-settings.php:1798
+#: includes/admin/class-admin-settings.php:2594
+#: includes/admin/class-admin-settings.php:2609
 msgid "Disable"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1977
+#: includes/admin/class-admin-settings.php:1801
 msgid "Heartbeat"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1983
+#: includes/admin/class-admin-settings.php:1807
 msgid "Heartbeat API Control"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1988
+#: includes/admin/class-admin-settings.php:1812
 msgid "Control Heartbeat API"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1989
+#: includes/admin/class-admin-settings.php:1813
 msgid ""
 "The WordPress Heartbeat API sends periodic AJAX requests (wp-admin/admin-"
 "ajax.php) to keep sessions alive, auto-save drafts, and show real-time "
@@ -2165,190 +1802,189 @@ msgid ""
 "especially on shared hosting."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:1999
+#: includes/admin/class-admin-settings.php:1823
 msgid "Frontend"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2001
+#: includes/admin/class-admin-settings.php:1825
 msgid ""
 "Heartbeat on public-facing pages. Usually unnecessary — disabling is "
 "recommended for most sites."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2009
-#: includes/admin/class-admin-settings.php:2030
+#: includes/admin/class-admin-settings.php:1833
+#: includes/admin/class-admin-settings.php:1854
 msgid "Interval:"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2020
+#: includes/admin/class-admin-settings.php:1844
 msgid "Admin Dashboard"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2022
+#: includes/admin/class-admin-settings.php:1846
 msgid ""
 "Heartbeat on wp-admin pages (excluding the post editor). Reducing to 120 "
 "seconds is a good balance between functionality and server load."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2041
+#: includes/admin/class-admin-settings.php:1865
 msgid "Post Editor"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2043
+#: includes/admin/class-admin-settings.php:1867
 msgid ""
 "Heartbeat on the post/page editor. Required for auto-save, post locking, and "
 "real-time collaboration. Disabling may cause data loss — \"Allow\" is "
 "strongly recommended."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2087
-#: includes/admin/class-admin-settings.php:2095
+#: includes/admin/class-admin-settings.php:1911
+#: includes/admin/class-admin-settings.php:1919
 msgid "Database"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2088
+#: includes/admin/class-admin-settings.php:1912
 msgid "Database optimization requires Prime Cache Pro."
 msgstr ""
 
-#. translators: %s: number of items cleaned up
-#: includes/admin/class-admin-settings.php:2101
+#: includes/admin/class-admin-settings.php:1925
 #, php-format
 msgid ""
 "Database cleanup processed %s items (max 1,000 per task). Run again if more "
 "remain."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2112
+#: includes/admin/class-admin-settings.php:1936
 msgid "Post Cleanup"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2115
+#: includes/admin/class-admin-settings.php:1939
 msgid "Revisions"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2115
+#: includes/admin/class-admin-settings.php:1939
 msgid ""
 "Delete all post revisions. Revisions are saved every time you update a post "
 "and can accumulate over time."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2116
+#: includes/admin/class-admin-settings.php:1940
 msgid "Auto Drafts"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2116
+#: includes/admin/class-admin-settings.php:1940
 msgid ""
 "Delete auto-draft posts created automatically by WordPress when you start "
 "writing a new post. These are never published."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2117
+#: includes/admin/class-admin-settings.php:1941
 msgid "Trashed Posts"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2117
+#: includes/admin/class-admin-settings.php:1941
 msgid ""
 "Permanently delete posts that are in the trash. These are already removed "
 "from the site but still occupy database space."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2134
+#: includes/admin/class-admin-settings.php:1958
 msgid "Comments Cleanup"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2137
+#: includes/admin/class-admin-settings.php:1961
 msgid "Spam Comments"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2137
+#: includes/admin/class-admin-settings.php:1961
 msgid ""
 "Permanently delete all comments marked as spam. These comments have already "
 "been filtered out but remain in the database."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2138
+#: includes/admin/class-admin-settings.php:1962
 msgid "Trashed Comments"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2138
+#: includes/admin/class-admin-settings.php:1962
 msgid "Permanently delete comments that are in the trash."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2155
+#: includes/admin/class-admin-settings.php:1979
 msgid "Transients Cleanup"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2158
+#: includes/admin/class-admin-settings.php:1982
 msgid "Expired Transients"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2158
+#: includes/admin/class-admin-settings.php:1982
 msgid ""
 "Delete only expired transients. These are temporary options that have passed "
 "their timeout and are no longer needed. Safe to clean."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2159
+#: includes/admin/class-admin-settings.php:1983
 msgid "All Transients"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2159
+#: includes/admin/class-admin-settings.php:1983
 msgid ""
 "Delete all transients, including active ones. Transients are recreated as "
 "needed by plugins and WordPress core. Use with caution — may briefly slow "
 "down the site while they regenerate."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2176
+#: includes/admin/class-admin-settings.php:2000
 msgid "Database Tables"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2181
+#: includes/admin/class-admin-settings.php:2005
 msgid "Optimize Tables"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2182
+#: includes/admin/class-admin-settings.php:2006
 msgid ""
 "Run OPTIMIZE TABLE on non-InnoDB WordPress tables with fragmented space. "
 "InnoDB tables are excluded because they handle fragmentation internally and "
 "OPTIMIZE can cause heavy table rebuilds on large tables."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2189
+#: includes/admin/class-admin-settings.php:2013
 msgid "Automatic Cleanup"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2194
+#: includes/admin/class-admin-settings.php:2018
 msgid "Schedule Automatic Cleanup"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2195
+#: includes/admin/class-admin-settings.php:2019
 msgid ""
 "Automatically run all enabled cleanup tasks above on a schedule via WP-Cron. "
 "Only the options toggled on above will be cleaned."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2199
+#: includes/admin/class-admin-settings.php:2023
 msgid "Cleanup Frequency"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2201
+#: includes/admin/class-admin-settings.php:2025
 msgid "Daily"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2202
+#: includes/admin/class-admin-settings.php:2026
 msgid "Weekly"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2203
+#: includes/admin/class-admin-settings.php:2027
 msgid "Monthly"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2212
+#: includes/admin/class-admin-settings.php:2036
 msgid "Please back up your database before running cleanup."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2213
+#: includes/admin/class-admin-settings.php:2037
 msgid ""
 "Database cleanup operations permanently delete data such as revisions, "
 "drafts, and comments. These actions cannot be undone. We strongly recommend "
@@ -2356,21 +1992,21 @@ msgid ""
 "plugin before proceeding."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2220
+#: includes/admin/class-admin-settings.php:2044
 msgid ""
 "Run database cleanup now? Up to 1,000 items will be processed per run. This "
 "cannot be undone."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2221
+#: includes/admin/class-admin-settings.php:2045
 msgid "Run Cleanup Now"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2245
+#: includes/admin/class-admin-settings.php:2069
 msgid "Post Publish / Update"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2245
+#: includes/admin/class-admin-settings.php:2069
 msgid ""
 "Clear related caches when a post, page, or custom post type is published or "
 "updated. Purges the post URL, home page, posts page, author archive, term "
@@ -2378,137 +2014,137 @@ msgid ""
 "page/2/, etc.) is left for natural expiry to preserve cache hit rate."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2246
+#: includes/admin/class-admin-settings.php:2070
 msgid "Post Trash / Delete"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2246
+#: includes/admin/class-admin-settings.php:2070
 msgid ""
 "Clear related caches when a post is moved to trash or permanently deleted."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2247
+#: includes/admin/class-admin-settings.php:2071
 msgid "Comment Changes"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2247
+#: includes/admin/class-admin-settings.php:2071
 msgid ""
 "Clear the post page, home page, and posts page cache when a comment is "
 "posted, approved, edited, trashed, or deleted. (Home/posts page cleared "
 "because they typically display comment counts and recent-comments widgets.)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2248
+#: includes/admin/class-admin-settings.php:2072
 msgid "Term Changes"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2248
+#: includes/admin/class-admin-settings.php:2072
 msgid ""
 "Clear the term archive (including pagination), home page, and posts page "
 "when a category, tag, or custom taxonomy term is created, edited, or deleted."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2249
+#: includes/admin/class-admin-settings.php:2073
 msgid "Theme Switch"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2249
+#: includes/admin/class-admin-settings.php:2073
 msgid ""
 "Clear the entire cache when the active theme is changed. Theme changes "
 "typically affect all pages."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2250
+#: includes/admin/class-admin-settings.php:2074
 msgid "Permalink Change"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2250
+#: includes/admin/class-admin-settings.php:2074
 msgid ""
 "Clear the entire cache when the permalink structure is updated. All cached "
 "URLs become invalid."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2251
+#: includes/admin/class-admin-settings.php:2075
 msgid "Plugin Activate / Deactivate"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2251
+#: includes/admin/class-admin-settings.php:2075
 msgid ""
 "Clear the entire cache when any plugin is activated or deactivated. Plugin "
 "changes may alter page output, menus, or widgets."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2252
+#: includes/admin/class-admin-settings.php:2076
 msgid "Customizer Save"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2252
+#: includes/admin/class-admin-settings.php:2076
 msgid ""
 "Clear the entire cache when theme customizer settings are saved. Changes to "
 "site identity, colors, layouts, and header/footer affect all pages."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2253
+#: includes/admin/class-admin-settings.php:2077
 msgid "Widget Update"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2253
+#: includes/admin/class-admin-settings.php:2077
 msgid ""
 "Clear the entire cache when widgets are added, removed, or rearranged. "
 "Widgets appear on multiple pages via sidebars and footers."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2254
+#: includes/admin/class-admin-settings.php:2078
 msgid "Navigation Menu Update"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2254
+#: includes/admin/class-admin-settings.php:2078
 msgid ""
 "Clear the entire cache when a navigation menu is created, edited, or "
 "deleted. Menus are typically displayed on every page."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2255
+#: includes/admin/class-admin-settings.php:2079
 msgid "WordPress Core Update"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2255
+#: includes/admin/class-admin-settings.php:2079
 msgid ""
 "Clear the entire cache after WordPress core is updated. Core updates may "
 "change HTML output, scripts, and styles."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2256
+#: includes/admin/class-admin-settings.php:2080
 msgid "User Profile Update"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2256
+#: includes/admin/class-admin-settings.php:2080
 msgid ""
 "Clear the author archive (including pagination), home page, and posts page "
 "when a user profile is updated or a user is deleted."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2260
+#: includes/admin/class-admin-settings.php:2084
 msgid ""
 "Choose which WordPress events automatically clear the cache. Disabling a "
 "trigger means that event will no longer purge cached pages."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2267
+#: includes/admin/class-admin-settings.php:2091
 msgid "Purge Triggers"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2286
+#: includes/admin/class-admin-settings.php:2110
 msgid ""
 "Note: When .htaccess Optimization is enabled, only simple patterns are used "
 "in the .htaccess fast-path."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2288
+#: includes/admin/class-admin-settings.php:2112
 msgid "URL patterns to never cache"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2288
+#: includes/admin/class-admin-settings.php:2112
 msgid ""
 "Enter URL path patterns separated by <code>|</code>. Use <code>*</code> as a "
 "wildcard. Matched URLs are always dynamically generated by WordPress. "
@@ -2516,89 +2152,86 @@ msgid ""
 "specific content."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2289
+#: includes/admin/class-admin-settings.php:2113
 msgid "Cookies that disable caching"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2289
+#: includes/admin/class-admin-settings.php:2113
 msgid ""
 "Enter cookie name patterns separated by <code>|</code>. Use <code>*</code> "
 "as a wildcard. When any listed cookie is present, the request is not cached. "
 "WordPress login cookies are excluded automatically."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2290
+#: includes/admin/class-admin-settings.php:2114
 msgid "User agents to never cache"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2290
+#: includes/admin/class-admin-settings.php:2114
 msgid ""
 "Enter user-agent patterns separated by <code>|</code>. Use <code>*</code> as "
 "a wildcard. Matched browsers or crawlers receive uncached responses."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2291
+#: includes/admin/class-admin-settings.php:2115
 msgid "Referrers to never cache"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2291
+#: includes/admin/class-admin-settings.php:2115
 msgid ""
 "Enter referrer URL patterns separated by <code>|</code>. Use <code>*</code> "
 "as a wildcard. Requests from matching referrers are excluded from the cache."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2298
+#: includes/admin/class-admin-settings.php:2122
 msgid "Wildcard"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2316
+#: includes/admin/class-admin-settings.php:2140
 msgid "Settings imported successfully."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2318
+#: includes/admin/class-admin-settings.php:2142
 msgid "Settings imported with warnings."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2332
+#: includes/admin/class-admin-settings.php:2156
 msgid "Import failed. Please upload a valid Prime Cache settings JSON file."
 msgstr ""
 
-#. translators: %s: preset name (e.g. "Standard", "Aggressive")
-#: includes/admin/class-admin-settings.php:2339
+#: includes/admin/class-admin-settings.php:2163
 #, php-format
 msgid "\"%s\" preset applied successfully."
 msgstr ""
 
-#. translators: %s: preset name supplied by the user
-#: includes/admin/class-admin-settings.php:2345
+#: includes/admin/class-admin-settings.php:2169
 #, php-format
 msgid "Unknown preset \"%s\". No changes were made."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2351
+#: includes/admin/class-admin-settings.php:2175
 msgid "Optimization Presets"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2352
+#: includes/admin/class-admin-settings.php:2176
 msgid ""
 "Quickly apply a preset configuration based on your comfort level. You can "
 "customize individual settings afterward."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2363
-#: includes/admin/class-admin-settings.php:2376
+#: includes/admin/class-admin-settings.php:2187
+#: includes/admin/class-admin-settings.php:2200
 msgid "Auto"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2364
+#: includes/admin/class-admin-settings.php:2188
 msgid ""
 "Recommended — analyzes your environment and applies optimal settings "
 "automatically."
 msgstr ""
 
-#. translators: %s: preset name
-#: includes/admin/class-admin-settings.php:2376
-#: includes/admin/class-admin-settings.php:2412
+#: includes/admin/class-admin-settings.php:2200
+#: includes/admin/class-admin-settings.php:2236
 #, php-format
 msgid ""
 "Apply the \"%s\" preset? Settings included in the preset will overwrite your "
@@ -2606,37 +2239,37 @@ msgid ""
 "additional purge URLs, etc.) are preserved."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2377
+#: includes/admin/class-admin-settings.php:2201
 msgid "Apply Auto Preset"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2386
+#: includes/admin/class-admin-settings.php:2210
 msgid "Safe"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2387
+#: includes/admin/class-admin-settings.php:2211
 msgid ""
 "Minimal risk. Enables page caching, gzip compression, browser caching, and "
 "lazy loading. No file optimization or advanced features. Recommended for "
 "beginners or production sites that need stability."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2392
+#: includes/admin/class-admin-settings.php:2216
 msgid "Balanced"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2393
+#: includes/admin/class-admin-settings.php:2217
 msgid ""
 "Good performance with low risk. Adds HTML/CSS/JS minification, link "
 "prefetching, defer JS, query-string removal, emoji removal, embed removal, "
 "and .htaccess optimization on top of Safe settings."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2398
+#: includes/admin/class-admin-settings.php:2222
 msgid "Aggressive"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2399
+#: includes/admin/class-admin-settings.php:2223
 msgid ""
 "Maximum performance. Adds defer/delay JS, async CSS, separate mobile cache, "
 "preloading, lazy load for iframes/videos, and disables unused WordPress "
@@ -2645,41 +2278,41 @@ msgid ""
 "exclusion rules for compatibility."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2413
+#: includes/admin/class-admin-settings.php:2237
 msgid "Apply"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2422
+#: includes/admin/class-admin-settings.php:2246
 msgid "Import / Export Settings"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2424
+#: includes/admin/class-admin-settings.php:2248
 msgid "Export"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2425
+#: includes/admin/class-admin-settings.php:2249
 msgid "Download Settings (JSON)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2426
+#: includes/admin/class-admin-settings.php:2250
 msgid ""
 "Export all Prime Cache settings as a JSON file. Use this to back up your "
 "configuration or transfer it to another site."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2429
-#: includes/admin/class-admin-settings.php:2434
+#: includes/admin/class-admin-settings.php:2253
+#: includes/admin/class-admin-settings.php:2258
 msgid "Import"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2433
+#: includes/admin/class-admin-settings.php:2257
 msgid ""
 "Import will overwrite settings included in the JSON. Settings the JSON does "
 "not mention (and Cloudflare/Sucuri API keys absent from the file) are kept "
 "at their current values. Continue?"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2437
+#: includes/admin/class-admin-settings.php:2261
 msgid ""
 "Upload a previously exported Prime Cache settings JSON file. Settings "
 "included in the JSON overwrite their current values; settings the JSON does "
@@ -2687,56 +2320,56 @@ msgid ""
 "preserved."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2443
+#: includes/admin/class-admin-settings.php:2267
 msgid "Reset All Settings"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2444
+#: includes/admin/class-admin-settings.php:2268
 msgid ""
 "Delete all Prime Cache settings and restore them to factory defaults. This "
 "does not delete cached files — use \"Clear All Cache\" from the admin bar "
 "for that."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2445
+#: includes/admin/class-admin-settings.php:2269
 msgid ""
 "This will reset ALL settings to defaults. This cannot be undone. Continue?"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2446
+#: includes/admin/class-admin-settings.php:2270
 msgid "Reset to Defaults"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2456
+#: includes/admin/class-admin-settings.php:2280
 msgid "Security Headers"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2458
+#: includes/admin/class-admin-settings.php:2282
 msgid ""
 "Security headers require .htaccess Optimization to be enabled on the Page "
 "Cache tab. Without it, these headers will not be added to responses."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2460
+#: includes/admin/class-admin-settings.php:2284
 msgid "HTTP Strict Transport Security (HSTS)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2460
+#: includes/admin/class-admin-settings.php:2284
 msgid ""
 "Force browsers to use HTTPS for all future connections. Only enable if your "
 "site fully supports HTTPS. Includes includeSubDomains and preload "
 "directives. Requires .htaccess Optimization on the Page Cache tab."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2473
+#: includes/admin/class-admin-settings.php:2297
 msgid "HSTS Max-Age"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2498
+#: includes/admin/class-admin-settings.php:2322
 msgid "Security Response Headers"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2498
+#: includes/admin/class-admin-settings.php:2322
 msgid ""
 "Add X-Content-Type-Options (nosniff), X-Frame-Options (SAMEORIGIN), X-XSS-"
 "Protection, Referrer-Policy, and Permissions-Policy headers. Protects "
@@ -2744,141 +2377,143 @@ msgid ""
 "Requires .htaccess Optimization on the Page Cache tab."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2503
+#: includes/admin/class-admin-settings.php:2327
 msgid "Debug"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2504
+#: includes/admin/class-admin-settings.php:2328
 msgid "Enable Debug Logging"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2504
+#: includes/admin/class-admin-settings.php:2328
 msgid ""
 "Log cache purge operations (PURGE ALL, PURGE URL) to wp-content/cache/prime-"
 "cache/debug.log. Useful for troubleshooting cache invalidation. Disable in "
 "production as it increases disk I/O."
 msgstr ""
 
-#. translators: %s: log file size (e.g. "2.5 MB")
-#: includes/admin/class-admin-settings.php:2513
+#: includes/admin/class-admin-settings.php:2337
 #, php-format
 msgid "Log file size: %s"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2525
+#: includes/admin/class-admin-settings.php:2349
 msgid "System Information"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2526
+#: includes/admin/class-admin-settings.php:2350
 msgid ""
 "Copy and paste this information when reporting bugs or requesting support."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2529
+#: includes/admin/class-admin-settings.php:2353
 msgid "Copied!"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2529
-#: includes/admin/class-admin-settings.php:2530
+#: includes/admin/class-admin-settings.php:2353
+#: includes/admin/class-admin-settings.php:2354
 msgid "Copy to Clipboard"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2712
+#: includes/admin/class-admin-settings.php:2536
 msgid ""
 "Shared memory within PHP processes. Ideal for single-server environments."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2721
+#: includes/admin/class-admin-settings.php:2545
 msgid ""
 "High-performance in-memory data store. Supports persistence and replication."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2730
+#: includes/admin/class-admin-settings.php:2554
 msgid "Distributed memory cache. Ideal for sharing across multiple servers."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2740
+#: includes/admin/class-admin-settings.php:2563
+#: includes/class-prime-cache.php:1211 includes/class-prime-cache.php:1487
+msgid "Object Cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:2564
 msgid "Object cache settings have been updated."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2741
+#: includes/admin/class-admin-settings.php:2565
 msgid ""
 "Object cache switch failed. Another plugin may be managing object-cache.php, "
 "or the required PHP extension is not available."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2748
+#: includes/admin/class-admin-settings.php:2572
 msgid "Object Cache: Disabled"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2750
+#: includes/admin/class-admin-settings.php:2574
 msgid "Object Cache: Managed by another plugin"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2752
+#: includes/admin/class-admin-settings.php:2576
 msgid "Object Cache: Backend file missing"
 msgstr ""
 
-#. translators: %s: object cache backend name (e.g. "REDIS", "MEMCACHED")
-#: includes/admin/class-admin-settings.php:2755
+#: includes/admin/class-admin-settings.php:2579
 #, php-format
 msgid "Object Cache: Active via %s"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2760
+#: includes/admin/class-admin-settings.php:2584
 msgid "Select a backend to enable object caching."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2762
+#: includes/admin/class-admin-settings.php:2586
 msgid "Another plugin's object-cache.php was detected."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2764
+#: includes/admin/class-admin-settings.php:2588
 msgid ""
 "Prime Cache's object-cache.php is installed, but the referenced backend file "
 "is unreadable. Disable and re-enable the backend to repair, or switch to "
 "another option."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2766
+#: includes/admin/class-admin-settings.php:2590
 msgid "Database query results are being cached in memory."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2778
+#: includes/admin/class-admin-settings.php:2602
 msgid "Not Found"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2779
+#: includes/admin/class-admin-settings.php:2603
 msgid "Available"
 msgstr ""
 
-#. translators: %s: PHP extension name (e.g. "redis", "memcached")
-#: includes/admin/class-admin-settings.php:2783
+#: includes/admin/class-admin-settings.php:2607
 #, php-format
 msgid "Ext: %s"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2786
+#: includes/admin/class-admin-settings.php:2610
 msgid "Enable"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2795
+#: includes/admin/class-admin-settings.php:2619
 msgid "PHP Extension Required"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2797
+#: includes/admin/class-admin-settings.php:2621
 msgid "Backend Not Bundled (Pro)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2799
+#: includes/admin/class-admin-settings.php:2623
 msgid "Not Available"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2808
+#: includes/admin/class-admin-settings.php:2632
 msgid "What is Object Cache?"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2808
+#: includes/admin/class-admin-settings.php:2632
 msgid ""
 "WordPress executes many database queries during page generation. Object "
 "cache stores query results in memory, returning subsequent requests for the "
@@ -2886,127 +2521,127 @@ msgid ""
 "many logged-in users or WooCommerce environments with uncacheable pages."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2821
+#: includes/admin/class-admin-settings.php:2645
 msgid "Full zone purge"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2821
+#: includes/admin/class-admin-settings.php:2645
 msgid "URL purge"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2824
+#: includes/admin/class-admin-settings.php:2648
 msgid ""
 "Cloudflare cache purge failed after multiple retries. Cloudflare may still "
 "be serving stale content. Please check your API credentials and try purging "
 "again."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2827
+#: includes/admin/class-admin-settings.php:2651
 msgid "Dismiss"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2836
+#: includes/admin/class-admin-settings.php:2660
 msgid ""
 "Page caching is not supported on WordPress multisite. Other features (file "
 "optimization, lazy load, CDN, etc.) work normally."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2847
+#: includes/admin/class-admin-settings.php:2671
 msgid ""
 "WP_CACHE is not set to true. Page caching will not work. Please check wp-"
 "config.php — another define( 'WP_CACHE', false ) may exist."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2853
+#: includes/admin/class-admin-settings.php:2677
 msgid ""
 "advanced-cache.php is managed by another plugin. Prime Cache page caching "
 "will not work until the other plugin is deactivated or its drop-in is "
 "removed."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2859
-#: includes/admin/class-admin-settings.php:2900
+#: includes/admin/class-admin-settings.php:2683
+#: includes/admin/class-admin-settings.php:2724
 msgid "Cache cleared successfully."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2868
+#: includes/admin/class-admin-settings.php:2692
 msgid "Varnish cache also purged."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2871
+#: includes/admin/class-admin-settings.php:2695
 msgid "Sucuri cache also purged."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2874
+#: includes/admin/class-admin-settings.php:2698
 msgid "Cloudflare cache also purged."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2878
+#: includes/admin/class-admin-settings.php:2702
 msgid ""
 "All caches cleared (page cache, minified files, critical CSS, object cache)."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2879
+#: includes/admin/class-admin-settings.php:2703
 msgid ""
 "All caches cleared. Preloading will start on the next WP-Cron tick "
 "(typically within a minute on a site with regular traffic; longer if WP-Cron "
 "is disabled or driven by a system cron)."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2880
+#: includes/admin/class-admin-settings.php:2704
 msgid ""
 "All caches cleared. Preloading will start on the next WP-Cron tick (default "
 "variant only — Vary Cookies active, so cookie-specific variants will be "
 "generated on first visitor request)."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2881
+#: includes/admin/class-admin-settings.php:2705
 msgid "Page cache cleared successfully."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2882
+#: includes/admin/class-admin-settings.php:2706
 msgid "Minified CSS/JS files cleared successfully."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2883
+#: includes/admin/class-admin-settings.php:2707
 msgid "Critical CSS cache cleared successfully."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2884
+#: includes/admin/class-admin-settings.php:2708
 msgid "Object cache flushed successfully."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2885
+#: includes/admin/class-admin-settings.php:2709
 msgid "This page cache cleared successfully."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2886
+#: includes/admin/class-admin-settings.php:2710
 msgid ""
 "Could not clear cache for the requested URL. The URL may be invalid, point "
 "to a different host, or filesystem permissions prevented removal."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2887
+#: includes/admin/class-admin-settings.php:2711
 msgid "Post cache and related pages cleared successfully."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2888
+#: includes/admin/class-admin-settings.php:2712
 msgid "Varnish cache purge request sent."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2889
+#: includes/admin/class-admin-settings.php:2713
 msgid "Sucuri firewall cache cleared successfully."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2890
+#: includes/admin/class-admin-settings.php:2714
 msgid "Cloudflare cache purged successfully."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2891
+#: includes/admin/class-admin-settings.php:2715
 msgid "Failed to clear Sucuri cache. Check your API key."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2892
+#: includes/admin/class-admin-settings.php:2716
 msgid ""
 "Cache preloading has been scheduled and will start on the next WP-Cron tick "
 "(typically within a minute on a site with regular traffic). If WP-Cron is "
@@ -3014,40 +2649,39 @@ msgid ""
 "delayed accordingly."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2893
+#: includes/admin/class-admin-settings.php:2717
 msgid ""
 "Cache preloading scheduled on the next WP-Cron tick (default variant only). "
 "Cookie-specific variants will be generated on first visitor request."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2894
+#: includes/admin/class-admin-settings.php:2718
 msgid ""
 "Cannot start preload: page caching is disabled. Enable \"Cache Enabled\" in "
 "Page Cache settings first."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2895
+#: includes/admin/class-admin-settings.php:2719
 msgid ""
 "Cannot start preload: preload is disabled. Enable \"Cache Preload\" in "
 "Preload settings first."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2896
+#: includes/admin/class-admin-settings.php:2720
 msgid ""
 "Failed to schedule the preload event. Another plugin or filter may be "
 "blocking WP-Cron event registration. Check your error log or run preload "
 "manually with WP-CLI."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2897
+#: includes/admin/class-admin-settings.php:2721
 msgid "All settings have been reset to defaults."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2906
+#: includes/admin/class-admin-settings.php:2730
 msgid "Statistics have been reset."
 msgstr ""
 
-#. translators: %s: list of plugin names
 #: includes/class-compatibility.php:67
 #, php-format
 msgid ""

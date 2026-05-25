@@ -917,7 +917,7 @@ class Prime_Cache_Image_Converter {
 							$cdir = trim( $cdir );
 							if ( $cdir && is_dir( $cdir ) ) {
 								$creal = realpath( $cdir );
-								if ( $creal && 0 === strpos( $real, rtrim( $creal, '/' ) . '/' ) ) {
+								if ( $creal && 0 === strpos( rtrim( $real, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR, rtrim( $creal, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR ) ) {
 									$allowed = true;
 									break;
 								}
