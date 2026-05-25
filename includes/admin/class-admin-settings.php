@@ -283,6 +283,36 @@ class Prime_Cache_Admin_Settings {
 			$warnings[] = __( 'Delay JavaScript enabled. This is an advanced feature — some interactive elements may not work until user interaction. Add problematic scripts to the exclusion list if needed.', 'prime-cache' );
 		}
 
+		// Add-on features are implemented by a separate add-on, not by this plugin.
+		// Without it active, force their options to off / empty BEFORE the config
+		// file and .htaccess are written below, so a POST or imported settings file
+		// can never leave add-on settings stored — or written into the generated
+		// config / .htaccess — by the free plugin.
+		if ( ! prime_cache_is_pro() ) {
+			$addon_bool_keys = array(
+				'combine_css', 'combine_mobile_only', 'optimize_css_delivery',
+				'remove_unused_css', 'async_css', 'critical_css_auto',
+				'combine_js', 'combine_google_fonts', 'self_host_google_fonts',
+				'preload_sitemap_enabled', 'preload_fonts', 'lcp_optimization',
+				'speculation_rules', 'varnish_enabled', 'sucuri_enabled',
+				'cloudflare_enabled', 'cdn_enabled', 'avif_enabled',
+				'youtube_thumbnail', 'local_analytics', 'heartbeat_enabled',
+				'db_auto_cleanup',
+			);
+			foreach ( $addon_bool_keys as $k ) {
+				$s[ $k ] = false;
+			}
+			$addon_text_keys = array(
+				'critical_css', 'ucss_safelist', 'preload_sitemap', 'lcp_excluded',
+				'prefetch_dns', 'preconnect', 'preload_resources', 'varnish_ip',
+				'sucuri_api_key', 'cloudflare_email', 'cloudflare_api_key',
+				'cloudflare_zone_id', 'cdn_hostname',
+			);
+			foreach ( $addon_text_keys as $k ) {
+				$s[ $k ] = '';
+			}
+		}
+
 		// (Object cache extension validation lives in handle_object_cache_switch()
 		// — that path uses Prime_Cache_Config::get_available_object_caches() to
 		// only allow backends whose PHP extension is loaded. The settings form
@@ -386,36 +416,6 @@ class Prime_Cache_Admin_Settings {
 				implode( ', ', $rejected_regex_fields )
 			);
 			set_transient( 'prime_cache_env_warnings', $existing, 60 );
-		}
-
-		// Add-on features are implemented by a separate add-on, not by this
-		// plugin. Without it active, force their options to off / empty so a POST
-		// or imported settings file can never leave add-on settings stored in the
-		// free plugin (they would have no effect and could look like a gated
-		// feature).
-		if ( ! prime_cache_is_pro() ) {
-			$addon_bool_keys = array(
-				'combine_css', 'combine_mobile_only', 'optimize_css_delivery',
-				'remove_unused_css', 'async_css', 'critical_css_auto',
-				'combine_js', 'combine_google_fonts', 'self_host_google_fonts',
-				'preload_sitemap_enabled', 'preload_fonts', 'lcp_optimization',
-				'speculation_rules', 'varnish_enabled', 'sucuri_enabled',
-				'cloudflare_enabled', 'cdn_enabled', 'avif_enabled',
-				'youtube_thumbnail', 'local_analytics', 'heartbeat_enabled',
-				'db_auto_cleanup',
-			);
-			foreach ( $addon_bool_keys as $k ) {
-				$s[ $k ] = false;
-			}
-			$addon_text_keys = array(
-				'critical_css', 'ucss_safelist', 'preload_sitemap', 'lcp_excluded',
-				'prefetch_dns', 'preconnect', 'preload_resources', 'varnish_ip',
-				'sucuri_api_key', 'cloudflare_email', 'cloudflare_api_key',
-				'cloudflare_zone_id', 'cdn_hostname',
-			);
-			foreach ( $addon_text_keys as $k ) {
-				$s[ $k ] = '';
-			}
 		}
 
 		return $s;
