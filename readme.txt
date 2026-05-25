@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.3
+Stable tag: 1.10.4
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -120,6 +120,11 @@ On upload (if auto-convert is enabled), JPG/PNG images are converted to WebP. Al
 Start with page caching and basic file optimization. Test your site after each change. JavaScript defer and delay may affect some themes or plugins — test thoroughly.
 
 == Changelog ==
+
+= 1.10.4 =
+* Changed: Preload URL exclusions now use simple wildcard (*) / substring matching instead of raw regular expressions (safer and avoids heavy patterns).
+* Hardening: The uninstall routine's recursive directory removal is now constrained to Prime Cache's own cache directories.
+* Improved: Internal cleanup — renamed the add-on preview helper, removed leftover "Go Pro" / "locked" wording from code comments, and stripped obsolete entries from the bundled Japanese translation.
 
 = 1.10.3 =
 * Improved: The readme and in-plugin wording now describe only the features included in the free plugin; optional features provided by the separate add-on are listed separately.

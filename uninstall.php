@@ -90,6 +90,23 @@ $pc_uninstall_rmtree = function ( $dir ) {
 	if ( ! is_dir( $dir ) ) {
 		return;
 	}
+	// Safety: only ever recurse-delete inside Prime Cache's own cache roots, so a
+	// miscomputed or symlinked $dir can never escalate into deleting unrelated
+	// files elsewhere under wp-content.
+	$real   = realpath( $dir );
+	$within = false;
+	if ( false !== $real ) {
+		foreach ( array( WP_CONTENT_DIR . '/cache/prime-cache', WP_CONTENT_DIR . '/cache/prime-cache-fo' ) as $allowed ) {
+			$root = realpath( $allowed );
+			if ( $root && 0 === strpos( rtrim( $real, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR, rtrim( $root, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR ) ) {
+				$within = true;
+				break;
+			}
+		}
+	}
+	if ( ! $within ) {
+		return;
+	}
 	$iter = new RecursiveIteratorIterator(
 		new RecursiveDirectoryIterator( $dir, RecursiveDirectoryIterator::SKIP_DOTS ),
 		RecursiveIteratorIterator::CHILD_FIRST

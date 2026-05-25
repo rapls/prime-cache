@@ -598,14 +598,22 @@ class Prime_Cache_Preload {
 
 	private function matches_exclude( $path, $patterns ) {
 		foreach ( $patterns as $pat ) {
-			if ( empty( $pat ) ) {
+			if ( '' === $pat ) {
 				continue;
 			}
+			// Plain substring match.
 			if ( false !== strpos( $path, $pat ) ) {
 				return true;
 			}
-			if ( @preg_match( '#' . $pat . '#i', $path ) ) {
-				return true;
+			// Wildcard match: "*" matches any sequence. The pattern is quoted
+			// first so admin-entered text cannot inject regex metacharacters
+			// (no raw regex execution — avoids heavy/catastrophic regex on
+			// every preload candidate).
+			if ( false !== strpos( $pat, '*' ) ) {
+				$regex = '#' . str_replace( '\*', '.*', preg_quote( $pat, '#' ) ) . '#i';
+				if ( preg_match( $regex, $path ) ) {
+					return true;
+				}
 			}
 		}
 		return false;

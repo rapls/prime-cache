@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Prime Cache\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-25 18:00+0900\n"
+"POT-Creation-Date: 2026-05-25 18:33+0900\n"
 "PO-Revision-Date: 2026-05-23 00:00+0900\n"
 "Last-Translator: rapls\n"
 "Language-Team: Japanese\n"
@@ -14,23 +14,23 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: includes/admin/class-admin-settings.php:51
-#: includes/admin/class-admin-settings.php:1908
-#: includes/admin/class-admin-settings.php:2297
+#: includes/admin/class-admin-settings.php:1899
+#: includes/admin/class-admin-settings.php:2288
 msgid "Excluded URLs"
 msgstr "除外 URL"
 
 #: includes/admin/class-admin-settings.php:52
-#: includes/admin/class-admin-settings.php:2298
+#: includes/admin/class-admin-settings.php:2289
 msgid "Excluded Cookies"
 msgstr "除外 Cookie"
 
 #: includes/admin/class-admin-settings.php:53
-#: includes/admin/class-admin-settings.php:2299
+#: includes/admin/class-admin-settings.php:2290
 msgid "Excluded User Agents"
 msgstr "除外ユーザーエージェント"
 
 #: includes/admin/class-admin-settings.php:54
-#: includes/admin/class-admin-settings.php:2300
+#: includes/admin/class-admin-settings.php:2291
 msgid "Excluded Referrers"
 msgstr "除外リファラー"
 
@@ -112,89 +112,89 @@ msgstr ""
 "ます — フィールドを開いてパターンを修正してから再保存してください。"
 
 #: includes/admin/class-admin-settings.php:512
-#: includes/admin/class-admin-settings.php:1051
-#: includes/admin/class-admin-settings.php:1076
-#: includes/admin/class-admin-settings.php:2502
+#: includes/admin/class-admin-settings.php:1042
+#: includes/admin/class-admin-settings.php:1067
+#: includes/admin/class-admin-settings.php:2493
 msgid "year(s)"
 msgstr "年"
 
 #: includes/admin/class-admin-settings.php:513
-#: includes/admin/class-admin-settings.php:1051
-#: includes/admin/class-admin-settings.php:1077
-#: includes/admin/class-admin-settings.php:2502
+#: includes/admin/class-admin-settings.php:1042
+#: includes/admin/class-admin-settings.php:1068
+#: includes/admin/class-admin-settings.php:2493
 msgid "month(s)"
 msgstr "か月"
 
 #: includes/admin/class-admin-settings.php:514
-#: includes/admin/class-admin-settings.php:1051
-#: includes/admin/class-admin-settings.php:1078
-#: includes/admin/class-admin-settings.php:2502
+#: includes/admin/class-admin-settings.php:1042
+#: includes/admin/class-admin-settings.php:1069
+#: includes/admin/class-admin-settings.php:2493
 msgid "day(s)"
 msgstr "日"
 
 #: includes/admin/class-admin-settings.php:515
-#: includes/admin/class-admin-settings.php:1051
-#: includes/admin/class-admin-settings.php:1079
-#: includes/admin/class-admin-settings.php:2502
+#: includes/admin/class-admin-settings.php:1042
+#: includes/admin/class-admin-settings.php:1070
+#: includes/admin/class-admin-settings.php:2493
 msgid "hour(s)"
 msgstr "時間"
 
 #: includes/admin/class-admin-settings.php:516
-#: includes/admin/class-admin-settings.php:1034
-#: includes/admin/class-admin-settings.php:1051
-#: includes/admin/class-admin-settings.php:1080
-#: includes/admin/class-admin-settings.php:2020
-#: includes/admin/class-admin-settings.php:2041
-#: includes/admin/class-admin-settings.php:2502
+#: includes/admin/class-admin-settings.php:1025
+#: includes/admin/class-admin-settings.php:1042
+#: includes/admin/class-admin-settings.php:1071
+#: includes/admin/class-admin-settings.php:2011
+#: includes/admin/class-admin-settings.php:2032
+#: includes/admin/class-admin-settings.php:2493
 msgid "sec"
 msgstr "秒"
 
 #: includes/admin/class-admin-settings.php:536
-#: includes/admin/class-admin-settings.php:733
+#: includes/admin/class-admin-settings.php:724
 msgid "Dashboard"
 msgstr "ダッシュボード"
 
 #: includes/admin/class-admin-settings.php:537
-#: includes/admin/class-admin-settings.php:832
-#: includes/admin/class-admin-settings.php:856
-#: includes/admin/class-admin-settings.php:904
+#: includes/admin/class-admin-settings.php:823
+#: includes/admin/class-admin-settings.php:847
+#: includes/admin/class-admin-settings.php:895
 #: includes/class-prime-cache.php:1488
 msgid "Page Cache"
 msgstr "ページキャッシュ"
 
 #: includes/admin/class-admin-settings.php:538
-#: includes/admin/class-admin-settings.php:833
-#: includes/admin/class-admin-settings.php:1120
+#: includes/admin/class-admin-settings.php:824
+#: includes/admin/class-admin-settings.php:1111
 msgid "File Optimization"
 msgstr "ファイル最適化"
 
 #: includes/admin/class-admin-settings.php:539
-#: includes/admin/class-admin-settings.php:1419
+#: includes/admin/class-admin-settings.php:1410
 msgid "Media"
 msgstr "メディア"
 
 #: includes/admin/class-admin-settings.php:540
-#: includes/admin/class-admin-settings.php:1824
+#: includes/admin/class-admin-settings.php:1815
 msgid "Preload"
 msgstr "プリロード"
 
 #: includes/admin/class-admin-settings.php:541
-#: includes/admin/class-admin-settings.php:1956
+#: includes/admin/class-admin-settings.php:1947
 msgid "Cache Control"
 msgstr "キャッシュ制御"
 
 #: includes/admin/class-admin-settings.php:542
-#: includes/admin/class-admin-settings.php:2268
+#: includes/admin/class-admin-settings.php:2259
 msgid "Auto Purge"
 msgstr "自動パージ"
 
 #: includes/admin/class-admin-settings.php:543
-#: includes/admin/class-admin-settings.php:2303
+#: includes/admin/class-admin-settings.php:2294
 msgid "Exclusion Rules"
 msgstr "除外ルール"
 
 #: includes/admin/class-admin-settings.php:544
-#: includes/admin/class-admin-settings.php:2321
+#: includes/admin/class-admin-settings.php:2312
 msgid "Tools"
 msgstr "ツール"
 
@@ -211,38 +211,38 @@ msgstr "キャッシュ有効"
 msgid "Cache Disabled"
 msgstr "キャッシュ無効"
 
-#: includes/admin/class-admin-settings.php:642
-#: includes/admin/class-admin-settings.php:960
-#: includes/admin/class-admin-settings.php:1189
-#: includes/admin/class-admin-settings.php:1245
-#: includes/admin/class-admin-settings.php:1942
+#: includes/admin/class-admin-settings.php:633
+#: includes/admin/class-admin-settings.php:951
+#: includes/admin/class-admin-settings.php:1180
+#: includes/admin/class-admin-settings.php:1236
+#: includes/admin/class-admin-settings.php:1933
 msgid "Available in Prime Cache Pro"
 msgstr "Prime Cache Pro で利用可能"
 
-#: includes/admin/class-admin-settings.php:644
-#: includes/admin/class-admin-settings.php:1525
-#: includes/admin/class-admin-settings.php:1918
-#: includes/admin/class-admin-settings.php:1928
-#: includes/admin/class-admin-settings.php:1938
+#: includes/admin/class-admin-settings.php:635
+#: includes/admin/class-admin-settings.php:1516
+#: includes/admin/class-admin-settings.php:1909
+#: includes/admin/class-admin-settings.php:1919
+#: includes/admin/class-admin-settings.php:1929
 msgid "PRO"
 msgstr "PRO"
 
-#: includes/admin/class-admin-settings.php:656
+#: includes/admin/class-admin-settings.php:647
 msgid "Additional performance features are available as a separate add-on."
 msgstr "追加のパフォーマンス機能は別のアドオンとして提供されています。"
 
-#: includes/admin/class-admin-settings.php:657
-#: includes/admin/class-admin-settings.php:705
+#: includes/admin/class-admin-settings.php:648
+#: includes/admin/class-admin-settings.php:696
 msgid "Learn more about Prime Cache Pro"
 msgstr "Prime Cache Pro の詳細を見る"
 
-#: includes/admin/class-admin-settings.php:663
-#: includes/admin/class-admin-settings.php:2748
+#: includes/admin/class-admin-settings.php:654
+#: includes/admin/class-admin-settings.php:2739
 #: includes/class-prime-cache.php:1211 includes/class-prime-cache.php:1487
 msgid "Object Cache"
 msgstr "オブジェクトキャッシュ"
 
-#: includes/admin/class-admin-settings.php:664
+#: includes/admin/class-admin-settings.php:655
 msgid ""
 "Persistent object caching with Redis, Memcached, or APCu. Dramatically "
 "reduces database queries and speeds up dynamic pages."
@@ -250,11 +250,11 @@ msgstr ""
 "Redis、Memcached、APCu による永続オブジェクトキャッシュ。データベースクエリを"
 "大幅に削減し、動的ページを高速化します。"
 
-#: includes/admin/class-admin-settings.php:668
+#: includes/admin/class-admin-settings.php:659
 msgid "WebP & AVIF Conversion"
 msgstr "WebP & AVIF 変換"
 
-#: includes/admin/class-admin-settings.php:669
+#: includes/admin/class-admin-settings.php:660
 msgid ""
 "Auto-convert images to modern formats on upload. Bulk optimize your entire "
 "media library. Reduce image sizes by 25-80%."
@@ -262,11 +262,11 @@ msgstr ""
 "アップロード時に画像を最新フォーマットに自動変換。メディアライブラリ全体を一"
 "括最適化。画像サイズを 25〜80% 削減します。"
 
-#: includes/admin/class-admin-settings.php:673
+#: includes/admin/class-admin-settings.php:664
 msgid "Advanced CSS & JS"
 msgstr "高度な CSS & JS"
 
-#: includes/admin/class-admin-settings.php:674
+#: includes/admin/class-admin-settings.php:665
 msgid ""
 "Combine CSS/JS files, Remove Unused CSS, auto-generate Critical CSS, "
 "Optimize CSS Delivery, and host Google Analytics locally."
@@ -274,11 +274,11 @@ msgstr ""
 "CSS/JS ファイルの結合、未使用 CSS 削除、Critical CSS 自動生成、CSS 配信最適"
 "化、Google Analytics ローカルホスティング。"
 
-#: includes/admin/class-admin-settings.php:678
+#: includes/admin/class-admin-settings.php:669
 msgid "Database Optimization"
 msgstr "データベース最適化"
 
-#: includes/admin/class-admin-settings.php:679
+#: includes/admin/class-admin-settings.php:670
 msgid ""
 "Clean up revisions, drafts, spam comments, expired transients, and optimize "
 "tables. Schedule automatic cleanup."
@@ -286,11 +286,11 @@ msgstr ""
 "リビジョン、下書き、スパムコメント、期限切れ Transient を整理し、テーブルを最"
 "適化。自動クリーンアップのスケジュール設定も可能です。"
 
-#: includes/admin/class-admin-settings.php:683
+#: includes/admin/class-admin-settings.php:674
 msgid "Heartbeat Control"
 msgstr "Heartbeat コントロール"
 
-#: includes/admin/class-admin-settings.php:684
+#: includes/admin/class-admin-settings.php:675
 msgid ""
 "Control the WordPress Heartbeat API per location (frontend, admin, editor). "
 "Reduce server load by disabling or throttling."
@@ -298,11 +298,11 @@ msgstr ""
 "WordPress Heartbeat API をフロントエンド・管理画面・エディターごとに制御。無"
 "効化や頻度の調整でサーバー負荷を軽減します。"
 
-#: includes/admin/class-admin-settings.php:688
+#: includes/admin/class-admin-settings.php:679
 msgid "Advanced Preloading"
 msgstr "高度なプリロード"
 
-#: includes/admin/class-admin-settings.php:689
+#: includes/admin/class-admin-settings.php:680
 msgid ""
 "Sitemap preloading, Speculation Rules API, font preloading, LCP "
 "optimization, DNS prefetch, and preconnect."
@@ -310,11 +310,11 @@ msgstr ""
 "サイトマッププリロード、Speculation Rules API、フォントプリロード、LCP 最適"
 "化、DNS Prefetch、Preconnect。"
 
-#: includes/admin/class-admin-settings.php:693
+#: includes/admin/class-admin-settings.php:684
 msgid "Varnish, Sucuri & Cloudflare"
 msgstr "Varnish、Sucuri & Cloudflare"
 
-#: includes/admin/class-admin-settings.php:694
+#: includes/admin/class-admin-settings.php:685
 msgid ""
 "Automatic cache sync with Varnish reverse proxies, Sucuri firewalls, and "
 "Cloudflare CDN zones when content changes."
@@ -322,11 +322,11 @@ msgstr ""
 "コンテンツ変更時に Varnish リバースプロキシ、Sucuri ファイアウォール、"
 "Cloudflare CDN ゾーンと自動キャッシュ同期。"
 
-#: includes/admin/class-admin-settings.php:698
+#: includes/admin/class-admin-settings.php:689
 msgid "YouTube & Media"
 msgstr "YouTube & メディア"
 
-#: includes/admin/class-admin-settings.php:699
+#: includes/admin/class-admin-settings.php:690
 msgid ""
 "Replace YouTube iframes with lightweight thumbnails. Save 500KB-1MB per "
 "embed on initial page load."
@@ -334,48 +334,48 @@ msgstr ""
 "YouTube iframe を軽量サムネイルに置換。初回ページ読み込みで埋め込みごとに "
 "500KB〜1MB を節約します。"
 
-#: includes/admin/class-admin-settings.php:738
-#: includes/admin/class-admin-settings.php:821
-#: includes/admin/class-admin-settings.php:844
-#: includes/admin/class-admin-settings.php:2786
+#: includes/admin/class-admin-settings.php:729
+#: includes/admin/class-admin-settings.php:812
+#: includes/admin/class-admin-settings.php:835
+#: includes/admin/class-admin-settings.php:2777
 #: includes/class-prime-cache.php:1230 includes/class-prime-cache.php:1488
 msgid "Active"
 msgstr "有効"
 
-#: includes/admin/class-admin-settings.php:738
+#: includes/admin/class-admin-settings.php:729
 msgid "Cache Status"
 msgstr "キャッシュ状態"
 
-#: includes/admin/class-admin-settings.php:740
+#: includes/admin/class-admin-settings.php:731
 #: includes/class-prime-cache.php:1476
 msgid "Hit Rate"
 msgstr "ヒット率"
 
-#: includes/admin/class-admin-settings.php:744
+#: includes/admin/class-admin-settings.php:735
 #: includes/class-prime-cache.php:1477
 msgid "Pages"
 msgstr "固定ページ"
 
-#: includes/admin/class-admin-settings.php:750
+#: includes/admin/class-admin-settings.php:741
 msgid "Cache Hit Rate"
 msgstr "キャッシュヒット率"
 
 #. translators: %s: date when stats tracking started (e.g. "2024/01/15 09:30")
-#: includes/admin/class-admin-settings.php:755
+#: includes/admin/class-admin-settings.php:746
 #, php-format
 msgid "Since: %s"
 msgstr "計測開始: %s"
 
-#: includes/admin/class-admin-settings.php:758
+#: includes/admin/class-admin-settings.php:749
 msgid "Reset all hit/miss statistics to zero?"
 msgstr "すべてのヒット/ミス統計をゼロにリセットしますか？"
 
-#: includes/admin/class-admin-settings.php:758
+#: includes/admin/class-admin-settings.php:749
 msgid "Reset"
 msgstr "リセット"
 
 #. translators: %s: number of cached pages
-#: includes/admin/class-admin-settings.php:766
+#: includes/admin/class-admin-settings.php:757
 #, php-format
 msgid ""
 "Cache is serving %s pages via .htaccess fast-path (PHP-free). Hit/miss stats "
@@ -387,126 +387,126 @@ msgstr ""
 "されません。"
 
 #. translators: %s: total number of cache requests
-#: includes/admin/class-admin-settings.php:775
+#: includes/admin/class-admin-settings.php:766
 #, php-format
 msgid "Total: %s"
 msgstr "合計: %s"
 
 #. translators: %s: total cache size (e.g. "12 MB")
 #. translators: %s: total cache size (e.g. "12 MB").
-#: includes/admin/class-admin-settings.php:779
+#: includes/admin/class-admin-settings.php:770
 #: includes/class-prime-cache.php:1484
 #, php-format
 msgid "Size: %s"
 msgstr "容量: %s"
 
-#: includes/admin/class-admin-settings.php:786
+#: includes/admin/class-admin-settings.php:777
 msgid "Quick Actions"
 msgstr "クイックアクション"
 
-#: includes/admin/class-admin-settings.php:788
+#: includes/admin/class-admin-settings.php:779
 #: includes/class-prime-cache.php:503
 msgid "Clear All Cache"
 msgstr "すべてのキャッシュをクリア"
 
-#: includes/admin/class-admin-settings.php:790
+#: includes/admin/class-admin-settings.php:781
 #: includes/class-prime-cache.php:511
 msgid "Clear Cache & Preload"
 msgstr "キャッシュクリア & プリロード"
 
-#: includes/admin/class-admin-settings.php:792
+#: includes/admin/class-admin-settings.php:783
 msgid "Default variant only"
 msgstr "デフォルトバリアントのみ"
 
-#: includes/admin/class-admin-settings.php:795
+#: includes/admin/class-admin-settings.php:786
 #: includes/class-prime-cache.php:526
 msgid "Clear Minified CSS/JS"
 msgstr "圧縮済み CSS/JS をクリア"
 
-#: includes/admin/class-admin-settings.php:797
+#: includes/admin/class-admin-settings.php:788
 #: includes/class-prime-cache.php:545
 msgid "Clear Object Cache"
 msgstr "オブジェクトキャッシュをクリア"
 
-#: includes/admin/class-admin-settings.php:805
+#: includes/admin/class-admin-settings.php:796
 msgid "System Status"
 msgstr "システム状態"
 
-#: includes/admin/class-admin-settings.php:809
+#: includes/admin/class-admin-settings.php:800
 msgid "WP_CACHE Constant"
 msgstr "WP_CACHE 定数"
 
-#: includes/admin/class-admin-settings.php:811
+#: includes/admin/class-admin-settings.php:802
 msgid "Cache Directory"
 msgstr "キャッシュディレクトリー"
 
-#: includes/admin/class-admin-settings.php:812
+#: includes/admin/class-admin-settings.php:803
 msgid "Gzip Support"
 msgstr "Gzip サポート"
 
-#: includes/admin/class-admin-settings.php:815
+#: includes/admin/class-admin-settings.php:806
 msgid ".htaccess Rules"
 msgstr ".htaccess ルール"
 
-#: includes/admin/class-admin-settings.php:821
+#: includes/admin/class-admin-settings.php:812
 msgid "External"
 msgstr "外部管理"
 
-#: includes/admin/class-admin-settings.php:821
-#: includes/admin/class-admin-settings.php:844
+#: includes/admin/class-admin-settings.php:812
+#: includes/admin/class-admin-settings.php:835
 #: includes/class-prime-cache.php:1231 includes/class-prime-cache.php:1487
 #: includes/class-prime-cache.php:1488
 msgid "Inactive"
 msgstr "無効"
 
-#: includes/admin/class-admin-settings.php:828
+#: includes/admin/class-admin-settings.php:819
 msgid "Feature Status"
 msgstr "機能ステータス"
 
-#: includes/admin/class-admin-settings.php:834
+#: includes/admin/class-admin-settings.php:825
 msgid "JS Optimization"
 msgstr "JS 最適化"
 
-#: includes/admin/class-admin-settings.php:835
-#: includes/admin/class-admin-settings.php:1426
+#: includes/admin/class-admin-settings.php:826
+#: includes/admin/class-admin-settings.php:1417
 msgid "Lazy Load"
 msgstr "遅延読み込み"
 
-#: includes/admin/class-admin-settings.php:836
+#: includes/admin/class-admin-settings.php:827
 msgid "Cache Preload"
 msgstr "キャッシュプリロード"
 
-#: includes/admin/class-admin-settings.php:838
-#: includes/admin/class-admin-settings.php:966
+#: includes/admin/class-admin-settings.php:829
+#: includes/admin/class-admin-settings.php:957
 msgid "Browser Cache"
 msgstr "ブラウザーキャッシュ"
 
-#: includes/admin/class-admin-settings.php:852
+#: includes/admin/class-admin-settings.php:843
 msgid "Cache Storage"
 msgstr "キャッシュストレージ"
 
-#: includes/admin/class-admin-settings.php:860
+#: includes/admin/class-admin-settings.php:851
 msgid "Minified Files"
 msgstr "圧縮ファイル"
 
-#: includes/admin/class-admin-settings.php:864
+#: includes/admin/class-admin-settings.php:855
 msgid "Total"
 msgstr "合計"
 
-#: includes/admin/class-admin-settings.php:871
+#: includes/admin/class-admin-settings.php:862
 msgid "Environment"
 msgstr "環境"
 
-#: includes/admin/class-admin-settings.php:881
+#: includes/admin/class-admin-settings.php:872
 #: includes/class-prime-cache.php:1218
 msgid "Theme"
 msgstr "テーマ"
 
-#: includes/admin/class-admin-settings.php:891
+#: includes/admin/class-admin-settings.php:882
 msgid "Optional add-ons"
 msgstr "オプションのアドオン"
 
-#: includes/admin/class-admin-settings.php:892
+#: includes/admin/class-admin-settings.php:883
 msgid ""
 "Additional performance features — such as object caching, advanced CSS/JS "
 "optimization, and database cleanup — are available as a separate add-on."
@@ -514,19 +514,19 @@ msgstr ""
 "オブジェクトキャッシュ、高度な CSS/JS 最適化、データベース掃除などの追加のパ"
 "フォーマンス機能は、別のアドオンとして提供されています。"
 
-#: includes/admin/class-admin-settings.php:893
+#: includes/admin/class-admin-settings.php:884
 msgid "Learn More"
 msgstr "詳しく見る"
 
-#: includes/admin/class-admin-settings.php:918
+#: includes/admin/class-admin-settings.php:909
 msgid "General Settings"
 msgstr "基本設定"
 
-#: includes/admin/class-admin-settings.php:921
+#: includes/admin/class-admin-settings.php:912
 msgid "Mobile Cache"
 msgstr "モバイルキャッシュ"
 
-#: includes/admin/class-admin-settings.php:921
+#: includes/admin/class-admin-settings.php:912
 msgid ""
 "Serve cached pages to smartphones and tablets. When disabled, WordPress "
 "dynamically generates every page for mobile visitors."
@@ -534,11 +534,11 @@ msgstr ""
 "スマートフォンやタブレットからのアクセスにもキャッシュを配信します。無効にす"
 "ると、モバイルユーザーには毎回 WordPress が動的にページを生成します。"
 
-#: includes/admin/class-admin-settings.php:922
+#: includes/admin/class-admin-settings.php:913
 msgid "Separate Mobile Cache"
 msgstr "モバイル専用キャッシュ"
 
-#: includes/admin/class-admin-settings.php:922
+#: includes/admin/class-admin-settings.php:913
 msgid ""
 "For themes that output different HTML for desktop and mobile. Maintains "
 "separate cache files per device type. Not needed for responsive themes."
@@ -547,11 +547,11 @@ msgstr ""
 "シュファイルを保持し、正しいページを配信します。レスポンシブデザインのテーマ"
 "では不要です。"
 
-#: includes/admin/class-admin-settings.php:923
+#: includes/admin/class-admin-settings.php:914
 msgid "Logged-in User Cache"
 msgstr "ログインユーザーキャッシュ"
 
-#: includes/admin/class-admin-settings.php:923
+#: includes/admin/class-admin-settings.php:914
 msgid ""
 "Serve cached pages to logged-in users. SECURITY WARNING: all logged-in users "
 "and anonymous visitors share one cached copy of each page, so a page "
@@ -567,11 +567,11 @@ msgstr ""
 "一のコンテンツを配信するサイト (例: ユーザーごとの出力が無い会員制サイト) で"
 "のみ有効化してください。"
 
-#: includes/admin/class-admin-settings.php:924
+#: includes/admin/class-admin-settings.php:915
 msgid "Gzip Compression"
 msgstr "Gzip 圧縮"
 
-#: includes/admin/class-admin-settings.php:924
+#: includes/admin/class-admin-settings.php:915
 msgid ""
 "Pre-compress cache files with gzip. Supported browsers receive the "
 "compressed version, reducing transfer size by 60-80%. Recommended for most "
@@ -581,11 +581,11 @@ msgstr ""
 "を配信し、転送量を 60〜80% 削減します。ほとんどの環境で有効にすることを推奨し"
 "ます。"
 
-#: includes/admin/class-admin-settings.php:925
+#: includes/admin/class-admin-settings.php:916
 msgid "Brotli Compression"
 msgstr "Brotli 圧縮"
 
-#: includes/admin/class-admin-settings.php:925
+#: includes/admin/class-admin-settings.php:916
 msgid ""
 "Enable Brotli compression via mod_brotli (Apache 2.4+). Brotli achieves "
 "15-25% better compression than gzip. Requires mod_brotli and .htaccess "
@@ -597,11 +597,11 @@ msgstr ""
 "必要です。Brotli が利用できない場合は mod_deflate 経由の gzip にフォールバッ"
 "クします。"
 
-#: includes/admin/class-admin-settings.php:926
+#: includes/admin/class-admin-settings.php:917
 msgid ".htaccess Optimization"
 msgstr ".htaccess 最適化"
 
-#: includes/admin/class-admin-settings.php:926
+#: includes/admin/class-admin-settings.php:917
 msgid ""
 "Write optimization rules to .htaccess. Apache serves cached files directly "
 "without invoking PHP, significantly improving response time. Also enables "
@@ -615,11 +615,11 @@ msgstr ""
 "Cache-Control ヘッダーは「Enable Browser Cache Headers」も有効な場合に追加さ"
 "れます。Nginx 環境では効果がありません。"
 
-#: includes/admin/class-admin-settings.php:927
+#: includes/admin/class-admin-settings.php:918
 msgid "Cache 404 Pages"
 msgstr "404 ページのキャッシュ"
 
-#: includes/admin/class-admin-settings.php:927
+#: includes/admin/class-admin-settings.php:918
 msgid ""
 "Cache 404 (Not Found) pages. Reduces server load from repeated requests to "
 "non-existent URLs. The cached 404 page is served with proper 404 HTTP status "
@@ -632,11 +632,11 @@ msgstr ""
 "最適化はキャッシュされた 404 ページを配信しません (正しいステータスコードを保"
 "証するため常に PHP を経由します)。"
 
-#: includes/admin/class-admin-settings.php:928
+#: includes/admin/class-admin-settings.php:919
 msgid "Mixed HTTP/HTTPS Site"
 msgstr "HTTP / HTTPS 混在サイト"
 
-#: includes/admin/class-admin-settings.php:928
+#: includes/admin/class-admin-settings.php:919
 msgid ""
 "Enable only if your site intentionally serves both http:// and https:// "
 "versions of the same URL. When disabled (recommended), the cache scheme "
@@ -652,11 +652,11 @@ msgstr ""
 "プロキシ配下のサイトでは wp-config.php に "
 "PRIME_CACHE_TRUST_X_FORWARDED_PROTO を定義してください。"
 
-#: includes/admin/class-admin-settings.php:929
+#: includes/admin/class-admin-settings.php:920
 msgid "Cache Footprint"
 msgstr "キャッシュフットプリント"
 
-#: includes/admin/class-admin-settings.php:929
+#: includes/admin/class-admin-settings.php:920
 msgid ""
 "Append an HTML comment with cache generation time to the source. Useful for "
 "verifying cache behavior via \"View Source\". Can be disabled in production."
@@ -665,19 +665,19 @@ msgstr ""
 "「ソースを表示」でキャッシュが正しく動作しているか確認するのに役立ちます。本"
 "番環境では無効にしても構いません。"
 
-#: includes/admin/class-admin-settings.php:934
+#: includes/admin/class-admin-settings.php:925
 msgid ".htaccess Active"
 msgstr ".htaccess 適用中"
 
-#: includes/admin/class-admin-settings.php:935
+#: includes/admin/class-admin-settings.php:926
 msgid ".htaccess Not Writable"
 msgstr ".htaccess 書き込み不可"
 
-#: includes/admin/class-admin-settings.php:943
+#: includes/admin/class-admin-settings.php:934
 msgid "Enable Varnish Purge"
 msgstr "Varnish パージを有効化"
 
-#: includes/admin/class-admin-settings.php:943
+#: includes/admin/class-admin-settings.php:934
 msgid ""
 "Automatically purge the Varnish cache when WordPress content changes. Sends "
 "PURGE requests to the configured Varnish server."
@@ -685,11 +685,11 @@ msgstr ""
 "WordPress のコンテンツが変更されたときに Varnish キャッシュを自動的にパージし"
 "ます。設定された Varnish サーバーに PURGE リクエストを送信します。"
 
-#: includes/admin/class-admin-settings.php:945
+#: includes/admin/class-admin-settings.php:936
 msgid "Varnish Server IP"
 msgstr "Varnish サーバー IP"
 
-#: includes/admin/class-admin-settings.php:947
+#: includes/admin/class-admin-settings.php:938
 msgid ""
 "One IP address per line. If your Varnish server runs on a different host or "
 "port, specify here. Defaults to 127.0.0.1 (localhost)."
@@ -698,22 +698,22 @@ msgstr ""
 "作している場合はここで指定してください。デフォルトは 127.0.0.1 (localhost) で"
 "す。"
 
-#: includes/admin/class-admin-settings.php:954
+#: includes/admin/class-admin-settings.php:945
 msgid "Enable Sucuri Purge"
 msgstr "Sucuri パージを有効化"
 
-#: includes/admin/class-admin-settings.php:954
+#: includes/admin/class-admin-settings.php:945
 msgid ""
 "Automatically clear the Sucuri firewall cache when WordPress content changes."
 msgstr ""
 "WordPress のコンテンツが変更されたときに Sucuri ファイアウォールのキャッシュ"
 "を自動的にクリアします。"
 
-#: includes/admin/class-admin-settings.php:956
+#: includes/admin/class-admin-settings.php:947
 msgid "Sucuri API Key"
 msgstr "Sucuri API キー"
 
-#: includes/admin/class-admin-settings.php:958
+#: includes/admin/class-admin-settings.php:949
 msgid ""
 "Your Sucuri firewall API key. Found in the Sucuri dashboard under API "
 "section."
@@ -721,11 +721,11 @@ msgstr ""
 "Sucuri ファイアウォールの API キーです。Sucuri ダッシュボードの API セクショ"
 "ンで確認できます。"
 
-#: includes/admin/class-admin-settings.php:967
+#: includes/admin/class-admin-settings.php:958
 msgid "Enable Browser Cache Headers"
 msgstr "ブラウザーキャッシュヘッダーを有効化"
 
-#: includes/admin/class-admin-settings.php:967
+#: includes/admin/class-admin-settings.php:958
 msgid ""
 "Add Cache-Control and Expires headers to cached responses, both using the "
 "lifetimes configured below. HTML Cache-Control is applied by the PHP drop-"
@@ -737,11 +737,11 @@ msgstr ""
 "ドロップインによって適用されます。CSS・JS・画像・フォント・Expires の各ヘッ"
 "ダーには .htaccess 最適化の有効化が必要です。"
 
-#: includes/admin/class-admin-settings.php:968
+#: includes/admin/class-admin-settings.php:959
 msgid "Immutable Cache-Control"
 msgstr "Immutable Cache-Control"
 
-#: includes/admin/class-admin-settings.php:968
+#: includes/admin/class-admin-settings.php:959
 msgid ""
 "Add \"immutable\" directive to Cache-Control for CSS, JS, images, and fonts. "
 "Tells the browser the file will never change during its lifetime, preventing "
@@ -751,23 +751,23 @@ msgstr ""
 "します。ファイルがキャッシュ期間中に変更されないことをブラウザーに伝え、条件"
 "付き再検証リクエスト (304 チェック) を防止します。"
 
-#: includes/admin/class-admin-settings.php:972
+#: includes/admin/class-admin-settings.php:963
 msgid "CSS & JS Cache Lifetime"
 msgstr "CSS と JS のキャッシュ期間"
 
-#: includes/admin/class-admin-settings.php:973
+#: includes/admin/class-admin-settings.php:964
 msgid "Images / Media / Documents Cache Lifetime"
 msgstr "画像 / メディア / ドキュメントのキャッシュ期間"
 
-#: includes/admin/class-admin-settings.php:974
+#: includes/admin/class-admin-settings.php:965
 msgid "Fonts Cache Lifetime"
 msgstr "フォントのキャッシュ期間"
 
-#: includes/admin/class-admin-settings.php:975
+#: includes/admin/class-admin-settings.php:966
 msgid "HTML Cache Lifetime"
 msgstr "HTML のキャッシュ期間"
 
-#: includes/admin/class-admin-settings.php:975
+#: includes/admin/class-admin-settings.php:966
 msgid ""
 "0 = no-cache (recommended for HTML). Non-zero values cache HTML in the "
 "browser."
@@ -775,83 +775,83 @@ msgstr ""
 "0 = no-cache (HTML では推奨)。0 以外の値を設定するとブラウザーで HTML が"
 "キャッシュされます。"
 
-#: includes/admin/class-admin-settings.php:994
-#: includes/admin/class-admin-settings.php:1026
-#: includes/admin/class-admin-settings.php:2486
+#: includes/admin/class-admin-settings.php:985
+#: includes/admin/class-admin-settings.php:1017
+#: includes/admin/class-admin-settings.php:2477
 msgid "Years"
 msgstr "年"
 
-#: includes/admin/class-admin-settings.php:995
-#: includes/admin/class-admin-settings.php:1027
-#: includes/admin/class-admin-settings.php:2487
+#: includes/admin/class-admin-settings.php:986
+#: includes/admin/class-admin-settings.php:1018
+#: includes/admin/class-admin-settings.php:2478
 msgid "Months"
 msgstr "か月"
 
-#: includes/admin/class-admin-settings.php:996
-#: includes/admin/class-admin-settings.php:1028
-#: includes/admin/class-admin-settings.php:2488
+#: includes/admin/class-admin-settings.php:987
+#: includes/admin/class-admin-settings.php:1019
+#: includes/admin/class-admin-settings.php:2479
 msgid "Weeks"
 msgstr "週"
 
-#: includes/admin/class-admin-settings.php:997
-#: includes/admin/class-admin-settings.php:1029
-#: includes/admin/class-admin-settings.php:2489
+#: includes/admin/class-admin-settings.php:988
+#: includes/admin/class-admin-settings.php:1020
+#: includes/admin/class-admin-settings.php:2480
 msgid "Days"
 msgstr "日"
 
-#: includes/admin/class-admin-settings.php:998
-#: includes/admin/class-admin-settings.php:1030
-#: includes/admin/class-admin-settings.php:2490
+#: includes/admin/class-admin-settings.php:989
+#: includes/admin/class-admin-settings.php:1021
+#: includes/admin/class-admin-settings.php:2481
 msgid "Hours"
 msgstr "時間"
 
-#: includes/admin/class-admin-settings.php:999
-#: includes/admin/class-admin-settings.php:1031
-#: includes/admin/class-admin-settings.php:2491
+#: includes/admin/class-admin-settings.php:990
+#: includes/admin/class-admin-settings.php:1022
+#: includes/admin/class-admin-settings.php:2482
 msgid "Minutes"
 msgstr "分"
 
-#: includes/admin/class-admin-settings.php:1000
-#: includes/admin/class-admin-settings.php:1032
-#: includes/admin/class-admin-settings.php:2492
+#: includes/admin/class-admin-settings.php:991
+#: includes/admin/class-admin-settings.php:1023
+#: includes/admin/class-admin-settings.php:2483
 msgid "Seconds"
 msgstr "秒"
 
-#: includes/admin/class-admin-settings.php:1011
+#: includes/admin/class-admin-settings.php:1002
 msgid "Cache Lifespan"
 msgstr "キャッシュ有効期間"
 
-#: includes/admin/class-admin-settings.php:1013
-#: includes/admin/class-admin-settings.php:1034
-#: includes/admin/class-admin-settings.php:1050
+#: includes/admin/class-admin-settings.php:1004
+#: includes/admin/class-admin-settings.php:1025
+#: includes/admin/class-admin-settings.php:1041
 msgid "Unlimited"
 msgstr "無期限"
 
-#: includes/admin/class-admin-settings.php:1013
+#: includes/admin/class-admin-settings.php:1004
 msgid "1 Hour"
 msgstr "1時間"
 
-#: includes/admin/class-admin-settings.php:1013
+#: includes/admin/class-admin-settings.php:1004
 msgid "6 Hours"
 msgstr "6時間"
 
-#: includes/admin/class-admin-settings.php:1013
+#: includes/admin/class-admin-settings.php:1004
 msgid "12 Hours"
 msgstr "12時間"
 
-#: includes/admin/class-admin-settings.php:1013
+#: includes/admin/class-admin-settings.php:1004
 msgid "1 Day"
 msgstr "1日"
 
-#: includes/admin/class-admin-settings.php:1013
+#: includes/admin/class-admin-settings.php:1004
 msgid "2 Days"
 msgstr "2日"
 
-#: includes/admin/class-admin-settings.php:1013
+#: includes/admin/class-admin-settings.php:1004
 msgid "7 Days"
 msgstr "7日"
 
-#: includes/admin/class-admin-settings.php:1037
+#: includes/admin/class-admin-settings.php:1028
 msgid ""
 "How long until cache files are automatically discarded. Expired caches are "
 "regenerated on the next visit and cleaned up hourly by WP-Cron. Set to 0 for "
@@ -876,40 +876,40 @@ msgstr ""
 "るシステム cron も設定されていない環境では、クリーンアップが実行されず、期限"
 "切れファイルが無期限に配信され続けます。"
 
-#: includes/admin/class-admin-settings.php:1041
-#: includes/admin/class-admin-settings.php:1345
-#: includes/admin/class-admin-settings.php:1595
-#: includes/admin/class-admin-settings.php:1804
-#: includes/admin/class-admin-settings.php:1946
-#: includes/admin/class-admin-settings.php:1968
-#: includes/admin/class-admin-settings.php:2065
-#: includes/admin/class-admin-settings.php:2228
-#: includes/admin/class-admin-settings.php:2286
-#: includes/admin/class-admin-settings.php:2310
-#: includes/admin/class-admin-settings.php:2528
+#: includes/admin/class-admin-settings.php:1032
+#: includes/admin/class-admin-settings.php:1336
+#: includes/admin/class-admin-settings.php:1586
+#: includes/admin/class-admin-settings.php:1795
+#: includes/admin/class-admin-settings.php:1937
+#: includes/admin/class-admin-settings.php:1959
+#: includes/admin/class-admin-settings.php:2056
+#: includes/admin/class-admin-settings.php:2219
+#: includes/admin/class-admin-settings.php:2277
+#: includes/admin/class-admin-settings.php:2301
+#: includes/admin/class-admin-settings.php:2519
 msgid "Save Settings"
 msgstr "設定を保存"
 
-#: includes/admin/class-admin-settings.php:1042
+#: includes/admin/class-admin-settings.php:1033
 #: includes/class-prime-cache.php:1491
 msgid "Clear Cache"
 msgstr "キャッシュをクリア"
 
-#: includes/admin/class-admin-settings.php:1051
-#: includes/admin/class-admin-settings.php:2502
+#: includes/admin/class-admin-settings.php:1042
+#: includes/admin/class-admin-settings.php:2493
 msgid "week(s)"
 msgstr "週間"
 
-#: includes/admin/class-admin-settings.php:1051
-#: includes/admin/class-admin-settings.php:2502
+#: includes/admin/class-admin-settings.php:1042
+#: includes/admin/class-admin-settings.php:2493
 msgid "minute(s)"
 msgstr "分"
 
-#: includes/admin/class-admin-settings.php:1128
+#: includes/admin/class-admin-settings.php:1119
 msgid "Minify HTML"
 msgstr "HTML の圧縮"
 
-#: includes/admin/class-admin-settings.php:1128
+#: includes/admin/class-admin-settings.php:1119
 msgid ""
 "Remove unnecessary whitespace from the HTML output to reduce page size. "
 "Content inside pre, script, style, and textarea tags is preserved."
@@ -917,11 +917,11 @@ msgstr ""
 "HTML 出力から不要な空白を削除してページサイズを削減します。pre、script、"
 "style、textarea タグ内のコンテンツは保持されます。"
 
-#: includes/admin/class-admin-settings.php:1129
+#: includes/admin/class-admin-settings.php:1120
 msgid "Optimize HTML via DOM Parser"
 msgstr "DOM パーサーによる HTML 最適化"
 
-#: includes/admin/class-admin-settings.php:1129
+#: includes/admin/class-admin-settings.php:1120
 msgid ""
 "Requires \"Minify HTML\" above to be enabled. Switches the minification "
 "engine from regex to DOMDocument for deeper optimization — parses the "
@@ -934,21 +934,21 @@ msgstr ""
 "し、ブロックレベル要素間の空白をより積極的に圧縮しつつ、インラインフォーマッ"
 "トを保持します。DOM 解析に失敗した場合は正規表現にフォールバックします。"
 
-#: includes/admin/class-admin-settings.php:1130
+#: includes/admin/class-admin-settings.php:1121
 msgid "Remove HTML Comments"
 msgstr "HTML コメントの削除"
 
-#: includes/admin/class-admin-settings.php:1130
+#: includes/admin/class-admin-settings.php:1121
 msgid ""
 "Strip HTML comments from the output. IE conditional comments are preserved."
 msgstr ""
 "出力から HTML コメントを除去します。IE 条件付きコメントは保持されます。"
 
-#: includes/admin/class-admin-settings.php:1131
+#: includes/admin/class-admin-settings.php:1122
 msgid "Disable WordPress Emoji"
 msgstr "WordPress 絵文字を無効化"
 
-#: includes/admin/class-admin-settings.php:1131
+#: includes/admin/class-admin-settings.php:1122
 msgid ""
 "Remove the emoji inline CSS, wp-emoji-release.min.js script, and DNS "
 "prefetch for s.w.org from all pages. Reduces 2 HTTP requests and ~16 KB from "
@@ -959,11 +959,11 @@ msgstr ""
 "HTTP リクエストと約 16 KB を削減します。最新のブラウザーでの絵文字表示には影"
 "響しません。"
 
-#: includes/admin/class-admin-settings.php:1137
+#: includes/admin/class-admin-settings.php:1128
 msgid "Minify CSS"
 msgstr "CSS の圧縮"
 
-#: includes/admin/class-admin-settings.php:1137
+#: includes/admin/class-admin-settings.php:1128
 msgid ""
 "Remove whitespace, comments, and unnecessary characters from CSS files to "
 "reduce file size."
@@ -971,11 +971,11 @@ msgstr ""
 "CSS ファイルから空白、コメント、不要な文字を削除してファイルサイズを削減しま"
 "す。"
 
-#: includes/admin/class-admin-settings.php:1140
+#: includes/admin/class-admin-settings.php:1131
 msgid "Combine CSS Files"
 msgstr "CSS ファイルの結合"
 
-#: includes/admin/class-admin-settings.php:1140
+#: includes/admin/class-admin-settings.php:1131
 msgid ""
 "Merge multiple CSS files into fewer files to reduce HTTP requests. On HTTP/2 "
 "servers this may have minimal benefit. Test thoroughly after enabling."
@@ -983,13 +983,13 @@ msgstr ""
 "複数の CSS ファイルを結合して HTTP リクエスト数を削減します。HTTP/2 サーバー"
 "では効果が限定的な場合があります。有効化後は十分にテストしてください。"
 
-#: includes/admin/class-admin-settings.php:1142
-#: includes/admin/class-admin-settings.php:1210
+#: includes/admin/class-admin-settings.php:1133
+#: includes/admin/class-admin-settings.php:1201
 msgid "Mobile Only"
 msgstr "モバイルのみ"
 
-#: includes/admin/class-admin-settings.php:1142
-#: includes/admin/class-admin-settings.php:1210
+#: includes/admin/class-admin-settings.php:1133
+#: includes/admin/class-admin-settings.php:1201
 msgid ""
 "Apply CSS/JS combining only on mobile devices. Desktop uses HTTP/2 "
 "multiplexing efficiently without combining. Requires separate mobile cache."
@@ -997,11 +997,11 @@ msgstr ""
 "モバイル端末でのみ CSS/JS の結合を適用します。デスクトップでは HTTP/2 の多重"
 "化により結合なしでも効率的に配信されます。モバイル専用キャッシュが必要です。"
 
-#: includes/admin/class-admin-settings.php:1146
+#: includes/admin/class-admin-settings.php:1137
 msgid "Excluded CSS Files"
 msgstr "除外 CSS ファイル"
 
-#: includes/admin/class-admin-settings.php:1148
+#: includes/admin/class-admin-settings.php:1139
 msgid ""
 "One pattern per line. These CSS files will not be minified, combined, or "
 "loaded asynchronously. Supports wildcards (*)."
@@ -1009,11 +1009,11 @@ msgstr ""
 "1行に1パターンを記入します。これらの CSS ファイルは圧縮、結合、非同期読み込み"
 "の対象外になります。ワイルドカード (*) に対応しています。"
 
-#: includes/admin/class-admin-settings.php:1150
+#: includes/admin/class-admin-settings.php:1141
 msgid "Inline Small CSS Files"
 msgstr "小さな CSS ファイルのインライン化"
 
-#: includes/admin/class-admin-settings.php:1150
+#: includes/admin/class-admin-settings.php:1141
 msgid ""
 "Inline CSS files smaller than the threshold directly into the HTML as "
 "<style> tags, eliminating HTTP requests for small stylesheets."
@@ -1021,15 +1021,15 @@ msgstr ""
 "閾値より小さい CSS ファイルを HTML 内に <style> タグとして直接インライン展開"
 "し、小さなスタイルシートの HTTP リクエストを排除します。"
 
-#: includes/admin/class-admin-settings.php:1152
+#: includes/admin/class-admin-settings.php:1143
 msgid "Threshold (bytes)"
 msgstr "閾値 (バイト)"
 
-#: includes/admin/class-admin-settings.php:1157
+#: includes/admin/class-admin-settings.php:1148
 msgid "Load CSS Asynchronously (Free)"
 msgstr "CSS を非同期読み込み (Free)"
 
-#: includes/admin/class-admin-settings.php:1157
+#: includes/admin/class-admin-settings.php:1148
 msgid ""
 "Convert non-first <link rel=\"stylesheet\"> tags to non-render-blocking "
 "loading via media=\"print\" + onload swap. The first stylesheet on the page "
@@ -1047,12 +1047,12 @@ msgstr ""
 "Unused CSS など、より高度な CSS 配信オプションが利用できるため、本オプション"
 "は無効のままにしてください。"
 
-#: includes/admin/class-admin-settings.php:1165
-#: includes/admin/class-admin-settings.php:1166
+#: includes/admin/class-admin-settings.php:1156
+#: includes/admin/class-admin-settings.php:1157
 msgid "Optimize CSS Delivery"
 msgstr "CSS 配信の最適化"
 
-#: includes/admin/class-admin-settings.php:1166
+#: includes/admin/class-admin-settings.php:1157
 msgid ""
 "Improve render performance by optimizing how CSS is loaded. Choose a method "
 "below."
@@ -1060,19 +1060,19 @@ msgstr ""
 "CSS の読み込み方法を最適化してレンダリングパフォーマンスを向上させます。以下"
 "の方法から選択してください。"
 
-#: includes/admin/class-admin-settings.php:1170
+#: includes/admin/class-admin-settings.php:1161
 msgid "Remove Unused CSS"
 msgstr "未使用 CSS の削除"
 
-#: includes/admin/class-admin-settings.php:1174
+#: includes/admin/class-admin-settings.php:1165
 msgid "Load CSS Asynchronously"
 msgstr "CSS の非同期読み込み"
 
-#: includes/admin/class-admin-settings.php:1177
+#: includes/admin/class-admin-settings.php:1168
 msgid "Auto-Generate Critical CSS"
 msgstr "Critical CSS の自動生成"
 
-#: includes/admin/class-admin-settings.php:1177
+#: includes/admin/class-admin-settings.php:1168
 msgid ""
 "Automatically extract above-the-fold Critical CSS for each page to prevent "
 "flash of unstyled content (FOUC)."
@@ -1080,11 +1080,11 @@ msgstr ""
 "ページごとにファーストビューの Critical CSS を自動抽出し、スタイル未適用のち"
 "らつき (FOUC) を防止します。"
 
-#: includes/admin/class-admin-settings.php:1179
+#: includes/admin/class-admin-settings.php:1170
 msgid "Fallback Critical CSS"
 msgstr "フォールバッククリティカル CSS"
 
-#: includes/admin/class-admin-settings.php:1181
+#: includes/admin/class-admin-settings.php:1172
 msgid ""
 "Manual critical CSS used as a fallback when auto-generation is not available "
 "for a page. Inlined in the <head> to render above-the-fold content "
@@ -1093,11 +1093,11 @@ msgstr ""
 "自動生成が利用できないページ向けの手動 Critical CSS です。<head> 内にインライ"
 "ン化され、ファーストビューのコンテンツを即座にレンダリングします。"
 
-#: includes/admin/class-admin-settings.php:1184
+#: includes/admin/class-admin-settings.php:1175
 msgid "Used CSS Safelist"
 msgstr "使用 CSS セーフリスト"
 
-#: includes/admin/class-admin-settings.php:1186
+#: includes/admin/class-admin-settings.php:1177
 msgid ""
 "CSS selectors or patterns that should never be removed (one per line). Use "
 "when Remove Unused CSS incorrectly strips needed styles."
@@ -1105,11 +1105,11 @@ msgstr ""
 "削除してはならない CSS セレクターやパターンを1行に1つ入力します。未使用 CSS "
 "の削除が必要なスタイルを誤って除去する場合に使用してください。"
 
-#: includes/admin/class-admin-settings.php:1188
+#: includes/admin/class-admin-settings.php:1179
 msgid "Async CSS"
 msgstr "非同期 CSS"
 
-#: includes/admin/class-admin-settings.php:1188
+#: includes/admin/class-admin-settings.php:1179
 msgid ""
 "Load all CSS files asynchronously using link[rel=preload] to eliminate "
 "render-blocking stylesheets."
@@ -1117,11 +1117,11 @@ msgstr ""
 "link[rel=preload] を使用してすべての CSS ファイルを非同期で読み込み、レンダリ"
 "ングブロックを解消します。"
 
-#: includes/admin/class-admin-settings.php:1196
+#: includes/admin/class-admin-settings.php:1187
 msgid "Minify JavaScript"
 msgstr "JavaScript の圧縮"
 
-#: includes/admin/class-admin-settings.php:1196
+#: includes/admin/class-admin-settings.php:1187
 msgid ""
 "Conservative JavaScript size reduction: trims trailing whitespace and "
 "collapses blank lines. Comments are preserved (regex-based comment removal "
@@ -1133,11 +1133,11 @@ msgstr ""
 "全でないため。サイズ削減は gzip 圧縮で十分対応できます)。すでに圧縮済みのファ"
 "イル (.min.js) はスキップされます。"
 
-#: includes/admin/class-admin-settings.php:1197
+#: includes/admin/class-admin-settings.php:1188
 msgid "Load JavaScript Deferred"
 msgstr "JavaScript の遅延読み込み"
 
-#: includes/admin/class-admin-settings.php:1197
+#: includes/admin/class-admin-settings.php:1188
 msgid ""
 "Add the defer attribute to enqueued scripts (wp_enqueue_script) to eliminate "
 "render-blocking JavaScript. Scripts are downloaded in parallel and executed "
@@ -1153,11 +1153,11 @@ msgstr ""
 "ときも動作するよう、インライン jQuery パターン ($(document).ready, $"
 "(function(){...}) など) を自動的に DOMContentLoaded でラップします。"
 
-#: includes/admin/class-admin-settings.php:1198
+#: includes/admin/class-admin-settings.php:1189
 msgid "Delay JavaScript Execution"
 msgstr "JavaScript 実行の遅延"
 
-#: includes/admin/class-admin-settings.php:1198
+#: includes/admin/class-admin-settings.php:1189
 msgid ""
 "Delay every external <script src=\"...\"> tag in the HTML output (including "
 "third-party / CDN — not limited to wp_enqueue_script handles) until user "
@@ -1181,11 +1181,11 @@ msgstr ""
 "延が生じる場合があります。操作前に実行が必要な外部スクリプトは下の除外リスト"
 "に登録してください。"
 
-#: includes/admin/class-admin-settings.php:1201
+#: includes/admin/class-admin-settings.php:1192
 msgid "Delay Timeout (ms)"
 msgstr "遅延タイムアウト (ms)"
 
-#: includes/admin/class-admin-settings.php:1203
+#: includes/admin/class-admin-settings.php:1194
 msgid ""
 "Auto-load delayed scripts after this many milliseconds even without user "
 "interaction. 0 = wait for interaction only."
@@ -1193,11 +1193,11 @@ msgstr ""
 "ユーザー操作がなくてもこのミリ秒後に遅延スクリプトを自動読み込みします。0 = "
 "操作を待つのみ。"
 
-#: includes/admin/class-admin-settings.php:1205
+#: includes/admin/class-admin-settings.php:1196
 msgid "Delay JS Safe Mode"
 msgstr "遅延 JS セーフモード"
 
-#: includes/admin/class-admin-settings.php:1205
+#: includes/admin/class-admin-settings.php:1196
 msgid ""
 "Only delay external (third-party) scripts. All internal scripts from your "
 "site (wp-includes, wp-content) load immediately. Reduces performance gains "
@@ -1207,11 +1207,11 @@ msgstr ""
 "(wp-includes、wp-content) は即座に読み込まれます。パフォーマンス向上は減りま"
 "すが、ほとんどの互換性問題を防止します。"
 
-#: includes/admin/class-admin-settings.php:1208
+#: includes/admin/class-admin-settings.php:1199
 msgid "Combine JavaScript Files"
 msgstr "JavaScript ファイルの結合"
 
-#: includes/admin/class-admin-settings.php:1208
+#: includes/admin/class-admin-settings.php:1199
 msgid ""
 "Merge multiple JS files into fewer files. May break some scripts — test "
 "thoroughly. On HTTP/2 the benefit is minimal."
@@ -1219,11 +1219,11 @@ msgstr ""
 "複数の JS ファイルを結合します。一部のスクリプトが動作しなくなる可能性がある"
 "ため、十分にテストしてください。HTTP/2 では効果が限定的です。"
 
-#: includes/admin/class-admin-settings.php:1214
+#: includes/admin/class-admin-settings.php:1205
 msgid "Excluded JS Files"
 msgstr "除外 JS ファイル"
 
-#: includes/admin/class-admin-settings.php:1216
+#: includes/admin/class-admin-settings.php:1207
 msgid ""
 "One pattern per line. These JS files will not be minified or combined. "
 "Supports wildcards (*)."
@@ -1231,11 +1231,11 @@ msgstr ""
 "1行に1パターンを記入します。これらの JS ファイルは圧縮・結合の対象外になりま"
 "す。ワイルドカード (*) に対応しています。"
 
-#: includes/admin/class-admin-settings.php:1219
+#: includes/admin/class-admin-settings.php:1210
 msgid "Excluded Inline JavaScript"
 msgstr "除外インライン JavaScript"
 
-#: includes/admin/class-admin-settings.php:1221
+#: includes/admin/class-admin-settings.php:1212
 msgid ""
 "Keywords to identify inline scripts to exclude from optimization. One per "
 "line."
@@ -1243,20 +1243,20 @@ msgstr ""
 "最適化から除外するインラインスクリプトを識別するキーワードです。1行に1つ記入"
 "します。"
 
-#: includes/admin/class-admin-settings.php:1224
+#: includes/admin/class-admin-settings.php:1215
 msgid "Excluded from Defer"
 msgstr "defer 除外"
 
-#: includes/admin/class-admin-settings.php:1226
+#: includes/admin/class-admin-settings.php:1217
 msgid "JS files that should not be deferred. One pattern per line."
 msgstr ""
 "遅延読み込み (defer) しない JS ファイルです。1行に1パターンを記入します。"
 
-#: includes/admin/class-admin-settings.php:1229
+#: includes/admin/class-admin-settings.php:1220
 msgid "Excluded from Delay"
 msgstr "delay 除外"
 
-#: includes/admin/class-admin-settings.php:1231
+#: includes/admin/class-admin-settings.php:1222
 msgid ""
 "JS files that should not be delayed. One pattern per line. Scripts with data-"
 "no-delay attribute are always excluded."
@@ -1264,15 +1264,15 @@ msgstr ""
 "実行遅延しない JS ファイルです。1行に1パターンを記入します。data-no-delay 属"
 "性のスクリプトは常に除外されます。"
 
-#: includes/admin/class-admin-settings.php:1237
+#: includes/admin/class-admin-settings.php:1228
 msgid "Fonts & Other"
 msgstr "フォントとその他"
 
-#: includes/admin/class-admin-settings.php:1241
+#: includes/admin/class-admin-settings.php:1232
 msgid "Combine Google Fonts"
 msgstr "Google Fonts の結合"
 
-#: includes/admin/class-admin-settings.php:1241
+#: includes/admin/class-admin-settings.php:1232
 msgid ""
 "Merge multiple Google Fonts requests into a single request to reduce HTTP "
 "round-trips."
@@ -1280,11 +1280,11 @@ msgstr ""
 "複数の Google Fonts リクエストを1つに結合し、HTTP ラウンドトリップを削減しま"
 "す。"
 
-#: includes/admin/class-admin-settings.php:1242
+#: includes/admin/class-admin-settings.php:1233
 msgid "Self-Host Google Fonts"
 msgstr "Google Fonts のセルフホスティング"
 
-#: includes/admin/class-admin-settings.php:1242
+#: includes/admin/class-admin-settings.php:1233
 msgid ""
 "Download Google Fonts and serve them from your own server. Eliminates "
 "external DNS lookups and connections to fonts.googleapis.com and "
@@ -1294,11 +1294,11 @@ msgstr ""
 "fonts.googleapis.com と fonts.gstatic.com への外部 DNS ルックアップと接続を排"
 "除します。"
 
-#: includes/admin/class-admin-settings.php:1243
+#: includes/admin/class-admin-settings.php:1234
 msgid "Host Google Analytics Locally"
 msgstr "Google Analytics のローカルホスティング"
 
-#: includes/admin/class-admin-settings.php:1243
+#: includes/admin/class-admin-settings.php:1234
 msgid ""
 "Download and serve the Google Analytics script from your own server. Reduces "
 "external requests and improves PageSpeed scores."
@@ -1306,11 +1306,11 @@ msgstr ""
 "Google Analytics のスクリプトをダウンロードし、自サーバーから配信します。外部"
 "リクエストを削減し、PageSpeed スコアを改善します。"
 
-#: includes/admin/class-admin-settings.php:1247
+#: includes/admin/class-admin-settings.php:1238
 msgid "Optimize Google Fonts"
 msgstr "Google Fonts を最適化"
 
-#: includes/admin/class-admin-settings.php:1247
+#: includes/admin/class-admin-settings.php:1238
 msgid ""
 "Improves Google Fonts loading: (1) appends display=swap to font URLs so text "
 "remains visible during font load (prevents FOIT), (2) loads font CSS "
@@ -1324,11 +1324,11 @@ msgstr ""
 "ブロックしません、(3) fonts.gstatic.com への preconnect ヒントを早期に注入し"
 "ます。"
 
-#: includes/admin/class-admin-settings.php:1248
+#: includes/admin/class-admin-settings.php:1239
 msgid "Remove Query Strings"
 msgstr "クエリーストリングの削除"
 
-#: includes/admin/class-admin-settings.php:1248
+#: includes/admin/class-admin-settings.php:1239
 msgid ""
 "Remove version query strings (?ver=, ?v=) from local CSS and JS file URLs. "
 "Improves cacheability by CDNs and proxies that ignore query strings. "
@@ -1338,15 +1338,15 @@ msgstr ""
 "を削除します。クエリ文字列を無視する CDN やプロキシによるキャッシュ効率を改善"
 "します。外部 URL には影響しません。"
 
-#: includes/admin/class-admin-settings.php:1254
+#: includes/admin/class-admin-settings.php:1245
 msgid "Advanced"
 msgstr "高度な設定"
 
-#: includes/admin/class-admin-settings.php:1255
+#: includes/admin/class-admin-settings.php:1246
 msgid "Enable Rewrite for File Optimizer"
 msgstr "ファイルオプティマイザーのリライトを有効化"
 
-#: includes/admin/class-admin-settings.php:1255
+#: includes/admin/class-admin-settings.php:1246
 msgid ""
 "Serve optimized CSS/JS files via clean URLs (/_pc-static/) instead of direct "
 "file paths. Uses WordPress rewrite rules for portability. Adds a 1-year "
@@ -1360,15 +1360,15 @@ msgstr ""
 "す。`immutable` ディレクティブは「Immutable Cache-Control」も有効な場合に追加"
 "されます。この設定が変更されるとパーマリンクが自動的にフラッシュされます。"
 
-#: includes/admin/class-admin-settings.php:1260
+#: includes/admin/class-admin-settings.php:1251
 msgid "Performance Tweaks"
 msgstr "パフォーマンスチューニング"
 
-#: includes/admin/class-admin-settings.php:1263
+#: includes/admin/class-admin-settings.php:1254
 msgid "Use Local jQuery"
 msgstr "ローカル jQuery を使用"
 
-#: includes/admin/class-admin-settings.php:1263
+#: includes/admin/class-admin-settings.php:1254
 msgid ""
 "Restore WordPress bundled jQuery when the theme loads it from an external "
 "CDN (e.g. cdnjs.cloudflare.com). Eliminates external connection overhead "
@@ -1378,11 +1378,11 @@ msgstr ""
 "WordPress 同梱の jQuery に戻します。同一オリジンから jQuery を配信することで"
 "外部接続のオーバーヘッド (モバイルで約 600ms) を排除します。"
 
-#: includes/admin/class-admin-settings.php:1264
+#: includes/admin/class-admin-settings.php:1255
 msgid "Disable jQuery Migrate"
 msgstr "jQuery Migrate を無効化"
 
-#: includes/admin/class-admin-settings.php:1264
+#: includes/admin/class-admin-settings.php:1255
 msgid ""
 "Remove jquery-migrate.min.js from the frontend. Most modern jQuery code and "
 "plugins no longer need it. Saves ~10 KB per page."
@@ -1390,11 +1390,11 @@ msgstr ""
 "フロントエンドから jquery-migrate.min.js を削除します。最新の jQuery コードや"
 "プラグインのほとんどは不要です。ページあたり約 10 KB を節約します。"
 
-#: includes/admin/class-admin-settings.php:1265
+#: includes/admin/class-admin-settings.php:1256
 msgid "Disable WP Embed"
 msgstr "WP Embed を無効化"
 
-#: includes/admin/class-admin-settings.php:1265
+#: includes/admin/class-admin-settings.php:1256
 msgid ""
 "Remove wp-embed.min.js and oEmbed discovery links from your pages. Saves ~6 "
 "KB of JavaScript per page and makes your content harder to auto-embed via "
@@ -1406,11 +1406,11 @@ msgstr ""
 "難にしますが、oEmbed REST エンドポイントは引き続き応答します。完全に埋め込み"
 "を防止するには下の「Disable oEmbed」と併用してください。"
 
-#: includes/admin/class-admin-settings.php:1266
+#: includes/admin/class-admin-settings.php:1257
 msgid "Disable Dashicons (Frontend)"
 msgstr "Dashicons の無効化 (フロントエンド)"
 
-#: includes/admin/class-admin-settings.php:1266
+#: includes/admin/class-admin-settings.php:1257
 msgid ""
 "Remove the Dashicons stylesheet for non-logged-in visitors. Saves ~46 KB. "
 "Icons remain available for logged-in users and the admin area."
@@ -1419,11 +1419,11 @@ msgstr ""
 "KB を節約します。ログインユーザーと管理画面ではアイコンは引き続き利用可能で"
 "す。"
 
-#: includes/admin/class-admin-settings.php:1267
+#: includes/admin/class-admin-settings.php:1258
 msgid "Remove WordPress Version"
 msgstr "WordPress バージョン番号の非表示"
 
-#: includes/admin/class-admin-settings.php:1267
+#: includes/admin/class-admin-settings.php:1258
 msgid ""
 "Remove the WordPress version meta tag and feed generator tag. Minor security "
 "improvement — prevents version fingerprinting."
@@ -1431,11 +1431,11 @@ msgstr ""
 "WordPress バージョンメタタグとフィードジェネレータータグを削除します。バー"
 "ジョンフィンガープリンティングを防ぐ軽微なセキュリティ改善です。"
 
-#: includes/admin/class-admin-settings.php:1268
+#: includes/admin/class-admin-settings.php:1259
 msgid "Disable XML-RPC"
 msgstr "XML-RPC を無効化"
 
-#: includes/admin/class-admin-settings.php:1268
+#: includes/admin/class-admin-settings.php:1259
 msgid ""
 "Disable the XML-RPC API via the xmlrpc_enabled filter and remove the X-"
 "Pingback header. This does not block access to xmlrpc.php at the server "
@@ -1447,11 +1447,11 @@ msgstr ""
 "ブロックには .htaccess またはサーバー設定を使用してください。REST API を使用"
 "している場合は不要です。"
 
-#: includes/admin/class-admin-settings.php:1269
+#: includes/admin/class-admin-settings.php:1260
 msgid "Disable Self-Pingbacks"
 msgstr "セルフピンバックを無効化"
 
-#: includes/admin/class-admin-settings.php:1269
+#: includes/admin/class-admin-settings.php:1260
 msgid ""
 "Prevent WordPress from sending pingback requests to your own site when you "
 "link to your own posts."
@@ -1459,11 +1459,11 @@ msgstr ""
 "自サイトの投稿にリンクしたときに、自サイトへのピンバックリクエスト送信を防止"
 "します。"
 
-#: includes/admin/class-admin-settings.php:1270
+#: includes/admin/class-admin-settings.php:1261
 msgid "Disable RSS Feeds"
 msgstr "RSS フィードを無効化"
 
-#: includes/admin/class-admin-settings.php:1270
+#: includes/admin/class-admin-settings.php:1261
 msgid ""
 "Disable all RSS/Atom feeds and redirect feed URLs to the homepage. Use only "
 "if your site does not need feeds."
@@ -1471,11 +1471,11 @@ msgstr ""
 "すべての RSS/Atom フィードを無効化し、フィード URL をホームページにリダイレク"
 "トします。フィードが不要なサイトでのみ使用してください。"
 
-#: includes/admin/class-admin-settings.php:1271
+#: includes/admin/class-admin-settings.php:1262
 msgid "Disable oEmbed"
 msgstr "oEmbed を無効化"
 
-#: includes/admin/class-admin-settings.php:1271
+#: includes/admin/class-admin-settings.php:1262
 msgid ""
 "Remove oEmbed discovery links, host JavaScript, and REST API route. Prevents "
 "remote embedding of your content."
@@ -1483,11 +1483,11 @@ msgstr ""
 "oEmbed ディスカバリーリンク、ホスト JavaScript、REST API ルートを削除します。"
 "コンテンツのリモート埋め込みを防止します。"
 
-#: includes/admin/class-admin-settings.php:1272
+#: includes/admin/class-admin-settings.php:1263
 msgid "Disable Gutenberg Block CSS"
 msgstr "Gutenberg ブロック CSS を無効化"
 
-#: includes/admin/class-admin-settings.php:1272
+#: includes/admin/class-admin-settings.php:1263
 msgid ""
 "Remove wp-block-library, wp-block-library-theme, and WooCommerce block "
 "stylesheets. Use only if you are using the Classic Editor and not using any "
@@ -1497,11 +1497,11 @@ msgstr ""
 "を削除します。クラシックエディターを使用し、Gutenberg ブロックを使用していな"
 "い場合のみ使用してください。"
 
-#: includes/admin/class-admin-settings.php:1273
+#: includes/admin/class-admin-settings.php:1264
 msgid "Disable Google Fonts"
 msgstr "Google Fonts を無効化"
 
-#: includes/admin/class-admin-settings.php:1273
+#: includes/admin/class-admin-settings.php:1264
 msgid ""
 "Dequeue all Google Fonts (fonts.googleapis.com and fonts.bunny.net) loaded "
 "by themes and plugins. Use if you self-host fonts or do not need external "
@@ -1511,11 +1511,11 @@ msgstr ""
 "fonts.bunny.net) を無効化します。フォントをセルフホストする場合や外部フォント"
 "が不要な場合に使用してください。"
 
-#: includes/admin/class-admin-settings.php:1274
+#: includes/admin/class-admin-settings.php:1265
 msgid "Disable Global Styles (SVG)"
 msgstr "Global Styles (SVG) を無効化"
 
-#: includes/admin/class-admin-settings.php:1274
+#: includes/admin/class-admin-settings.php:1265
 msgid ""
 "Remove the global-styles inline CSS and SVG filters added by WordPress 6.1+. "
 "Saves ~2 KB of inline markup on every page."
@@ -1523,11 +1523,11 @@ msgstr ""
 "WordPress 6.1 以降で追加された global-styles インライン CSS と SVG フィルター"
 "を削除します。ページあたり約 2 KB のインラインマークアップを節約します。"
 
-#: includes/admin/class-admin-settings.php:1275
+#: includes/admin/class-admin-settings.php:1266
 msgid "Limit DNS Prefetch Hints"
 msgstr "DNS Prefetch ヒントを制限"
 
-#: includes/admin/class-admin-settings.php:1275
+#: includes/admin/class-admin-settings.php:1266
 msgid ""
 "Limit dns-prefetch and preconnect hints to 4 entries. WordPress auto-adds "
 "hints for every external domain, which wastes mobile connections. PageSpeed "
@@ -1537,11 +1537,11 @@ msgstr ""
 "部ドメインごとにヒントを自動追加しますが、モバイル接続を浪費します。"
 "PageSpeed は 4 つ以下を推奨しています。"
 
-#: includes/admin/class-admin-settings.php:1283
+#: includes/admin/class-admin-settings.php:1274
 msgid "Limit Post Revisions"
 msgstr "投稿リビジョンの制限"
 
-#: includes/admin/class-admin-settings.php:1283
+#: includes/admin/class-admin-settings.php:1274
 msgid ""
 "Limit the maximum number of revisions stored per post. Reduces database "
 "bloat over time."
@@ -1549,19 +1549,19 @@ msgstr ""
 "投稿ごとに保存されるリビジョンの最大数を制限します。データベースの肥大化を防"
 "ぎます。"
 
-#: includes/admin/class-admin-settings.php:1285
+#: includes/admin/class-admin-settings.php:1276
 msgid "Max Revisions"
 msgstr "最大リビジョン数"
 
-#: includes/admin/class-admin-settings.php:1287
+#: includes/admin/class-admin-settings.php:1278
 msgid "0 = disable revisions entirely"
 msgstr "0 = リビジョンを完全に無効化"
 
-#: includes/admin/class-admin-settings.php:1292
+#: includes/admin/class-admin-settings.php:1283
 msgid "WooCommerce Script Optimization"
 msgstr "WooCommerce スクリプト最適化"
 
-#: includes/admin/class-admin-settings.php:1292
+#: includes/admin/class-admin-settings.php:1283
 msgid ""
 "Disable WooCommerce CSS and JavaScript on non-WooCommerce pages (shop, "
 "product, archive, cart, checkout, and account pages are excluded). Saves "
@@ -1571,11 +1571,11 @@ msgstr ""
 "(ショップ、商品、アーカイブ、カート、チェックアウト、アカウントページは除"
 "外)。通常のブログ/固定ページで 100KB 以上を節約します。"
 
-#: includes/admin/class-admin-settings.php:1293
+#: includes/admin/class-admin-settings.php:1284
 msgid "Disable Cart Fragments AJAX"
 msgstr "カートフラグメント AJAX の無効化"
 
-#: includes/admin/class-admin-settings.php:1293
+#: includes/admin/class-admin-settings.php:1284
 msgid ""
 "Disable WooCommerce cart fragments AJAX request (wc-"
 "ajax=get_refreshed_fragments) on non-cart/checkout pages. This AJAX call "
@@ -1587,15 +1587,15 @@ msgstr ""
 "のページ読み込みで実行され、WooCommerce の最大のパフォーマンスボトルネックの1"
 "つです。"
 
-#: includes/admin/class-admin-settings.php:1298
+#: includes/admin/class-admin-settings.php:1289
 msgid "WP Head Cleanup"
 msgstr "WP Head クリーンアップ"
 
-#: includes/admin/class-admin-settings.php:1301
+#: includes/admin/class-admin-settings.php:1292
 msgid "Remove Shortlink"
 msgstr "ショートリンクの削除"
 
-#: includes/admin/class-admin-settings.php:1301
+#: includes/admin/class-admin-settings.php:1292
 msgid ""
 "Remove the shortlink tag and HTTP header. Not needed if you use pretty "
 "permalinks."
@@ -1603,11 +1603,11 @@ msgstr ""
 "ショートリンクタグと HTTP ヘッダーを削除します。パーマリンクを使用している場"
 "合は不要です。"
 
-#: includes/admin/class-admin-settings.php:1302
+#: includes/admin/class-admin-settings.php:1293
 msgid "Remove RSD & WLW Manifest"
 msgstr "RSD と WLW Manifest の削除"
 
-#: includes/admin/class-admin-settings.php:1302
+#: includes/admin/class-admin-settings.php:1293
 msgid ""
 "Remove Really Simple Discovery and Windows Live Writer manifest links. Only "
 "needed for XML-RPC clients."
@@ -1615,22 +1615,22 @@ msgstr ""
 "Really Simple Discovery と Windows Live Writer マニフェストリンクを削除しま"
 "す。XML-RPC クライアントを使用する場合のみ必要です。"
 
-#: includes/admin/class-admin-settings.php:1303
+#: includes/admin/class-admin-settings.php:1294
 msgid "Remove REST API Link"
 msgstr "REST API リンクの削除"
 
-#: includes/admin/class-admin-settings.php:1303
+#: includes/admin/class-admin-settings.php:1294
 msgid ""
 "Remove the REST API discovery link tag and HTTP header from the frontend."
 msgstr ""
 "フロントエンドから REST API ディスカバリーリンクタグと HTTP ヘッダーを削除し"
 "ます。"
 
-#: includes/admin/class-admin-settings.php:1304
+#: includes/admin/class-admin-settings.php:1295
 msgid "Disable WordPress Sitemap"
 msgstr "WordPress サイトマップの無効化"
 
-#: includes/admin/class-admin-settings.php:1304
+#: includes/admin/class-admin-settings.php:1295
 msgid ""
 "Disable the built-in WordPress XML sitemap (/wp-sitemap.xml). Use if you "
 "have a sitemap plugin like Yoast SEO or Rank Math."
@@ -1639,11 +1639,11 @@ msgstr ""
 "Yoast SEO や Rank Math などのサイトマッププラグインを使用している場合に使用し"
 "てください。"
 
-#: includes/admin/class-admin-settings.php:1305
+#: includes/admin/class-admin-settings.php:1296
 msgid "Add Blank Favicon"
 msgstr "空の favicon を追加"
 
-#: includes/admin/class-admin-settings.php:1305
+#: includes/admin/class-admin-settings.php:1296
 msgid ""
 "Add an inline SVG favicon to prevent the browser from requesting a missing "
 "favicon.ico (404). Only applied when no site icon is set."
@@ -1652,11 +1652,11 @@ msgstr ""
 "SVG favicon を追加します。サイトアイコンが設定されていない場合のみ適用されま"
 "す。"
 
-#: includes/admin/class-admin-settings.php:1315
+#: includes/admin/class-admin-settings.php:1306
 msgid "3rd-Party Script Delay Presets"
 msgstr "サードパーティースクリプト遅延プリセット"
 
-#: includes/admin/class-admin-settings.php:1316
+#: includes/admin/class-admin-settings.php:1307
 msgid ""
 "Select known third-party scripts to exclude from JavaScript delay execution. "
 "These scripts will load immediately instead of waiting for user interaction."
@@ -1664,11 +1664,11 @@ msgstr ""
 "JavaScript 実行遅延から除外する既知のサードパーティースクリプトを選択します。"
 "これらのスクリプトはユーザー操作を待たずに即座に読み込まれます。"
 
-#: includes/admin/class-admin-settings.php:1427
+#: includes/admin/class-admin-settings.php:1418
 msgid "Lazy Load Images"
 msgstr "画像の遅延読み込み"
 
-#: includes/admin/class-admin-settings.php:1427
+#: includes/admin/class-admin-settings.php:1418
 msgid ""
 "Add loading=\"lazy\" attribute to images below the fold. The first N images "
 "(configurable below) are skipped to preserve above-the-fold LCP performance. "
@@ -1678,11 +1678,11 @@ msgstr ""
 "(下で設定可能) の画像は LCP パフォーマンスを維持するためスキップされます。"
 "fetchpriority=\"high\" の画像は遅延読み込みされません。"
 
-#: includes/admin/class-admin-settings.php:1429
+#: includes/admin/class-admin-settings.php:1420
 msgid "Skip First N Images"
 msgstr "スキップする先頭画像数"
 
-#: includes/admin/class-admin-settings.php:1431
+#: includes/admin/class-admin-settings.php:1422
 msgid ""
 "Number of leading images per page that bypass lazy loading (typically the "
 "LCP candidate and adjacent above-the-fold images). Default 3. Set 0 to lazy-"
@@ -1692,11 +1692,11 @@ msgstr ""
 "ファーストビュー画像)。デフォルトは 3 です。0 を指定するとすべての画像を遅延"
 "読み込みします。"
 
-#: includes/admin/class-admin-settings.php:1433
+#: includes/admin/class-admin-settings.php:1424
 msgid "Lazy Load Iframes"
 msgstr "iframe の遅延読み込み"
 
-#: includes/admin/class-admin-settings.php:1433
+#: includes/admin/class-admin-settings.php:1424
 msgid ""
 "Add loading=\"lazy\" to iframes (YouTube embeds, Google Maps, etc.). "
 "Significantly reduces initial page weight for embed-heavy pages."
@@ -1704,11 +1704,11 @@ msgstr ""
 "iframe (YouTube 埋め込み、Google Maps など) に loading=\"lazy\" を追加しま"
 "す。埋め込みが多いページの初期読み込みサイズを大幅に削減します。"
 
-#: includes/admin/class-admin-settings.php:1434
+#: includes/admin/class-admin-settings.php:1425
 msgid "Lazy Load Videos"
 msgstr "動画の遅延読み込み"
 
-#: includes/admin/class-admin-settings.php:1434
+#: includes/admin/class-admin-settings.php:1425
 msgid ""
 "Set preload=\"none\" on video elements to prevent auto-downloading video "
 "files until playback is requested."
@@ -1716,11 +1716,11 @@ msgstr ""
 "video 要素に preload=\"none\" を設定し、再生が要求されるまで動画ファイルの自"
 "動ダウンロードを防止します。"
 
-#: includes/admin/class-admin-settings.php:1435
+#: includes/admin/class-admin-settings.php:1426
 msgid "Disable WordPress Native Lazy Load"
 msgstr "WordPress ネイティブ遅延読み込みを無効化"
 
-#: includes/admin/class-admin-settings.php:1435
+#: includes/admin/class-admin-settings.php:1426
 msgid ""
 "Disable the built-in lazy loading added by WordPress 5.5+. Use this if you "
 "want Prime Cache to have full control over which images are lazy loaded, or "
@@ -1732,11 +1732,11 @@ msgstr ""
 "ぎたい場合に使用してください。無効にすると、WordPress が画像や iframe に自動"
 "で loading=\"lazy\" を追加しなくなります。"
 
-#: includes/admin/class-admin-settings.php:1437
+#: includes/admin/class-admin-settings.php:1428
 msgid "Excluded Patterns"
 msgstr "除外パターン"
 
-#: includes/admin/class-admin-settings.php:1439
+#: includes/admin/class-admin-settings.php:1430
 msgid ""
 "One pattern per line. Images, iframes, and videos containing these strings "
 "will not be lazy loaded."
@@ -1744,17 +1744,17 @@ msgstr ""
 "1行に1パターンを記入します。これらの文字列を含む画像、iframe、動画は遅延読み"
 "込みされません。"
 
-#: includes/admin/class-admin-settings.php:1445
+#: includes/admin/class-admin-settings.php:1436
 msgid "Image Optimization"
 msgstr "画像最適化"
 
-#: includes/admin/class-admin-settings.php:1448
-#: includes/admin/class-admin-settings.php:1450
+#: includes/admin/class-admin-settings.php:1439
+#: includes/admin/class-admin-settings.php:1441
 msgid "YouTube Thumbnail Placeholder"
 msgstr "YouTube サムネイルプレースホルダー"
 
-#: includes/admin/class-admin-settings.php:1448
-#: includes/admin/class-admin-settings.php:1450
+#: includes/admin/class-admin-settings.php:1439
+#: includes/admin/class-admin-settings.php:1441
 msgid ""
 "Replace YouTube iframe embeds with a lightweight thumbnail image. The iframe "
 "loads only when the user clicks play, saving significant bandwidth and "
@@ -1764,11 +1764,11 @@ msgstr ""
 "生をクリックしたときにのみ iframe を読み込むため、帯域幅を大幅に節約しページ"
 "の読み込み時間を改善します。"
 
-#: includes/admin/class-admin-settings.php:1452
+#: includes/admin/class-admin-settings.php:1443
 msgid "Add Missing Image Dimensions"
 msgstr "画像の寸法を自動補完"
 
-#: includes/admin/class-admin-settings.php:1452
+#: includes/admin/class-admin-settings.php:1443
 msgid ""
 "Automatically add width and height attributes to images that are missing "
 "them. Prevents Cumulative Layout Shift (CLS) — a Core Web Vitals metric. "
@@ -1778,11 +1778,11 @@ msgstr ""
 "指標である Cumulative Layout Shift (CLS) を防止します。ローカルでホストされて"
 "いる画像のみ対象です。"
 
-#: includes/admin/class-admin-settings.php:1453
+#: includes/admin/class-admin-settings.php:1444
 msgid "Strip EXIF Data"
 msgstr "EXIF データの除去"
 
-#: includes/admin/class-admin-settings.php:1453
+#: includes/admin/class-admin-settings.php:1444
 msgid ""
 "Remove EXIF metadata (camera model, GPS coordinates, timestamps) from JPEG "
 "images on upload. Only JPEG images are processed. Images are re-encoded at "
@@ -1794,11 +1794,11 @@ msgstr ""
 "されるため、ファイルサイズがわずかに変わる場合があります。位置情報を削除する"
 "ことでプライバシーを改善します。"
 
-#: includes/admin/class-admin-settings.php:1454
+#: includes/admin/class-admin-settings.php:1445
 msgid "Resize Oversized Images"
 msgstr "大きすぎる画像のリサイズ"
 
-#: includes/admin/class-admin-settings.php:1454
+#: includes/admin/class-admin-settings.php:1445
 msgid ""
 "Automatically resize JPEG and PNG images that exceed the maximum dimensions "
 "on upload. WebP, GIF, and AVIF images are not affected. Prevents "
@@ -1808,23 +1808,23 @@ msgstr ""
 "WebP、GIF、AVIF 画像には影響しません。不必要に大きな画像の保存と配信を防ぎま"
 "す。"
 
-#: includes/admin/class-admin-settings.php:1457
+#: includes/admin/class-admin-settings.php:1448
 msgid "Max Width (px)"
 msgstr "最大幅 (px)"
 
-#: includes/admin/class-admin-settings.php:1461
+#: includes/admin/class-admin-settings.php:1452
 msgid "Max Height (px)"
 msgstr "最大高さ (px)"
 
-#: includes/admin/class-admin-settings.php:1476
+#: includes/admin/class-admin-settings.php:1467
 msgid "Format Conversion (WebP / AVIF)"
 msgstr "フォーマット変換 (WebP / AVIF)"
 
-#: includes/admin/class-admin-settings.php:1481
+#: includes/admin/class-admin-settings.php:1472
 msgid "Enable Image Conversion"
 msgstr "画像変換を有効化"
 
-#: includes/admin/class-admin-settings.php:1482
+#: includes/admin/class-admin-settings.php:1473
 msgid ""
 "Convert JPEG and PNG images to modern formats for smaller file sizes and "
 "faster loading."
@@ -1832,23 +1832,23 @@ msgstr ""
 "JPEG・PNG 画像を最新フォーマットに変換し、ファイルサイズを削減して読み込みを"
 "高速化します。"
 
-#: includes/admin/class-admin-settings.php:1489
+#: includes/admin/class-admin-settings.php:1480
 msgid "WebP"
 msgstr "WebP"
 
-#: includes/admin/class-admin-settings.php:1490
+#: includes/admin/class-admin-settings.php:1481
 msgid "Convert images to WebP format. Supported by all modern browsers."
 msgstr ""
 "画像を WebP フォーマットに変換します。すべてのモダンブラウザーで対応していま"
 "す。"
 
-#: includes/admin/class-admin-settings.php:1499
-#: includes/admin/class-admin-settings.php:1504
+#: includes/admin/class-admin-settings.php:1490
+#: includes/admin/class-admin-settings.php:1495
 msgid "AVIF"
 msgstr "AVIF"
 
-#: includes/admin/class-admin-settings.php:1500
-#: includes/admin/class-admin-settings.php:1504
+#: includes/admin/class-admin-settings.php:1491
+#: includes/admin/class-admin-settings.php:1495
 msgid ""
 "Convert images to AVIF format. Offers superior compression but requires more "
 "processing time."
@@ -1856,7 +1856,7 @@ msgstr ""
 "画像を AVIF フォーマットに変換します。より高い圧縮率を実現しますが、変換に時"
 "間がかかります。"
 
-#: includes/admin/class-admin-settings.php:1508
+#: includes/admin/class-admin-settings.php:1499
 msgid ""
 "Your server does not support AVIF conversion — AVIF will be skipped even if "
 "enabled. (Requires GD with AVIF support or ImageMagick with AVIF.)"
@@ -1864,93 +1864,93 @@ msgstr ""
 "お使いのサーバーは AVIF 変換に対応していません。有効にしても AVIF はスキップ"
 "されます。 (AVIF 対応の GD または AVIF 対応の ImageMagick が必要です)"
 
-#: includes/admin/class-admin-settings.php:1513
+#: includes/admin/class-admin-settings.php:1504
 msgid "Quality Mode"
 msgstr "品質モード"
 
-#: includes/admin/class-admin-settings.php:1515
+#: includes/admin/class-admin-settings.php:1506
 msgid "Lossy"
 msgstr "非可逆"
 
-#: includes/admin/class-admin-settings.php:1516
+#: includes/admin/class-admin-settings.php:1507
 msgid "Lossless"
 msgstr "可逆"
 
-#: includes/admin/class-admin-settings.php:1517
+#: includes/admin/class-admin-settings.php:1508
 msgid "Custom"
 msgstr "カスタム"
 
-#: includes/admin/class-admin-settings.php:1521
+#: includes/admin/class-admin-settings.php:1512
 msgid "WebP Quality"
 msgstr "WebP 品質"
 
-#: includes/admin/class-admin-settings.php:1525
+#: includes/admin/class-admin-settings.php:1516
 msgid "AVIF Quality"
 msgstr "AVIF 品質"
 
-#: includes/admin/class-admin-settings.php:1536
+#: includes/admin/class-admin-settings.php:1527
 msgid "Delivery Method"
 msgstr "配信方法"
 
-#: includes/admin/class-admin-settings.php:1538
+#: includes/admin/class-admin-settings.php:1529
 msgid "Rewrite (.htaccess)"
 msgstr "リライト (.htaccess)"
 
-#: includes/admin/class-admin-settings.php:1539
+#: includes/admin/class-admin-settings.php:1530
 msgid "<picture> Tag"
 msgstr "<picture> タグ"
 
-#: includes/admin/class-admin-settings.php:1540
+#: includes/admin/class-admin-settings.php:1531
 msgid "URL Replacement"
 msgstr "URL 置換"
 
-#: includes/admin/class-admin-settings.php:1544
+#: includes/admin/class-admin-settings.php:1535
 msgid "Conversion Engine"
 msgstr "変換エンジン"
 
-#: includes/admin/class-admin-settings.php:1546
+#: includes/admin/class-admin-settings.php:1537
 msgid "Auto (Imagick, then GD)"
 msgstr "自動 (Imagick、次に GD)"
 
-#: includes/admin/class-admin-settings.php:1554
+#: includes/admin/class-admin-settings.php:1545
 msgid "Target Folders"
 msgstr "対象フォルダー"
 
-#: includes/admin/class-admin-settings.php:1557
+#: includes/admin/class-admin-settings.php:1548
 msgid "Uploads (wp-content/uploads)"
 msgstr "アップロード (wp-content/uploads)"
 
-#: includes/admin/class-admin-settings.php:1561
+#: includes/admin/class-admin-settings.php:1552
 msgid "Themes (wp-content/themes)"
 msgstr "テーマ (wp-content/themes)"
 
-#: includes/admin/class-admin-settings.php:1565
+#: includes/admin/class-admin-settings.php:1556
 msgid "Plugins (wp-content/plugins)"
 msgstr "プラグイン (wp-content/plugins)"
 
-#: includes/admin/class-admin-settings.php:1573
+#: includes/admin/class-admin-settings.php:1564
 msgid "Auto-Optimize on Upload"
 msgstr "アップロード時の自動最適化"
 
-#: includes/admin/class-admin-settings.php:1574
+#: includes/admin/class-admin-settings.php:1565
 msgid ""
 "Automatically convert images when they are uploaded to the media library."
 msgstr "メディアライブラリにアップロードされた画像を自動的に変換します。"
 
-#: includes/admin/class-admin-settings.php:1581
+#: includes/admin/class-admin-settings.php:1572
 msgid "Delete Larger Conversions"
 msgstr "サイズ増加時に変換ファイルを削除"
 
-#: includes/admin/class-admin-settings.php:1582
+#: includes/admin/class-admin-settings.php:1573
 msgid ""
 "If the converted file is larger than the original, delete it automatically."
 msgstr "変換後のファイルが元のファイルより大きい場合、自動的に削除します。"
 
-#: includes/admin/class-admin-settings.php:1589
+#: includes/admin/class-admin-settings.php:1580
 msgid "Exclude PNG Files"
 msgstr "PNG ファイルを除外"
 
-#: includes/admin/class-admin-settings.php:1590
+#: includes/admin/class-admin-settings.php:1581
 msgid ""
 "Skip PNG images during conversion. Useful for PNGs with transparency or "
 "sharp graphics where WebP/AVIF offers little benefit. JPEG images are still "
@@ -1959,11 +1959,11 @@ msgstr ""
 "変換時に PNG 画像をスキップします。透過や輪郭のはっきりしたグラフィックなど、"
 "WebP/AVIF の効果が小さい PNG に有効です。JPEG 画像は引き続き変換されます。"
 
-#: includes/admin/class-admin-settings.php:1600
+#: includes/admin/class-admin-settings.php:1591
 msgid "Bulk Image Optimization"
 msgstr "画像一括最適化"
 
-#: includes/admin/class-admin-settings.php:1601
+#: includes/admin/class-admin-settings.php:1592
 msgid ""
 "Scan and optimize existing images in your media library. Progress is saved — "
 "you can pause and resume at any time."
@@ -1971,61 +1971,61 @@ msgstr ""
 "メディアライブラリ内の既存画像をスキャンして最適化します。進行状況は保存され"
 "るため、いつでも中断・再開できます。"
 
-#: includes/admin/class-admin-settings.php:1603
+#: includes/admin/class-admin-settings.php:1594
 msgid "Scan for Unoptimized Images"
 msgstr "未最適化の画像をスキャン"
 
-#: includes/admin/class-admin-settings.php:1611
+#: includes/admin/class-admin-settings.php:1602
 msgid "Progress"
 msgstr "進捗"
 
-#: includes/admin/class-admin-settings.php:1649
+#: includes/admin/class-admin-settings.php:1640
 msgid "Scanning…"
 msgstr "スキャン中…"
 
-#: includes/admin/class-admin-settings.php:1650
+#: includes/admin/class-admin-settings.php:1641
 msgid "No unoptimized images found."
 msgstr "最適化が必要な画像は見つかりませんでした。"
 
 #. translators: %1$d: number of images processed so far, %2$d: total number of images.
-#: includes/admin/class-admin-settings.php:1651
+#: includes/admin/class-admin-settings.php:1642
 #, php-format
 msgid "Converting %1$d / %2$d…"
 msgstr "変換中 %1$d / %2$d…"
 
 #. translators: %d: number of images processed.
-#: includes/admin/class-admin-settings.php:1652
+#: includes/admin/class-admin-settings.php:1643
 #, php-format
 msgid "Done. Processed %d images."
 msgstr "完了しました。%d 枚の画像を処理しました。"
 
 #. translators: %s: error message.
-#: includes/admin/class-admin-settings.php:1653
+#: includes/admin/class-admin-settings.php:1644
 #, php-format
 msgid "Error: %s"
 msgstr "エラー: %s"
 
-#: includes/admin/class-admin-settings.php:1654
+#: includes/admin/class-admin-settings.php:1645
 msgid "unknown error"
 msgstr "不明なエラー"
 
-#: includes/admin/class-admin-settings.php:1655
+#: includes/admin/class-admin-settings.php:1646
 msgid "network error"
 msgstr "ネットワークエラー"
 
-#: includes/admin/class-admin-settings.php:1748
+#: includes/admin/class-admin-settings.php:1739
 msgid "CDN"
 msgstr "CDN"
 
-#: includes/admin/class-admin-settings.php:1755
+#: includes/admin/class-admin-settings.php:1746
 msgid "CDN URL Rewriting"
 msgstr "CDN URL 書き換え"
 
-#: includes/admin/class-admin-settings.php:1756
+#: includes/admin/class-admin-settings.php:1747
 msgid "Enable CDN"
 msgstr "CDN を有効化"
 
-#: includes/admin/class-admin-settings.php:1756
+#: includes/admin/class-admin-settings.php:1747
 msgid ""
 "Rewrite URLs for static assets (images, CSS, JS) to be served from your CDN "
 "hostname. Works with any pull-zone CDN (BunnyCDN, CloudFront, KeyCDN, "
@@ -2035,11 +2035,11 @@ msgstr ""
 "す。すべてのプルゾーン CDN (BunnyCDN、CloudFront、KeyCDN、StackPath など) で"
 "動作します。"
 
-#: includes/admin/class-admin-settings.php:1757
+#: includes/admin/class-admin-settings.php:1748
 msgid "Rewrite Relative URLs"
 msgstr "相対 URL を書き換え"
 
-#: includes/admin/class-admin-settings.php:1757
+#: includes/admin/class-admin-settings.php:1748
 msgid ""
 "Also rewrite relative URLs (starting with /) in src and href attributes. "
 "Disable if your theme uses relative URLs for non-asset links."
@@ -2047,11 +2047,11 @@ msgstr ""
 "src や href 属性内の相対 URL (/ で始まるもの) も書き換えます。テーマがアセッ"
 "ト以外のリンクに相対 URL を使用している場合は無効にしてください。"
 
-#: includes/admin/class-admin-settings.php:1759
+#: includes/admin/class-admin-settings.php:1750
 msgid "CDN Hostname(s)"
 msgstr "CDN ホスト名"
 
-#: includes/admin/class-admin-settings.php:1761
+#: includes/admin/class-admin-settings.php:1752
 msgid ""
 "One hostname per line (without https://). Multiple hostnames enable domain "
 "sharding — assets are distributed across them in round-robin."
@@ -2059,11 +2059,11 @@ msgstr ""
 "1行に1ホスト名を記入します (https:// なし)。複数のホスト名を指定するとドメイ"
 "ンシャーディングが有効になり、アセットがラウンドロビンで分散されます。"
 
-#: includes/admin/class-admin-settings.php:1764
+#: includes/admin/class-admin-settings.php:1755
 msgid "Include Directories"
 msgstr "対象ディレクトリー"
 
-#: includes/admin/class-admin-settings.php:1766
+#: includes/admin/class-admin-settings.php:1757
 msgid ""
 "Comma-separated directory names. Only URLs containing these paths will be "
 "rewritten. Default: wp-content,wp-includes"
@@ -2071,11 +2071,11 @@ msgstr ""
 "カンマ区切りのディレクトリー名です。これらのパスを含む URL のみが書き換えられ"
 "ます。デフォルト: wp-content,wp-includes"
 
-#: includes/admin/class-admin-settings.php:1769
+#: includes/admin/class-admin-settings.php:1760
 msgid "Exclude Patterns"
 msgstr "除外パターン"
 
-#: includes/admin/class-admin-settings.php:1771
+#: includes/admin/class-admin-settings.php:1762
 msgid ""
 "One pattern per line. URLs containing these strings will not be rewritten to "
 "the CDN."
@@ -2083,11 +2083,11 @@ msgstr ""
 "1行に1パターンを記入します。これらの文字列を含む URL は CDN に書き換えられま"
 "せん。"
 
-#: includes/admin/class-admin-settings.php:1778
+#: includes/admin/class-admin-settings.php:1769
 msgid "Cloudflare Cache Sync"
 msgstr "Cloudflare キャッシュ同期"
 
-#: includes/admin/class-admin-settings.php:1778
+#: includes/admin/class-admin-settings.php:1769
 msgid ""
 "Automatically purge Cloudflare cache when Prime Cache is cleared. Supports "
 "full zone purge and per-URL purge (up to 30 URLs per API call, batched "
@@ -2099,33 +2099,33 @@ msgstr ""
 "URL、自動バッチ処理)。少量のバッチは即座に送信され、大量のバッチはバックグラ"
 "ウンドタスクで処理されます。"
 
-#: includes/admin/class-admin-settings.php:1780
+#: includes/admin/class-admin-settings.php:1771
 msgid "Zone ID"
 msgstr "ゾーン ID"
 
-#: includes/admin/class-admin-settings.php:1782
+#: includes/admin/class-admin-settings.php:1773
 msgid ""
 "Find this in Cloudflare dashboard > your domain > Overview (right sidebar)."
 msgstr ""
 "Cloudflare ダッシュボード > ドメイン > 概要 (右サイドバー) で確認できます。"
 
-#: includes/admin/class-admin-settings.php:1785
+#: includes/admin/class-admin-settings.php:1776
 msgid "Authentication Method"
 msgstr "認証方法"
 
-#: includes/admin/class-admin-settings.php:1787
+#: includes/admin/class-admin-settings.php:1778
 msgid "API Token (recommended)"
 msgstr "API トークン (推奨)"
 
-#: includes/admin/class-admin-settings.php:1788
+#: includes/admin/class-admin-settings.php:1779
 msgid "Global API Key + Email"
 msgstr "グローバル API キー + メール"
 
-#: includes/admin/class-admin-settings.php:1792
+#: includes/admin/class-admin-settings.php:1783
 msgid "API Token or Global API Key"
 msgstr "API トークンまたはグローバル API キー"
 
-#: includes/admin/class-admin-settings.php:1795
+#: includes/admin/class-admin-settings.php:1786
 msgid ""
 "API Token: Create a custom token with \"Zone > Cache Purge > Purge\" "
 "permission. Global API Key: Use with the email address below. Can also be "
@@ -2135,26 +2135,26 @@ msgstr ""
 "ください。グローバル API キー: 下のメールアドレスと一緒に使用します。"
 "PRIME_CACHE_CF_API_TOKEN 定数でも設定できます。"
 
-#: includes/admin/class-admin-settings.php:1798
+#: includes/admin/class-admin-settings.php:1789
 msgid "Cloudflare Account Email"
 msgstr "Cloudflare アカウントメール"
 
-#: includes/admin/class-admin-settings.php:1800
+#: includes/admin/class-admin-settings.php:1791
 msgid ""
 "Required only when using Global API Key authentication. Not needed for API "
 "Token."
 msgstr ""
 "グローバル API キー認証を使用する場合のみ必要です。API トークンでは不要です。"
 
-#: includes/admin/class-admin-settings.php:1831
+#: includes/admin/class-admin-settings.php:1822
 msgid "Cache Preloading"
 msgstr "キャッシュプリロード"
 
-#: includes/admin/class-admin-settings.php:1834
+#: includes/admin/class-admin-settings.php:1825
 msgid "Partial preload:"
 msgstr "部分的なプリロード:"
 
-#: includes/admin/class-admin-settings.php:1834
+#: includes/admin/class-admin-settings.php:1825
 msgid ""
 "Vary Cookies are active. Preloading can only warm the default (no-cookie) "
 "variant for each URL. Cookie-specific cache files (e.g. for currency, "
@@ -2167,11 +2167,11 @@ msgstr ""
 "国、A/B テストなど) はプリロードできず、その Cookie 値を持つ最初の訪問者リク"
 "エスト時に生成されます。これは技術的な制限であり、不具合ではありません。"
 
-#: includes/admin/class-admin-settings.php:1837
+#: includes/admin/class-admin-settings.php:1828
 msgid "Enable Cache Preloading"
 msgstr "キャッシュプリロードを有効化"
 
-#: includes/admin/class-admin-settings.php:1839
+#: includes/admin/class-admin-settings.php:1830
 msgid ""
 "Automatically crawl your site to warm the default cache variant (desktop and "
 "mobile). Cookie-specific variants cannot be preloaded and are generated on "
@@ -2181,7 +2181,7 @@ msgstr ""
 "およびモバイル) をウォームアップします。Cookie 固有のバリアントはプリロードで"
 "きず、その Cookie 値を持つ最初の実際の訪問者リクエスト時に生成されます。"
 
-#: includes/admin/class-admin-settings.php:1841
+#: includes/admin/class-admin-settings.php:1832
 msgid ""
 "Automatically crawl your site in the background to warm the page cache. "
 "Pages are preloaded via non-blocking HTTP requests so visitors always "
@@ -2191,19 +2191,19 @@ msgstr ""
 "ます。ノンブロッキング HTTP リクエストでプリロードするため、訪問者には常に"
 "キャッシュ済みページが配信されます。キャッシュの全削除後に自動で再開します。"
 
-#: includes/admin/class-admin-settings.php:1844
+#: includes/admin/class-admin-settings.php:1835
 msgid "Preload Homepage"
 msgstr "ホームページをプリロード"
 
-#: includes/admin/class-admin-settings.php:1844
+#: includes/admin/class-admin-settings.php:1835
 msgid "Include the front page, posts page, and home URL in the preload queue."
 msgstr "フロントページ、投稿ページ、ホーム URL をプリロードキューに含めます。"
 
-#: includes/admin/class-admin-settings.php:1845
+#: includes/admin/class-admin-settings.php:1836
 msgid "Preload Public Posts"
 msgstr "公開投稿をプリロード"
 
-#: includes/admin/class-admin-settings.php:1845
+#: includes/admin/class-admin-settings.php:1836
 msgid ""
 "Preload published posts, pages, and custom post types (most recently "
 "modified first)."
@@ -2211,24 +2211,24 @@ msgstr ""
 "公開済みの投稿、固定ページ、カスタム投稿タイプをプリロードします (更新日の新"
 "しい順)。"
 
-#: includes/admin/class-admin-settings.php:1846
+#: includes/admin/class-admin-settings.php:1837
 msgid "Preload Taxonomies"
 msgstr "タクソノミーをプリロード"
 
-#: includes/admin/class-admin-settings.php:1846
+#: includes/admin/class-admin-settings.php:1837
 msgid "Preload category, tag, and custom taxonomy archive pages."
 msgstr ""
 "カテゴリー、タグ、カスタムタクソノミーのアーカイブページをプリロードします。"
 
-#: includes/admin/class-admin-settings.php:1850
+#: includes/admin/class-admin-settings.php:1841
 msgid "Max Posts"
 msgstr "最大投稿数"
 
-#: includes/admin/class-admin-settings.php:1854
+#: includes/admin/class-admin-settings.php:1845
 msgid "Max Terms"
 msgstr "最大ターム数"
 
-#: includes/admin/class-admin-settings.php:1858
+#: includes/admin/class-admin-settings.php:1849
 msgid ""
 "Maximum number of posts and taxonomy terms to include in each preload cycle. "
 "Higher values warm more pages but take longer to complete."
@@ -2236,11 +2236,11 @@ msgstr ""
 "各プリロードサイクルに含める投稿とタクソノミータームの最大数です。値を大きく"
 "するとより多くのページをウォームアップしますが、完了まで時間がかかります。"
 
-#: includes/admin/class-admin-settings.php:1861
+#: includes/admin/class-admin-settings.php:1852
 msgid "Preloader Request Interval (seconds)"
 msgstr "プリローダーリクエスト間隔 (秒)"
 
-#: includes/admin/class-admin-settings.php:1863
+#: includes/admin/class-admin-settings.php:1854
 msgid ""
 "Delay between each preload batch. Each batch sends up to 10 URLs in "
 "sequence, then waits this many seconds before the next batch via WP-Cron. "
@@ -2255,32 +2255,29 @@ msgstr ""
 "が CPU コア数の 80% または 2.0 のいずれか高い方を超えた場合、または負荷スパイ"
 "クを検出した場合、プリロードは自動的に一時停止します。"
 
-#: includes/admin/class-admin-settings.php:1866
+#: includes/admin/class-admin-settings.php:1857
 msgid "Preload Excluded URLs"
 msgstr "プリロード除外 URL"
 
-#: includes/admin/class-admin-settings.php:1868
+#: includes/admin/class-admin-settings.php:1859
 msgid ""
-"URL path patterns to skip during preloading, one per line. Each line is "
-"matched as a regular expression (case-insensitive) against the URL path — "
-"substring matches like /sample-page/ work as-is, and regex metacharacters "
-"such as (.*), |, ^, $ are honored. Use \\ to escape literal special "
-"characters."
+"URL path patterns to skip during preloading, one per line. A line matches "
+"when it appears anywhere in the URL path; use * as a wildcard for any "
+"sequence (for example, /private-area/*)."
 msgstr ""
-"プリロード時にスキップする URL パスパターン (1行に1つ)。各行は URL パスに対す"
-"る正規表現 (大文字小文字を区別しない) として評価されます — /sample-page/ のよ"
-"うな単純な部分一致もそのまま動作し、(.*) や |、^、$ などの正規表現メタ文字も"
-"有効です。リテラルとして扱いたい特殊文字は \\ でエスケープしてください。"
+"プリロード時にスキップする URL パスのパターンを1行に1つ入力します。各行は "
+"URL パスのいずれかの箇所に一致すれば対象となります。任意の文字列に一致させる"
+"には * をワイルドカードとして使用します (例: /private-area/*)。"
 
-#: includes/admin/class-admin-settings.php:1874
+#: includes/admin/class-admin-settings.php:1865
 msgid "Preload Links"
 msgstr "リンクプリフェッチ"
 
-#: includes/admin/class-admin-settings.php:1875
+#: includes/admin/class-admin-settings.php:1866
 msgid "Enable Link Prefetching"
 msgstr "リンクプリフェッチを有効化"
 
-#: includes/admin/class-admin-settings.php:1875
+#: includes/admin/class-admin-settings.php:1866
 msgid ""
 "Inject a lightweight JavaScript that prefetches internal links when the user "
 "hovers over them or when they enter the viewport. The browser downloads the "
@@ -2293,15 +2290,15 @@ msgstr ""
 "れています。管理画面、ログイン、カート、購入手続き、外部リンクは除外されま"
 "す。"
 
-#: includes/admin/class-admin-settings.php:1882
+#: includes/admin/class-admin-settings.php:1873
 msgid "Sitemap Preloading"
 msgstr "サイトマッププリロード"
 
-#: includes/admin/class-admin-settings.php:1883
+#: includes/admin/class-admin-settings.php:1874
 msgid "Enable Sitemap Preloading"
 msgstr "サイトマッププリロードを有効化"
 
-#: includes/admin/class-admin-settings.php:1883
+#: includes/admin/class-admin-settings.php:1874
 msgid ""
 "Use your XML sitemap to discover and preload all URLs. More reliable than "
 "the default post/taxonomy crawl for sites with custom post types or complex "
@@ -2311,11 +2308,11 @@ msgstr ""
 "タイプや複雑な URL 構造を持つサイトでは、デフォルトの投稿・タクソノミーのク"
 "ロールよりも確実です。"
 
-#: includes/admin/class-admin-settings.php:1885
+#: includes/admin/class-admin-settings.php:1876
 msgid "Sitemap URL"
 msgstr "サイトマップ URL"
 
-#: includes/admin/class-admin-settings.php:1887
+#: includes/admin/class-admin-settings.php:1878
 msgid ""
 "Full URL to your XML sitemap. Leave empty to use the WordPress default "
 "sitemap."
@@ -2323,15 +2320,15 @@ msgstr ""
 "XML サイトマップの完全な URL。空欄の場合は WordPress 標準のサイトマップを使用"
 "します。"
 
-#: includes/admin/class-admin-settings.php:1893
+#: includes/admin/class-admin-settings.php:1884
 msgid "Speculation Rules"
 msgstr "Speculation Rules"
 
-#: includes/admin/class-admin-settings.php:1894
+#: includes/admin/class-admin-settings.php:1885
 msgid "Enable Speculation Rules"
 msgstr "Speculation Rules を有効化"
 
-#: includes/admin/class-admin-settings.php:1894
+#: includes/admin/class-admin-settings.php:1885
 msgid ""
 "Use the Speculation Rules API to prerender or prefetch pages. Supported by "
 "Chromium-based browsers (Chrome, Edge). Provides near-instant page "
@@ -2341,15 +2338,15 @@ msgstr ""
 "す。Chromium 系のブラウザー (Chrome、Edge) で対応しています。ほぼ瞬時のページ"
 "遷移を実現します。"
 
-#: includes/admin/class-admin-settings.php:1899
+#: includes/admin/class-admin-settings.php:1890
 msgid "Font Preloading"
 msgstr "フォントプリロード"
 
-#: includes/admin/class-admin-settings.php:1900
+#: includes/admin/class-admin-settings.php:1891
 msgid "Preload Fonts"
 msgstr "フォントプリロード"
 
-#: includes/admin/class-admin-settings.php:1900
+#: includes/admin/class-admin-settings.php:1891
 msgid ""
 "Add preload hints for font files used in above-the-fold content. Reduces "
 "font loading delay and prevents flash of invisible text (FOIT)."
@@ -2358,15 +2355,15 @@ msgstr ""
 "追加します。フォントの読み込み遅延を抑え、テキストが一時的に表示されない現象 "
 "(FOIT) を防ぎます。"
 
-#: includes/admin/class-admin-settings.php:1905
+#: includes/admin/class-admin-settings.php:1896
 msgid "LCP Optimization"
 msgstr "LCP 最適化"
 
-#: includes/admin/class-admin-settings.php:1906
+#: includes/admin/class-admin-settings.php:1897
 msgid "Optimize Largest Contentful Paint"
 msgstr "Largest Contentful Paint を最適化"
 
-#: includes/admin/class-admin-settings.php:1906
+#: includes/admin/class-admin-settings.php:1897
 msgid ""
 "Automatically detect and preload the LCP image for each page. Adds "
 "fetchpriority=\"high\" and a preload link to accelerate the largest visible "
@@ -2375,19 +2372,19 @@ msgstr ""
 "各ページの LCP 画像を自動検出してプリロードします。fetchpriority=\"high\" と"
 "プリロードリンクを追加し、最も大きく表示される要素の表示を高速化します。"
 
-#: includes/admin/class-admin-settings.php:1910
+#: includes/admin/class-admin-settings.php:1901
 msgid "URL patterns to exclude from LCP optimization. One per line."
 msgstr "LCP 最適化から除外する URL パターン。1 行に 1 つ。"
 
-#: includes/admin/class-admin-settings.php:1916
+#: includes/admin/class-admin-settings.php:1907
 msgid "Preload Critical Resources"
 msgstr "重要リソースのプリロード"
 
-#: includes/admin/class-admin-settings.php:1918
+#: includes/admin/class-admin-settings.php:1909
 msgid "Resources to Preload"
 msgstr "プリロードするリソース"
 
-#: includes/admin/class-admin-settings.php:1920
+#: includes/admin/class-admin-settings.php:1911
 msgid ""
 "One URL per line. These resources will be preloaded via <link "
 "rel=\"preload\"> in the page head. Use for critical fonts, images, or "
@@ -2397,15 +2394,15 @@ msgstr ""
 "rel=\"preload\"> によりプリロードされます。ブラウザーによる発見が遅れる重要な"
 "フォント・画像・スクリプトに使用してください。"
 
-#: includes/admin/class-admin-settings.php:1926
+#: includes/admin/class-admin-settings.php:1917
 msgid "Prefetch DNS"
 msgstr "DNS プリフェッチ"
 
-#: includes/admin/class-admin-settings.php:1928
+#: includes/admin/class-admin-settings.php:1919
 msgid "Domains to Prefetch"
 msgstr "プリフェッチするドメイン"
 
-#: includes/admin/class-admin-settings.php:1930
+#: includes/admin/class-admin-settings.php:1921
 msgid ""
 "One domain per line (with //). DNS resolution is performed in advance so "
 "that external resources load faster when requested."
@@ -2413,15 +2410,15 @@ msgstr ""
 "1 行に 1 つのドメイン (// 付き)。DNS の名前解決を事前に行い、リクエスト時に外"
 "部リソースが速く読み込まれるようにします。"
 
-#: includes/admin/class-admin-settings.php:1936
+#: includes/admin/class-admin-settings.php:1927
 msgid "Preconnect"
 msgstr "プリコネクト"
 
-#: includes/admin/class-admin-settings.php:1938
+#: includes/admin/class-admin-settings.php:1929
 msgid "Origins to Preconnect"
 msgstr "プリコネクトするオリジン"
 
-#: includes/admin/class-admin-settings.php:1940
+#: includes/admin/class-admin-settings.php:1931
 msgid ""
 "One origin per line. Establishes early connections (DNS + TCP + TLS) to "
 "important third-party origins before the browser needs them."
@@ -2429,15 +2426,15 @@ msgstr ""
 "1 行に 1 つのオリジン。重要なサードパーティオリジンに対し、ブラウザーが必要と"
 "する前に接続 (DNS + TCP + TLS) を確立します。"
 
-#: includes/admin/class-admin-settings.php:1958
+#: includes/admin/class-admin-settings.php:1949
 msgid "Query Parameters"
 msgstr "クエリーパラメーター"
 
-#: includes/admin/class-admin-settings.php:1959
+#: includes/admin/class-admin-settings.php:1950
 msgid "Ignored Query Parameters"
 msgstr "無視するクエリーパラメーター"
 
-#: includes/admin/class-admin-settings.php:1959
+#: includes/admin/class-admin-settings.php:1950
 msgid ""
 "Comma-separated parameter names. These parameters are stripped and the same "
 "cache is served as if they were absent. Register ad-tracking parameters "
@@ -2453,11 +2450,11 @@ msgstr ""
 "むリクエストはすべて PHP ドロップイン経由で配信されます (.htaccess 高速配信は"
 "空のクエリ文字列を要件とするため)。非常に高速ですが PHP なしではありません。"
 
-#: includes/admin/class-admin-settings.php:1960
+#: includes/admin/class-admin-settings.php:1951
 msgid "Cached Query Parameters"
 msgstr "キャッシュするクエリーパラメーター"
 
-#: includes/admin/class-admin-settings.php:1960
+#: includes/admin/class-admin-settings.php:1951
 msgid ""
 "Comma-separated parameter names. Each unique value generates a separate "
 "cache file. For example, specifying <code>lang</code> creates separate "
@@ -2476,15 +2473,15 @@ msgstr ""
 "高速配信は自動的に無効化され、すべてのリクエストがドロップイン経由で正しいバ"
 "リアントを選択して配信されます (非常に高速ですが、PHP なしではありません)。"
 
-#: includes/admin/class-admin-settings.php:1962
+#: includes/admin/class-admin-settings.php:1953
 msgid "Cookie-based Cache Splitting"
 msgstr "Cookie 別キャッシュ振り分け"
 
-#: includes/admin/class-admin-settings.php:1963
+#: includes/admin/class-admin-settings.php:1954
 msgid "Vary Cookie Names"
 msgstr "振り分け対象 Cookie 名"
 
-#: includes/admin/class-admin-settings.php:1963
+#: includes/admin/class-admin-settings.php:1954
 msgid ""
 "Comma-separated cookie names. Different cache files are generated based on "
 "each cookie's value, even for the same URL. For example, specifying the "
@@ -2503,15 +2500,15 @@ msgstr ""
 "配信は自動的に無効化されます。正しいバリアントを選択するため、すべてのリクエ"
 "ストがドロップインを経由して配信されます。"
 
-#: includes/admin/class-admin-settings.php:1965
+#: includes/admin/class-admin-settings.php:1956
 msgid "Purge Settings"
 msgstr "パージ設定"
 
-#: includes/admin/class-admin-settings.php:1966
+#: includes/admin/class-admin-settings.php:1957
 msgid "Always Purge URLs"
 msgstr "常時パージ URL"
 
-#: includes/admin/class-admin-settings.php:1966
+#: includes/admin/class-admin-settings.php:1957
 msgid ""
 "One URL per line. Whenever any post is published, updated, trashed, or "
 "deleted, caches for these URLs are also cleared in addition to the standard "
@@ -2525,33 +2522,33 @@ msgstr ""
 "トマップ、カスタムランディングページ、投稿一覧を表示するショートコードページ"
 "など、投稿更新の影響を受けるが自動検出されないページに使用します。"
 
-#: includes/admin/class-admin-settings.php:1981
+#: includes/admin/class-admin-settings.php:1972
 msgid "Allow"
 msgstr "許可"
 
-#: includes/admin/class-admin-settings.php:1982
+#: includes/admin/class-admin-settings.php:1973
 msgid "Reduce Frequency"
 msgstr "頻度を減らす"
 
-#: includes/admin/class-admin-settings.php:1983
-#: includes/admin/class-admin-settings.php:2779
-#: includes/admin/class-admin-settings.php:2794
+#: includes/admin/class-admin-settings.php:1974
+#: includes/admin/class-admin-settings.php:2770
+#: includes/admin/class-admin-settings.php:2785
 msgid "Disable"
 msgstr "無効化"
 
-#: includes/admin/class-admin-settings.php:1986
+#: includes/admin/class-admin-settings.php:1977
 msgid "Heartbeat"
 msgstr "ハートビート"
 
-#: includes/admin/class-admin-settings.php:1992
+#: includes/admin/class-admin-settings.php:1983
 msgid "Heartbeat API Control"
 msgstr "Heartbeat API 制御"
 
-#: includes/admin/class-admin-settings.php:1997
+#: includes/admin/class-admin-settings.php:1988
 msgid "Control Heartbeat API"
 msgstr "Heartbeat API を制御"
 
-#: includes/admin/class-admin-settings.php:1998
+#: includes/admin/class-admin-settings.php:1989
 msgid ""
 "The WordPress Heartbeat API sends periodic AJAX requests (wp-admin/admin-"
 "ajax.php) to keep sessions alive, auto-save drafts, and show real-time "
@@ -2563,11 +2560,11 @@ msgstr ""
 "を減らすか無効にすることで、特に共有ホスティングでのサーバー負荷と CPU 使用率"
 "を低減できます。"
 
-#: includes/admin/class-admin-settings.php:2008
+#: includes/admin/class-admin-settings.php:1999
 msgid "Frontend"
 msgstr "フロントエンド"
 
-#: includes/admin/class-admin-settings.php:2010
+#: includes/admin/class-admin-settings.php:2001
 msgid ""
 "Heartbeat on public-facing pages. Usually unnecessary — disabling is "
 "recommended for most sites."
@@ -2575,16 +2572,16 @@ msgstr ""
 "公開ページでのハートビートです。通常は不要なため、ほとんどのサイトでは無効化"
 "を推奨します。"
 
-#: includes/admin/class-admin-settings.php:2018
-#: includes/admin/class-admin-settings.php:2039
+#: includes/admin/class-admin-settings.php:2009
+#: includes/admin/class-admin-settings.php:2030
 msgid "Interval:"
 msgstr "間隔:"
 
-#: includes/admin/class-admin-settings.php:2029
+#: includes/admin/class-admin-settings.php:2020
 msgid "Admin Dashboard"
 msgstr "管理画面ダッシュボード"
 
-#: includes/admin/class-admin-settings.php:2031
+#: includes/admin/class-admin-settings.php:2022
 msgid ""
 "Heartbeat on wp-admin pages (excluding the post editor). Reducing to 120 "
 "seconds is a good balance between functionality and server load."
@@ -2592,11 +2589,11 @@ msgstr ""
 "wp-admin ページ (投稿エディターを除く) でのハートビートです。120秒に減らす"
 "と、機能性とサーバー負荷のバランスが取れます。"
 
-#: includes/admin/class-admin-settings.php:2050
+#: includes/admin/class-admin-settings.php:2041
 msgid "Post Editor"
 msgstr "投稿エディター"
 
-#: includes/admin/class-admin-settings.php:2052
+#: includes/admin/class-admin-settings.php:2043
 msgid ""
 "Heartbeat on the post/page editor. Required for auto-save, post locking, and "
 "real-time collaboration. Disabling may cause data loss — \"Allow\" is "
@@ -2606,17 +2603,17 @@ msgstr ""
 "イム共同編集に必要です。無効にするとデータ損失の可能性があるため、「許可」を"
 "強く推奨します。"
 
-#: includes/admin/class-admin-settings.php:2096
-#: includes/admin/class-admin-settings.php:2104
+#: includes/admin/class-admin-settings.php:2087
+#: includes/admin/class-admin-settings.php:2095
 msgid "Database"
 msgstr "データベース"
 
-#: includes/admin/class-admin-settings.php:2097
+#: includes/admin/class-admin-settings.php:2088
 msgid "Database optimization requires Prime Cache Pro."
 msgstr "データベース最適化には Prime Cache Pro が必要です。"
 
 #. translators: %s: number of items cleaned up
-#: includes/admin/class-admin-settings.php:2110
+#: includes/admin/class-admin-settings.php:2101
 #, php-format
 msgid ""
 "Database cleanup processed %s items (max 1,000 per task). Run again if more "
@@ -2625,15 +2622,15 @@ msgstr ""
 "データベースのクリーンアップで %s 件を処理しました (タスクあたり最大 1,000"
 "件)。残りがある場合は再度実行してください。"
 
-#: includes/admin/class-admin-settings.php:2121
+#: includes/admin/class-admin-settings.php:2112
 msgid "Post Cleanup"
 msgstr "投稿のクリーンアップ"
 
-#: includes/admin/class-admin-settings.php:2124
+#: includes/admin/class-admin-settings.php:2115
 msgid "Revisions"
 msgstr "リビジョン"
 
-#: includes/admin/class-admin-settings.php:2124
+#: includes/admin/class-admin-settings.php:2115
 msgid ""
 "Delete all post revisions. Revisions are saved every time you update a post "
 "and can accumulate over time."
@@ -2641,11 +2638,11 @@ msgstr ""
 "投稿のリビジョンをすべて削除します。リビジョンは投稿を更新するたびに保存さ"
 "れ、時間とともに蓄積されます。"
 
-#: includes/admin/class-admin-settings.php:2125
+#: includes/admin/class-admin-settings.php:2116
 msgid "Auto Drafts"
 msgstr "自動下書き"
 
-#: includes/admin/class-admin-settings.php:2125
+#: includes/admin/class-admin-settings.php:2116
 msgid ""
 "Delete auto-draft posts created automatically by WordPress when you start "
 "writing a new post. These are never published."
@@ -2653,11 +2650,11 @@ msgstr ""
 "新しい投稿の作成を開始したときに WordPress が自動的に作成する自動下書き投稿を"
 "削除します。これらは公開されることはありません。"
 
-#: includes/admin/class-admin-settings.php:2126
+#: includes/admin/class-admin-settings.php:2117
 msgid "Trashed Posts"
 msgstr "ゴミ箱内の投稿"
 
-#: includes/admin/class-admin-settings.php:2126
+#: includes/admin/class-admin-settings.php:2117
 msgid ""
 "Permanently delete posts that are in the trash. These are already removed "
 "from the site but still occupy database space."
@@ -2665,15 +2662,15 @@ msgstr ""
 "ゴミ箱内の投稿を完全に削除します。サイトからはすでに削除されていますが、デー"
 "タベースの容量を占有しています。"
 
-#: includes/admin/class-admin-settings.php:2143
+#: includes/admin/class-admin-settings.php:2134
 msgid "Comments Cleanup"
 msgstr "コメントのクリーンアップ"
 
-#: includes/admin/class-admin-settings.php:2146
+#: includes/admin/class-admin-settings.php:2137
 msgid "Spam Comments"
 msgstr "スパムコメント"
 
-#: includes/admin/class-admin-settings.php:2146
+#: includes/admin/class-admin-settings.php:2137
 msgid ""
 "Permanently delete all comments marked as spam. These comments have already "
 "been filtered out but remain in the database."
@@ -2681,23 +2678,23 @@ msgstr ""
 "スパムとしてマークされたすべてのコメントを完全に削除します。これらのコメント"
 "はすでにフィルターされていますが、データベースに残っています。"
 
-#: includes/admin/class-admin-settings.php:2147
+#: includes/admin/class-admin-settings.php:2138
 msgid "Trashed Comments"
 msgstr "ゴミ箱内のコメント"
 
-#: includes/admin/class-admin-settings.php:2147
+#: includes/admin/class-admin-settings.php:2138
 msgid "Permanently delete comments that are in the trash."
 msgstr "ゴミ箱内のコメントを完全に削除します。"
 
-#: includes/admin/class-admin-settings.php:2164
+#: includes/admin/class-admin-settings.php:2155
 msgid "Transients Cleanup"
 msgstr "トランジェントのクリーンアップ"
 
-#: includes/admin/class-admin-settings.php:2167
+#: includes/admin/class-admin-settings.php:2158
 msgid "Expired Transients"
 msgstr "期限切れトランジェント"
 
-#: includes/admin/class-admin-settings.php:2167
+#: includes/admin/class-admin-settings.php:2158
 msgid ""
 "Delete only expired transients. These are temporary options that have passed "
 "their timeout and are no longer needed. Safe to clean."
@@ -2705,11 +2702,11 @@ msgstr ""
 "期限切れのトランジェントのみを削除します。タイムアウトを過ぎた一時オプション"
 "で、もう必要ありません。安全に削除できます。"
 
-#: includes/admin/class-admin-settings.php:2168
+#: includes/admin/class-admin-settings.php:2159
 msgid "All Transients"
 msgstr "すべてのトランジェント"
 
-#: includes/admin/class-admin-settings.php:2168
+#: includes/admin/class-admin-settings.php:2159
 msgid ""
 "Delete all transients, including active ones. Transients are recreated as "
 "needed by plugins and WordPress core. Use with caution — may briefly slow "
@@ -2719,15 +2716,15 @@ msgstr ""
 "ンや WordPress コアが必要に応じて再作成します。再生成中に一時的にサイトが遅く"
 "なる可能性があるため、注意して使用してください。"
 
-#: includes/admin/class-admin-settings.php:2185
+#: includes/admin/class-admin-settings.php:2176
 msgid "Database Tables"
 msgstr "データベーステーブル"
 
-#: includes/admin/class-admin-settings.php:2190
+#: includes/admin/class-admin-settings.php:2181
 msgid "Optimize Tables"
 msgstr "テーブルの最適化"
 
-#: includes/admin/class-admin-settings.php:2191
+#: includes/admin/class-admin-settings.php:2182
 msgid ""
 "Run OPTIMIZE TABLE on non-InnoDB WordPress tables with fragmented space. "
 "InnoDB tables are excluded because they handle fragmentation internally and "
@@ -2737,15 +2734,15 @@ msgstr ""
 "行します。InnoDB テーブルは内部的に断片化を処理し、OPTIMIZE は大きなテーブル"
 "で重いテーブル再構築を引き起こす可能性があるため除外されます。"
 
-#: includes/admin/class-admin-settings.php:2198
+#: includes/admin/class-admin-settings.php:2189
 msgid "Automatic Cleanup"
 msgstr "自動クリーンアップ"
 
-#: includes/admin/class-admin-settings.php:2203
+#: includes/admin/class-admin-settings.php:2194
 msgid "Schedule Automatic Cleanup"
 msgstr "自動クリーンアップをスケジュール"
 
-#: includes/admin/class-admin-settings.php:2204
+#: includes/admin/class-admin-settings.php:2195
 msgid ""
 "Automatically run all enabled cleanup tasks above on a schedule via WP-Cron. "
 "Only the options toggled on above will be cleaned."
@@ -2753,28 +2750,28 @@ msgstr ""
 "上で有効にしたすべてのクリーンアップタスクを WP-Cron 経由でスケジュール実行し"
 "ます。上でオンにしたオプションのみがクリーンアップされます。"
 
-#: includes/admin/class-admin-settings.php:2208
+#: includes/admin/class-admin-settings.php:2199
 msgid "Cleanup Frequency"
 msgstr "クリーンアップ頻度"
 
-#: includes/admin/class-admin-settings.php:2210
+#: includes/admin/class-admin-settings.php:2201
 msgid "Daily"
 msgstr "毎日"
 
-#: includes/admin/class-admin-settings.php:2211
+#: includes/admin/class-admin-settings.php:2202
 msgid "Weekly"
 msgstr "毎週"
 
-#: includes/admin/class-admin-settings.php:2212
+#: includes/admin/class-admin-settings.php:2203
 msgid "Monthly"
 msgstr "毎月"
 
-#: includes/admin/class-admin-settings.php:2221
+#: includes/admin/class-admin-settings.php:2212
 msgid "Please back up your database before running cleanup."
 msgstr ""
 "クリーンアップを実行する前に、データベースのバックアップを取得してください。"
 
-#: includes/admin/class-admin-settings.php:2222
+#: includes/admin/class-admin-settings.php:2213
 msgid ""
 "Database cleanup operations permanently delete data such as revisions, "
 "drafts, and comments. These actions cannot be undone. We strongly recommend "
@@ -2786,7 +2783,7 @@ msgstr ""
 "パネルやバックアッププラグインを使用して、データベースの完全なバックアップを"
 "作成してから実行することを強く推奨します。"
 
-#: includes/admin/class-admin-settings.php:2229
+#: includes/admin/class-admin-settings.php:2220
 msgid ""
 "Run database cleanup now? Up to 1,000 items will be processed per run. This "
 "cannot be undone."
@@ -2794,15 +2791,15 @@ msgstr ""
 "データベースクリーンアップを今すぐ実行しますか？ 1 回の実行で最大 1,000 アイ"
 "テムが処理されます。この操作は元に戻せません。"
 
-#: includes/admin/class-admin-settings.php:2230
+#: includes/admin/class-admin-settings.php:2221
 msgid "Run Cleanup Now"
 msgstr "今すぐクリーンアップ"
 
-#: includes/admin/class-admin-settings.php:2254
+#: includes/admin/class-admin-settings.php:2245
 msgid "Post Publish / Update"
 msgstr "投稿の公開・更新"
 
-#: includes/admin/class-admin-settings.php:2254
+#: includes/admin/class-admin-settings.php:2245
 msgid ""
 "Clear related caches when a post, page, or custom post type is published or "
 "updated. Purges the post URL, home page, posts page, author archive, term "
@@ -2815,22 +2812,22 @@ msgstr ""
 "対象です。`/page/2/` 以降のページネーションは、キャッシュヒット率維持のため自"
 "然な期限切れに任せます。"
 
-#: includes/admin/class-admin-settings.php:2255
+#: includes/admin/class-admin-settings.php:2246
 msgid "Post Trash / Delete"
 msgstr "投稿のゴミ箱移動・削除"
 
-#: includes/admin/class-admin-settings.php:2255
+#: includes/admin/class-admin-settings.php:2246
 msgid ""
 "Clear related caches when a post is moved to trash or permanently deleted."
 msgstr ""
 "投稿がゴミ箱に移動または完全に削除されたときに、関連するキャッシュをクリアし"
 "ます。"
 
-#: includes/admin/class-admin-settings.php:2256
+#: includes/admin/class-admin-settings.php:2247
 msgid "Comment Changes"
 msgstr "コメントの変更"
 
-#: includes/admin/class-admin-settings.php:2256
+#: includes/admin/class-admin-settings.php:2247
 msgid ""
 "Clear the post page, home page, and posts page cache when a comment is "
 "posted, approved, edited, trashed, or deleted. (Home/posts page cleared "
@@ -2840,11 +2837,11 @@ msgstr ""
 "ム、投稿一覧ページのキャッシュをクリアします (ホームと投稿一覧ページはコメン"
 "ト数や最近のコメントウィジェットを表示するため)。"
 
-#: includes/admin/class-admin-settings.php:2257
+#: includes/admin/class-admin-settings.php:2248
 msgid "Term Changes"
 msgstr "タームの変更"
 
-#: includes/admin/class-admin-settings.php:2257
+#: includes/admin/class-admin-settings.php:2248
 msgid ""
 "Clear the term archive (including pagination), home page, and posts page "
 "when a category, tag, or custom taxonomy term is created, edited, or deleted."
@@ -2853,11 +2850,11 @@ msgstr ""
 "に、タームアーカイブ (ページネーション含む)、ホーム、投稿一覧ページのキャッ"
 "シュをクリアします。"
 
-#: includes/admin/class-admin-settings.php:2258
+#: includes/admin/class-admin-settings.php:2249
 msgid "Theme Switch"
 msgstr "テーマの切り替え"
 
-#: includes/admin/class-admin-settings.php:2258
+#: includes/admin/class-admin-settings.php:2249
 msgid ""
 "Clear the entire cache when the active theme is changed. Theme changes "
 "typically affect all pages."
@@ -2865,11 +2862,11 @@ msgstr ""
 "有効テーマが変更されたときにキャッシュをすべて削除します。テーマの変更は通"
 "常、すべてのページに影響します。"
 
-#: includes/admin/class-admin-settings.php:2259
+#: includes/admin/class-admin-settings.php:2250
 msgid "Permalink Change"
 msgstr "パーマリンクの変更"
 
-#: includes/admin/class-admin-settings.php:2259
+#: includes/admin/class-admin-settings.php:2250
 msgid ""
 "Clear the entire cache when the permalink structure is updated. All cached "
 "URLs become invalid."
@@ -2877,11 +2874,11 @@ msgstr ""
 "パーマリンク構造が更新されたときにキャッシュをすべて削除します。すべての"
 "キャッシュ済み URL が無効になります。"
 
-#: includes/admin/class-admin-settings.php:2260
+#: includes/admin/class-admin-settings.php:2251
 msgid "Plugin Activate / Deactivate"
 msgstr "プラグインの有効化・無効化"
 
-#: includes/admin/class-admin-settings.php:2260
+#: includes/admin/class-admin-settings.php:2251
 msgid ""
 "Clear the entire cache when any plugin is activated or deactivated. Plugin "
 "changes may alter page output, menus, or widgets."
@@ -2889,11 +2886,11 @@ msgstr ""
 "プラグインが有効化または無効化されたときにキャッシュをすべて削除します。プラ"
 "グインの変更はページ出力、メニュー、ウィジェットに影響する可能性があります。"
 
-#: includes/admin/class-admin-settings.php:2261
+#: includes/admin/class-admin-settings.php:2252
 msgid "Customizer Save"
 msgstr "カスタマイザーの保存"
 
-#: includes/admin/class-admin-settings.php:2261
+#: includes/admin/class-admin-settings.php:2252
 msgid ""
 "Clear the entire cache when theme customizer settings are saved. Changes to "
 "site identity, colors, layouts, and header/footer affect all pages."
@@ -2902,11 +2899,11 @@ msgstr ""
 "イトのタイトル、色、レイアウト、ヘッダー/フッターの変更はすべてのページに影響"
 "します。"
 
-#: includes/admin/class-admin-settings.php:2262
+#: includes/admin/class-admin-settings.php:2253
 msgid "Widget Update"
 msgstr "ウィジェットの更新"
 
-#: includes/admin/class-admin-settings.php:2262
+#: includes/admin/class-admin-settings.php:2253
 msgid ""
 "Clear the entire cache when widgets are added, removed, or rearranged. "
 "Widgets appear on multiple pages via sidebars and footers."
@@ -2914,11 +2911,11 @@ msgstr ""
 "ウィジェットが追加・削除・並び替えされたときにキャッシュをすべて削除します。"
 "ウィジェットはサイドバーやフッターを通じて複数のページに表示されます。"
 
-#: includes/admin/class-admin-settings.php:2263
+#: includes/admin/class-admin-settings.php:2254
 msgid "Navigation Menu Update"
 msgstr "ナビゲーションメニューの更新"
 
-#: includes/admin/class-admin-settings.php:2263
+#: includes/admin/class-admin-settings.php:2254
 msgid ""
 "Clear the entire cache when a navigation menu is created, edited, or "
 "deleted. Menus are typically displayed on every page."
@@ -2926,11 +2923,11 @@ msgstr ""
 "ナビゲーションメニューが作成・編集・削除されたときにキャッシュをすべて削除し"
 "ます。メニューは通常すべてのページに表示されます。"
 
-#: includes/admin/class-admin-settings.php:2264
+#: includes/admin/class-admin-settings.php:2255
 msgid "WordPress Core Update"
 msgstr "WordPress 本体の更新"
 
-#: includes/admin/class-admin-settings.php:2264
+#: includes/admin/class-admin-settings.php:2255
 msgid ""
 "Clear the entire cache after WordPress core is updated. Core updates may "
 "change HTML output, scripts, and styles."
@@ -2938,11 +2935,11 @@ msgstr ""
 "WordPress 本体が更新された後にキャッシュをすべて削除します。コアの更新は "
 "HTML 出力、スクリプト、スタイルを変更する可能性があります。"
 
-#: includes/admin/class-admin-settings.php:2265
+#: includes/admin/class-admin-settings.php:2256
 msgid "User Profile Update"
 msgstr "ユーザープロフィールの更新"
 
-#: includes/admin/class-admin-settings.php:2265
+#: includes/admin/class-admin-settings.php:2256
 msgid ""
 "Clear the author archive (including pagination), home page, and posts page "
 "when a user profile is updated or a user is deleted."
@@ -2951,7 +2948,7 @@ msgstr ""
 "者アーカイブ (ページネーション含む)、ホーム、投稿一覧ページのキャッシュをクリ"
 "アします。"
 
-#: includes/admin/class-admin-settings.php:2269
+#: includes/admin/class-admin-settings.php:2260
 msgid ""
 "Choose which WordPress events automatically clear the cache. Disabling a "
 "trigger means that event will no longer purge cached pages."
@@ -2959,11 +2956,11 @@ msgstr ""
 "キャッシュを自動的にクリアする WordPress イベントを選択します。トリガーを無効"
 "にすると、そのイベントではキャッシュが削除されなくなります。"
 
-#: includes/admin/class-admin-settings.php:2276
+#: includes/admin/class-admin-settings.php:2267
 msgid "Purge Triggers"
 msgstr "パージトリガー"
 
-#: includes/admin/class-admin-settings.php:2295
+#: includes/admin/class-admin-settings.php:2286
 msgid ""
 "Note: When .htaccess Optimization is enabled, only simple patterns are used "
 "in the .htaccess fast-path."
@@ -2971,11 +2968,11 @@ msgstr ""
 "注意: .htaccess 最適化が有効な場合、.htaccess 高速パスでは単純なパターンのみ"
 "が使用されます。"
 
-#: includes/admin/class-admin-settings.php:2297
+#: includes/admin/class-admin-settings.php:2288
 msgid "URL patterns to never cache"
 msgstr "キャッシュしない URL パターン"
 
-#: includes/admin/class-admin-settings.php:2297
+#: includes/admin/class-admin-settings.php:2288
 msgid ""
 "Enter URL path patterns separated by <code>|</code>. Use <code>*</code> as a "
 "wildcard. Matched URLs are always dynamically generated by WordPress. "
@@ -2987,11 +2984,11 @@ msgstr ""
 "ます。WooCommerce のカート/チェックアウト、マイアカウントページ、またはユー"
 "ザー固有のコンテンツを含むページを指定してください。"
 
-#: includes/admin/class-admin-settings.php:2298
+#: includes/admin/class-admin-settings.php:2289
 msgid "Cookies that disable caching"
 msgstr "キャッシュを無効化する Cookie"
 
-#: includes/admin/class-admin-settings.php:2298
+#: includes/admin/class-admin-settings.php:2289
 msgid ""
 "Enter cookie name patterns separated by <code>|</code>. Use <code>*</code> "
 "as a wildcard. When any listed cookie is present, the request is not cached. "
@@ -3001,11 +2998,11 @@ msgstr ""
 "イルドカードとして使用できます。リストされた Cookie が存在する場合、リクエス"
 "トはキャッシュされません。WordPress ログイン Cookie は自動的に除外されます。"
 
-#: includes/admin/class-admin-settings.php:2299
+#: includes/admin/class-admin-settings.php:2290
 msgid "User agents to never cache"
 msgstr "キャッシュしないユーザーエージェント"
 
-#: includes/admin/class-admin-settings.php:2299
+#: includes/admin/class-admin-settings.php:2290
 msgid ""
 "Enter user-agent patterns separated by <code>|</code>. Use <code>*</code> as "
 "a wildcard. Matched browsers or crawlers receive uncached responses."
@@ -3014,11 +3011,11 @@ msgstr ""
 "code> をワイルドカードとして使用できます。マッチしたブラウザーやクローラーに"
 "はキャッシュされていないレスポンスが返されます。"
 
-#: includes/admin/class-admin-settings.php:2300
+#: includes/admin/class-admin-settings.php:2291
 msgid "Referrers to never cache"
 msgstr "キャッシュしないリファラー"
 
-#: includes/admin/class-admin-settings.php:2300
+#: includes/admin/class-admin-settings.php:2291
 msgid ""
 "Enter referrer URL patterns separated by <code>|</code>. Use <code>*</code> "
 "as a wildcard. Requests from matching referrers are excluded from the cache."
@@ -3027,41 +3024,41 @@ msgstr ""
 "code> をワイルドカードとして使用できます。マッチしたリファラーからのリクエス"
 "トはキャッシュから除外されます。"
 
-#: includes/admin/class-admin-settings.php:2307
+#: includes/admin/class-admin-settings.php:2298
 msgid "Wildcard"
 msgstr "ワイルドカード"
 
-#: includes/admin/class-admin-settings.php:2325
+#: includes/admin/class-admin-settings.php:2316
 msgid "Settings imported successfully."
 msgstr "設定をインポートしました。"
 
-#: includes/admin/class-admin-settings.php:2327
+#: includes/admin/class-admin-settings.php:2318
 msgid "Settings imported with warnings."
 msgstr "設定がインポートされましたが、警告があります。"
 
-#: includes/admin/class-admin-settings.php:2341
+#: includes/admin/class-admin-settings.php:2332
 msgid "Import failed. Please upload a valid Prime Cache settings JSON file."
 msgstr ""
 "インポートに失敗しました。有効な Prime Cache 設定の JSON ファイルをアップロー"
 "ドしてください。"
 
 #. translators: %s: preset name (e.g. "Standard", "Aggressive")
-#: includes/admin/class-admin-settings.php:2348
+#: includes/admin/class-admin-settings.php:2339
 #, php-format
 msgid "\"%s\" preset applied successfully."
 msgstr "「%s」プリセットが正常に適用されました。"
 
 #. translators: %s: preset name supplied by the user
-#: includes/admin/class-admin-settings.php:2354
+#: includes/admin/class-admin-settings.php:2345
 #, php-format
 msgid "Unknown preset \"%s\". No changes were made."
 msgstr "不明なプリセット「%s」です。変更は行われませんでした。"
 
-#: includes/admin/class-admin-settings.php:2360
+#: includes/admin/class-admin-settings.php:2351
 msgid "Optimization Presets"
 msgstr "最適化プリセット"
 
-#: includes/admin/class-admin-settings.php:2361
+#: includes/admin/class-admin-settings.php:2352
 msgid ""
 "Quickly apply a preset configuration based on your comfort level. You can "
 "customize individual settings afterward."
@@ -3069,20 +3066,20 @@ msgstr ""
 "設定レベルに応じたプリセットをすばやく適用できます。適用後に個別の設定をカス"
 "タマイズできます。"
 
-#: includes/admin/class-admin-settings.php:2372
-#: includes/admin/class-admin-settings.php:2385
+#: includes/admin/class-admin-settings.php:2363
+#: includes/admin/class-admin-settings.php:2376
 msgid "Auto"
 msgstr "自動"
 
-#: includes/admin/class-admin-settings.php:2373
+#: includes/admin/class-admin-settings.php:2364
 msgid ""
 "Recommended — analyzes your environment and applies optimal settings "
 "automatically."
 msgstr "推奨 — サーバー環境を分析し、最適な設定を自動的に適用します。"
 
 #. translators: %s: preset name
-#: includes/admin/class-admin-settings.php:2385
-#: includes/admin/class-admin-settings.php:2421
+#: includes/admin/class-admin-settings.php:2376
+#: includes/admin/class-admin-settings.php:2412
 #, php-format
 msgid ""
 "Apply the \"%s\" preset? Settings included in the preset will overwrite your "
@@ -3093,15 +3090,15 @@ msgstr ""
 "ますが、プリセットが扱わない設定 (除外 URI、追加パージ URL など) は保持されま"
 "す。"
 
-#: includes/admin/class-admin-settings.php:2386
+#: includes/admin/class-admin-settings.php:2377
 msgid "Apply Auto Preset"
 msgstr "自動プリセットを適用"
 
-#: includes/admin/class-admin-settings.php:2395
+#: includes/admin/class-admin-settings.php:2386
 msgid "Safe"
 msgstr "安全"
 
-#: includes/admin/class-admin-settings.php:2396
+#: includes/admin/class-admin-settings.php:2387
 msgid ""
 "Minimal risk. Enables page caching, gzip compression, browser caching, and "
 "lazy loading. No file optimization or advanced features. Recommended for "
@@ -3111,11 +3108,11 @@ msgstr ""
 "遅延読み込みを有効化します。ファイル最適化や高度な機能は使用しません。初心者"
 "や安定性を重視する本番サイトにおすすめです。"
 
-#: includes/admin/class-admin-settings.php:2401
+#: includes/admin/class-admin-settings.php:2392
 msgid "Balanced"
 msgstr "バランス"
 
-#: includes/admin/class-admin-settings.php:2402
+#: includes/admin/class-admin-settings.php:2393
 msgid ""
 "Good performance with low risk. Adds HTML/CSS/JS minification, link "
 "prefetching, defer JS, query-string removal, emoji removal, embed removal, "
@@ -3125,11 +3122,11 @@ msgstr ""
 "CSS/JS の圧縮、リンクプリフェッチ、JS の遅延読み込み、クエリ文字列の削除、絵"
 "文字の無効化、埋め込みの無効化、.htaccess 最適化を追加します。"
 
-#: includes/admin/class-admin-settings.php:2407
+#: includes/admin/class-admin-settings.php:2398
 msgid "Aggressive"
 msgstr "アグレッシブ"
 
-#: includes/admin/class-admin-settings.php:2408
+#: includes/admin/class-admin-settings.php:2399
 msgid ""
 "Maximum performance. Adds defer/delay JS, async CSS, separate mobile cache, "
 "preloading, lazy load for iframes/videos, and disables unused WordPress "
@@ -3143,23 +3140,23 @@ msgstr ""
 "化します。Pro 版では CSS/JS 結合とクリティカル CSS 自動生成も追加されます。互"
 "換性のためにテストや除外ルールが必要な場合があります。"
 
-#: includes/admin/class-admin-settings.php:2422
+#: includes/admin/class-admin-settings.php:2413
 msgid "Apply"
 msgstr "適用"
 
-#: includes/admin/class-admin-settings.php:2431
+#: includes/admin/class-admin-settings.php:2422
 msgid "Import / Export Settings"
 msgstr "設定のインポート/エクスポート"
 
-#: includes/admin/class-admin-settings.php:2433
+#: includes/admin/class-admin-settings.php:2424
 msgid "Export"
 msgstr "エクスポート"
 
-#: includes/admin/class-admin-settings.php:2434
+#: includes/admin/class-admin-settings.php:2425
 msgid "Download Settings (JSON)"
 msgstr "設定をダウンロード (JSON)"
 
-#: includes/admin/class-admin-settings.php:2435
+#: includes/admin/class-admin-settings.php:2426
 msgid ""
 "Export all Prime Cache settings as a JSON file. Use this to back up your "
 "configuration or transfer it to another site."
@@ -3167,12 +3164,12 @@ msgstr ""
 "Prime Cache のすべての設定を JSON ファイルとしてエクスポートします。設定の"
 "バックアップや別のサイトへの移行に使用してください。"
 
-#: includes/admin/class-admin-settings.php:2438
-#: includes/admin/class-admin-settings.php:2443
+#: includes/admin/class-admin-settings.php:2429
+#: includes/admin/class-admin-settings.php:2434
 msgid "Import"
 msgstr "インポート"
 
-#: includes/admin/class-admin-settings.php:2442
+#: includes/admin/class-admin-settings.php:2433
 msgid ""
 "Import will overwrite settings included in the JSON. Settings the JSON does "
 "not mention (and Cloudflare/Sucuri API keys absent from the file) are kept "
@@ -3182,7 +3179,7 @@ msgstr ""
 "設定 (および JSON に含まれない Cloudflare/Sucuri API キー) は現在の値のまま保"
 "持されます。続行しますか？"
 
-#: includes/admin/class-admin-settings.php:2446
+#: includes/admin/class-admin-settings.php:2437
 msgid ""
 "Upload a previously exported Prime Cache settings JSON file. Settings "
 "included in the JSON overwrite their current values; settings the JSON does "
@@ -3193,11 +3190,11 @@ msgstr ""
 "JSON に含まれる設定は現在の値を上書きし、JSON に記載されていない設定 (および "
 "JSON に含まれない Cloudflare/Sucuri API キー) は現在の値が保持されます。"
 
-#: includes/admin/class-admin-settings.php:2452
+#: includes/admin/class-admin-settings.php:2443
 msgid "Reset All Settings"
 msgstr "すべての設定をリセット"
 
-#: includes/admin/class-admin-settings.php:2453
+#: includes/admin/class-admin-settings.php:2444
 msgid ""
 "Delete all Prime Cache settings and restore them to factory defaults. This "
 "does not delete cached files — use \"Clear All Cache\" from the admin bar "
@@ -3207,22 +3204,22 @@ msgstr ""
 "削除されません。キャッシュファイルの削除は管理バーの「すべてのキャッシュをク"
 "リア」を使用してください。"
 
-#: includes/admin/class-admin-settings.php:2454
+#: includes/admin/class-admin-settings.php:2445
 msgid ""
 "This will reset ALL settings to defaults. This cannot be undone. Continue?"
 msgstr ""
 "すべての設定がデフォルトにリセットされます。この操作は取り消せません。続行し"
 "ますか？"
 
-#: includes/admin/class-admin-settings.php:2455
+#: includes/admin/class-admin-settings.php:2446
 msgid "Reset to Defaults"
 msgstr "デフォルトにリセット"
 
-#: includes/admin/class-admin-settings.php:2465
+#: includes/admin/class-admin-settings.php:2456
 msgid "Security Headers"
 msgstr "セキュリティーヘッダー"
 
-#: includes/admin/class-admin-settings.php:2467
+#: includes/admin/class-admin-settings.php:2458
 msgid ""
 "Security headers require .htaccess Optimization to be enabled on the Page "
 "Cache tab. Without it, these headers will not be added to responses."
@@ -3230,11 +3227,11 @@ msgstr ""
 "セキュリティヘッダーにはページキャッシュタブの .htaccess 最適化の有効化が必要"
 "です。有効化しないと、これらのヘッダーはレスポンスに追加されません。"
 
-#: includes/admin/class-admin-settings.php:2469
+#: includes/admin/class-admin-settings.php:2460
 msgid "HTTP Strict Transport Security (HSTS)"
 msgstr "HTTP Strict Transport Security (HSTS)"
 
-#: includes/admin/class-admin-settings.php:2469
+#: includes/admin/class-admin-settings.php:2460
 msgid ""
 "Force browsers to use HTTPS for all future connections. Only enable if your "
 "site fully supports HTTPS. Includes includeSubDomains and preload "
@@ -3245,15 +3242,15 @@ msgstr ""
 "preload ディレクティブを含みます。ページキャッシュタブの .htaccess 最適化が必"
 "要です。"
 
-#: includes/admin/class-admin-settings.php:2482
+#: includes/admin/class-admin-settings.php:2473
 msgid "HSTS Max-Age"
 msgstr "HSTS Max-Age"
 
-#: includes/admin/class-admin-settings.php:2507
+#: includes/admin/class-admin-settings.php:2498
 msgid "Security Response Headers"
 msgstr "セキュリティーレスポンスヘッダー"
 
-#: includes/admin/class-admin-settings.php:2507
+#: includes/admin/class-admin-settings.php:2498
 msgid ""
 "Add X-Content-Type-Options (nosniff), X-Frame-Options (SAMEORIGIN), X-XSS-"
 "Protection, Referrer-Policy, and Permissions-Policy headers. Protects "
@@ -3265,15 +3262,15 @@ msgstr ""
 "クジャッキング、MIME タイプスニッフィング、XSS 攻撃から保護します。ページ"
 "キャッシュタブの .htaccess 最適化が必要です。"
 
-#: includes/admin/class-admin-settings.php:2512
+#: includes/admin/class-admin-settings.php:2503
 msgid "Debug"
 msgstr "デバッグ"
 
-#: includes/admin/class-admin-settings.php:2513
+#: includes/admin/class-admin-settings.php:2504
 msgid "Enable Debug Logging"
 msgstr "デバッグログを有効化"
 
-#: includes/admin/class-admin-settings.php:2513
+#: includes/admin/class-admin-settings.php:2504
 msgid ""
 "Log cache purge operations (PURGE ALL, PURGE URL) to wp-content/cache/prime-"
 "cache/debug.log. Useful for troubleshooting cache invalidation. Disable in "
@@ -3284,50 +3281,50 @@ msgstr ""
 "ディスク I/O が増加するため、本番環境では無効化してください。"
 
 #. translators: %s: log file size (e.g. "2.5 MB")
-#: includes/admin/class-admin-settings.php:2522
+#: includes/admin/class-admin-settings.php:2513
 #, php-format
 msgid "Log file size: %s"
 msgstr "ログファイルサイズ: %s"
 
-#: includes/admin/class-admin-settings.php:2534
+#: includes/admin/class-admin-settings.php:2525
 msgid "System Information"
 msgstr "システム情報"
 
-#: includes/admin/class-admin-settings.php:2535
+#: includes/admin/class-admin-settings.php:2526
 msgid ""
 "Copy and paste this information when reporting bugs or requesting support."
 msgstr "バグ報告やサポート依頼の際にこの情報をコピーして貼り付けてください。"
 
-#: includes/admin/class-admin-settings.php:2538
+#: includes/admin/class-admin-settings.php:2529
 msgid "Copied!"
 msgstr "コピーしました"
 
-#: includes/admin/class-admin-settings.php:2538
-#: includes/admin/class-admin-settings.php:2539
+#: includes/admin/class-admin-settings.php:2529
+#: includes/admin/class-admin-settings.php:2530
 msgid "Copy to Clipboard"
 msgstr "クリップボードにコピー"
 
-#: includes/admin/class-admin-settings.php:2721
+#: includes/admin/class-admin-settings.php:2712
 msgid ""
 "Shared memory within PHP processes. Ideal for single-server environments."
 msgstr "PHP プロセス内の共有メモリーを使用します。単一サーバー環境に最適です。"
 
-#: includes/admin/class-admin-settings.php:2730
+#: includes/admin/class-admin-settings.php:2721
 msgid ""
 "High-performance in-memory data store. Supports persistence and replication."
 msgstr ""
 "高性能インメモリーデータストアです。永続化とレプリケーションに対応していま"
 "す。"
 
-#: includes/admin/class-admin-settings.php:2739
+#: includes/admin/class-admin-settings.php:2730
 msgid "Distributed memory cache. Ideal for sharing across multiple servers."
 msgstr "分散メモリーキャッシュです。複数サーバーでの共有に最適です。"
 
-#: includes/admin/class-admin-settings.php:2749
+#: includes/admin/class-admin-settings.php:2740
 msgid "Object cache settings have been updated."
 msgstr "オブジェクトキャッシュの設定を変更しました。"
 
-#: includes/admin/class-admin-settings.php:2750
+#: includes/admin/class-admin-settings.php:2741
 msgid ""
 "Object cache switch failed. Another plugin may be managing object-cache.php, "
 "or the required PHP extension is not available."
@@ -3335,33 +3332,33 @@ msgstr ""
 "オブジェクトキャッシュの切り替えに失敗しました。他のプラグインが object-"
 "cache.php を管理しているか、必要な PHP 拡張が利用できません。"
 
-#: includes/admin/class-admin-settings.php:2757
+#: includes/admin/class-admin-settings.php:2748
 msgid "Object Cache: Disabled"
 msgstr "オブジェクトキャッシュ: 無効"
 
-#: includes/admin/class-admin-settings.php:2759
+#: includes/admin/class-admin-settings.php:2750
 msgid "Object Cache: Managed by another plugin"
 msgstr "オブジェクトキャッシュ: 外部プラグインが管理中"
 
-#: includes/admin/class-admin-settings.php:2761
+#: includes/admin/class-admin-settings.php:2752
 msgid "Object Cache: Backend file missing"
 msgstr "オブジェクトキャッシュ: バックエンドファイルが見つかりません"
 
 #. translators: %s: object cache backend name (e.g. "REDIS", "MEMCACHED")
-#: includes/admin/class-admin-settings.php:2764
+#: includes/admin/class-admin-settings.php:2755
 #, php-format
 msgid "Object Cache: Active via %s"
 msgstr "オブジェクトキャッシュ: %s で有効"
 
-#: includes/admin/class-admin-settings.php:2769
+#: includes/admin/class-admin-settings.php:2760
 msgid "Select a backend to enable object caching."
 msgstr "バックエンドを選択して有効化してください。"
 
-#: includes/admin/class-admin-settings.php:2771
+#: includes/admin/class-admin-settings.php:2762
 msgid "Another plugin's object-cache.php was detected."
 msgstr "別のプラグインの object-cache.php が検出されました。"
 
-#: includes/admin/class-admin-settings.php:2773
+#: includes/admin/class-admin-settings.php:2764
 msgid ""
 "Prime Cache's object-cache.php is installed, but the referenced backend file "
 "is unreadable. Disable and re-enable the backend to repair, or switch to "
@@ -3371,45 +3368,45 @@ msgstr ""
 "エンドファイルを読み取れません。バックエンドを一度無効化してから再度有効化す"
 "るか、別のオプションに切り替えて修復してください。"
 
-#: includes/admin/class-admin-settings.php:2775
+#: includes/admin/class-admin-settings.php:2766
 msgid "Database query results are being cached in memory."
 msgstr "データベースクエリーの結果がメモリーにキャッシュされています。"
 
-#: includes/admin/class-admin-settings.php:2787
+#: includes/admin/class-admin-settings.php:2778
 msgid "Not Found"
 msgstr "未検出"
 
-#: includes/admin/class-admin-settings.php:2788
+#: includes/admin/class-admin-settings.php:2779
 msgid "Available"
 msgstr "利用可能"
 
 #. translators: %s: PHP extension name (e.g. "redis", "memcached")
-#: includes/admin/class-admin-settings.php:2792
+#: includes/admin/class-admin-settings.php:2783
 #, php-format
 msgid "Ext: %s"
 msgstr "拡張: %s"
 
-#: includes/admin/class-admin-settings.php:2795
+#: includes/admin/class-admin-settings.php:2786
 msgid "Enable"
 msgstr "有効化"
 
-#: includes/admin/class-admin-settings.php:2804
+#: includes/admin/class-admin-settings.php:2795
 msgid "PHP Extension Required"
 msgstr "PHP 拡張が必要です"
 
-#: includes/admin/class-admin-settings.php:2806
+#: includes/admin/class-admin-settings.php:2797
 msgid "Backend Not Bundled (Pro)"
 msgstr "バックエンド未同梱 (Pro)"
 
-#: includes/admin/class-admin-settings.php:2808
+#: includes/admin/class-admin-settings.php:2799
 msgid "Not Available"
 msgstr "利用不可"
 
-#: includes/admin/class-admin-settings.php:2817
+#: includes/admin/class-admin-settings.php:2808
 msgid "What is Object Cache?"
 msgstr "オブジェクトキャッシュとは"
 
-#: includes/admin/class-admin-settings.php:2817
+#: includes/admin/class-admin-settings.php:2808
 msgid ""
 "WordPress executes many database queries during page generation. Object "
 "cache stores query results in memory, returning subsequent requests for the "
@@ -3421,15 +3418,15 @@ msgstr ""
 "タベースを経由せず高速に返します。ログインユーザーが多いサイトや WooCommerce "
 "環境で効果的です。"
 
-#: includes/admin/class-admin-settings.php:2830
+#: includes/admin/class-admin-settings.php:2821
 msgid "Full zone purge"
 msgstr "ゾーン全体パージ"
 
-#: includes/admin/class-admin-settings.php:2830
+#: includes/admin/class-admin-settings.php:2821
 msgid "URL purge"
 msgstr "URL パージ"
 
-#: includes/admin/class-admin-settings.php:2833
+#: includes/admin/class-admin-settings.php:2824
 msgid ""
 "Cloudflare cache purge failed after multiple retries. Cloudflare may still "
 "be serving stale content. Please check your API credentials and try purging "
@@ -3439,11 +3436,11 @@ msgstr ""
 "が古いコンテンツを配信し続けている可能性があります。API 認証情報を確認し、も"
 "う一度パージしてください。"
 
-#: includes/admin/class-admin-settings.php:2836
+#: includes/admin/class-admin-settings.php:2827
 msgid "Dismiss"
 msgstr "非表示にする"
 
-#: includes/admin/class-admin-settings.php:2845
+#: includes/admin/class-admin-settings.php:2836
 msgid ""
 "Page caching is not supported on WordPress multisite. Other features (file "
 "optimization, lazy load, CDN, etc.) work normally."
@@ -3451,7 +3448,7 @@ msgstr ""
 "ページキャッシュは WordPress マルチサイトには対応していません。その他の機能 "
 "(ファイル最適化、遅延読み込み、CDN など) は通常通り動作します。"
 
-#: includes/admin/class-admin-settings.php:2856
+#: includes/admin/class-admin-settings.php:2847
 msgid ""
 "WP_CACHE is not set to true. Page caching will not work. Please check wp-"
 "config.php — another define( 'WP_CACHE', false ) may exist."
@@ -3460,7 +3457,7 @@ msgstr ""
 "config.php を確認してください。別の define( 'WP_CACHE', false ) が存在する可"
 "能性があります。"
 
-#: includes/admin/class-admin-settings.php:2862
+#: includes/admin/class-admin-settings.php:2853
 msgid ""
 "advanced-cache.php is managed by another plugin. Prime Cache page caching "
 "will not work until the other plugin is deactivated or its drop-in is "
@@ -3470,31 +3467,31 @@ msgstr ""
 "無効化するか、ドロップインを削除するまで Prime Cache のページキャッシュは動作"
 "しません。"
 
-#: includes/admin/class-admin-settings.php:2868
-#: includes/admin/class-admin-settings.php:2909
+#: includes/admin/class-admin-settings.php:2859
+#: includes/admin/class-admin-settings.php:2900
 msgid "Cache cleared successfully."
 msgstr "キャッシュをクリアしました。"
 
-#: includes/admin/class-admin-settings.php:2877
+#: includes/admin/class-admin-settings.php:2868
 msgid "Varnish cache also purged."
 msgstr "Varnish キャッシュもパージしました。"
 
-#: includes/admin/class-admin-settings.php:2880
+#: includes/admin/class-admin-settings.php:2871
 msgid "Sucuri cache also purged."
 msgstr "Sucuri キャッシュもパージしました。"
 
-#: includes/admin/class-admin-settings.php:2883
+#: includes/admin/class-admin-settings.php:2874
 msgid "Cloudflare cache also purged."
 msgstr "Cloudflare キャッシュもパージしました。"
 
-#: includes/admin/class-admin-settings.php:2887
+#: includes/admin/class-admin-settings.php:2878
 msgid ""
 "All caches cleared (page cache, minified files, critical CSS, object cache)."
 msgstr ""
 "すべてのキャッシュをクリアしました (ページキャッシュ、圧縮ファイル、クリティ"
 "カル CSS、オブジェクトキャッシュ)。"
 
-#: includes/admin/class-admin-settings.php:2888
+#: includes/admin/class-admin-settings.php:2879
 msgid ""
 "All caches cleared. Preloading will start on the next WP-Cron tick "
 "(typically within a minute on a site with regular traffic; longer if WP-Cron "
@@ -3504,7 +3501,7 @@ msgstr ""
 "サイトでは概ね 1 分以内、DISABLE_WP_CRON 設定時やシステム cron 駆動時はそれ以"
 "上) にプリロードが開始されます。"
 
-#: includes/admin/class-admin-settings.php:2889
+#: includes/admin/class-admin-settings.php:2880
 msgid ""
 "All caches cleared. Preloading will start on the next WP-Cron tick (default "
 "variant only — Vary Cookies active, so cookie-specific variants will be "
@@ -3514,27 +3511,27 @@ msgstr ""
 "ます (デフォルトバリアントのみ — Vary Cookies が有効なため、Cookie ごとのバリ"
 "アントは訪問者の初回リクエスト時に生成されます)。"
 
-#: includes/admin/class-admin-settings.php:2890
+#: includes/admin/class-admin-settings.php:2881
 msgid "Page cache cleared successfully."
 msgstr "ページキャッシュをクリアしました。"
 
-#: includes/admin/class-admin-settings.php:2891
+#: includes/admin/class-admin-settings.php:2882
 msgid "Minified CSS/JS files cleared successfully."
 msgstr "圧縮済み CSS/JS ファイルをクリアしました。"
 
-#: includes/admin/class-admin-settings.php:2892
+#: includes/admin/class-admin-settings.php:2883
 msgid "Critical CSS cache cleared successfully."
 msgstr "クリティカル CSS キャッシュをクリアしました。"
 
-#: includes/admin/class-admin-settings.php:2893
+#: includes/admin/class-admin-settings.php:2884
 msgid "Object cache flushed successfully."
 msgstr "オブジェクトキャッシュをフラッシュしました。"
 
-#: includes/admin/class-admin-settings.php:2894
+#: includes/admin/class-admin-settings.php:2885
 msgid "This page cache cleared successfully."
 msgstr "このページのキャッシュをクリアしました。"
 
-#: includes/admin/class-admin-settings.php:2895
+#: includes/admin/class-admin-settings.php:2886
 msgid ""
 "Could not clear cache for the requested URL. The URL may be invalid, point "
 "to a different host, or filesystem permissions prevented removal."
@@ -3543,27 +3540,27 @@ msgstr ""
 "している、またはファイルシステムの権限により削除できなかった可能性がありま"
 "す。"
 
-#: includes/admin/class-admin-settings.php:2896
+#: includes/admin/class-admin-settings.php:2887
 msgid "Post cache and related pages cleared successfully."
 msgstr "投稿と関連ページのキャッシュをクリアしました。"
 
-#: includes/admin/class-admin-settings.php:2897
+#: includes/admin/class-admin-settings.php:2888
 msgid "Varnish cache purge request sent."
 msgstr "Varnish キャッシュのパージリクエストを送信しました。"
 
-#: includes/admin/class-admin-settings.php:2898
+#: includes/admin/class-admin-settings.php:2889
 msgid "Sucuri firewall cache cleared successfully."
 msgstr "Sucuri ファイアウォールキャッシュをクリアしました。"
 
-#: includes/admin/class-admin-settings.php:2899
+#: includes/admin/class-admin-settings.php:2890
 msgid "Cloudflare cache purged successfully."
 msgstr "Cloudflare キャッシュをパージしました。"
 
-#: includes/admin/class-admin-settings.php:2900
+#: includes/admin/class-admin-settings.php:2891
 msgid "Failed to clear Sucuri cache. Check your API key."
 msgstr "Sucuri キャッシュのクリアに失敗しました。API キーを確認してください。"
 
-#: includes/admin/class-admin-settings.php:2901
+#: includes/admin/class-admin-settings.php:2892
 msgid ""
 "Cache preloading has been scheduled and will start on the next WP-Cron tick "
 "(typically within a minute on a site with regular traffic). If WP-Cron is "
@@ -3575,7 +3572,7 @@ msgstr ""
 "ている、またはシステム cron に依存している環境では、開始までの時間がそれに応"
 "じて遅延します。"
 
-#: includes/admin/class-admin-settings.php:2902
+#: includes/admin/class-admin-settings.php:2893
 msgid ""
 "Cache preloading scheduled on the next WP-Cron tick (default variant only). "
 "Cookie-specific variants will be generated on first visitor request."
@@ -3584,7 +3581,7 @@ msgstr ""
 "リアントのみ)。Cookie ごとのバリアントは、訪問者の初回リクエスト時に生成され"
 "ます。"
 
-#: includes/admin/class-admin-settings.php:2903
+#: includes/admin/class-admin-settings.php:2894
 msgid ""
 "Cannot start preload: page caching is disabled. Enable \"Cache Enabled\" in "
 "Page Cache settings first."
@@ -3592,7 +3589,7 @@ msgstr ""
 "プリロードを開始できません: ページキャッシュが無効です。先に Page Cache 設定"
 "の「Cache Enabled」を有効化してください。"
 
-#: includes/admin/class-admin-settings.php:2904
+#: includes/admin/class-admin-settings.php:2895
 msgid ""
 "Cannot start preload: preload is disabled. Enable \"Cache Preload\" in "
 "Preload settings first."
@@ -3600,7 +3597,7 @@ msgstr ""
 "プリロードを開始できません: プリロードが無効です。先に Preload 設定の「Cache "
 "Preload」を有効化してください。"
 
-#: includes/admin/class-admin-settings.php:2905
+#: includes/admin/class-admin-settings.php:2896
 msgid ""
 "Failed to schedule the preload event. Another plugin or filter may be "
 "blocking WP-Cron event registration. Check your error log or run preload "
@@ -3610,11 +3607,11 @@ msgstr ""
 "ターが WP-Cron イベント登録をブロックしている可能性があります。エラーログを確"
 "認するか、WP-CLI で手動実行してください。"
 
-#: includes/admin/class-admin-settings.php:2906
+#: includes/admin/class-admin-settings.php:2897
 msgid "All settings have been reset to defaults."
 msgstr "すべての設定をデフォルトにリセットしました。"
 
-#: includes/admin/class-admin-settings.php:2915
+#: includes/admin/class-admin-settings.php:2906
 msgid "Statistics have been reset."
 msgstr "統計をリセットしました。"
 
@@ -3852,1415 +3849,3 @@ msgstr ""
 "Prime Cache の設定は保存されましたが、設定ファイルを再生成できませんでした。"
 "ファイルの書き込みが成功するまで、キャッシュは以前の設定で動作し続けます。wp-"
 "content が書き込み可能かどうかを確認してください。"
-
-#~ msgid "Go Pro"
-#~ msgstr "Pro を入手"
-
-#~ msgid "Want more speed?"
-#~ msgstr "さらに高速化しませんか？"
-
-#~ msgid ""
-#~ "You're using Prime Cache Free. Upgrade to Pro for Object Cache, WebP/AVIF "
-#~ "conversion, Remove Unused CSS, database optimization, and 30+ additional "
-#~ "features."
-#~ msgstr ""
-#~ "Prime Cache Free をご利用中です。Pro にアップグレードすると、オブジェクト"
-#~ "キャッシュ、WebP/AVIF 変換、未使用 CSS 削除、データベース最適化など 30 以"
-#~ "上の機能が利用可能になります。"
-
-# ── Upsell strings ─────────────────────────────────────
-#~ msgid "Get Pro"
-#~ msgstr "Pro を入手"
-
-#~ msgid ""
-#~ "Unlock the full potential of your site with advanced performance "
-#~ "optimization features."
-#~ msgstr ""
-#~ "高度なパフォーマンス最適化機能でサイトの可能性を最大限に引き出しましょう。"
-
-#~ msgid "Get Prime Cache Pro"
-#~ msgstr "Prime Cache Pro を入手"
-
-#~ msgid "Ready to speed up your site?"
-#~ msgstr "サイトを高速化しませんか？"
-
-#~ msgid "Unlock these with Prime Cache Pro"
-#~ msgstr "これらの機能は Prime Cache Pro で利用できます"
-
-#~ msgid ""
-#~ "Serve cached pages to logged-in users. Disable if your site shows admin "
-#~ "bars or user-specific content. Useful for membership sites serving "
-#~ "identical content to all users."
-#~ msgstr ""
-#~ "ログイン中のユーザーにもキャッシュを配信します。管理バーやユーザー固有のコ"
-#~ "ンテンツがあるサイトでは無効のままにしてください。会員制サイトなどですべて"
-#~ "のユーザーに同一コンテンツを表示する場合に有効です。"
-
-#~ msgid ""
-#~ "Write optimization rules to .htaccess. Apache serves cached files "
-#~ "directly without invoking PHP, significantly improving response time. "
-#~ "Also enables mod_deflate compression, mod_expires browser caching, and "
-#~ "ETag removal. No effect on Nginx."
-#~ msgstr ""
-#~ "Apache 向けの最適化ルールを .htaccess に書き込みます。PHP を経由せず "
-#~ "Apache が直接キャッシュファイルを配信するため、応答速度が大幅に向上しま"
-#~ "す。さらに mod_deflate による動的 gzip 圧縮、mod_expires によるブラウザー"
-#~ "キャッシュ制御、ETag 無効化も設定されます。Nginx 環境では効果がありませ"
-#~ "ん。"
-
-#~ msgid ""
-#~ "How long until cache files are automatically discarded. Expired caches "
-#~ "are regenerated on the next visit and cleaned up hourly by WP-Cron. Set "
-#~ "to 0 for unlimited (purge only on post updates, comments, and term "
-#~ "changes). For frequently updated news sites, use 1-6 hours. For less "
-#~ "active sites, use 1-7 days or unlimited."
-#~ msgstr ""
-#~ "キャッシュファイルが自動的に破棄されるまでの有効期間を設定します。期間が過"
-#~ "ぎたキャッシュは次のアクセス時に再生成され、古いファイルは WP-Cron で毎時"
-#~ "クリーンアップされます。0 に設定すると無期限となり、投稿の更新・コメント・"
-#~ "タームの変更などのイベントが発生したときのみキャッシュが削除されます。頻繁"
-#~ "に更新されるニュースサイトでは短め (1〜6時間)、更新頻度の低いサイトでは長"
-#~ "め (1〜7日) または無期限を推奨します。"
-
-#~ msgid ""
-#~ "Comma-separated parameter names. These parameters are stripped and the "
-#~ "same cache is served as if they were absent. Register ad-tracking "
-#~ "parameters (utm_source, fbclid, gclid, etc.) to prevent unnecessary cache "
-#~ "duplication."
-#~ msgstr ""
-#~ "カンマ区切りでパラメーター名を指定します。ここに記載されたパラメーターが "
-#~ "URL に含まれていても、パラメーターなしの URL と同じキャッシュが配信されま"
-#~ "す。広告トラッキング用のパラメーター (utm_source, fbclid, gclid など) を登"
-#~ "録することで、不要なキャッシュの重複を防ぎます。"
-
-#~ msgid ""
-#~ "Comma-separated parameter names. Each unique value generates a separate "
-#~ "cache file. For example, specifying <code>lang</code> creates separate "
-#~ "caches for <code>?lang=en</code> and <code>?lang=ja</code>. Use for "
-#~ "multilingual plugins or currency switchers. URLs with parameters not in "
-#~ "either list are not cached. <strong>Note:</strong> .htaccess fast-path "
-#~ "does not serve query string variants — they are served via the drop-in "
-#~ "(still very fast, but not zero-PHP)."
-#~ msgstr ""
-#~ "カンマ区切りでパラメーター名を指定します。ここに記載されたパラメーターは、"
-#~ "値ごとに個別のキャッシュファイルを生成します。例えば <code>lang</code> を"
-#~ "指定すると、<code>?lang=en</code> と <code>?lang=ja</code> にそれぞれ別の"
-#~ "キャッシュが保存されます。多言語プラグインや通貨切替など、クエリーパラメー"
-#~ "ターでコンテンツが変わるサイトで使用します。どちらのリストにも含まれないパ"
-#~ "ラメーターが付いた URL はキャッシュされません。<strong>注意:</"
-#~ "strong> .htaccess 高速配信はクエリーパラメーターバリアントに対応していませ"
-#~ "ん。ドロップインを経由して配信されます (非常に高速ですが、PHP なしではあり"
-#~ "ません)。"
-
-#~ msgid ""
-#~ "One URL per line. Whenever any post is updated, caches for these URLs are "
-#~ "also cleared in addition to the standard related pages (home, categories, "
-#~ "tags, author, date archives). Use for sitemaps, custom landing pages, or "
-#~ "shortcode-based post listing pages that are not auto-detected."
-#~ msgstr ""
-#~ "1行に1つの URL を記入します。いずれかの投稿が更新されるたびに、通常の関連"
-#~ "ページ (ホーム、カテゴリー、タグ、投稿者、日付アーカイブなど) に加えて、こ"
-#~ "こに記載された URL のキャッシュも自動的に削除されます。サイトマップ、カス"
-#~ "タムランディングページ、投稿一覧を表示するショートコードページなど、投稿更"
-#~ "新の影響を受けるが自動検出されないページに使用します。"
-
-#~ msgid ""
-#~ "Enter URL path regex patterns separated by <code>|</code>. Matched URLs "
-#~ "are always dynamically generated by WordPress. Specify WooCommerce cart/"
-#~ "checkout, my-account pages, or any page with user-specific content or "
-#~ "dynamic API endpoints."
-#~ msgstr ""
-#~ "URL パスの正規表現パターンを <code>|</code> で区切って入力します。マッチし"
-#~ "た URL は常に WordPress が動的に生成します。WooCommerce のカート・購入手続"
-#~ "き、マイアカウントページなどユーザーごとに内容が異なるページや、動的に変化"
-#~ "する API エンドポイントなどを指定してください。"
-
-#~ msgid ""
-#~ "Enter cookie name regex patterns separated by <code>|</code>. When any "
-#~ "listed cookie is present in the browser, the request is not cached. "
-#~ "Specify WooCommerce cart sessions, form plugin tokens, or any cookies "
-#~ "holding user-specific state. WordPress login cookies "
-#~ "(wordpress_logged_in_) are excluded automatically."
-#~ msgstr ""
-#~ "Cookie 名の正規表現パターンを <code>|</code> で区切って入力します。ここに"
-#~ "記載された Cookie がブラウザーに存在する場合、そのリクエストはキャッシュさ"
-#~ "れません。WooCommerce のカートセッション、フォームプラグインのトークンな"
-#~ "ど、ユーザー固有の状態を持つ Cookie を指定してください。WordPress 標準のロ"
-#~ "グイン Cookie (wordpress_logged_in_) は自動的に除外されるため、ここに記載"
-#~ "する必要はありません。"
-
-#~ msgid ""
-#~ "Enter user-agent regex patterns separated by <code>|</code>. Matched "
-#~ "browsers or crawlers receive uncached responses. Use to always show fresh "
-#~ "content to specific bots or to exclude monitoring tool requests from the "
-#~ "cache."
-#~ msgstr ""
-#~ "ユーザーエージェント文字列の正規表現パターンを <code>|</code> で区切って入"
-#~ "力します。マッチしたブラウザーやクローラーからのアクセスにはキャッシュを配"
-#~ "信しません。特定のボットに常に最新のコンテンツを見せたい場合や、監視ツール"
-#~ "のアクセスをキャッシュから除外したい場合に使用します。"
-
-#~ msgid ""
-#~ "Enter referrer URL regex patterns separated by <code>|</code>. Requests "
-#~ "from matching referrers are excluded from the cache. Use to block spam "
-#~ "referrers or to always show fresh content on specific ad landing flows."
-#~ msgstr ""
-#~ "リファラー (参照元 URL) の正規表現パターンを <code>|</code> で区切って入力"
-#~ "します。特定のサイトから流入したアクセスをキャッシュから除外できます。スパ"
-#~ "ムリファラーの除外や、特定の広告ランディングで常に最新コンテンツを表示した"
-#~ "い場合に使用します。"
-
-#~ msgid "Regex"
-#~ msgstr "正規表現"
-
-#~ msgid "All caches cleared. Preloading will start shortly."
-#~ msgstr ""
-#~ "すべてのキャッシュをクリアしました。まもなくプリロードが開始されます。"
-
-#~ msgid "Cache preloading has been scheduled and will start shortly."
-#~ msgstr ""
-#~ "キャッシュのプリロードをスケジュールしました。まもなく開始されます。"
-
-#~ msgid ""
-#~ "Add Cache-Control headers to static assets via .htaccess. Instructs "
-#~ "browsers to cache files locally for the specified duration, eliminating "
-#~ "repeat downloads on subsequent page views."
-#~ msgstr ""
-#~ ".htaccess 経由で静的アセットに Cache-Control ヘッダーを追加します。指定し"
-#~ "た期間ブラウザーにファイルをローカルキャッシュさせ、以降のページ表示での再"
-#~ "ダウンロードを排除します。"
-
-#~ msgid ""
-#~ "Enable Brotli compression via mod_brotli (Apache 2.4+). Brotli achieves "
-#~ "15-25% better compression than gzip for text-based assets. Requires "
-#~ "mod_brotli to be installed on the server. Falls back to gzip if "
-#~ "unavailable."
-#~ msgstr ""
-#~ "mod_brotli (Apache 2.4 以上) による Brotli 圧縮を有効にします。Brotli はテ"
-#~ "キストベースのアセットで gzip より 15〜25% 高い圧縮率を実現します。サー"
-#~ "バーに mod_brotli がインストールされている必要があります。利用できない場合"
-#~ "は gzip にフォールバックします。"
-
-#~ msgid "CSS & JS Cache Lifetime (seconds)"
-#~ msgstr "CSS と JS のキャッシュ期間 (秒)"
-
-#~ msgid "Images Cache Lifetime (seconds)"
-#~ msgstr "画像のキャッシュ期間 (秒)"
-
-#~ msgid "Fonts Cache Lifetime (seconds)"
-#~ msgstr "フォントのキャッシュ期間 (秒)"
-
-#~ msgid "HTML Cache Lifetime (seconds)"
-#~ msgstr "HTML のキャッシュ期間 (秒)"
-
-#~ msgid "Varnish"
-#~ msgstr "Varnish"
-
-#~ msgid "Varnish Cache Auto-Purge"
-#~ msgstr "Varnish キャッシュ自動パージ"
-
-#~ msgid ""
-#~ "Automatically send HTTP PURGE requests to your Varnish reverse proxy when "
-#~ "page cache is cleared. Supports exact URL purge and regex-based full-site "
-#~ "purge. Enable if your server uses Varnish as a caching layer in front of "
-#~ "WordPress."
-#~ msgstr ""
-#~ "ページキャッシュがクリアされたときに、Varnish リバースプロキシに HTTP "
-#~ "PURGE リクエストを自動送信します。個別 URL パージと正規表現ベースのサイト"
-#~ "全体パージに対応しています。サーバーが WordPress の前段に Varnish をキャッ"
-#~ "シュレイヤーとして使用している場合に有効にしてください。"
-
-#~ msgid ""
-#~ "IP address of your Varnish server. One per line for multiple servers. "
-#~ "Leave empty to send PURGE requests to the site hostname directly. Can "
-#~ "also be set via the PRIME_CACHE_VARNISH_IP constant in wp-config.php."
-#~ msgstr ""
-#~ "Varnish サーバーの IP アドレスです。複数サーバーの場合は1行に1つ記入しま"
-#~ "す。空欄の場合はサイトのホスト名に直接 PURGE リクエストを送信します。wp-"
-#~ "config.php の PRIME_CACHE_VARNISH_IP 定数でも設定できます。"
-
-#~ msgid "Sucuri Firewall Cache Sync"
-#~ msgstr "Sucuri ファイアウォールキャッシュ同期"
-
-#~ msgid ""
-#~ "Automatically clear Sucuri WAF/CDN cache when Prime Cache is purged. "
-#~ "Provide your Firewall API key below. Sucuri cache is purged on every full "
-#~ "cache clear and debounced on individual URL purges."
-#~ msgstr ""
-#~ "Prime Cache がパージされたときに Sucuri WAF/CDN キャッシュを自動的にクリア"
-#~ "します。下にファイアウォール API キーを入力してください。Sucuri キャッシュ"
-#~ "はキャッシュ全削除時に毎回パージされ、個別 URL パージ時にはリクエストをま"
-#~ "とめて送信します。"
-
-#~ msgid "Firewall API Key"
-#~ msgstr "ファイアウォール API キー"
-
-#~ msgid ""
-#~ "Firewall API key in the format: 32-character-key/32-character-secret. "
-#~ "Find this in your Sucuri dashboard under Firewall > Settings > API. Can "
-#~ "also be set via the PRIME_CACHE_SUCURI_API_KEY constant in wp-config.php."
-#~ msgstr ""
-#~ "32文字のキー/32文字のシークレットの形式でファイアウォール API キーを入力し"
-#~ "ます。Sucuri ダッシュボードの「Firewall」>「Settings」>「API」で確認できま"
-#~ "す。wp-config.php の PRIME_CACHE_SUCURI_API_KEY 定数でも設定できます。"
-
-#~ msgid ""
-#~ "Discover URLs from your XML sitemap instead of database queries. When "
-#~ "enabled, the sitemap is the primary source for the preload URL list. The "
-#~ "homepage, posts, and taxonomy toggles above serve as fallback if the "
-#~ "sitemap is unreachable."
-#~ msgstr ""
-#~ "データベースクエリーの代わりに XML サイトマップから URL を取得します。有効"
-#~ "にすると、サイトマップがプリロード URL リストの主要なソースになります。サ"
-#~ "イトマップにアクセスできない場合は、上のホームページ・投稿・タクソノミーの"
-#~ "トグルがフォールバックとして使用されます。"
-
-#~ msgid ""
-#~ "Full URL to your XML sitemap. Supports sitemap index files — child "
-#~ "sitemaps are parsed recursively (up to 1,000 URLs). WordPress generates a "
-#~ "built-in sitemap at /wp-sitemap.xml."
-#~ msgstr ""
-#~ "XML サイトマップの完全な URL を入力します。サイトマップインデックスファイ"
-#~ "ルに対応しています。子サイトマップは再帰的に解析されます (最大 1,000 "
-#~ "URL)。WordPress は /wp-sitemap.xml に組み込みサイトマップを生成します。"
-
-#~ msgid ""
-#~ "Preload all published posts, pages, and custom post types (up to 500, "
-#~ "most recently modified first)."
-#~ msgstr ""
-#~ "公開済みの投稿、固定ページ、カスタム投稿タイプをすべてプリロードします (最"
-#~ "大 500件、更新日順)。"
-
-#~ msgid ""
-#~ "Preload category, tag, and custom taxonomy archive pages (up to 200 "
-#~ "terms)."
-#~ msgstr ""
-#~ "カテゴリー、タグ、カスタムタクソノミーのアーカイブページをプリロードしま"
-#~ "す (最大 200ターム)。"
-
-#~ msgid ""
-#~ "If provided, URLs are discovered from this sitemap instead of database "
-#~ "queries. Supports sitemap index files (child sitemaps are parsed "
-#~ "recursively, up to 1000 URLs). Leave empty to use the database-based "
-#~ "method above."
-#~ msgstr ""
-#~ "指定するとデータベースクエリーの代わりにこのサイトマップから URL を取得し"
-#~ "ます。サイトマップインデックスに対応しています (子サイトマップを再帰的に解"
-#~ "析、最大 1000 URL)。空欄の場合は上記のデータベースベースの方法を使用しま"
-#~ "す。"
-
-#~ msgid "Request Interval (seconds)"
-#~ msgstr "リクエスト間隔 (秒)"
-
-#~ msgid ""
-#~ "Delay between each preload request. Higher values reduce server load but "
-#~ "take longer to complete. Preloading automatically pauses if server load "
-#~ "is too high (weighted average > 16.0 or load spike detected)."
-#~ msgstr ""
-#~ "プリロードリクエスト間の遅延時間です。値を大きくするとサーバー負荷は減りま"
-#~ "すが完了まで時間がかかります。サーバー負荷が高い場合 (加重平均 > 16.0 また"
-#~ "はスパイク検出時) は自動的に一時停止します。"
-
-#~ msgid ""
-#~ "URL path patterns to skip during preloading (one per line). Supports "
-#~ "regex. These pages will not be crawled by the preloader."
-#~ msgstr ""
-#~ "プリロード時にスキップする URL パスパターンです (1行に1つ)。正規表現に対応"
-#~ "しています。これらのページはプリローダーがクロールしません。"
-
-#~ msgid "Enable Speculation Rules API"
-#~ msgstr "Speculation Rules API を有効化"
-
-#~ msgid ""
-#~ "Use the Speculation Rules API (Chrome 109+) to prerender pages when the "
-#~ "user is likely to navigate to them. Much faster than prefetch — the "
-#~ "entire page is rendered in the background, making navigation virtually "
-#~ "instant. Admin, login, cart, checkout, and account pages are "
-#~ "automatically excluded. Browsers without support simply ignore the rules."
-#~ msgstr ""
-#~ "Speculation Rules API (Chrome 109 以上) を使用して、ユーザーが遷移する可能"
-#~ "性が高いページを事前レンダリングします。プリフェッチよりはるかに高速で、"
-#~ "ページ全体がバックグラウンドでレンダリングされるため、ナビゲーションがほぼ"
-#~ "瞬時になります。管理画面、ログイン、カート、購入手続き、マイアカウントペー"
-#~ "ジは自動的に除外されます。非対応ブラウザーでは単に無視されます。"
-
-#~ msgid ""
-#~ "Cache 404 (Not Found) pages. Reduces server load from repeated requests "
-#~ "to non-existent URLs. The cached 404 page is served with proper 404 HTTP "
-#~ "status code."
-#~ msgstr ""
-#~ "404 (Not Found) ページをキャッシュします。存在しない URL への繰り返しリク"
-#~ "エストによるサーバー負荷を軽減します。キャッシュされた 404 ページは正しい "
-#~ "404 HTTP ステータスコードで配信されます。"
-
-#~ msgid "Auto-detect & Preload Fonts"
-#~ msgstr "フォント自動検出・プリロード"
-
-#~ msgid ""
-#~ "Scan theme and plugin stylesheets for @font-face declarations and inject "
-#~ "<link rel=\"preload\"> hints in the head. Prioritizes woff2 format. "
-#~ "Preloading fonts reduces layout shifts and improves Largest Contentful "
-#~ "Paint (LCP) for text-heavy pages. Results are cached for 24 hours."
-#~ msgstr ""
-#~ "テーマとプラグインのスタイルシートから @font-face 宣言をスキャンし、<link "
-#~ "rel=\"preload\"> ヒントを head に注入します。woff2 形式を優先します。フォ"
-#~ "ントのプリロードによりレイアウトシフトを削減し、テキスト中心のページで "
-#~ "LCP (Largest Contentful Paint) を改善します。結果は 24時間キャッシュされま"
-#~ "す。"
-
-#~ msgid ""
-#~ "Automatically detect the most likely LCP image (first large above-the-"
-#~ "fold image) and apply optimizations: add fetchpriority=\"high\" "
-#~ "attribute, inject <link rel=\"preload\"> with imagesrcset support, and "
-#~ "remove loading=\"lazy\" from the LCP element. Improves Core Web Vitals "
-#~ "LCP score."
-#~ msgstr ""
-#~ "LCP の候補となる画像 (ファーストビューの最初の大きな画像) を自動検出し、"
-#~ "fetchpriority=\"high\" 属性の付与、imagesrcset 対応の <link "
-#~ "rel=\"preload\"> の注入、LCP 要素からの loading=\"lazy\" の削除を行いま"
-#~ "す。Core Web Vitals の LCP スコアを改善します。"
-
-#~ msgid "LCP Excluded Patterns"
-#~ msgstr "LCP 除外パターン"
-
-#~ msgid ""
-#~ "Image URL patterns to exclude from LCP detection (one per line). Use for "
-#~ "logos, icons, or decorative images that should not be treated as the LCP "
-#~ "element."
-#~ msgstr ""
-#~ "LCP 検出から除外する画像 URL パターンです (1行に1つ)。ロゴ、アイコン、装飾"
-#~ "画像など LCP 要素として扱うべきでない画像に使用します。"
-
-#~ msgid "DNS Prefetch Domains"
-#~ msgstr "DNS プリフェッチドメイン"
-
-#~ msgid ""
-#~ "One domain per line (without https://). The browser resolves DNS for "
-#~ "these domains early in the page load, reducing latency when external "
-#~ "resources are later requested. Lightweight and safe to use for any "
-#~ "external domain."
-#~ msgstr ""
-#~ "1行に1ドメインを記入します (https:// なし)。ブラウザーがページ読み込みの早"
-#~ "い段階でこれらのドメインの DNS を解決し、外部リソースのリクエスト時の遅延"
-#~ "を低減します。軽量で、すべての外部ドメインに安全に使用できます。"
-
-#~ msgid "Preconnect Origins"
-#~ msgstr "プリコネクト先"
-
-#~ msgid ""
-#~ "One origin per line (include https://). The browser performs DNS lookup, "
-#~ "TCP connection, and TLS handshake in advance for these origins. Use for "
-#~ "critical third-party resources like font providers, CDNs, or API "
-#~ "endpoints. More aggressive than DNS Prefetch — use sparingly for origins "
-#~ "you will definitely connect to."
-#~ msgstr ""
-#~ "1行に1つのオリジンを記入します (https:// を含めてください)。ブラウザーがこ"
-#~ "れらのオリジンに対して DNS ルックアップ、TCP 接続、TLS ハンドシェイクを事"
-#~ "前に実行します。フォントプロバイダー、CDN、API エンドポイントなど重要な"
-#~ "サードパーティーリソースに使用します。DNS プリフェッチより積極的なため、確"
-#~ "実に接続するオリジンのみに使用してください。"
-
-#~ msgid ""
-#~ "Use DOMDocument for deeper HTML optimization. Parses the document tree to "
-#~ "more aggressively collapse whitespace between block-level elements while "
-#~ "preserving inline formatting. Falls back to regex if DOM parsing fails."
-#~ msgstr ""
-#~ "DOMDocument を使用してより深い HTML 最適化を行います。ドキュメントツリーを"
-#~ "解析し、ブロックレベル要素間の空白をより積極的に圧縮しつつ、インライン"
-#~ "フォーマットを保持します。DOM 解析に失敗した場合は正規表現にフォールバック"
-#~ "します。"
-
-#~ msgid ""
-#~ "Eliminates render-blocking CSS on your website. Only one method can be "
-#~ "selected. Remove Unused CSS is recommended for optimal performance."
-#~ msgstr ""
-#~ "サイトのレンダリングブロック CSS を排除します。いずれか1つの方法のみ選択で"
-#~ "きます。最適なパフォーマンスには「未使用 CSS の削除」を推奨します。"
-
-#~ msgid "Enable Optimize CSS Delivery"
-#~ msgstr "CSS 配信の最適化を有効化"
-
-#~ msgid "Turn on CSS delivery optimization. Choose a method below."
-#~ msgstr "CSS 配信の最適化をオンにします。下からメソッドを選択してください。"
-
-#~ msgid ""
-#~ "Removes unused CSS per page and helps to reduce page size and HTTP "
-#~ "requests. Recommended for best performance. Test thoroughly!"
-#~ msgstr ""
-#~ "ページごとに未使用 CSS を削除し、ページサイズと HTTP リクエスト数を削減し"
-#~ "ます。最高のパフォーマンスに推奨します。十分にテストしてください。"
-
-#~ msgid "CSS Safelist"
-#~ msgstr "CSS セーフリスト"
-
-#~ msgid ""
-#~ "Specify CSS filenames, IDs or classes that should not be removed (one per "
-#~ "line). Supports file path patterns, .class-name, #id, and tag selectors."
-#~ msgstr ""
-#~ "削除しない CSS ファイル名、ID、クラスを指定します (1行に1つ)。ファイルパス"
-#~ "パターン、.クラス名、#ID、タグセレクターに対応しています。"
-
-#~ msgid ""
-#~ "Load stylesheets asynchronously via media=\"print\" onload swap. "
-#~ "Eliminates render-blocking CSS. Provide critical CSS to prevent flash of "
-#~ "unstyled content."
-#~ msgstr ""
-#~ "media=\"print\" onload スワップでスタイルシートを非同期に読み込みます。レ"
-#~ "ンダリングブロック CSS を排除します。FOUC を防ぐためクリティカル CSS を指"
-#~ "定してください。"
-
-#~ msgid ""
-#~ "Automatically extract above-the-fold CSS rules per page. Cached for 7 "
-#~ "days per URL. Skipped if manual critical CSS is provided below."
-#~ msgstr ""
-#~ "ページごとにファーストビューの CSS ルールを自動抽出します。URL ごとに 7日"
-#~ "間キャッシュされます。下にクリティカル CSS が入力されている場合はスキップ"
-#~ "します。"
-
-#~ msgid ""
-#~ "CSS to inline in the head for above-the-fold content. Prevents flash of "
-#~ "unstyled content while stylesheets load. If auto-generate is enabled and "
-#~ "this field is empty, critical CSS will be generated automatically."
-#~ msgstr ""
-#~ "ファーストビューコンテンツ用に head にインライン展開する CSS です。スタイ"
-#~ "ルシート読み込み中の FOUC を防ぎます。自動生成が有効でこのフィールドが空の"
-#~ "場合、クリティカル CSS は自動生成されます。"
-
-#~ msgid ""
-#~ "Merge multiple CSS files into a single file to reduce HTTP requests. Not "
-#~ "recommended on HTTP/2 servers."
-#~ msgstr ""
-#~ "複数の CSS ファイルを1つに結合して HTTP リクエスト数を削減します。HTTP/2 "
-#~ "サーバーでは非推奨です。"
-
-#~ msgid ""
-#~ "Eliminate render-blocking CSS by loading stylesheets asynchronously. Uses "
-#~ "media=\"print\" with onload swap. Provide critical CSS below to prevent "
-#~ "FOUC."
-#~ msgstr ""
-#~ "スタイルシートを非同期に読み込み、レンダリングブロック CSS を排除します。"
-#~ "media=\"print\" と onload スワップを使用します。FOUC を防ぐため、下のクリ"
-#~ "ティカル CSS を設定してください。"
-
-#~ msgid "Auto-generate Critical CSS"
-#~ msgstr "クリティカル CSS の自動生成"
-
-#~ msgid ""
-#~ "Automatically extract CSS rules for above-the-fold elements (header, nav, "
-#~ "hero, h1, etc.) and inline them in the head. Works with async CSS to "
-#~ "prevent FOUC without manual CSS input. Per-URL cache with 7-day expiry. "
-#~ "Skipped if manual critical CSS is provided below."
-#~ msgstr ""
-#~ "ファーストビュー要素 (header、nav、hero、h1 等) の CSS ルールを自動抽出"
-#~ "し、head にインライン展開します。CSS 非同期読み込みと連携して FOUC を防止"
-#~ "します。URL ごとにキャッシュされます (7日間有効)。下のフォールバック CSS "
-#~ "が入力されている場合はスキップされます。"
-
-#~ msgid ""
-#~ "Analyze each page and remove CSS rules whose selectors do not match any "
-#~ "element in the HTML. Significantly reduces CSS file size. @font-face, "
-#~ "@keyframes, and @media blocks are preserved. Use the safelist below to "
-#~ "keep specific selectors."
-#~ msgstr ""
-#~ "各ページを解析し、HTML 内のどの要素にもマッチしない CSS ルールを削除しま"
-#~ "す。CSS ファイルサイズを大幅に削減します。@font-face、@keyframes、@media "
-#~ "ブロックは保持されます。下のセーフリストで特定のセレクターを保持できます。"
-
-#~ msgid "Unused CSS Safelist"
-#~ msgstr "未使用 CSS セーフリスト"
-
-#~ msgid ""
-#~ "CSS selectors, classes, or IDs that should never be removed (one per "
-#~ "line). Use for dynamically injected elements that may not be present in "
-#~ "the initial HTML (modals, dropdowns, AJAX-loaded content)."
-#~ msgstr ""
-#~ "削除しない CSS セレクター、クラス、ID を1行に1つ指定します。モーダル、ド"
-#~ "ロップダウン、AJAX 読み込みコンテンツなど、初期 HTML に存在しない動的要素"
-#~ "に使用してください。"
-
-#~ msgid ""
-#~ "CSS to inline in the head for above-the-fold content. Only used when "
-#~ "async CSS is enabled. Prevents flash of unstyled content while "
-#~ "stylesheets load. If auto-generate is enabled and this field is empty, "
-#~ "critical CSS will be generated automatically."
-#~ msgstr ""
-#~ "ファーストビューコンテンツ用に head にインライン展開する CSS です。CSS 非"
-#~ "同期読み込み有効時のみ使用されます。スタイルシート読み込み中の FOUC を防ぎ"
-#~ "ます。自動生成が有効でこのフィールドが空の場合、クリティカル CSS は自動生"
-#~ "成されます。"
-
-#~ msgid ""
-#~ "CSS to inline in the head for above-the-fold content. Only used when "
-#~ "async CSS is enabled. Prevents flash of unstyled content while "
-#~ "stylesheets load."
-#~ msgstr ""
-#~ "ファーストビューコンテンツ用に head にインライン展開する CSS です。CSS 非"
-#~ "同期読み込み有効時のみ使用されます。スタイルシート読み込み中の FOUC を防ぎ"
-#~ "ます。"
-
-#~ msgid ""
-#~ "Remove whitespace and comments from JavaScript files to reduce file size. "
-#~ "Already minified files (.min.js) are skipped."
-#~ msgstr ""
-#~ "JavaScript ファイルから空白とコメントを削除してファイルサイズを削減しま"
-#~ "す。すでに圧縮済みのファイル (.min.js) はスキップされます。"
-
-#~ msgid ""
-#~ "Merge multiple JS files into a single file to reduce HTTP requests. Not "
-#~ "recommended on HTTP/2 servers. May cause issues — test thoroughly."
-#~ msgstr ""
-#~ "複数の JS ファイルを1つに結合して HTTP リクエスト数を削減します。HTTP/2 "
-#~ "サーバーでは非推奨です。問題が生じる可能性があるため十分にテストしてくださ"
-#~ "い。"
-
-#~ msgid ""
-#~ "Add the defer attribute to script tags to eliminate render-blocking "
-#~ "JavaScript. Scripts are downloaded in parallel and executed after HTML "
-#~ "parsing."
-#~ msgstr ""
-#~ "script タグに defer 属性を追加してレンダリングブロック JavaScript を排除し"
-#~ "ます。スクリプトは並列ダウンロードされ、HTML パース後に実行されます。"
-
-#~ msgid ""
-#~ "Delay loading of all JavaScript until user interaction (scroll, click, "
-#~ "keypress, touch). Significantly improves initial page load metrics but "
-#~ "may cause a brief delay on first interaction."
-#~ msgstr ""
-#~ "ユーザー操作 (スクロール、クリック、キー入力、タッチ) まで JavaScript の読"
-#~ "み込みを遅延します。初期読み込み速度を大幅に改善しますが、最初の操作時に一"
-#~ "瞬の遅延が生じる場合があります。"
-
-#~ msgid ""
-#~ "Merge multiple Google Fonts API requests into a single request to reduce "
-#~ "external connections."
-#~ msgstr ""
-#~ "複数の Google Fonts API リクエストを1つに結合して外部接続数を削減します。"
-
-#~ msgid "Self-host Google Fonts"
-#~ msgstr "Google Fonts のセルフホスト"
-
-#~ msgid ""
-#~ "Download Google Fonts CSS and font files to your server and serve them "
-#~ "locally. Eliminates external connections to fonts.googleapis.com and "
-#~ "fonts.gstatic.com, improving privacy and reducing DNS lookups and "
-#~ "connection overhead."
-#~ msgstr ""
-#~ "Google Fonts の CSS とフォントファイルをサーバーにダウンロードしてローカル"
-#~ "から配信します。fonts.googleapis.com と fonts.gstatic.com への外部接続を排"
-#~ "除し、プライバシーの向上と DNS ルックアップ・接続オーバーヘッドの削減を実"
-#~ "現します。"
-
-#~ msgid "Google Fonts Display Swap"
-#~ msgstr "Google Fonts Display Swap"
-
-#~ msgid ""
-#~ "Add display=swap to Google Fonts URLs so text remains visible while web "
-#~ "fonts load (prevents FOIT)."
-#~ msgstr ""
-#~ "Google Fonts の URL に display=swap を追加し、Web フォント読み込み中もテキ"
-#~ "ストを表示します (FOIT 防止)。"
-
-#~ msgid ""
-#~ "Remove version query strings (?ver=) from CSS and JS file URLs. Improves "
-#~ "cacheability by CDNs and proxies that ignore query strings."
-#~ msgstr ""
-#~ "CSS と JS ファイル URL からバージョンクエリーストリング (?ver=) を削除しま"
-#~ "す。クエリーストリングを無視する CDN やプロキシでのキャッシュ効率が向上し"
-#~ "ます。"
-
-#~ msgid ""
-#~ "Serve optimized CSS/JS files via clean URLs (/_pc-static/) instead of "
-#~ "direct file paths. Uses WordPress rewrite rules for portability. Adds "
-#~ "long-lived Cache-Control headers (1 year, immutable) for optimal browser "
-#~ "caching. Flush permalinks after enabling."
-#~ msgstr ""
-#~ "最適化済み CSS/JS ファイルをファイルパスの代わりにクリーン URL (/_pc-"
-#~ "static/) で配信します。WordPress のリライトルールを使用します。ブラウザー"
-#~ "キャッシュを最適化する長期 Cache-Control ヘッダー (1年、immutable) を付与"
-#~ "します。有効化後にパーマリンクを更新してください。"
-
-#~ msgid "DNS Prefetch"
-#~ msgstr "DNS プリフェッチ"
-
-#~ msgid ""
-#~ "One domain per line. The browser resolves DNS for these domains early, "
-#~ "reducing latency for external resources."
-#~ msgstr ""
-#~ "1行に1ドメインを記入します。ブラウザーがこれらのドメインの DNS 解決を事前"
-#~ "に行い、外部リソースの遅延を低減します。"
-
-#~ msgid ""
-#~ "Add loading=\"lazy\" attribute to images below the fold. The first 2 "
-#~ "images are skipped to preserve above-the-fold LCP performance. Images "
-#~ "with fetchpriority=\"high\" are never lazy loaded."
-#~ msgstr ""
-#~ "ファーストビュー以下の画像に loading=\"lazy\" 属性を追加します。最初の 2枚"
-#~ "の画像は LCP パフォーマンスを維持するためスキップされます。"
-#~ "fetchpriority=\"high\" の画像は遅延読み込みされません。"
-
-#~ msgid ""
-#~ "One pattern per line. Images/iframes containing these strings will not be "
-#~ "lazy loaded."
-#~ msgstr ""
-#~ "1行に1パターンを記入します。これらの文字列を含む画像/iframe は遅延読み込み"
-#~ "されません。"
-
-#~ msgid "Format Conversion"
-#~ msgstr "フォーマット変換"
-
-#~ msgid ""
-#~ "Convert JPG/PNG to AVIF. Better compression than WebP (40-50% smaller) "
-#~ "but slower to encode. Requires PHP 8.1+ with GD or Imagick AVIF support."
-#~ msgstr ""
-#~ "JPG/PNG を AVIF に変換します。WebP より高い圧縮率 (40〜50% 小さい) ですが"
-#~ "エンコードが遅くなります。GD または Imagick の AVIF サポートを持つ PHP "
-#~ "8.1 以上が必要です。"
-
-#~ msgid "Auto-convert on Upload"
-#~ msgstr "アップロード時に自動変換"
-
-#~ msgid ""
-#~ "Automatically convert new images to the enabled formats (WebP/AVIF) when "
-#~ "uploaded. All thumbnail sizes are also converted."
-#~ msgstr ""
-#~ "アップロード時に新しい画像を有効なフォーマット (WebP/AVIF) に自動変換しま"
-#~ "す。すべてのサムネイルサイズも変換されます。"
-
-#~ msgid "Remove if Larger"
-#~ msgstr "元より大きい場合は削除"
-
-#~ msgid ""
-#~ "Automatically delete the converted file if it is larger than the "
-#~ "original. This can happen with small icons or already-optimized images."
-#~ msgstr ""
-#~ "変換後のファイルが元のファイルより大きい場合に自動削除します。小さなアイコ"
-#~ "ンやすでに最適化済みの画像で発生することがあります。"
-
-#~ msgid "Exclude PNG"
-#~ msgstr "PNG を除外"
-
-#~ msgid ""
-#~ "Do not convert PNG images. Useful if your PNGs contain transparency that "
-#~ "may not be preserved correctly."
-#~ msgstr ""
-#~ "PNG 画像を変換しません。透明度が正しく保持されない可能性がある PNG に使用"
-#~ "してください。"
-
-#~ msgid ""
-#~ "Remove EXIF metadata (camera model, GPS coordinates, timestamps) from "
-#~ "JPEG images on upload. Reduces file size and improves privacy."
-#~ msgstr ""
-#~ "アップロード時に JPEG 画像から EXIF メタデータ (カメラ機種、GPS 座標、撮影"
-#~ "日時) を除去します。ファイルサイズの削減とプライバシーの向上に役立ちます。"
-
-#~ msgid ""
-#~ "Automatically resize images that exceed the maximum dimensions on upload. "
-#~ "Prevents unnecessarily large images from being stored and served."
-#~ msgstr ""
-#~ "アップロード時に最大寸法を超える画像を自動リサイズします。不必要に大きな画"
-#~ "像が保存・配信されるのを防ぎます。"
-
-#~ msgid "Lossy (recommended)"
-#~ msgstr "非可逆 (推奨)"
-
-#~ msgid "Converter Engine"
-#~ msgstr "変換エンジン"
-
-#~ msgid "Auto (Imagick > GD)"
-#~ msgstr "自動 (Imagick 優先)"
-
-#~ msgid ".htaccess Rewrite (recommended)"
-#~ msgstr ".htaccess リライト (推奨)"
-
-#~ msgid "URL Rewrite (PHP)"
-#~ msgstr "URL リライト (PHP)"
-
-#~ msgid ""
-#~ ".htaccess: Apache serves the correct format via Accept header (fastest). "
-#~ "<picture>: Wraps images in HTML picture elements with source fallback. "
-#~ "URL Rewrite: Swaps src/srcset URLs in PHP output buffer."
-#~ msgstr ""
-#~ ".htaccess: Apache が Accept ヘッダーで正しいフォーマットを配信します (最"
-#~ "速)。<picture>: 画像を HTML picture 要素でラップしソースフォールバックを提"
-#~ "供します。URL リライト: PHP 出力バッファーで src/srcset URL を書き換えま"
-#~ "す。"
-
-#~ msgid ""
-#~ "Choose which folders to include for image conversion. Uploads is enabled "
-#~ "by default. Enable themes/plugins to convert images bundled with them."
-#~ msgstr ""
-#~ "画像変換の対象フォルダーを選択します。アップロードフォルダーはデフォルトで"
-#~ "有効です。テーマやプラグインに同梱されている画像を変換するには、それぞれを"
-#~ "有効にしてください。"
-
-#~ msgid "Custom Folders"
-#~ msgstr "カスタムフォルダー"
-
-#~ msgid ""
-#~ "Additional absolute paths to include (one per line). Use for custom "
-#~ "directories outside the standard WordPress structure."
-#~ msgstr ""
-#~ "対象に含める追加の絶対パスです (1行に1つ)。WordPress の標準構造外にあるカ"
-#~ "スタムディレクトリーに使用します。"
-
-#~ msgid ""
-#~ "One folder path per line. Images in these folders will not be converted, "
-#~ "even if they are inside an included folder above."
-#~ msgstr ""
-#~ "1行に1つのフォルダーパスを記入します。上の対象フォルダー内であっても、これ"
-#~ "らのフォルダー内の画像は変換されません。"
-
-#~ msgid "Exclude Folders"
-#~ msgstr "除外フォルダー"
-
-#~ msgid ""
-#~ "One folder path per line. Images in these folders will not be converted."
-#~ msgstr ""
-#~ "1行に1つのフォルダーパスを記入します。これらのフォルダー内の画像は変換され"
-#~ "ません。"
-
-#~ msgid "Bulk Optimization"
-#~ msgstr "一括最適化"
-
-#~ msgid "Scan Unconverted Images"
-#~ msgstr "未変換の画像をスキャン"
-
-#~ msgid "Scanning..."
-#~ msgstr "スキャン中..."
-
-#~ msgid "No images to convert"
-#~ msgstr "変換する画像はありません"
-
-#~ msgid "Processing..."
-#~ msgstr "処理中..."
-
-#~ msgid "Done!"
-#~ msgstr "完了！"
-
-#~ msgid "images processed."
-#~ msgstr "件の画像を処理しました。"
-
-#~ msgid "Not available"
-#~ msgstr "利用不可"
-
-#~ msgid "WebP Conversion"
-#~ msgstr "WebP 変換"
-
-#~ msgid "WebP Image Conversion"
-#~ msgstr "WebP 画像変換"
-
-#~ msgid ""
-#~ "Automatically create WebP copies of JPEG/PNG images on upload. WebP "
-#~ "versions are served to supported browsers, reducing image file sizes by "
-#~ "25-35% on average."
-#~ msgstr ""
-#~ "アップロード時に JPEG/PNG 画像の WebP コピーを自動作成します。対応ブラウ"
-#~ "ザーには WebP 版が配信され、画像ファイルサイズを平均 25〜35% 削減します。"
-
-#~ msgid "Requires GD or Imagick PHP extension with WebP support."
-#~ msgstr "WebP 対応の GD または Imagick PHP 拡張が必要です。"
-
-#~ msgid ""
-#~ "Compression quality for WebP output (1-100). Lower values produce smaller "
-#~ "files. 80 is recommended for a good balance of quality and size."
-#~ msgstr ""
-#~ "WebP 出力の圧縮品質 (1〜100) です。低い値ほどファイルサイズが小さくなりま"
-#~ "す。品質とサイズのバランスに 80 を推奨します。"
-
-#~ msgid ""
-#~ "Automatically purge Cloudflare cache when Prime Cache is cleared. "
-#~ "Supports full zone purge and per-URL purge (up to 30 URLs per API call, "
-#~ "batched automatically). Individual URL purges are queued and sent in a "
-#~ "single request on shutdown."
-#~ msgstr ""
-#~ "Prime Cache がクリアされたときに Cloudflare キャッシュを自動パージします。"
-#~ "ゾーン全体パージと URL 単位パージに対応しています (API 呼び出しあたり最大 "
-#~ "30 URL、自動バッチ処理)。個別の URL パージはキューに入れられ、シャットダウ"
-#~ "ン時に1回のリクエストで送信されます。"
-
-#~ msgid ""
-#~ "API Token (recommended): Create a custom token with \"Zone > Cache Purge "
-#~ "> Purge\" permission. Or use Global API Key with the email below. Can "
-#~ "also be set via PRIME_CACHE_CF_API_TOKEN constant."
-#~ msgstr ""
-#~ "API トークン (推奨): 「Zone > Cache Purge > Purge」権限のカスタムトークン"
-#~ "を作成してください。または下のメールアドレスとグローバル API キーを使用し"
-#~ "ます。PRIME_CACHE_CF_API_TOKEN 定数でも設定できます。"
-
-#~ msgid "Replace YouTube Iframes with Thumbnails"
-#~ msgstr "YouTube iframe をサムネイルに置換"
-
-#~ msgid ""
-#~ "Replace YouTube embed iframes with a lightweight thumbnail image and play "
-#~ "button. The actual video player loads only when clicked, saving 500KB-1MB "
-#~ "per embed on initial page load."
-#~ msgstr ""
-#~ "YouTube 埋め込み iframe を軽量なサムネイル画像と再生ボタンに置換します。実"
-#~ "際の動画プレーヤーはクリック時にのみ読み込まれ、埋め込みあたり 500KB〜1MB "
-#~ "の初期読み込みを削減します。"
-
-#~ msgid ""
-#~ "Upload a previously exported Prime Cache settings JSON file. This will "
-#~ "overwrite all current settings."
-#~ msgstr ""
-#~ "以前エクスポートした Prime Cache 設定の JSON ファイルをアップロードしま"
-#~ "す。現在のすべての設定が上書きされます。"
-
-#~ msgid "Import will overwrite all current settings. Continue?"
-#~ msgstr "インポートすると現在のすべての設定が上書きされます。続行しますか？"
-
-#~ msgid ""
-#~ "Force browsers to use HTTPS for all future connections. Only enable if "
-#~ "your site fully supports HTTPS. Includes includeSubDomains and preload "
-#~ "directives."
-#~ msgstr ""
-#~ "すべての接続にブラウザーが HTTPS を使用するよう強制します。サイトが HTTPS "
-#~ "に完全対応している場合のみ有効にしてください。includeSubDomains と "
-#~ "preload ディレクティブを含みます。"
-
-#~ msgid "HSTS Max-Age (seconds)"
-#~ msgstr "HSTS Max-Age (秒)"
-
-#~ msgid ""
-#~ "Add X-Content-Type-Options (nosniff), X-Frame-Options (SAMEORIGIN), X-XSS-"
-#~ "Protection, Referrer-Policy, and Permissions-Policy headers. Protects "
-#~ "against clickjacking, MIME-type sniffing, and XSS attacks."
-#~ msgstr ""
-#~ "X-Content-Type-Options (nosniff)、X-Frame-Options (SAMEORIGIN)、X-XSS-"
-#~ "Protection、Referrer-Policy、Permissions-Policy ヘッダーを追加します。ク"
-#~ "リックジャッキング、MIME タイプスニッフィング、XSS 攻撃から保護します。"
-
-#~ msgid ""
-#~ "Log cache operations (HIT, MISS, PURGE) to wp-content/cache/prime-cache/"
-#~ "debug.log. Useful for troubleshooting. Disable in production as it "
-#~ "increases disk I/O."
-#~ msgstr ""
-#~ "キャッシュ操作 (HIT、MISS、PURGE) を wp-content/cache/prime-cache/"
-#~ "debug.log に記録します。トラブルシューティングに有用です。ディスク I/O が"
-#~ "増加するため本番環境では無効にしてください。"
-
-#~ msgid ""
-#~ "Remove wp-embed.min.js and oEmbed discovery links. Prevents other sites "
-#~ "from embedding your content and removes ~6 KB of JavaScript."
-#~ msgstr ""
-#~ "wp-embed.min.js と oEmbed ディスカバリーリンクを削除します。他のサイトによ"
-#~ "るコンテンツの埋め込みを防止し、約 6 KB の JavaScript を削減します。"
-
-#~ msgid ""
-#~ "Remove the WordPress version meta tag and header. Minor security "
-#~ "improvement — prevents version fingerprinting."
-#~ msgstr ""
-#~ "WordPress バージョンの meta タグとヘッダーを削除します。バージョンの特定を"
-#~ "防ぐ軽微なセキュリティー改善です。"
-
-#~ msgid ""
-#~ "Disable the XML-RPC API and remove the X-Pingback header. XML-RPC is a "
-#~ "legacy interface often targeted by brute-force attacks. Not needed if you "
-#~ "use the REST API."
-#~ msgstr ""
-#~ "XML-RPC API を無効化し、X-Pingback ヘッダーを削除します。XML-RPC はブルー"
-#~ "トフォース攻撃の標的となるレガシーインターフェースです。REST API を使用し"
-#~ "ている場合は不要です。"
-
-#~ msgid ""
-#~ "Remove wp-block-library and wp-block-library-theme stylesheets. Use only "
-#~ "if you are using the Classic Editor and not using any Gutenberg blocks."
-#~ msgstr ""
-#~ "wp-block-library と wp-block-library-theme スタイルシートを削除します。ク"
-#~ "ラシックエディターを使用しており、Gutenberg ブロックを使用していない場合の"
-#~ "み使用してください。"
-
-#~ msgid ""
-#~ "Disable WooCommerce CSS and JavaScript on non-WooCommerce pages (product "
-#~ "pages, cart, checkout, and account pages are excluded). Saves ~100 KB+ on "
-#~ "regular blog/pages."
-#~ msgstr ""
-#~ "WooCommerce 以外のページ (商品ページ、カート、購入手続き、マイアカウントは"
-#~ "除外) で WooCommerce の CSS と JavaScript を無効化します。通常のブログや"
-#~ "ページで 100 KB 以上を節約します。"
-
-#~ msgid "Local Google Analytics"
-#~ msgstr "Google Analytics のローカルホスト"
-
-#~ msgid ""
-#~ "Download gtag.js, analytics.js, and gtm.js to your server and serve them "
-#~ "locally. Eliminates external connections to Google domains and improves "
-#~ "PageSpeed scores. Files are refreshed every 24 hours."
-#~ msgstr ""
-#~ "gtag.js、analytics.js、gtm.js をサーバーにダウンロードしてローカルから配信"
-#~ "します。Google ドメインへの外部接続を排除し、PageSpeed スコアを改善しま"
-#~ "す。ファイルは 24時間ごとに更新されます。"
-
-#~ msgid "Preload URLs"
-#~ msgstr "プリロード URL"
-
-#~ msgid ""
-#~ "One URL per line. These resources will be injected as <link "
-#~ "rel=\"preload\"> in the HTML head. The browser downloads them with high "
-#~ "priority before they are discovered in the page. The resource type (font, "
-#~ "style, script, image) is auto-detected from the file extension. Use for "
-#~ "critical fonts, above-the-fold CSS, or hero images."
-#~ msgstr ""
-#~ "1行に1つの URL を記入します。これらのリソースは HTML の head に <link "
-#~ "rel=\"preload\"> として注入されます。ブラウザーがページ内で検出する前に高"
-#~ "い優先度でダウンロードします。リソースの種類 (フォント、スタイル、スクリプ"
-#~ "ト、画像) はファイル拡張子から自動検出されます。重要なフォント、ファースト"
-#~ "ビューの CSS、ヒーロー画像に使用してください。"
-
-#~ msgid "Database cleanup complete. %s items processed."
-#~ msgstr "データベースのクリーンアップが完了しました。%s 件を処理しました。"
-
-#~ msgid ""
-#~ "Run OPTIMIZE TABLE on non-InnoDB tables with fragmented space. Reclaims "
-#~ "unused space and defragments the data file. InnoDB tables are skipped as "
-#~ "they handle fragmentation internally."
-#~ msgstr ""
-#~ "断片化された領域がある非 InnoDB テーブルに対して OPTIMIZE TABLE を実行しま"
-#~ "す。未使用領域を回収し、データファイルの断片化を解消します。InnoDB テーブ"
-#~ "ルは内部的に断片化を処理するためスキップされます。"
-
-#~ msgid "Run database cleanup now? This cannot be undone."
-#~ msgstr ""
-#~ "データベースのクリーンアップを今すぐ実行しますか？この操作は取り消せませ"
-#~ "ん。"
-
-#~ msgid ""
-#~ "Clear related caches when a post, page, or custom post type is published "
-#~ "or updated. Purges the post URL, home page, archives, taxonomy pages, and "
-#~ "date archives."
-#~ msgstr ""
-#~ "投稿、固定ページ、カスタム投稿タイプが公開または更新されたときに、関連する"
-#~ "キャッシュをクリアします。投稿 URL、ホーム、アーカイブ、タクソノミーペー"
-#~ "ジ、日付アーカイブが対象です。"
-
-#~ msgid ""
-#~ "Clear the post page cache when a comment is posted, approved, edited, "
-#~ "trashed, or deleted."
-#~ msgstr ""
-#~ "コメントの投稿・承認・編集・ゴミ箱移動・削除時に、該当する投稿ページの"
-#~ "キャッシュをクリアします。"
-
-#~ msgid ""
-#~ "Clear the term archive and home page when a category, tag, or custom "
-#~ "taxonomy term is created, edited, or deleted."
-#~ msgstr ""
-#~ "カテゴリー、タグ、カスタムタクソノミーのタームが作成・編集・削除されたとき"
-#~ "に、タームアーカイブとホームページのキャッシュをクリアします。"
-
-#~ msgid ""
-#~ "Convert <link rel=\"stylesheet\"> tags to non-render-blocking loading via "
-#~ "media=\"print\" + onload swap. Eliminates render-blocking CSS at the cost "
-#~ "of a brief unstyled flash. Use the \"Excluded CSS Files\" list above for "
-#~ "stylesheets that must remain render-blocking. Pro users get more "
-#~ "sophisticated CSS delivery options (Critical CSS, Remove Unused CSS) and "
-#~ "should leave this off."
-#~ msgstr ""
-#~ "<link rel=\"stylesheet\"> タグを media=\"print\" + onload 切り替え方式に変"
-#~ "換し、レンダリングをブロックしない読み込みに変更します。レンダリングブロッ"
-#~ "ク CSS を排除できますが、スタイル無しの瞬間的なちらつきが発生する場合があ"
-#~ "ります。レンダリングブロックを維持したい CSS は上の「除外する CSS ファイ"
-#~ "ル」に追加してください。Pro 版では Critical CSS や Remove Unused CSS な"
-#~ "ど、より高度な CSS 配信オプションが利用できるため、本オプションは無効のま"
-#~ "まにしてください。"
-
-#~ msgid ""
-#~ "Clear the author archive page and home page when a user profile is "
-#~ "updated or a user is deleted."
-#~ msgstr ""
-#~ "ユーザープロフィールが更新されたとき、またはユーザーが削除されたときに、投"
-#~ "稿者アーカイブページとホームページのキャッシュをクリアします。"
-
-#~ msgid ""
-#~ "Good performance with low risk. Adds HTML/CSS/JS minification, DNS "
-#~ "prefetch, link prefetching, emoji removal, and .htaccess optimization on "
-#~ "top of Safe settings."
-#~ msgstr ""
-#~ "低リスクで良好なパフォーマンスを実現します。安全プリセットの設定に加え、"
-#~ "HTML/CSS/JS の圧縮、DNS プリフェッチ、リンクプリフェッチ、絵文字の無効"
-#~ "化、.htaccess 最適化を追加します。"
-
-#~ msgid ""
-#~ "Maximum performance. Adds CSS/JS combining, defer/delay JS, async CSS, "
-#~ "critical CSS auto-generation, and preloading. May require testing and "
-#~ "exclusion rules for compatibility."
-#~ msgstr ""
-#~ "パフォーマンスを最大化します。CSS/JS の結合、JS の遅延読み込み/遅延実行、"
-#~ "非同期 CSS、クリティカル CSS の自動生成、プリロードを追加します。互換性の"
-#~ "ためにテストや除外ルールが必要な場合があります。"
-
-#~ msgid "Apply the \"%s\" preset? This will overwrite your current settings."
-#~ msgstr "「%s」プリセットを適用しますか？ 現在の設定は上書きされます。"
-
-#~ msgid ""
-#~ "Redis object cache not enabled: the Redis PHP extension is not installed."
-#~ msgstr ""
-#~ "Redis オブジェクトキャッシュを有効化できません。Redis PHP 拡張がインストー"
-#~ "ルされていません。"
-
-#~ msgid ""
-#~ "Memcached object cache not enabled: the Memcached PHP extension is not "
-#~ "installed."
-#~ msgstr ""
-#~ "Memcached オブジェクトキャッシュを有効化できません。Memcached PHP 拡張がイ"
-#~ "ンストールされていません。"
-
-#~ msgid ""
-#~ "APCu object cache not enabled: the APCu PHP extension is not installed."
-#~ msgstr ""
-#~ "APCu オブジェクトキャッシュを有効化できません。APCu PHP 拡張がインストール"
-#~ "されていません。"
-
-#~ msgid ""
-#~ "Scan your media library for images that have not yet been converted to "
-#~ "WebP/AVIF and process them in batches. Statistics are based on a sample "
-#~ "of up to 1,000 images."
-#~ msgstr ""
-#~ "メディアライブラリをスキャンして、まだ WebP/AVIF に変換されていない画像を"
-#~ "バッチ処理します。統計は最大 1,000 件のサンプルに基づいています。"
-
-#~ msgid ""
-#~ "advanced-cache.php is managed by another plugin. Prime Cache page caching "
-#~ "will not work until the other plugin is deactivated."
-#~ msgstr ""
-#~ "advanced-cache.php は別のプラグインによって管理されています。そのプラグイ"
-#~ "ンを無効化するまで Prime Cache のページキャッシュは動作しません。"
-
-#~ msgid "Note:"
-#~ msgstr "注意:"
-
-#~ msgid ""
-#~ "Vary Cookies are active. Preloading warms only the default cookie variant "
-#~ "for each URL. Cookie-specific variants (e.g. currency, country) are "
-#~ "generated on the first real visitor request."
-#~ msgstr ""
-#~ "Cookie 別キャッシュ振り分けが有効です。プリロードは各 URL のデフォルトバリ"
-#~ "アントのみをウォームアップします。Cookie 固有のバリアント (通貨、国など) "
-#~ "は最初の実際の訪問者リクエスト時に生成されます。"
-
-#~ msgid "Enable Format Conversion"
-#~ msgstr "フォーマット変換を有効化"
-
-#~ msgid ""
-#~ "Master switch for all image format conversion features (WebP, AVIF, auto-"
-#~ "convert, delivery, bulk optimization). Disable to turn off all conversion "
-#~ "at once without losing individual settings."
-#~ msgstr ""
-#~ "すべての画像フォーマット変換機能 (WebP、AVIF、自動変換、配信方法、一括最適"
-#~ "化) のマスタースイッチです。個別設定を失うことなく、すべての変換を一括でオ"
-#~ "フにできます。"
-
-#~ msgid ""
-#~ "Cache preloading scheduled (default variant only). Cookie-specific "
-#~ "variants will be generated on first visitor request."
-#~ msgstr ""
-#~ "キャッシュのプリロードがスケジュールされました (デフォルトバリアントの"
-#~ "み)。Cookie 固有のバリアントは最初の訪問者リクエスト時に生成されます。"
-
-#~ msgid ""
-#~ "URL path patterns to skip during preloading (one per line). Supports "
-#~ "simple patterns with pipe (|) for alternatives. These pages will not be "
-#~ "crawled by the preloader."
-#~ msgstr ""
-#~ "プリロード時にスキップする URL パスパターンです (1行に1つ)。パイプ (|) に"
-#~ "よる代替パターンに対応しています。これらのページはプリローダーがクロールし"
-#~ "ません。"
-
-#~ msgid "Convert JPG/PNG to WebP. Reduces file size by 25-35%."
-#~ msgstr "JPG/PNG を WebP に変換します。ファイルサイズを 25〜35% 削減します。"
-
-#~ msgid "Uploads"
-#~ msgstr "アップロード"
-
-#~ msgid "Themes"
-#~ msgstr "テーマ"
-
-#~ msgid "Plugins"
-#~ msgstr "プラグイン"
-
-#~ msgid "Images Cache Lifetime"
-#~ msgstr "画像のキャッシュ期間"
-
-#~ msgid ""
-#~ "Removes unused CSS per page (URL-specific). Can significantly reduce page "
-#~ "size but may break layouts on pages with dynamic content, JS-injected "
-#~ "classes, or complex selectors. Add affected selectors to the safelist "
-#~ "below if issues occur. Test thoroughly on all page types!"
-#~ msgstr ""
-#~ "ページごとに未使用 CSS を削除します (URL 単位)。ページサイズを大幅に削減で"
-#~ "きますが、動的コンテンツ、JavaScript で挿入されるクラス、複雑なセレクター"
-#~ "を使用するページでレイアウトが崩れる場合があります。問題が発生した場合は下"
-#~ "のセーフリストに該当するセレクターを追加してください。すべてのページタイプ"
-#~ "で十分にテストしてください。"
-
-#~ msgid ""
-#~ "CSS selectors and file patterns that should never be removed (one per "
-#~ "line). Add selectors for elements that appear via JavaScript interaction "
-#~ "(modals, dropdowns, tabs, accordions), AJAX-loaded content, or hover/"
-#~ "focus states. Common examples: .modal, .dropdown-menu, .tab-"
-#~ "content, .accordion, .wp-block-*."
-#~ msgstr ""
-#~ "削除しない CSS セレクターとファイルパターンです (1行に1つ)。JavaScript の"
-#~ "操作で表示される要素 (モーダル、ドロップダウン、タブ、アコーディオン)、"
-#~ "AJAX で読み込まれるコンテンツ、hover/focus 状態のセレクターを追加してくだ"
-#~ "さい。一般的な例: .modal, .dropdown-menu, .tab-content, .accordion, .wp-"
-#~ "block-*。"
-
-#~ msgid ""
-#~ "Prime Cache Pro adds Varnish cache purging and Sucuri firewall sync for "
-#~ "enterprise hosting environments."
-#~ msgstr ""
-#~ "Prime Cache Pro では Varnish キャッシュパージと Sucuri ファイアウォール同"
-#~ "期が追加され、エンタープライズホスティング環境に対応します。"
-
-#~ msgid ""
-#~ "Prime Cache Pro adds Combine CSS/JS, Remove Unused CSS, Critical CSS "
-#~ "generation, Async CSS Delivery, and local Google Analytics hosting."
-#~ msgstr ""
-#~ "Prime Cache Pro では CSS/JS 結合、未使用 CSS 削除、Critical CSS 自動生成、"
-#~ "CSS 非同期配信、Google Analytics ローカルホスティングが追加されます。"
-
-#~ msgid ""
-#~ "Prime Cache Pro adds WebP and AVIF image conversion, bulk media library "
-#~ "optimization, and YouTube thumbnail replacement."
-#~ msgstr ""
-#~ "Prime Cache Pro では WebP/AVIF 画像変換、メディアライブラリの一括最適化、"
-#~ "YouTube サムネイル置換が追加されます。"
-
-#~ msgid ""
-#~ "Prime Cache Pro adds Sitemap Preloading, Speculation Rules API, Font "
-#~ "Preloading, LCP Optimization, DNS Prefetch, and Preconnect."
-#~ msgstr ""
-#~ "Prime Cache Pro ではサイトマッププリロード、Speculation Rules API、フォン"
-#~ "トプリロード、LCP 最適化、DNS Prefetch、Preconnect が追加されます。"
-
-# ── Missing translations (2026-04-02) ──────────────────
-#~ msgid "AVIF Conversion"
-#~ msgstr "AVIF 変換"
-
-#~ msgid ""
-#~ "Add Cache-Control headers to cached responses. HTML headers are applied "
-#~ "by the PHP drop-in. CSS, JS, image, and font headers require .htaccess "
-#~ "Optimization to be enabled."
-#~ msgstr ""
-#~ "キャッシュ済みレスポンスに Cache-Control ヘッダーを追加します。HTML ヘッ"
-#~ "ダーは PHP ドロップインが適用します。CSS、JS、画像、フォントのヘッダー"
-#~ "は .htaccess 最適化の有効化が必要です。"
-
-#~ msgid ""
-#~ "Add the defer attribute to enqueued scripts (wp_enqueue_script) to "
-#~ "eliminate render-blocking JavaScript. Scripts are downloaded in parallel "
-#~ "and executed after HTML parsing. Manually inserted scripts in theme "
-#~ "templates are not affected."
-#~ msgstr ""
-#~ "エンキューされたスクリプト (wp_enqueue_script) に defer 属性を追加し、レン"
-#~ "ダリングブロック JavaScript を排除します。スクリプトは並列ダウンロードさ"
-#~ "れ、HTML パース後に実行されます。テーマテンプレートに直接挿入されたスクリ"
-#~ "プトには影響しません。"
-
-#~ msgid "Analyze each page and strip CSS rules that are never used."
-#~ msgstr "各ページを解析し、使用されていない CSS ルールを削除します。"
-
-#~ msgid "Async CSS Delivery"
-#~ msgstr "CSS 非同期配信"
-
-#~ msgid "Auto-convert images to WebP on upload. 25-80% smaller files."
-#~ msgstr ""
-#~ "アップロード時に画像を WebP に自動変換。ファイルサイズを 25〜80% 削減。"
-
-#~ msgid "Auto-detect and preload @font-face fonts used above the fold."
-#~ msgstr ""
-#~ "ファーストビューで使用される @font-face フォントを自動検出してプリロードし"
-#~ "ます。"
-
-#~ msgid "Auto-generate above-the-fold CSS for instant first paint."
-#~ msgstr "ファーストビュー用の CSS を自動生成し、即座に初回描画します。"
-
-#~ msgid "Auto-purge Varnish reverse proxy when content changes."
-#~ msgstr "コンテンツ変更時に Varnish リバースプロキシを自動パージします。"
-
-#~ msgid "Batch convert your entire media library in one click."
-#~ msgstr "メディアライブラリ全体をワンクリックで一括変換します。"
-
-#~ msgid "Chrome prerendering for instant page navigation."
-#~ msgstr "Chrome プリレンダリングによる瞬時のページ遷移。"
-
-#~ msgid "Clear Sucuri firewall cache via API on content update."
-#~ msgstr ""
-#~ "コンテンツ更新時に API 経由で Sucuri ファイアウォールキャッシュをクリアし"
-#~ "ます。"
-
-#~ msgid "Combine JavaScript"
-#~ msgstr "JavaScript 結合"
-
-#~ msgid "Critical CSS"
-#~ msgstr "Critical CSS"
-
-#~ msgid ""
-#~ "Delay between each preload request. Higher values reduce server load but "
-#~ "take longer to complete. Preloading automatically pauses if server load "
-#~ "is too high (exceeds 80% of CPU core count, or load spike detected)."
-#~ msgstr ""
-#~ "各プリロードリクエスト間の遅延。値を大きくするとサーバー負荷は減りますが、"
-#~ "完了までの時間が長くなります。サーバー負荷が高すぎる場合 (CPU コア数の "
-#~ "80% を超える、または負荷スパイク検出時) はプリロードが自動的に一時停止しま"
-#~ "す。"
-
-#~ msgid ""
-#~ "Delay between each preload batch. Each batch sends up to 10 URLs in "
-#~ "sequence, then waits this many seconds before the next batch via WP-Cron. "
-#~ "Higher values reduce server load but take longer to complete. Preloading "
-#~ "automatically pauses if server load is too high (exceeds 80% of CPU core "
-#~ "count, or load spike detected)."
-#~ msgstr ""
-#~ "各プリロードバッチ間の遅延。1 バッチで最大 10 URL を連続送信し、その後この"
-#~ "秒数だけ待機してから WP-Cron で次のバッチを実行します。値を大きくすると"
-#~ "サーバー負荷は減りますが、完了までの時間が長くなります。サーバー負荷が高す"
-#~ "ぎる場合 (CPU コア数の 80% を超える、または負荷スパイク検出時) はプリロー"
-#~ "ドが自動的に一時停止します。"
-
-#~ msgid ""
-#~ "Delay loading of enqueued JavaScript (wp_enqueue_script) until user "
-#~ "interaction (scroll, click, keydown, touchstart, mousemove). Applied on "
-#~ "mobile devices only to avoid CLS regression on desktop. Separate mobile "
-#~ "cache is automatically enabled when this setting is on. Significantly "
-#~ "improves mobile page load metrics but may cause a brief delay on first "
-#~ "interaction."
-#~ msgstr ""
-#~ "エンキューされた JavaScript (wp_enqueue_script) の読み込みをユーザー操作 "
-#~ "(スクロール、クリック、キー入力、タッチ、マウス移動) まで遅延します。デス"
-#~ "クトップの CLS 悪化を避けるため、モバイルデバイスのみに適用されます。この"
-#~ "設定が有効な場合、モバイル別キャッシュが自動的に有効化されます。モバイルの"
-#~ "ページ読み込み指標を大幅に改善しますが、初回操作時にわずかな遅延が生じる場"
-#~ "合があります。"
-
-#~ msgid ""
-#~ "Delay all <script> tags in the HTML output (external, inline, and CDN — "
-#~ "not just wp_enqueue_script handles) until user interaction (scroll, "
-#~ "click, keydown, touchstart, mousemove). Applied on mobile devices only to "
-#~ "avoid CLS regression on desktop. Separate mobile cache is automatically "
-#~ "enabled when this setting is on. Significantly improves mobile page load "
-#~ "metrics but may cause a brief delay on first interaction. Use the "
-#~ "exclusion list below for scripts that must run before interaction."
-#~ msgstr ""
-#~ "HTML 出力中のすべての <script> タグ (外部・インライン・CDN を含み、"
-#~ "wp_enqueue_script ハンドルに限定しません) をユーザー操作 (スクロール、ク"
-#~ "リック、キー入力、タッチ、マウス移動) まで遅延します。デスクトップの CLS "
-#~ "悪化を避けるため、モバイルデバイスのみに適用されます。この設定が有効な場"
-#~ "合、モバイル別キャッシュが自動的に有効化されます。モバイルのページ読み込み"
-#~ "指標を大幅に改善しますが、初回操作時にわずかな遅延が生じる場合があります。"
-#~ "操作前に実行が必要なスクリプトは下の除外リストに登録してください。"
-
-#~ msgid "Discover and warm all URLs from your XML sitemap."
-#~ msgstr ""
-#~ "XML サイトマップからすべての URL を検出してキャッシュを事前生成します。"
-
-#~ msgid "Early DNS resolution for external domains."
-#~ msgstr "外部ドメインの DNS を事前解決します。"
-
-#~ msgid "Full DNS + TCP + TLS handshake in advance."
-#~ msgstr "DNS + TCP + TLS ハンドシェイクを事前に完了します。"
-
-#~ msgid "Host analytics scripts locally. Eliminates external connections."
-#~ msgstr "アナリティクススクリプトをローカルでホスト。外部接続を排除します。"
-
-#~ msgid ""
-#~ "How long until cache files are automatically discarded. Expired caches "
-#~ "are regenerated on the next visit and cleaned up hourly by WP-Cron. Set "
-#~ "to 0 for unlimited (purge only on post updates, comments, and term "
-#~ "changes). For frequently updated news sites, use 1-6 hours. For less "
-#~ "active sites, use 1-7 days or unlimited. Note: When .htaccess "
-#~ "Optimization is enabled, Apache serves cached files directly and cannot "
-#~ "check file age. Expired files may continue to be served until the next WP-"
-#~ "Cron cleanup (runs hourly)."
-#~ msgstr ""
-#~ "キャッシュファイルが自動的に破棄されるまでの時間。期限切れのキャッシュは次"
-#~ "のアクセス時に再生成され、WP-Cron により毎時クリーンアップされます。0 に設"
-#~ "定すると無制限 (投稿更新、コメント、タームの変更時のみパージ)。頻繁に更新"
-#~ "されるニュースサイトには 1〜6 時間、更新が少ないサイトには 1〜7 日または無"
-#~ "制限を推奨します。注意: .htaccess 最適化が有効な場合、Apache はキャッシュ"
-#~ "ファイルを直接配信するため、ファイルの有効期限をチェックできません。期限切"
-#~ "れファイルは次の WP-Cron クリーンアップ (毎時実行) まで配信され続ける場合"
-#~ "があります。"
-
-#~ msgid ""
-#~ "How long until cache files are automatically discarded. Expired caches "
-#~ "are regenerated on the next visit and cleaned up hourly by WP-Cron. Set "
-#~ "to 0 for unlimited — caches then persist until invalidated by an enabled "
-#~ "Auto Purge trigger (Auto Purge tab) or a manual \"Clear Cache\". For "
-#~ "frequently updated news sites, use 1-6 hours. For less active sites, use "
-#~ "1-7 days or unlimited. Note: When .htaccess Optimization is enabled, "
-#~ "Apache serves cached files directly and cannot check file age. Expired "
-#~ "files may continue to be served until the next WP-Cron cleanup (runs "
-#~ "hourly)."
-#~ msgstr ""
-#~ "キャッシュファイルが自動的に破棄されるまでの時間。期限切れのキャッシュは次"
-#~ "のアクセス時に再生成され、WP-Cron により毎時クリーンアップされます。0 に設"
-#~ "定すると無制限 — その場合、キャッシュは有効化された Auto Purge トリガー "
-#~ "(Auto Purge タブ) または手動の「Clear Cache」によって無効化されるまで保持"
-#~ "されます。頻繁に更新されるニュースサイトには 1〜6 時間、更新が少ないサイト"
-#~ "には 1〜7 日または無制限を推奨します。注意: .htaccess 最適化が有効な場合、"
-#~ "Apache はキャッシュファイルを直接配信するため、ファイルの有効期限をチェッ"
-#~ "クできません。期限切れファイルは次の WP-Cron クリーンアップ (毎時実行) ま"
-#~ "で配信され続ける場合があります。"
-
-#~ msgid "Load stylesheets without blocking page rendering."
-#~ msgstr "ページレンダリングをブロックせずにスタイルシートを読み込みます。"
-
-#~ msgid "Merge JS files into one request. Reduces connection overhead."
-#~ msgstr ""
-#~ "JS ファイルを 1 つのリクエストに結合。接続オーバーヘッドを削減します。"
-
-#~ msgid "Merge multiple CSS files into a single file to reduce HTTP requests."
-#~ msgstr "複数の CSS ファイルを 1 つに結合して HTTP リクエストを削減します。"
-
-#~ msgid "Next-gen image format with even better compression than WebP."
-#~ msgstr "WebP よりさらに優れた圧縮率の次世代画像フォーマット。"
-
-#~ msgid "Preload hero images with fetchpriority=high for faster LCP."
-#~ msgstr ""
-#~ "fetchpriority=high でヒーロー画像をプリロードし、LCP を高速化します。"
-
-#~ msgid "Prime Cache Pro"
-#~ msgstr "Prime Cache Pro"
-
-#~ msgid "Replace iframes with lightweight thumbnails. Save 500KB+ per embed."
-#~ msgstr "iframe を軽量サムネイルに置換。埋め込みごとに 500KB 以上を節約。"
-
-#~ msgid ""
-#~ "Serve optimized CSS/JS files via clean URLs (/_pc-static/) instead of "
-#~ "direct file paths. Uses WordPress rewrite rules for portability. Adds "
-#~ "long-lived Cache-Control headers (1 year, immutable) for optimal browser "
-#~ "caching. Permalinks are flushed automatically when this setting is "
-#~ "changed."
-#~ msgstr ""
-#~ "最適化された CSS/JS ファイルを直接ファイルパスではなくクリーン URL (/_pc-"
-#~ "static/) で配信します。WordPress リライトルールを使用して移植性を確保しま"
-#~ "す。最適なブラウザーキャッシュのために長期間の Cache-Control ヘッダー (1 "
-#~ "年、immutable) を追加します。この設定が変更されるとパーマリンクが自動的に"
-#~ "フラッシュされます。"
-
-#~ msgid "Speculation Rules API"
-#~ msgstr "Speculation Rules API"
-
-#~ msgid "Sucuri Firewall Sync"
-#~ msgstr "Sucuri ファイアウォール同期"
-
-#~ msgid "Varnish Cache Purging"
-#~ msgstr "Varnish キャッシュパージ"
-
-#~ msgid "YouTube Thumbnails"
-#~ msgstr "YouTube サムネイル"
-
-#~ msgid "Unlock with Prime Cache Pro"
-#~ msgstr "Prime Cache Pro でロック解除"
-
-#~ msgid ""
-#~ "These exclusion patterns were dropped because the value was too long "
-#~ "(over 512 chars), empty after sanitization, or did not compile as a "
-#~ "regex: %s. Saved value is empty for these fields — open the field, fix "
-#~ "the pattern, and save again."
-#~ msgstr ""
-#~ "次の除外パターンは、値が長すぎる (512 文字超) か、サニタイズ後に空になった"
-#~ "か、正規表現としてコンパイルできなかったため破棄されました: %s。これらの"
-#~ "フィールドには空の値が保存されています — フィールドを開いてパターンを修正"
-#~ "してから再保存してください。"
