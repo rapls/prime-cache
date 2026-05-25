@@ -352,7 +352,11 @@ class Prime_Cache_Admin_Settings {
 			$htaccess_was_on = ! empty( $old['htaccess_enabled'] );
 			$htaccess_now_on = ! empty( $s['htaccess_enabled'] );
 			if ( $htaccess_now_on ) {
-				$rules_dirty = false;
+				// In the free plugin, always regenerate so the .htaccess can never
+				// retain stale add-on rules (e.g. an AVIF rewrite) that a previous
+				// state may have written — the old-vs-new comparison can't detect a
+				// mismatch that lives only in the file. Pro uses change detection.
+				$rules_dirty = ! prime_cache_is_pro();
 				foreach ( $htaccess_keys as $k ) {
 					if ( ( $old[ $k ] ?? null ) !== ( $s[ $k ] ?? null ) ) {
 						$rules_dirty = true;
