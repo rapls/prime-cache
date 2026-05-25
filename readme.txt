@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.1
+Stable tag: 1.10.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -245,6 +245,9 @@ On upload (if auto-convert is enabled), JPG/PNG images are converted to WebP and
 Start with page caching and basic file optimization. Test your site after each change. CSS/JS combining and delay may cause issues with some themes/plugins — test thoroughly.
 
 == Changelog ==
+
+= 1.10.2 =
+* Improved: Reworded the Pro add-on information shown in the settings screen — neutral, informational phrasing (e.g. "Available in Prime Cache Pro", "Learn more about Prime Cache Pro") in place of upgrade/unlock prompts, and a single, low-key link on the add-on information tab. No change to the free feature set.
 
 = 1.10.1 =
 * Security: The .htaccess fast-path now rejects path-traversal sequences ("..") in the request URI.
