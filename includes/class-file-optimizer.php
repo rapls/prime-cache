@@ -90,9 +90,13 @@ class Prime_Cache_File_Optimizer {
 	 * @return string|false Normalized URI, or false if request has unknown query params.
 	 */
 	public function get_normalized_cache_uri() {
-		$uri  = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '/';
+		$uri  = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
 		$path = strtok( $uri, '?' );
 
+		// This computes the page-cache key from the current request on every
+		// front-end hit; it is not form processing, so no nonce applies. Only
+		// query-string keys are inspected here (values are not output).
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( empty( $_GET ) ) {
 			return $path;
 		}
@@ -101,6 +105,7 @@ class Prime_Cache_File_Optimizer {
 		$ignored    = array_filter( array_map( 'trim', explode( ',', $s['cache_ignore_qs'] ?? '' ) ) );
 		$cached_qs  = array_filter( array_map( 'trim', explode( ',', $s['cache_query_strings'] ?? '' ) ) );
 		$remaining  = array_diff_key( $_GET, array_flip( $ignored ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( empty( $remaining ) ) {
 			return $path; // All params were ignored — same as no query.
@@ -203,7 +208,7 @@ class Prime_Cache_File_Optimizer {
 		// and is filterable, which would let a desktop-rendered HTML land in the
 		// mobile bucket on a webOS visitor or vice versa.
 		require_once PRIME_CACHE_PATH . 'includes/cache-key-functions.php';
-		$is_mobile = _prime_cache_is_mobile_ua( $_SERVER['HTTP_USER_AGENT'] ?? '' );
+		$is_mobile = _prime_cache_is_mobile_ua( sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ) );
 
 		// Wrap inline jQuery scripts with DOMContentLoaded so jQuery can be deferred.
 		// Mobile only — on desktop jQuery is synchronous (not deferred) and inline
@@ -696,7 +701,7 @@ class Prime_Cache_File_Optimizer {
 		// puts in the mobile bucket (otherwise a desktop-defer'd script set could
 		// be served to a mobile UA the dropin already cached as "mobile").
 		require_once PRIME_CACHE_PATH . 'includes/cache-key-functions.php';
-		$is_mobile = _prime_cache_is_mobile_ua( $_SERVER['HTTP_USER_AGENT'] ?? '' );
+		$is_mobile = _prime_cache_is_mobile_ua( sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ) );
 		if ( ! $is_mobile ) {
 			$list = array_merge( $list, array( 'jquery-core', 'jquery', 'jquery-migrate' ) );
 		}

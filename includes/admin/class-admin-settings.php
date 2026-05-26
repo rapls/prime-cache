@@ -12,7 +12,7 @@ class Prime_Cache_Admin_Settings {
 	}
 
 	public function handle_cf_dismiss() {
-		if ( isset( $_GET['pc_dismiss_cf_alert'] ) && wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'pc_dismiss_cf' ) && current_user_can( 'manage_options' ) ) {
+		if ( isset( $_GET['pc_dismiss_cf_alert'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'pc_dismiss_cf' ) && current_user_can( 'manage_options' ) ) {
 			delete_option( 'prime_cache_cf_purge_failed' );
 			wp_safe_redirect( remove_query_arg( array( 'pc_dismiss_cf_alert', '_wpnonce' ) ) );
 			exit;
@@ -572,6 +572,7 @@ class Prime_Cache_Admin_Settings {
 
 	public function render_page() {
 		if ( ! current_user_can( 'manage_options' ) ) return;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only tab routing for the settings screen; value is sanitized with sanitize_key().
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'dashboard';
 		$settings = prime_cache_get_settings();
 		$on = ! empty( $settings['cache_enabled'] );
@@ -848,7 +849,7 @@ class Prime_Cache_Admin_Settings {
 				$env = array(
 					'WordPress'  => $wp_version,
 					'PHP'        => PHP_VERSION,
-					'Server'     => isset( $_SERVER['SERVER_SOFTWARE'] ) ? preg_replace( '#/.*#', '', $_SERVER['SERVER_SOFTWARE'] ) : 'Unknown',
+					'Server'     => isset( $_SERVER['SERVER_SOFTWARE'] ) ? preg_replace( '#/.*#', '', sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) ) : 'Unknown',
 					'MySQL'      => $GLOBALS['wpdb']->db_version(),
 					'Memory'     => ini_get( 'memory_limit' ),
 					__( 'Theme', 'prime-cache' ) => wp_get_theme()->get( 'Name' ),
@@ -1935,6 +1936,7 @@ class Prime_Cache_Admin_Settings {
 		?>
 		<h2 class="pc-title"><?php esc_html_e( 'Database', 'prime-cache' ); ?></h2>
 
+		<?php /* phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only success notice shown after a nonce-verified cleanup redirect; the value is cast to int. */ ?>
 		<?php if ( isset( $_GET['prime_cache_db_cleaned'] ) ) : ?>
 			<div class="notice notice-success is-dismissible" style="margin:0 0 16px">
 				<p><?php
@@ -1943,6 +1945,7 @@ class Prime_Cache_Admin_Settings {
 				?></p>
 			</div>
 		<?php endif; ?>
+		<?php /* phpcs:enable WordPress.Security.NonceVerification.Recommended */ ?>
 
 		<form method="post" action="options.php">
 			<?php settings_fields( 'prime_cache_settings_group' ); ?>
@@ -2152,6 +2155,7 @@ class Prime_Cache_Admin_Settings {
 		?>
 		<h2 class="pc-title"><?php esc_html_e( 'Tools', 'prime-cache' ); ?></h2>
 
+		<?php /* phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only admin notices shown after nonce-verified import/preset redirects; values are display-only and sanitized. */ ?>
 		<?php if ( isset( $_GET['pc_imported'] ) ) : ?>
 			<?php if ( 'ok' === $_GET['pc_imported'] ) : ?>
 				<div class="notice notice-success is-dismissible" style="margin:0 0 16px"><p><?php esc_html_e( 'Settings imported successfully.', 'prime-cache' ); ?></p></div>
@@ -2186,6 +2190,7 @@ class Prime_Cache_Admin_Settings {
 			printf( esc_html__( 'Unknown preset "%s". No changes were made.', 'prime-cache' ), esc_html( sanitize_key( $_GET['pc_preset_error'] ) ) );
 			?></p></div>
 		<?php endif; ?>
+		<?php /* phpcs:enable WordPress.Security.NonceVerification.Recommended */ ?>
 
 		<!-- Presets -->
 		<div class="pc-card">
@@ -2406,7 +2411,7 @@ class Prime_Cache_Admin_Settings {
 		}
 
 		// Server.
-		$server_software = isset( $_SERVER['SERVER_SOFTWARE'] ) ? $_SERVER['SERVER_SOFTWARE'] : 'Unknown';
+		$server_software = isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : 'Unknown';
 		$sapi = php_sapi_name();
 
 		// Memory.
@@ -2578,8 +2583,10 @@ class Prime_Cache_Admin_Settings {
 		);
 		?>
 		<h2 class="pc-title"><?php esc_html_e('Object Cache','prime-cache'); ?></h2>
+		<?php /* phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only success/failure notices shown after a nonce-verified object-cache switch redirect. */ ?>
 		<?php if(isset($_GET['prime_cache_oc_switched'])): ?><div class="notice notice-success is-dismissible" style="margin:0 0 16px"><p><?php esc_html_e('Object cache settings have been updated.','prime-cache'); ?></p></div><?php endif; ?>
 		<?php if(isset($_GET['prime_cache_oc_switch_failed'])): ?><div class="notice notice-error is-dismissible" style="margin:0 0 16px"><p><?php esc_html_e('Object cache switch failed. Another plugin may be managing object-cache.php, or the required PHP extension is not available.','prime-cache'); ?></p></div><?php endif; ?>
+		<?php /* phpcs:enable WordPress.Security.NonceVerification.Recommended */ ?>
 
 		<div class="pc-card pc-oc-banner">
 			<span class="pc-dot pc-dot--<?php echo ('off'===$act||'broken'===$act)?'m':'g'; ?> pc-dot--xl"></span>
@@ -2696,6 +2703,7 @@ class Prime_Cache_Admin_Settings {
 			}
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only admin notices shown after nonce-verified cache-clear / stats-reset redirects; flag values are compared to literals or sanitized with sanitize_key().
 		if ( isset( $_GET['prime_cache_cleared'] ) && '1' === $_GET['prime_cache_cleared'] )
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Cache cleared successfully.', 'prime-cache' ) . '</p></div>';
 
@@ -2745,6 +2753,7 @@ class Prime_Cache_Admin_Settings {
 
 		if ( isset( $_GET['prime_cache_stats_reset'] ) && '1' === $_GET['prime_cache_stats_reset'] )
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Statistics have been reset.', 'prime-cache' ) . '</p></div>';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		// Activation warnings (advanced-cache.php / WP_CACHE issues).
 		$act_warnings = get_transient( 'prime_cache_activation_warnings' );

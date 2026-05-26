@@ -633,7 +633,7 @@ class Prime_Cache {
 		if ( ! isset( $_GET['pc_action'] ) ) {
 			// Backward compat: old purge URL.
 			if ( isset( $_GET['prime_cache_purge'] ) ) {
-				if ( current_user_can( 'manage_options' ) && wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'prime_cache_purge' ) ) {
+				if ( current_user_can( 'manage_options' ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'prime_cache_purge' ) ) {
 					$this->purge->purge_all();
 					wp_safe_redirect( add_query_arg( 'prime_cache_cleared', '1', remove_query_arg( array( 'prime_cache_purge', '_wpnonce' ) ) ) );
 					exit;
@@ -646,7 +646,7 @@ class Prime_Cache {
 			return;
 		}
 
-		if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'prime_cache_admin_action' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'prime_cache_admin_action' ) ) {
 			return;
 		}
 
@@ -714,7 +714,7 @@ class Prime_Cache {
 				break;
 
 			case 'clear_url':
-				$url = isset( $_GET['pc_url'] ) ? esc_url_raw( rawurldecode( $_GET['pc_url'] ) ) : '';
+				$url = isset( $_GET['pc_url'] ) ? esc_url_raw( rawurldecode( sanitize_text_field( wp_unslash( $_GET['pc_url'] ) ) ) ) : '';
 				$cleared = false;
 				if ( $url ) {
 					// Mirror the CLI's flush url validation: require scheme +
@@ -1053,7 +1053,7 @@ class Prime_Cache {
 		$http2 = false;
 		if ( function_exists( 'apache_get_modules' ) && in_array( 'mod_http2', apache_get_modules(), true ) ) {
 			$http2 = true;
-		} elseif ( ! empty( $_SERVER['SERVER_PROTOCOL'] ) && version_compare( str_replace( 'HTTP/', '', $_SERVER['SERVER_PROTOCOL'] ), '2', '>=' ) ) {
+		} elseif ( ! empty( $_SERVER['SERVER_PROTOCOL'] ) && version_compare( str_replace( 'HTTP/', '', sanitize_text_field( wp_unslash( $_SERVER['SERVER_PROTOCOL'] ) ) ), '2', '>=' ) ) {
 			$http2 = true;
 		} elseif ( ! empty( $_SERVER['HTTP2'] ) || ! empty( $_SERVER['H2'] ) ) {
 			$http2 = true;
@@ -1170,7 +1170,7 @@ class Prime_Cache {
 
 		// Web server.
 		$server = 'Unknown';
-		$sw     = $_SERVER['SERVER_SOFTWARE'] ?? '';
+		$sw     = sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ?? '' ) );
 		if ( stripos( $sw, 'apache' ) !== false ) {
 			$server = 'Apache';
 		} elseif ( stripos( $sw, 'nginx' ) !== false ) {
@@ -1188,7 +1188,7 @@ class Prime_Cache {
 		$info[ '.htaccess' ] = Prime_Cache_Htaccess::is_writable() ? __( 'Writable', 'prime-cache' ) : __( 'Not writable', 'prime-cache' );
 
 		// HTTP protocol.
-		$proto = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
+		$proto = sanitize_text_field( wp_unslash( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1' ) );
 		if ( ! empty( $_SERVER['HTTP2'] ) || ! empty( $_SERVER['H2'] ) ) {
 			$proto = 'HTTP/2';
 		}
@@ -1319,7 +1319,7 @@ class Prime_Cache {
 			return;
 		}
 
-		if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'prime_cache_reset_stats' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'prime_cache_reset_stats' ) ) {
 			return;
 		}
 
@@ -1400,7 +1400,7 @@ class Prime_Cache {
 			return;
 		}
 
-		if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'prime_cache_object_cache' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'prime_cache_object_cache' ) ) {
 			return;
 		}
 
@@ -1527,7 +1527,7 @@ class Prime_Cache {
 		if ( ! isset( $_GET['pc_export_settings'] ) || ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'pc_export' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'pc_export' ) ) {
 			return;
 		}
 
@@ -1563,7 +1563,7 @@ class Prime_Cache {
 		if ( ! isset( $_POST['pc_import_settings'] ) || ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		if ( ! wp_verify_nonce( $_POST['_wpnonce'] ?? '', 'pc_import' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ?? '' ) ), 'pc_import' ) ) {
 			return;
 		}
 
@@ -1579,19 +1579,22 @@ class Prime_Cache {
 		}
 
 		// Verify it is a real upload (prevents local file inclusion).
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- is_uploaded_file() validates this server-generated temp path; unslashing/sanitizing it would corrupt Windows paths.
 		if ( ! is_uploaded_file( $_FILES['pc_import_file']['tmp_name'] ) ) {
 			wp_safe_redirect( $error_url );
 			exit;
 		}
 
 		// Size limit: 256 KB max for a settings JSON.
-		if ( $_FILES['pc_import_file']['size'] > 262144 ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- numeric upload size from the file validated by is_uploaded_file() above; cast to int.
+		if ( (int) ( $_FILES['pc_import_file']['size'] ?? 0 ) > 262144 ) {
 			wp_safe_redirect( $error_url );
 			exit;
 		}
 
 		// Extension check.
-		$ext = strtolower( pathinfo( $_FILES['pc_import_file']['name'], PATHINFO_EXTENSION ) );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- the upload was validated (nonce, is_uploaded_file, size) above; only the extension is read here, and it is sanitized.
+		$ext = strtolower( pathinfo( sanitize_text_field( wp_unslash( $_FILES['pc_import_file']['name'] ) ), PATHINFO_EXTENSION ) );
 		if ( 'json' !== $ext ) {
 			wp_safe_redirect( $error_url );
 			exit;
@@ -1605,6 +1608,7 @@ class Prime_Cache {
 		if ( function_exists( 'finfo_open' ) ) {
 			$finfo = finfo_open( FILEINFO_MIME_TYPE );
 			if ( false !== $finfo ) {
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- tmp_name is the server-generated upload path validated by is_uploaded_file() above; unslashing/sanitizing would corrupt Windows paths.
 				$mime = finfo_file( $finfo, $_FILES['pc_import_file']['tmp_name'] );
 				finfo_close( $finfo );
 				// JSON files may report as application/json or text/plain.

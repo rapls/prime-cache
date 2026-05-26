@@ -14,6 +14,15 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// This drop-in is loaded by advanced-cache.php BEFORE WordPress initializes, so
+// wp_unslash(), sanitize_*() and the nonce APIs do not exist here. Superglobals
+// are normalized and validated with pure PHP downstream (host normalization,
+// path-traversal guards, integer casts, hashing, and exact-match comparisons),
+// and these requests serve cached output rather than processing form actions.
+// Disable the WP input-validation / nonce sniffs for this pre-WP file instead
+// of emitting WordPress calls that are not loaded yet.
+// phpcs:disable WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification
+
 // Fail-close if the bootstrapping constants advanced-cache.php normally
 // defines are missing. A corrupted, partially-rewritten, or hand-edited
 // advanced-cache.php would otherwise let this dropin run and Error in
@@ -813,3 +822,5 @@ ob_start( function ( $buffer ) {
 
 	return $buffer;
 } );
+
+// phpcs:enable WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification

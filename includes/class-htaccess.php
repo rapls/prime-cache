@@ -975,7 +975,7 @@ class Prime_Cache_Htaccess {
 	 */
 	private static function get_relative_cache_path() {
 		$abs = PRIME_CACHE_CACHE_DIR;
-		$doc = realpath( $_SERVER['DOCUMENT_ROOT'] ?? ABSPATH );
+		$doc = realpath( sanitize_text_field( wp_unslash( $_SERVER['DOCUMENT_ROOT'] ?? ABSPATH ) ) );
 
 		if ( $doc && strpos( $abs, $doc ) === 0 ) {
 			return ltrim( substr( $abs, strlen( $doc ) ), '/' );

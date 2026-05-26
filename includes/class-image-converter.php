@@ -505,7 +505,7 @@ class Prime_Cache_Image_Converter {
 			define( 'DONOTCACHEPAGE', true );
 		}
 
-		$accept   = isset( $_SERVER['HTTP_ACCEPT'] ) ? $_SERVER['HTTP_ACCEPT'] : '';
+		$accept   = isset( $_SERVER['HTTP_ACCEPT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT'] ) ) : '';
 		$use_webp = ! empty( $this->settings['webp_enabled'] ) && false !== strpos( $accept, 'image/webp' );
 
 		// Choose the format that actually exists for EACH image, per-image:
@@ -848,7 +848,7 @@ class Prime_Cache_Image_Converter {
 			wp_send_json_error( array( 'message' => 'Image conversion is disabled.' ) );
 		}
 
-		$raw_items = isset( $_POST['items'] ) && is_array( $_POST['items'] ) ? wp_unslash( $_POST['items'] ) : array();
+		$raw_items = isset( $_POST['items'] ) && is_array( $_POST['items'] ) ? map_deep( wp_unslash( $_POST['items'] ), 'sanitize_text_field' ) : array();
 		$items = array();
 		foreach ( $raw_items as $ri ) {
 			if ( is_array( $ri ) && isset( $ri['type'], $ri['value'] ) ) {

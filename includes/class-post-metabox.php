@@ -55,7 +55,7 @@ class Prime_Cache_Post_Metabox {
 		if ( ! isset( $_POST['prime_cache_metabox_nonce'] ) ) {
 			return;
 		}
-		if ( ! wp_verify_nonce( $_POST['prime_cache_metabox_nonce'], 'prime_cache_metabox' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['prime_cache_metabox_nonce'] ) ), 'prime_cache_metabox' ) ) {
 			return;
 		}
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
