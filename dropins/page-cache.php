@@ -15,13 +15,15 @@
 defined( 'ABSPATH' ) || exit;
 
 // This drop-in is loaded by advanced-cache.php BEFORE WordPress initializes, so
-// wp_unslash(), sanitize_*() and the nonce APIs do not exist here. Superglobals
-// are normalized and validated with pure PHP downstream (host normalization,
-// path-traversal guards, integer casts, hashing, and exact-match comparisons),
-// and these requests serve cached output rather than processing form actions.
-// Disable the WP input-validation / nonce sniffs for this pre-WP file instead
-// of emitting WordPress calls that are not loaded yet.
-// phpcs:disable WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification
+// wp_unslash(), sanitize_*(), wp_rand(), WP_Filesystem and the nonce APIs do
+// not exist here. Superglobals are normalized and validated with pure PHP
+// downstream (host normalization, path-traversal guards, integer casts,
+// hashing, exact-match comparisons); the cache file is read/written directly
+// for speed; internal globals/functions use a "_pc_" / "_prime_cache_" prefix
+// to avoid collisions; and these requests serve cached output rather than
+// processing form actions. Disable the WP-API-oriented sniffs for this pre-WP
+// file instead of emitting WordPress calls that are not loaded yet.
+// phpcs:disable WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification, WordPress.WP.AlternativeFunctions, WordPress.NamingConventions.PrefixAllGlobals
 
 // Fail-close if the bootstrapping constants advanced-cache.php normally
 // defines are missing. A corrupted, partially-rewritten, or hand-edited
@@ -823,4 +825,4 @@ ob_start( function ( $buffer ) {
 	return $buffer;
 } );
 
-// phpcs:enable WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification
+// phpcs:enable WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification, WordPress.WP.AlternativeFunctions, WordPress.NamingConventions.PrefixAllGlobals

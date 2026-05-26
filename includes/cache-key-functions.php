@@ -6,6 +6,14 @@
  * It must not use any WordPress functions — only pure PHP.
  */
 
+defined( 'ABSPATH' ) || exit;
+
+// Shared pure-PHP helpers used by both the pre-WordPress drop-in and the plugin.
+// They intentionally use a leading-underscore "_prime_cache_" prefix to mark them
+// internal while still namespacing against collisions, so the prefix sniff is
+// disabled for this file.
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
+
 if ( function_exists( '_prime_cache_normalize_host' ) ) {
 	return; // Already loaded.
 }

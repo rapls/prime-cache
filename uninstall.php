@@ -7,6 +7,12 @@
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
+// This uninstall script removes Prime Cache's own cache files and directories
+// directly (a one-shot cleanup, not the hot path), and uses a few "$pc_"-prefixed
+// procedural globals. WP_Filesystem is not used here, and the prefix avoids
+// collisions, so the direct-file and prefix sniffs are disabled for this file.
+// phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.NamingConventions.PrefixAllGlobals
+
 // Remove plugin option.
 delete_option( 'prime_cache_settings' );
 

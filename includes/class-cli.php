@@ -14,6 +14,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// Prime Cache manages its own cache files directly for performance; the
+// WP_Filesystem API is not used on these cache paths. Disable the direct-file
+// sniff for this module.
+// phpcs:disable WordPress.WP.AlternativeFunctions
+
 if ( ! class_exists( 'WP_CLI_Command' ) ) {
 	return;
 }

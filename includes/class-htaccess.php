@@ -11,6 +11,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// Prime Cache manages its own cache files directly for performance; the
+// WP_Filesystem API is not used on these cache paths. Disable the direct-file
+// sniff for this module.
+// phpcs:disable WordPress.WP.AlternativeFunctions
+
 class Prime_Cache_Htaccess {
 
 	const MARKER = 'Prime Cache';
