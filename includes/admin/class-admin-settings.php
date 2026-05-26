@@ -648,8 +648,6 @@ class Prime_Cache_Admin_Settings {
 		<?php
 	}
 
-	/* ── SVG preview card for Pro features ────────────────── */
-
 	/* ── tab: add-ons ────────────────────────────────────── */
 
 	private function tab_upgrade() {
@@ -1910,9 +1908,10 @@ class Prime_Cache_Admin_Settings {
 			'db_auto_cleanup','db_cleanup_frequency',
 		);
 
+		// This tab is only registered (via the prime_cache_admin_tabs filter) by
+		// the add-on that provides the optimizer, so this guard is not reachable
+		// in the free plugin. Bail quietly rather than fatal if it ever is.
 		if ( ! class_exists( 'Prime_Cache_Database_Optimizer' ) ) {
-			echo '<h2 class="pc-title">' . esc_html__( 'Database', 'prime-cache' ) . '</h2>';
-			echo '<div class="pc-card" style="opacity:0.5"><p>' . esc_html__( 'Database optimization requires Prime Cache Pro.', 'prime-cache' ) . '</p></div>';
 			return;
 		}
 		$optimizer = new Prime_Cache_Database_Optimizer();

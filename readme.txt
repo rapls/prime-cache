@@ -128,6 +128,7 @@ No. The free plugin does not send your data or API requests to any third-party s
 = 1.10.5 =
 * Changed: Optional add-on features are no longer shown as disabled setting controls inside the free plugin's tabs; the "Add-ons" screen is now a plain text feature list.
 * Changed: While the add-on is inactive, its option keys are forced off/empty when settings are saved or imported, so they are never stored by the free plugin.
+* Changed: Removed the "wp prime-cache db-cleanup" WP-CLI command from the free plugin; database optimization is provided by the optional add-on.
 * Improved: When saving settings cannot write or remove the .htaccess optimization rules (for example a read-only .htaccess), an admin notice now explains the problem instead of silently reporting success.
 * Added: FAQ note clarifying that this version does not send data to third-party services.
 
@@ -141,7 +142,7 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Hardening: Cache-file path containment now uses a strict directory-boundary check.
 
 = 1.10.2 =
-* Improved: Reworded the optional add-on information shown in the settings screen — neutral, informational phrasing (e.g. "Available in Prime Cache Pro", "Learn more about Prime Cache Pro") in place of upgrade/unlock prompts, and a single, low-key link on the add-on information tab. No change to the free feature set.
+* Improved: Reworded the optional add-on information shown in the settings screen to use neutral, informational phrasing in place of upgrade/unlock prompts, with a single low-key link on the add-on information tab. No change to the free feature set.
 
 = 1.10.1 =
 * Security: The .htaccess fast-path now rejects path-traversal sequences ("..") in the request URI.

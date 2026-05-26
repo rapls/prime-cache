@@ -10,7 +10,6 @@
  *   wp prime-cache flush url <url> — Clear cache for a specific URL
  *   wp prime-cache preload        — Start cache preloading
  *   wp prime-cache status         — Show cache status and statistics
- *   wp prime-cache db-cleanup     — Run database cleanup
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -294,49 +293,6 @@ class Prime_Cache_CLI extends WP_CLI_Command {
 		);
 		WP_CLI::line( '' );
 		WP_CLI::line( 'Object Cache:  ' . ( $oc_label[ $oc ] ?? strtoupper( $oc ) ) );
-	}
-
-	/**
-	 * Run database cleanup.
-	 *
-	 * ## EXAMPLES
-	 *
-	 *     wp prime-cache db-cleanup
-	 *
-	 * @subcommand db-cleanup
-	 */
-	public function db_cleanup( $args, $assoc_args ) {
-		if ( ! class_exists( 'Prime_Cache_Database_Optimizer' ) ) {
-			WP_CLI::error( 'Database optimization requires Prime Cache Pro.' );
-			return;
-		}
-		$s = prime_cache_get_settings();
-		$optimizer = new Prime_Cache_Database_Optimizer();
-		$results = $optimizer->execute_cleanup( $s );
-
-		// Defensive validation — Pro implementation could in theory return
-		// WP_Error or a malformed shape. Reject anything other than an
-		// array of int-castable counts so array_sum / sprintf don't warning.
-		if ( is_wp_error( $results ) ) {
-			WP_CLI::error( 'Database cleanup failed: ' . $results->get_error_message() );
-		}
-		if ( ! is_array( $results ) ) {
-			WP_CLI::error( 'Database cleanup returned an unexpected value (' . gettype( $results ) . '). Cannot summarize.' );
-		}
-
-		$total = 0;
-		foreach ( $results as $key => $count ) {
-			if ( ! is_numeric( $count ) ) {
-				continue;
-			}
-			$count = (int) $count;
-			$total += $count;
-			if ( $count > 0 && is_string( $key ) ) {
-				WP_CLI::line( ucfirst( str_replace( '_', ' ', $key ) ) . ": {$count} items" );
-			}
-		}
-
-		WP_CLI::success( "Database cleanup processed {$total} items (max 1,000 per task). Run again if more remain." );
 	}
 }
 
