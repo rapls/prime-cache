@@ -1909,9 +1909,13 @@ class Prime_Cache_Admin_Settings {
 		);
 
 		// This tab is only registered (via the prime_cache_admin_tabs filter) by
-		// the add-on that provides the optimizer, so this guard is not reachable
-		// in the free plugin. Bail quietly rather than fatal if it ever is.
+		// the add-on that provides the optimizer, so it is never shown in the
+		// free plugin on its own. If the tab is registered but the optimizer is
+		// not loaded (e.g. the add-on is present but inactive/not ready), show a
+		// neutral notice rather than a blank pane or fatal.
 		if ( ! class_exists( 'Prime_Cache_Database_Optimizer' ) ) {
+			echo '<h2 class="pc-title">' . esc_html__( 'Database', 'prime-cache' ) . '</h2>';
+			echo '<div class="pc-card"><p>' . esc_html__( 'Database optimization is not available right now. Make sure the add-on that provides it is active and up to date.', 'prime-cache' ) . '</p></div>';
 			return;
 		}
 		$optimizer = new Prime_Cache_Database_Optimizer();
