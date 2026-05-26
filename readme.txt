@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.5
+Stable tag: 1.10.6
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.6 =
+* Hardening: Coding-standards pass for WordPress.org. Request data ($_GET / $_POST / $_FILES / $_SERVER) is consistently unslashed and sanitized before use, and the bundled code now passes Plugin Check (the pre-WordPress page-cache drop-in and direct cache-file operations are documented as intended). No change to features or behavior.
+
 = 1.10.5 =
 * Changed: Optional add-on features are no longer shown as disabled setting controls inside the free plugin's tabs; the "Add-ons" screen is now a plain text feature list.
 * Changed: While the add-on is inactive, its option keys are forced off/empty when settings are saved or imported, so they are never stored by the free plugin.
@@ -187,6 +190,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.6 =
+Coding-standards and Plugin Check hardening (input unslashing/sanitization). No feature or behavior changes.
 
 = 1.10.3 =
 Documentation and in-plugin wording clarified to describe the free feature set, plus a path-containment hardening. Recommended for all users.
