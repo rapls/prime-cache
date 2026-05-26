@@ -139,7 +139,12 @@ class Prime_Cache_Admin_Settings {
 		$s['varnish_enabled']       = ! empty( $input['varnish_enabled'] );
 		$s['varnish_ip']            = sanitize_textarea_field( $input['varnish_ip'] ?? '' );
 		$s['sucuri_enabled']        = ! empty( $input['sucuri_enabled'] );
-		$s['sucuri_api_key']        = sanitize_text_field( $input['sucuri_api_key'] ?? '' );
+		// Secret key: not emitted as a hidden input (see hidden()), so it is
+		// absent from $input unless its own tab is the one being saved. Preserve
+		// the stored value rather than clearing it.
+		$s['sucuri_api_key']        = isset( $input['sucuri_api_key'] )
+			? sanitize_text_field( $input['sucuri_api_key'] )
+			: ( $old['sucuri_api_key'] ?? '' );
 		$s['heartbeat_enabled']     = ! empty( $input['heartbeat_enabled'] );
 		$hb_valid = array( 'enable', 'disable', 'modify' );
 		$s['heartbeat_frontend']    = in_array( $input['heartbeat_frontend'] ?? '', $hb_valid, true ) ? $input['heartbeat_frontend'] : 'disable';
@@ -161,15 +166,15 @@ class Prime_Cache_Admin_Settings {
 		$s['cdn_relative']          = ! empty( $input['cdn_relative'] );
 		$s['cloudflare_enabled']    = ! empty( $input['cloudflare_enabled'] );
 		$s['cloudflare_email']      = sanitize_email( $input['cloudflare_email'] ?? '' );
-		// Preserve DB-stored key if input is disabled (PRIME_CACHE_CF_API_TOKEN active).
-		if ( defined( 'PRIME_CACHE_CF_API_TOKEN' ) && ! isset( $input['cloudflare_api_key'] ) ) {
-			$s['cloudflare_api_key'] = $defaults['cloudflare_api_key'] ?? '';
-			$existing = get_option( 'prime_cache_settings', array() );
-			if ( ! empty( $existing['cloudflare_api_key'] ) ) {
-				$s['cloudflare_api_key'] = $existing['cloudflare_api_key'];
-			}
+		// Secret key: not emitted as a hidden input (see hidden()) and also
+		// suppressed when PRIME_CACHE_CF_API_TOKEN is defined. When the field is
+		// not part of the submitted form it is absent from $input, so preserve
+		// the stored value rather than clearing the secret; only a real
+		// submission of its own tab updates it.
+		if ( isset( $input['cloudflare_api_key'] ) && ! defined( 'PRIME_CACHE_CF_API_TOKEN' ) ) {
+			$s['cloudflare_api_key'] = sanitize_text_field( $input['cloudflare_api_key'] );
 		} else {
-			$s['cloudflare_api_key'] = sanitize_text_field( $input['cloudflare_api_key'] ?? '' );
+			$s['cloudflare_api_key'] = $old['cloudflare_api_key'] ?? '';
 		}
 		$s['cloudflare_auth_mode']  = in_array( $input['cloudflare_auth_mode'] ?? '', array( 'token', 'global_key' ), true ) ? $input['cloudflare_auth_mode'] : 'token';
 		$s['cloudflare_zone_id']    = sanitize_text_field( $input['cloudflare_zone_id'] ?? '' );
@@ -550,8 +555,14 @@ class Prime_Cache_Admin_Settings {
 	}
 
 	private function hidden( $settings, $visible ) {
+		// Never carry secret values (API keys) across tabs as hidden inputs —
+		// they would otherwise be written into the form HTML of unrelated tabs.
+		// When a secret field is not part of the submitted form, sanitize_settings()
+		// preserves its stored value instead of clearing it.
+		$secret_keys = array( 'cloudflare_api_key', 'sucuri_api_key' );
 		foreach ( $settings as $k => $v ) {
 			if ( in_array( $k, $visible, true ) ) continue;
+			if ( in_array( $k, $secret_keys, true ) ) continue;
 			$value = is_bool( $v ) ? ( $v ? '1' : '0' ) : $v;
 			printf( '<input type="hidden" name="prime_cache_settings[%s]" value="%s">', esc_attr( $k ), esc_attr( $value ) );
 		}
@@ -1299,9 +1310,9 @@ class Prime_Cache_Admin_Settings {
 				'img_include_custom','img_exclude_folders',
 			) );
 		}
-		// AVIF keys deliberately omitted from $vis when NOT pro so hidden() preserves
-		// any stored avif_enabled / avif_quality value (the grayed control is disabled
-		// and never submits), rather than the disabled control silently clearing it.
+		// AVIF keys are included only when the add-on is active; otherwise they are
+		// omitted from $vis so hidden() carries any stored avif_enabled /
+		// avif_quality value forward instead of a non-rendered field clearing it.
 		$avif_supported = class_exists( 'Prime_Cache_Image_Converter' ) ? Prime_Cache_Image_Converter::avif_supported() : false;
 		?>
 		<h2 class="pc-title"><?php esc_html_e( 'Media', 'prime-cache' ); ?></h2>
@@ -2226,7 +2237,7 @@ class Prime_Cache_Admin_Settings {
 					),
 					'aggressive' => array(
 						__( 'Aggressive', 'prime-cache' ),
-						__( 'Maximum performance. Adds defer/delay JS, async CSS, separate mobile cache, preloading, lazy load for iframes/videos, and disables unused WordPress assets (emoji, embed, dashicons, oEmbed, block CSS). Pro adds CSS/JS combining and Critical CSS auto-generation. May require testing and exclusion rules for compatibility.', 'prime-cache' ),
+						__( 'Maximum performance. Adds defer/delay JS, async CSS, separate mobile cache, preloading, lazy load for iframes/videos, and disables unused WordPress assets (emoji, embed, dashicons, oEmbed, block CSS). Additional add-ons may provide CSS/JS combining and Critical CSS generation. May require testing and exclusion rules for compatibility.', 'prime-cache' ),
 						'#ef4444',
 						'dashicons-controls-forward',
 					),
