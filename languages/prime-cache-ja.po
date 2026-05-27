@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Prime Cache\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-27 17:42+0900\n"
+"POT-Creation-Date: 2026-05-27 18:03+0900\n"
 "PO-Revision-Date: 2026-05-23 00:00+0900\n"
 "Last-Translator: rapls\n"
 "Language-Team: Japanese\n"
@@ -2881,6 +2881,14 @@ msgstr "公開投稿数"
 #: includes/class-prime-cache.php:1236
 msgid "Optional Add-on"
 msgstr "オプションのアドオン"
+
+#: includes/class-prime-cache.php:1494
+msgid "HIT"
+msgstr "ヒット"
+
+#: includes/class-prime-cache.php:1494
+msgid "MISS"
+msgstr "ミス"
 
 #: includes/class-prime-cache.php:1681
 msgid ""

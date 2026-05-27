@@ -52,7 +52,7 @@ class Prime_Cache {
 	private static $file_optimizer;
 
 	/**
-	 * Get the shared File Optimizer instance (for Pro plugin delegation).
+	 * Get the shared File Optimizer instance (for optional add-on delegation).
 	 */
 	public static function get_file_optimizer() {
 		return self::$file_optimizer;
@@ -81,7 +81,7 @@ class Prime_Cache {
 		new Prime_Cache_Media_Optimizer();
 		new Prime_Cache_Image_Converter();
 
-		// Pro classes — initialized by prime-cache-pro add-on:
+		// Add-on classes — initialized by the optional add-on:
 		// Database_Optimizer, Varnish, Sucuri, Heartbeat, CDN, Cloudflare, WebP
 		new Prime_Cache_Post_Metabox();
 		new Prime_Cache_Compatibility();
@@ -1028,7 +1028,7 @@ class Prime_Cache {
 					'preload_homepage'      => true,
 					'preload_public_posts'  => true,
 				) );
-				// Pro enhances presets with additional features.
+				// The optional add-on enhances presets with additional features.
 				return apply_filters( 'prime_cache_preset_aggressive', $preset );
 
 			case 'auto':
@@ -1138,7 +1138,7 @@ class Prime_Cache {
 			'preload_public_posts'  => true,
 		);
 
-		// Pro enhances auto preset with additional features.
+		// The optional add-on enhances the auto preset with additional features.
 		$s = apply_filters( 'prime_cache_preset_auto', $s );
 
 		// ── Preload tuning by site size ──────────────────────────────
@@ -1160,7 +1160,7 @@ class Prime_Cache {
 			$s['cache_reject_uri']      = 'cart|checkout|my-account|wc-api|add-to-cart';
 		}
 
-		// Pro adds image conversion, object cache, and other Pro settings
+		// The optional add-on adds image conversion, object cache, and other add-on settings
 		// via the prime_cache_preset_auto filter above.
 
 		return $s;
@@ -1491,7 +1491,7 @@ class Prime_Cache {
 			<div style="text-align:center;padding:10px;background:#f0f9ff;border-radius:8px"><b style="font-size:20px;color:#1d4ed8"><?php echo esc_html( number_format( $files ) ); ?></b><br><span style="font-size:11px;color:#6b7280"><?php esc_html_e( 'Pages', 'prime-cache' ); ?></span></div>
 		</div>
 		<ul style="margin:0;font-size:13px;line-height:2">
-			<li><?php printf( 'HIT: <b>%s</b> / MISS: <b>%s</b>', esc_html( number_format( $hs['hit'] ) ), esc_html( number_format( $hs['miss'] ) ) ); ?></li>
+			<li><?php esc_html_e( 'HIT', 'prime-cache' ); ?>: <b><?php echo esc_html( number_format( $hs['hit'] ) ); ?></b> / <?php esc_html_e( 'MISS', 'prime-cache' ); ?>: <b><?php echo esc_html( number_format( $hs['miss'] ) ); ?></b></li>
 			<li><?php esc_html_e( 'Size', 'prime-cache' ); ?>: <b><?php echo esc_html( size_format( $size ) ); ?></b></li>
 			<li><?php esc_html_e( 'Object Cache', 'prime-cache' ); ?>: <b><?php echo 'off' === $oc ? esc_html__( 'Inactive', 'prime-cache' ) : esc_html( strtoupper( $oc ) ); ?></b></li>
 			<li><?php esc_html_e( 'Page Cache', 'prime-cache' ); ?>: <b><?php echo $s['cache_enabled'] ? esc_html__( 'Active', 'prime-cache' ) : esc_html__( 'Inactive', 'prime-cache' ); ?></b></li>

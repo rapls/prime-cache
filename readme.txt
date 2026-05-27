@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.10
+Stable tag: 1.10.11
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.11 =
+* Changed: The dashboard cache HIT/MISS labels are now translatable, with formatting tags kept outside the translated strings. Internal code comments and the Add-ons navigation styling were tidied. No functional changes.
+
 = 1.10.10 =
 * Changed: Dashboard cache statistics place formatting tags outside the translated strings (consistent with the rest of the admin UI); no HTML is passed through a translation placeholder. No functional changes.
 
@@ -207,6 +210,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.11 =
+Minor i18n and admin-UI polish (translatable hit/miss labels, tidied navigation). No functional changes.
 
 = 1.10.10 =
 Minor output-escaping consistency polish in the dashboard statistics. No functional changes.

@@ -256,7 +256,7 @@ class Prime_Cache_Admin_Settings {
 		$s['db_cleanup_frequency']  = isset( $input['db_cleanup_frequency'] ) && in_array( $input['db_cleanup_frequency'], array( 'daily', 'weekly', 'monthly' ), true ) ? $input['db_cleanup_frequency'] : 'weekly';
 		$s['cache_ignore_qs']       = sanitize_textarea_field( $input['cache_ignore_qs'] ?? $defaults['cache_ignore_qs'] );
 
-		// Reschedule DB cleanup cron if settings changed (Pro feature).
+		// Reschedule DB cleanup cron if settings changed (add-on feature).
 		if ( class_exists( 'Prime_Cache_Database_Optimizer' ) ) {
 			if ( $s['db_auto_cleanup'] ) {
 				Prime_Cache_Database_Optimizer::reschedule_cron( $s['db_cleanup_frequency'] );
@@ -804,7 +804,7 @@ class Prime_Cache_Admin_Settings {
 						array( $settings['htaccess_enabled'], '.htaccess' ),
 						array( $settings['browser_cache'], __( 'Browser Cache', 'prime-cache' ) ),
 					);
-					// Pro adds its feature status entries (Object Cache, CDN, WebP, Heartbeat, etc.).
+					// The optional add-on adds its feature status entries (Object Cache, CDN, WebP, Heartbeat, etc.).
 					$features = apply_filters( 'prime_cache_dashboard_features', $features, $settings );
 					foreach ( $features as $f ) :
 					?>
@@ -1351,7 +1351,7 @@ class Prime_Cache_Admin_Settings {
 			</div>
 
 			<?php
-			// Pro's handler for this hook is removed; the Format Conversion + Bulk
+			// The optional add-on's handler for this hook is removed; the Format Conversion + Bulk
 			// Optimization cards are rendered directly below for ALL users (WebP is a
 			// Free feature). The hook call is kept for forward-compat / 3rd-party use.
 			do_action( 'prime_cache_media_after_optimization', $settings );
@@ -2236,7 +2236,7 @@ class Prime_Cache_Admin_Settings {
 		if ( isset( $_GET['pc_cleared'] ) ) {
 			$cfg = prime_cache_get_settings();
 			$extra_notes = array();
-			// Pro integrations: only claim "also purged" when the integration class
+			// Add-on integrations: only claim "also purged" when the integration class
 			// is actually loaded. Otherwise an orphaned settings flag (Pro deactivated
 			// but settings retained) would lie about side effects.
 			if ( ! empty( $cfg['varnish_enabled'] ) && class_exists( 'Prime_Cache_Varnish' ) ) {
@@ -2325,9 +2325,7 @@ class Prime_Cache_Admin_Settings {
 .pc-nav__item:hover .dashicons{color:#64748b}
 .pc-nav__item--on{background:#ede9fe;color:var(--c-pri);font-weight:600}
 .pc-nav__item--on .dashicons{color:var(--c-pri)}
-.pc-nav__addons{background:linear-gradient(135deg,#6366f1,#7c3aed) !important;color:#fff !important;font-weight:600;border-radius:6px;margin:12px 10px 0;padding:10px 14px !important;text-align:center;transition:opacity .2s}
-.pc-nav__addons .dashicons{color:#fbbf24}
-.pc-nav__addons:hover{opacity:.9;color:#fff !important;background:linear-gradient(135deg,#4f46e5,#6d28d9) !important}
+.pc-nav__addons{margin-top:10px;border-top:1px solid #e5e7eb;padding-top:12px;border-radius:0}
 /* Add-on badge — for the optional add-on to use when injecting cards via hooks. */
 .pc-addon-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.5px;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;padding:1px 6px;border-radius:4px;margin-left:auto;line-height:16px}
 

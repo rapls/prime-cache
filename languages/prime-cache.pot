@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Prime Cache\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-27 17:42+0900\n"
+"POT-Creation-Date: 2026-05-27 18:03+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2408,6 +2408,14 @@ msgstr ""
 
 #: includes/class-prime-cache.php:1236
 msgid "Optional Add-on"
+msgstr ""
+
+#: includes/class-prime-cache.php:1494
+msgid "HIT"
+msgstr ""
+
+#: includes/class-prime-cache.php:1494
+msgid "MISS"
 msgstr ""
 
 #: includes/class-prime-cache.php:1681
