@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.9
+Stable tag: 1.10.10
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.10 =
+* Changed: Dashboard cache statistics place formatting tags outside the translated strings (consistent with the rest of the admin UI); no HTML is passed through a translation placeholder. No functional changes.
+
 = 1.10.9 =
 * Security: The cache-size line in the System Information panel now places the formatting tag outside the translated string instead of passing HTML through a translation placeholder.
 * Changed: Neutralized remaining add-on references in code comments and dropped an unused legacy CSS class alias.
@@ -204,6 +207,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.10 =
+Minor output-escaping consistency polish in the dashboard statistics. No functional changes.
 
 = 1.10.9 =
 Minor output-escaping refinement in the System Information panel and internal wording cleanup. No functional changes.

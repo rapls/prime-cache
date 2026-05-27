@@ -736,21 +736,15 @@ class Prime_Cache_Admin_Settings {
 				<span class="dashicons dashicons-yes-alt" style="color:#22c55e;font-size:20px"></span>
 				<span style="font-size:13px;color:#475569"><?php
 				/* translators: %s: number of cached pages */
-				echo wp_kses( sprintf( __( 'Cache is serving %s pages via .htaccess fast-path (PHP-free). Hit/miss stats are not tracked in this mode because pages are served directly by Apache without running PHP.', 'prime-cache' ), '<b>' . number_format( $st['files'] ) . '</b>' ), array( 'b' => array() ) );
+				echo esc_html( sprintf( __( 'Cache is serving %s pages via .htaccess fast-path (PHP-free). Hit/miss stats are not tracked in this mode because pages are served directly by Apache without running PHP.', 'prime-cache' ), number_format( $st['files'] ) ) );
 				?></span>
 			</div>
 			<?php else : ?>
 			<div class="pc-bar"><div class="pc-bar__fill" style="width:<?php echo esc_attr( $rate ); ?>%"></div></div>
 			<?php endif; ?>
 			<div class="pc-bar__info">
-				<span><?php
-				/* translators: %s: total number of cache requests */
-				echo wp_kses( sprintf( __( 'Total: %s', 'prime-cache' ), '<b>' . number_format( $total ) . '</b>' ), array( 'b' => array() ) );
-				?></span>
-				<span><?php
-				/* translators: %s: total cache size (e.g. "12 MB") */
-				echo wp_kses( sprintf( __( 'Size: %s', 'prime-cache' ), '<b>' . esc_html( $this->fmt( $st['size'] ) ) . '</b>' ), array( 'b' => array() ) );
-				?></span>
+				<span><?php esc_html_e( 'Total', 'prime-cache' ); ?>: <b><?php echo esc_html( number_format( $total ) ); ?></b></span>
+				<span><?php esc_html_e( 'Size', 'prime-cache' ); ?>: <b><?php echo esc_html( $this->fmt( $st['size'] ) ); ?></b></span>
 			</div>
 		</div>
 
