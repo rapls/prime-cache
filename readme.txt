@@ -129,6 +129,7 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Changed: The optional add-on settings tabs (CDN, Object Cache, Heartbeat, Database) are no longer rendered by the free plugin. The free plugin only reserves the tab slots; the optional add-on renders them when active. No change for sites without the add-on.
 * Improved: Admin notices that include a value now limit allowed HTML to a single formatting tag via wp_kses().
 * Changed: Optional add-on information is shown only on the Add-ons screen (removed from the dashboard).
+* Hardening: The object cache switch (an add-on feature) no longer runs unless the optional add-on is active, so it cannot be triggered by a stale request.
 
 = 1.10.6 =
 * Hardening: Coding-standards pass for WordPress.org. Request data ($_GET / $_POST / $_FILES / $_SERVER) is consistently unslashed and sanitized before use, and the bundled code now passes Plugin Check (the pre-WordPress page-cache drop-in and direct cache-file operations are documented as intended). No change to features or behavior.
