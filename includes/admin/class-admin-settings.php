@@ -554,7 +554,12 @@ class Prime_Cache_Admin_Settings {
 		return '= ' . $s . ' ' . __( 'sec', 'prime-cache' );
 	}
 
-	private function hidden( $settings, $visible ) {
+	/**
+	 * Output non-visible settings as hidden inputs so a per-tab form submit does
+	 * not drop options that belong to other tabs. Public so an add-on can reuse
+	 * it when rendering its own settings tabs via prime_cache_render_admin_tab.
+	 */
+	public function hidden( $settings, $visible ) {
 		// Never carry secret values (API keys) across tabs as hidden inputs —
 		// they would otherwise be written into the form HTML of unrelated tabs.
 		// When a secret field is not part of the submitted form, sanitize_settings()
@@ -624,21 +629,7 @@ class Prime_Cache_Admin_Settings {
 			<!-- Main -->
 			<main class="pc-main">
 				<?php
-				// Pro-only tabs: render only if Pro registered them via prime_cache_admin_tabs filter.
 				switch ( $tab ) {
-					case 'object-cache':
-					case 'heartbeat':
-					case 'database':
-					case 'cdn':
-						if ( isset( $tabs[ $tab ] ) ) {
-							if ( 'object-cache' === $tab ) { $this->tab_object(); }
-							elseif ( 'heartbeat' === $tab ) { $this->tab_heartbeat( $settings ); }
-							elseif ( 'database' === $tab ) { $this->tab_database( $settings ); }
-							elseif ( 'cdn' === $tab ) { $this->tab_cdn( $settings ); }
-						} else {
-							$this->tab_dashboard( $settings );
-						}
-						break;
 					case 'page-cache':    $this->tab_page( $settings, $on ); break;
 					case 'file-opt':      $this->tab_file_opt( $settings ); break;
 					case 'media':         $this->tab_media( $settings ); break;
@@ -650,8 +641,16 @@ class Prime_Cache_Admin_Settings {
 					case 'dashboard':     $this->tab_dashboard( $settings ); break;
 					case 'upgrade':       if ( ! prime_cache_is_pro() ) { $this->tab_upgrade(); } else { $this->tab_dashboard( $settings ); } break;
 					default:
-						// Unknown tab slug (e.g. bookmarked Pro tab URL when Pro is inactive).
-						$this->tab_dashboard( $settings );
+						// Tabs contributed by an add-on via the prime_cache_admin_tabs filter
+						// are rendered by the add-on (the free plugin ships no body for them).
+						// If this is a registered add-on tab, let the add-on render it; otherwise
+						// fall back to the dashboard (e.g. a bookmarked add-on tab URL with no
+						// add-on active).
+						if ( isset( $tabs[ $tab ] ) && has_action( 'prime_cache_render_admin_tab' ) ) {
+							do_action( 'prime_cache_render_admin_tab', $tab, $settings, $this );
+						} else {
+							$this->tab_dashboard( $settings );
+						}
 						break;
 				}
 				?>
@@ -737,7 +736,7 @@ class Prime_Cache_Admin_Settings {
 				<span class="dashicons dashicons-yes-alt" style="color:#22c55e;font-size:20px"></span>
 				<span style="font-size:13px;color:#475569"><?php
 				/* translators: %s: number of cached pages */
-				printf( esc_html__( 'Cache is serving %s pages via .htaccess fast-path (PHP-free). Hit/miss stats are not tracked in this mode because pages are served directly by Apache without running PHP.', 'prime-cache' ), '<b>' . esc_html( number_format( $st['files'] ) ) . '</b>' );
+				echo wp_kses( sprintf( __( 'Cache is serving %s pages via .htaccess fast-path (PHP-free). Hit/miss stats are not tracked in this mode because pages are served directly by Apache without running PHP.', 'prime-cache' ), '<b>' . number_format( $st['files'] ) . '</b>' ), array( 'b' => array() ) );
 				?></span>
 			</div>
 			<?php else : ?>
@@ -746,11 +745,11 @@ class Prime_Cache_Admin_Settings {
 			<div class="pc-bar__info">
 				<span><?php
 				/* translators: %s: total number of cache requests */
-				printf( esc_html__( 'Total: %s', 'prime-cache' ), '<b>' . esc_html( number_format( $total ) ) . '</b>' );
+				echo wp_kses( sprintf( __( 'Total: %s', 'prime-cache' ), '<b>' . number_format( $total ) . '</b>' ), array( 'b' => array() ) );
 				?></span>
 				<span><?php
 				/* translators: %s: total cache size (e.g. "12 MB") */
-				printf( esc_html__( 'Size: %s', 'prime-cache' ), '<b>' . esc_html( $this->fmt( $st['size'] ) ) . '</b>' );
+				echo wp_kses( sprintf( __( 'Size: %s', 'prime-cache' ), '<b>' . esc_html( $this->fmt( $st['size'] ) ) . '</b>' ), array( 'b' => array() ) );
 				?></span>
 			</div>
 		</div>
@@ -860,14 +859,9 @@ class Prime_Cache_Admin_Settings {
 				<?php endforeach; ?>
 			</div>
 		</div>
-		<?php if ( ! prime_cache_is_pro() ) : ?>
-		<div class="pc-card pc-upsell">
-			<span class="pc-card__h"><?php esc_html_e( 'Optional add-ons', 'prime-cache' ); ?></span>
-			<p><?php esc_html_e( 'Additional performance features — such as object caching, advanced CSS/JS optimization, and database cleanup — are available as a separate add-on.', 'prime-cache' ); ?></p>
-			<a href="https://raplsworks.com/prime-cache-pro/" class="pc-btn pc-btn--p pc-btn--sm" target="_blank" rel="noopener"><?php esc_html_e( 'Learn More', 'prime-cache' ); ?> &rarr;</a>
-		</div>
-		<?php endif; ?>
 		<?php
+		// Optional add-on information lives only on the Add-ons tab (tab_upgrade)
+		// to keep the dashboard free of upsell prompts.
 	}
 
 	/* ── tab: page cache ──────────────────────────────────── */
@@ -1631,74 +1625,6 @@ class Prime_Cache_Admin_Settings {
 		<?php
 	}
 
-	/* ── tab: cdn ─────────────────────────────────────────── */
-
-	private function tab_cdn( $settings ) {
-		$vis = array();
-		if ( prime_cache_is_pro() ) {
-			$vis = array( 'cdn_enabled','cdn_hostname','cdn_include_dirs','cdn_exclude','cdn_relative','cloudflare_enabled','cloudflare_email','cloudflare_api_key','cloudflare_auth_mode','cloudflare_zone_id' );
-		}
-		?>
-		<h2 class="pc-title"><?php esc_html_e( 'CDN', 'prime-cache' ); ?></h2>
-		<form method="post" action="options.php">
-			<?php settings_fields( 'prime_cache_settings_group' ); ?>
-			<?php $this->hidden( $settings, $vis ); ?>
-
-			<!-- CDN URL Rewriting -->
-			<div class="pc-card">
-				<span class="pc-card__h"><?php esc_html_e( 'CDN URL Rewriting', 'prime-cache' ); ?></span>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[cdn_enabled]" value="1" <?php checked( $settings['cdn_enabled'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Enable CDN', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Rewrite URLs for static assets (images, CSS, JS) to be served from your CDN hostname. Works with any pull-zone CDN (BunnyCDN, CloudFront, KeyCDN, StackPath, etc.).', 'prime-cache' ); ?></small></span></label>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[cdn_relative]" value="1" <?php checked( $settings['cdn_relative'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Rewrite Relative URLs', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Also rewrite relative URLs (starting with /) in src and href attributes. Disable if your theme uses relative URLs for non-asset links.', 'prime-cache' ); ?></small></span></label>
-				<div class="pc-field">
-					<label class="pc-lbl"><?php esc_html_e( 'CDN Hostname(s)', 'prime-cache' ); ?></label>
-					<textarea name="prime_cache_settings[cdn_hostname]" rows="2" class="pc-ta" placeholder="cdn.example.com&#10;cdn2.example.com"><?php echo esc_textarea( $settings['cdn_hostname'] ); ?></textarea>
-					<p class="pc-help"><?php esc_html_e( 'One hostname per line (without https://). Multiple hostnames enable domain sharding — assets are distributed across them in round-robin.', 'prime-cache' ); ?></p>
-				</div>
-				<div class="pc-field">
-					<label class="pc-lbl"><?php esc_html_e( 'Include Directories', 'prime-cache' ); ?></label>
-					<input type="text" name="prime_cache_settings[cdn_include_dirs]" value="<?php echo esc_attr( $settings['cdn_include_dirs'] ); ?>" class="pc-ta" style="font-family:inherit" placeholder="wp-content,wp-includes">
-					<p class="pc-help"><?php esc_html_e( 'Comma-separated directory names. Only URLs containing these paths will be rewritten. Default: wp-content,wp-includes', 'prime-cache' ); ?></p>
-				</div>
-				<div class="pc-field">
-					<label class="pc-lbl"><?php esc_html_e( 'Exclude Patterns', 'prime-cache' ); ?></label>
-					<textarea name="prime_cache_settings[cdn_exclude]" rows="2" class="pc-ta" placeholder=".php&#10;dynamic-image"><?php echo esc_textarea( $settings['cdn_exclude'] ); ?></textarea>
-					<p class="pc-help"><?php esc_html_e( 'One pattern per line. URLs containing these strings will not be rewritten to the CDN.', 'prime-cache' ); ?></p>
-				</div>
-			</div>
-
-			<!-- Cloudflare -->
-			<div class="pc-card">
-				<span class="pc-card__h">Cloudflare</span>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[cloudflare_enabled]" value="1" <?php checked( $settings['cloudflare_enabled'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Cloudflare Cache Sync', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Automatically purge Cloudflare cache when Prime Cache is cleared. Supports full zone purge and per-URL purge (up to 30 URLs per API call, batched automatically). Small batches are sent immediately; larger batches are deferred to a background task.', 'prime-cache' ); ?></small></span></label>
-				<div class="pc-field">
-					<label class="pc-lbl"><?php esc_html_e( 'Zone ID', 'prime-cache' ); ?></label>
-					<input type="text" name="prime_cache_settings[cloudflare_zone_id]" value="<?php echo esc_attr( $settings['cloudflare_zone_id'] ); ?>" class="pc-ta" style="font-family:monospace" placeholder="32-character zone ID">
-					<p class="pc-help"><?php esc_html_e( 'Find this in Cloudflare dashboard > your domain > Overview (right sidebar).', 'prime-cache' ); ?></p>
-				</div>
-				<div class="pc-field">
-					<label class="pc-lbl"><?php esc_html_e( 'Authentication Method', 'prime-cache' ); ?></label>
-					<select name="prime_cache_settings[cloudflare_auth_mode]" class="pc-sel" style="width:220px">
-						<option value="token" <?php selected( $settings['cloudflare_auth_mode'] ?? 'token', 'token' ); ?>><?php esc_html_e( 'API Token (recommended)', 'prime-cache' ); ?></option>
-						<option value="global_key" <?php selected( $settings['cloudflare_auth_mode'] ?? 'token', 'global_key' ); ?>><?php esc_html_e( 'Global API Key + Email', 'prime-cache' ); ?></option>
-					</select>
-				</div>
-				<div class="pc-field">
-					<label class="pc-lbl"><?php esc_html_e( 'API Token or Global API Key', 'prime-cache' ); ?></label>
-					<input type="text" name="prime_cache_settings[cloudflare_api_key]" value="<?php echo esc_attr( $settings['cloudflare_api_key'] ); ?>" class="pc-ta" style="font-family:monospace" placeholder="<?php echo 'global_key' === ( $settings['cloudflare_auth_mode'] ?? 'token' ) ? 'Global API Key' : 'API Token'; ?>"
-						<?php echo defined( 'PRIME_CACHE_CF_API_TOKEN' ) ? 'disabled' : ''; ?>>
-					<p class="pc-help"><?php esc_html_e( 'API Token: Create a custom token with "Zone > Cache Purge > Purge" permission. Global API Key: Use with the email address below. Can also be set via PRIME_CACHE_CF_API_TOKEN constant.', 'prime-cache' ); ?></p>
-				</div>
-				<div class="pc-field">
-					<label class="pc-lbl"><?php esc_html_e( 'Cloudflare Account Email', 'prime-cache' ); ?></label>
-					<input type="email" name="prime_cache_settings[cloudflare_email]" value="<?php echo esc_attr( $settings['cloudflare_email'] ); ?>" class="pc-ta" style="font-family:inherit" placeholder="you@example.com">
-					<p class="pc-help"><?php esc_html_e( 'Required only when using Global API Key authentication. Not needed for API Token.', 'prime-cache' ); ?></p>
-				</div>
-			</div>
-
-			<div class="pc-actions"><?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?></div>
-		</form>
-		<?php
-	}
 
 	/* ── tab: preload ─────────────────────────────────────── */
 
@@ -1798,284 +1724,7 @@ class Prime_Cache_Admin_Settings {
 		<?php
 	}
 
-	/* ── tab: heartbeat ───────────────────────────────────── */
 
-	private function tab_heartbeat( $settings ) {
-		$vis = array(
-			'heartbeat_enabled','heartbeat_frontend','heartbeat_admin','heartbeat_editor',
-			'heartbeat_admin_interval','heartbeat_frontend_interval',
-		);
-		$behaviors = array(
-			'enable'  => __( 'Allow', 'prime-cache' ),
-			'modify'  => __( 'Reduce Frequency', 'prime-cache' ),
-			'disable' => __( 'Disable', 'prime-cache' ),
-		);
-		?>
-		<h2 class="pc-title"><?php esc_html_e( 'Heartbeat', 'prime-cache' ); ?></h2>
-		<form method="post" action="options.php">
-			<?php settings_fields( 'prime_cache_settings_group' ); ?>
-			<?php $this->hidden( $settings, $vis ); ?>
-
-			<div class="pc-card">
-				<span class="pc-card__h"><?php esc_html_e( 'Heartbeat API Control', 'prime-cache' ); ?></span>
-				<label class="pc-sw" style="margin-bottom:16px">
-					<input type="checkbox" name="prime_cache_settings[heartbeat_enabled]" value="1" <?php checked( $settings['heartbeat_enabled'] ); ?> id="pc-hb-toggle">
-					<span class="pc-sw__track"></span>
-					<span class="pc-sw__body">
-						<b><?php esc_html_e( 'Control Heartbeat API', 'prime-cache' ); ?></b>
-						<small><?php esc_html_e( 'The WordPress Heartbeat API sends periodic AJAX requests (wp-admin/admin-ajax.php) to keep sessions alive, auto-save drafts, and show real-time notifications. Reducing or disabling it lowers server load and CPU usage, especially on shared hosting.', 'prime-cache' ); ?></small>
-					</span>
-				</label>
-
-				<div id="pc-hb-options" style="<?php echo $settings['heartbeat_enabled'] ? '' : 'opacity:.4;pointer-events:none;'; ?>">
-
-					<!-- Frontend -->
-					<div class="pc-hb-location">
-						<div class="pc-hb-location__head">
-							<span class="dashicons dashicons-admin-site-alt3" style="color:var(--c-pri)"></span>
-							<b><?php esc_html_e( 'Frontend', 'prime-cache' ); ?></b>
-						</div>
-						<p class="pc-help" style="margin:0 0 10px"><?php esc_html_e( 'Heartbeat on public-facing pages. Usually unnecessary — disabling is recommended for most sites.', 'prime-cache' ); ?></p>
-						<div class="pc-hb-controls">
-							<select name="prime_cache_settings[heartbeat_frontend]" class="pc-sel" id="pc-hb-fe-sel">
-								<?php foreach ( $behaviors as $val => $label ) : ?>
-									<option value="<?php echo esc_attr( $val ); ?>" <?php selected( $settings['heartbeat_frontend'], $val ); ?>><?php echo esc_html( $label ); ?></option>
-								<?php endforeach; ?>
-							</select>
-							<div class="pc-hb-interval" id="pc-hb-fe-int" style="<?php echo 'modify' === $settings['heartbeat_frontend'] ? '' : 'display:none;'; ?>">
-								<label class="pc-meta"><?php esc_html_e( 'Interval:', 'prime-cache' ); ?></label>
-								<input type="number" name="prime_cache_settings[heartbeat_frontend_interval]" value="<?php echo esc_attr( $settings['heartbeat_frontend_interval'] ); ?>" min="15" max="300" class="pc-inp" style="width:80px">
-								<span class="pc-meta"><?php esc_html_e( 'sec', 'prime-cache' ); ?></span>
-							</div>
-						</div>
-					</div>
-
-					<!-- Admin -->
-					<div class="pc-hb-location">
-						<div class="pc-hb-location__head">
-							<span class="dashicons dashicons-dashboard" style="color:var(--c-pri)"></span>
-							<b><?php esc_html_e( 'Admin Dashboard', 'prime-cache' ); ?></b>
-						</div>
-						<p class="pc-help" style="margin:0 0 10px"><?php esc_html_e( 'Heartbeat on wp-admin pages (excluding the post editor). Reducing to 120 seconds is a good balance between functionality and server load.', 'prime-cache' ); ?></p>
-						<div class="pc-hb-controls">
-							<select name="prime_cache_settings[heartbeat_admin]" class="pc-sel" id="pc-hb-ad-sel">
-								<?php foreach ( $behaviors as $val => $label ) : ?>
-									<option value="<?php echo esc_attr( $val ); ?>" <?php selected( $settings['heartbeat_admin'], $val ); ?>><?php echo esc_html( $label ); ?></option>
-								<?php endforeach; ?>
-							</select>
-							<div class="pc-hb-interval" id="pc-hb-ad-int" style="<?php echo 'modify' === $settings['heartbeat_admin'] ? '' : 'display:none;'; ?>">
-								<label class="pc-meta"><?php esc_html_e( 'Interval:', 'prime-cache' ); ?></label>
-								<input type="number" name="prime_cache_settings[heartbeat_admin_interval]" value="<?php echo esc_attr( $settings['heartbeat_admin_interval'] ); ?>" min="15" max="300" class="pc-inp" style="width:80px">
-								<span class="pc-meta"><?php esc_html_e( 'sec', 'prime-cache' ); ?></span>
-							</div>
-						</div>
-					</div>
-
-					<!-- Editor -->
-					<div class="pc-hb-location">
-						<div class="pc-hb-location__head">
-							<span class="dashicons dashicons-edit" style="color:var(--c-pri)"></span>
-							<b><?php esc_html_e( 'Post Editor', 'prime-cache' ); ?></b>
-						</div>
-						<p class="pc-help" style="margin:0 0 10px"><?php esc_html_e( 'Heartbeat on the post/page editor. Required for auto-save, post locking, and real-time collaboration. Disabling may cause data loss — "Allow" is strongly recommended.', 'prime-cache' ); ?></p>
-						<div class="pc-hb-controls">
-							<select name="prime_cache_settings[heartbeat_editor]" class="pc-sel">
-								<?php foreach ( $behaviors as $val => $label ) : ?>
-									<option value="<?php echo esc_attr( $val ); ?>" <?php selected( $settings['heartbeat_editor'], $val ); ?>><?php echo esc_html( $label ); ?></option>
-								<?php endforeach; ?>
-							</select>
-						</div>
-					</div>
-
-				</div>
-			</div>
-
-			<div class="pc-actions"><?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?></div>
-		</form>
-
-		<script>
-		(function(){
-			var toggle=document.getElementById('pc-hb-toggle'),opts=document.getElementById('pc-hb-options');
-			if(toggle&&opts) toggle.addEventListener('change',function(){opts.style.opacity=toggle.checked?'1':'.4';opts.style.pointerEvents=toggle.checked?'':'none';});
-
-			function bindInterval(selId,intId){
-				var sel=document.getElementById(selId),box=document.getElementById(intId);
-				if(!sel||!box)return;
-				sel.addEventListener('change',function(){box.style.display=sel.value==='modify'?'':'none';});
-			}
-			bindInterval('pc-hb-fe-sel','pc-hb-fe-int');
-			bindInterval('pc-hb-ad-sel','pc-hb-ad-int');
-		})();
-		</script>
-		<?php
-	}
-
-	/* ── tab: database ────────────────────────────────────── */
-
-	private function tab_database( $settings ) {
-		$db_keys = array(
-			'db_revisions','db_auto_drafts','db_trashed_posts',
-			'db_spam_comments','db_trashed_comments',
-			'db_expired_transients','db_all_transients','db_optimize_tables',
-			'db_auto_cleanup','db_cleanup_frequency',
-		);
-
-		// This tab is only registered (via the prime_cache_admin_tabs filter) by
-		// the add-on that provides the optimizer, so it is never shown in the
-		// free plugin on its own. If the tab is registered but the optimizer is
-		// not loaded (e.g. the add-on is present but inactive/not ready), show a
-		// neutral notice rather than a blank pane or fatal.
-		if ( ! class_exists( 'Prime_Cache_Database_Optimizer' ) ) {
-			echo '<h2 class="pc-title">' . esc_html__( 'Database', 'prime-cache' ) . '</h2>';
-			echo '<div class="pc-card"><p>' . esc_html__( 'Database optimization is not available right now. Make sure the add-on that provides it is active and up to date.', 'prime-cache' ) . '</p></div>';
-			return;
-		}
-		$optimizer = new Prime_Cache_Database_Optimizer();
-		$counts    = $optimizer->get_counts();
-		$cleanup_url = wp_nonce_url( admin_url( 'admin.php?prime_cache_db_cleanup=1' ), 'prime_cache_db_cleanup' );
-		?>
-		<h2 class="pc-title"><?php esc_html_e( 'Database', 'prime-cache' ); ?></h2>
-
-		<?php /* phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only success notice shown after a nonce-verified cleanup redirect; the value is cast to int. */ ?>
-		<?php if ( isset( $_GET['prime_cache_db_cleaned'] ) ) : ?>
-			<div class="notice notice-success is-dismissible" style="margin:0 0 16px">
-				<p><?php
-				/* translators: %s: number of items cleaned up */
-				printf( esc_html__( 'Database cleanup processed %s items (max 1,000 per task). Run again if more remain.', 'prime-cache' ), '<b>' . esc_html( (int) $_GET['prime_cache_db_cleaned'] ) . '</b>' );
-				?></p>
-			</div>
-		<?php endif; ?>
-		<?php /* phpcs:enable WordPress.Security.NonceVerification.Recommended */ ?>
-
-		<form method="post" action="options.php">
-			<?php settings_fields( 'prime_cache_settings_group' ); ?>
-			<?php $this->hidden( $settings, $db_keys ); ?>
-
-			<!-- Post Cleanup -->
-			<div class="pc-card">
-				<span class="pc-card__h"><?php esc_html_e( 'Post Cleanup', 'prime-cache' ); ?></span>
-				<?php
-				$post_items = array(
-					array( 'db_revisions',     __( 'Revisions', 'prime-cache' ),     __( 'Delete all post revisions. Revisions are saved every time you update a post and can accumulate over time.', 'prime-cache' ), $counts['revisions'] ),
-					array( 'db_auto_drafts',   __( 'Auto Drafts', 'prime-cache' ),   __( 'Delete auto-draft posts created automatically by WordPress when you start writing a new post. These are never published.', 'prime-cache' ), $counts['auto_drafts'] ),
-					array( 'db_trashed_posts', __( 'Trashed Posts', 'prime-cache' ),  __( 'Permanently delete posts that are in the trash. These are already removed from the site but still occupy database space.', 'prime-cache' ), $counts['trashed_posts'] ),
-				);
-				foreach ( $post_items as $item ) :
-				?>
-				<label class="pc-sw">
-					<input type="checkbox" name="prime_cache_settings[<?php echo esc_attr( $item[0] ); ?>]" value="1" <?php checked( $settings[ $item[0] ] ); ?>>
-					<span class="pc-sw__track"></span>
-					<span class="pc-sw__body">
-						<b><?php echo esc_html( $item[1] ); ?> <span class="pc-badge pc-badge--m"><?php echo esc_html( number_format( $item[3] ) ); ?></span></b>
-						<small><?php echo esc_html( $item[2] ); ?></small>
-					</span>
-				</label>
-				<?php endforeach; ?>
-			</div>
-
-			<!-- Comments Cleanup -->
-			<div class="pc-card">
-				<span class="pc-card__h"><?php esc_html_e( 'Comments Cleanup', 'prime-cache' ); ?></span>
-				<?php
-				$comment_items = array(
-					array( 'db_spam_comments',    __( 'Spam Comments', 'prime-cache' ),    __( 'Permanently delete all comments marked as spam. These comments have already been filtered out but remain in the database.', 'prime-cache' ), $counts['spam_comments'] ),
-					array( 'db_trashed_comments', __( 'Trashed Comments', 'prime-cache' ), __( 'Permanently delete comments that are in the trash.', 'prime-cache' ), $counts['trashed_comments'] ),
-				);
-				foreach ( $comment_items as $item ) :
-				?>
-				<label class="pc-sw">
-					<input type="checkbox" name="prime_cache_settings[<?php echo esc_attr( $item[0] ); ?>]" value="1" <?php checked( $settings[ $item[0] ] ); ?>>
-					<span class="pc-sw__track"></span>
-					<span class="pc-sw__body">
-						<b><?php echo esc_html( $item[1] ); ?> <span class="pc-badge pc-badge--m"><?php echo esc_html( number_format( $item[3] ) ); ?></span></b>
-						<small><?php echo esc_html( $item[2] ); ?></small>
-					</span>
-				</label>
-				<?php endforeach; ?>
-			</div>
-
-			<!-- Transients Cleanup -->
-			<div class="pc-card">
-				<span class="pc-card__h"><?php esc_html_e( 'Transients Cleanup', 'prime-cache' ); ?></span>
-				<?php
-				$transient_items = array(
-					array( 'db_expired_transients', __( 'Expired Transients', 'prime-cache' ), __( 'Delete only expired transients. These are temporary options that have passed their timeout and are no longer needed. Safe to clean.', 'prime-cache' ), $counts['expired_transients'] ),
-					array( 'db_all_transients',     __( 'All Transients', 'prime-cache' ),     __( 'Delete all transients, including active ones. Transients are recreated as needed by plugins and WordPress core. Use with caution — may briefly slow down the site while they regenerate.', 'prime-cache' ), $counts['all_transients'] ),
-				);
-				foreach ( $transient_items as $item ) :
-				?>
-				<label class="pc-sw">
-					<input type="checkbox" name="prime_cache_settings[<?php echo esc_attr( $item[0] ); ?>]" value="1" <?php checked( $settings[ $item[0] ] ); ?>>
-					<span class="pc-sw__track"></span>
-					<span class="pc-sw__body">
-						<b><?php echo esc_html( $item[1] ); ?> <span class="pc-badge pc-badge--m"><?php echo esc_html( number_format( $item[3] ) ); ?></span></b>
-						<small><?php echo esc_html( $item[2] ); ?></small>
-					</span>
-				</label>
-				<?php endforeach; ?>
-			</div>
-
-			<!-- Table Optimization -->
-			<div class="pc-card">
-				<span class="pc-card__h"><?php esc_html_e( 'Database Tables', 'prime-cache' ); ?></span>
-				<label class="pc-sw">
-					<input type="checkbox" name="prime_cache_settings[db_optimize_tables]" value="1" <?php checked( $settings['db_optimize_tables'] ); ?>>
-					<span class="pc-sw__track"></span>
-					<span class="pc-sw__body">
-						<b><?php esc_html_e( 'Optimize Tables', 'prime-cache' ); ?> <span class="pc-badge pc-badge--m"><?php echo esc_html( number_format( $counts['tables'] ) ); ?></span></b>
-						<small><?php esc_html_e( 'Run OPTIMIZE TABLE on non-InnoDB WordPress tables with fragmented space. InnoDB tables are excluded because they handle fragmentation internally and OPTIMIZE can cause heavy table rebuilds on large tables.', 'prime-cache' ); ?></small>
-					</span>
-				</label>
-			</div>
-
-			<!-- Automatic Cleanup -->
-			<div class="pc-card">
-				<span class="pc-card__h"><?php esc_html_e( 'Automatic Cleanup', 'prime-cache' ); ?></span>
-				<label class="pc-sw" style="margin-bottom:12px">
-					<input type="checkbox" name="prime_cache_settings[db_auto_cleanup]" value="1" <?php checked( $settings['db_auto_cleanup'] ); ?> id="pc-db-auto">
-					<span class="pc-sw__track"></span>
-					<span class="pc-sw__body">
-						<b><?php esc_html_e( 'Schedule Automatic Cleanup', 'prime-cache' ); ?></b>
-						<small><?php esc_html_e( 'Automatically run all enabled cleanup tasks above on a schedule via WP-Cron. Only the options toggled on above will be cleaned.', 'prime-cache' ); ?></small>
-					</span>
-				</label>
-				<div class="pc-field" id="pc-db-freq" style="<?php echo $settings['db_auto_cleanup'] ? '' : 'opacity:.4;pointer-events:none;'; ?>">
-					<label class="pc-lbl"><?php esc_html_e( 'Cleanup Frequency', 'prime-cache' ); ?></label>
-					<select name="prime_cache_settings[db_cleanup_frequency]" class="pc-sel" style="width:180px">
-						<option value="daily" <?php selected( $settings['db_cleanup_frequency'], 'daily' ); ?>><?php esc_html_e( 'Daily', 'prime-cache' ); ?></option>
-						<option value="weekly" <?php selected( $settings['db_cleanup_frequency'], 'weekly' ); ?>><?php esc_html_e( 'Weekly', 'prime-cache' ); ?></option>
-						<option value="monthly" <?php selected( $settings['db_cleanup_frequency'], 'monthly' ); ?>><?php esc_html_e( 'Monthly', 'prime-cache' ); ?></option>
-					</select>
-				</div>
-			</div>
-
-			<div class="pc-card" style="background:#fffbeb;border-color:#fbbf24">
-				<div style="display:flex;align-items:flex-start;gap:12px">
-					<span class="dashicons dashicons-warning" style="color:#d97706;font-size:22px;margin-top:2px;flex-shrink:0"></span>
-					<div>
-						<b style="color:#92400e"><?php esc_html_e( 'Please back up your database before running cleanup.', 'prime-cache' ); ?></b>
-						<p class="pc-help" style="margin:4px 0 0;color:#a16207"><?php esc_html_e( 'Database cleanup operations permanently delete data such as revisions, drafts, and comments. These actions cannot be undone. We strongly recommend creating a full database backup using your hosting control panel or a backup plugin before proceeding.', 'prime-cache' ); ?></p>
-					</div>
-				</div>
-			</div>
-
-			<div class="pc-actions">
-				<?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?>
-				<a href="<?php echo esc_url( $cleanup_url ); ?>" class="pc-btn pc-btn--p" onclick="return confirm(<?php echo esc_attr( wp_json_encode( __( 'Run database cleanup now? Up to 1,000 items will be processed per run. This cannot be undone.', 'prime-cache' ) ) ); ?>)">
-					<span class="dashicons dashicons-database-remove"></span><?php esc_html_e( 'Run Cleanup Now', 'prime-cache' ); ?>
-				</a>
-			</div>
-		</form>
-
-		<script>
-		(function(){
-			var cb=document.getElementById('pc-db-auto'),fr=document.getElementById('pc-db-freq');
-			if(!cb||!fr)return;
-			cb.addEventListener('change',function(){fr.style.opacity=cb.checked?'1':'.4';fr.style.pointerEvents=cb.checked?'':'none';});
-		})();
-		</script>
-		<?php
-	}
 
 	/* ── tab: auto purge ──────────────────────────────────── */
 
@@ -2539,123 +2188,6 @@ class Prime_Cache_Admin_Settings {
 		<?php
 	}
 
-	/* ── tab: object cache ────────────────────────────────── */
-
-	private function tab_object() {
-		$act = Prime_Cache_Config::get_active_object_cache();
-		// "Available" must agree with what setup_object_cache() can actually
-		// install: PHP extension AND the backend dropin file present. Track
-		// both signals separately so the disabled button can show the right
-		// reason — "PHP Extension Required" vs "Backend Not Bundled" (the
-		// latter is the Free build path where the Pro dropin is absent).
-		$has_dropin = function ( $backend ) {
-			$dropin = Prime_Cache_Config::get_object_cache_dropin_path( $backend );
-			return $dropin && is_readable( $dropin );
-		};
-		$be = array(
-			'apcu'=>array(
-				'APCu',
-				__('Shared memory within PHP processes. Ideal for single-server environments.','prime-cache'),
-				'apcu',
-				function_exists('apcu_add') && $has_dropin('apcu'),
-				'dashicons-performance',
-				function_exists('apcu_add'),
-				$has_dropin('apcu'),
-			),
-			'redis'=>array(
-				'Redis',
-				__('High-performance in-memory data store. Supports persistence and replication.','prime-cache'),
-				'redis (PhpRedis)',
-				class_exists('Redis') && $has_dropin('redis'),
-				'dashicons-cloud',
-				class_exists('Redis'),
-				$has_dropin('redis'),
-			),
-			'memcached'=>array(
-				'Memcached',
-				__('Distributed memory cache. Ideal for sharing across multiple servers.','prime-cache'),
-				'memcached (PECL)',
-				class_exists('Memcached') && $has_dropin('memcached'),
-				'dashicons-networking',
-				class_exists('Memcached'),
-				$has_dropin('memcached'),
-			),
-		);
-		?>
-		<h2 class="pc-title"><?php esc_html_e('Object Cache','prime-cache'); ?></h2>
-		<?php /* phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only success/failure notices shown after a nonce-verified object-cache switch redirect. */ ?>
-		<?php if(isset($_GET['prime_cache_oc_switched'])): ?><div class="notice notice-success is-dismissible" style="margin:0 0 16px"><p><?php esc_html_e('Object cache settings have been updated.','prime-cache'); ?></p></div><?php endif; ?>
-		<?php if(isset($_GET['prime_cache_oc_switch_failed'])): ?><div class="notice notice-error is-dismissible" style="margin:0 0 16px"><p><?php esc_html_e('Object cache switch failed. Another plugin may be managing object-cache.php, or the required PHP extension is not available.','prime-cache'); ?></p></div><?php endif; ?>
-		<?php /* phpcs:enable WordPress.Security.NonceVerification.Recommended */ ?>
-
-		<div class="pc-card pc-oc-banner">
-			<span class="pc-dot pc-dot--<?php echo ('off'===$act||'broken'===$act)?'m':'g'; ?> pc-dot--xl"></span>
-			<div class="pc-oc-banner__body">
-				<b><?php
-				if ( 'off' === $act ) {
-					esc_html_e( 'Object Cache: Disabled', 'prime-cache' );
-				} elseif ( 'external' === $act ) {
-					esc_html_e( 'Object Cache: Managed by another plugin', 'prime-cache' );
-				} elseif ( 'broken' === $act ) {
-					esc_html_e( 'Object Cache: Backend file missing', 'prime-cache' );
-				} else {
-					/* translators: %s: object cache backend name (e.g. "REDIS", "MEMCACHED") */
-					printf( esc_html__( 'Object Cache: Active via %s', 'prime-cache' ), esc_html( strtoupper( $act ) ) );
-				}
-				?></b>
-				<small><?php
-				if ( 'off' === $act ) {
-					esc_html_e( 'Select a backend to enable object caching.', 'prime-cache' );
-				} elseif ( 'external' === $act ) {
-					esc_html_e( "Another plugin's object-cache.php was detected.", 'prime-cache' );
-				} elseif ( 'broken' === $act ) {
-					esc_html_e( "Prime Cache's object-cache.php is installed, but the referenced backend file is unreadable. Disable and re-enable the backend to repair, or switch to another option.", 'prime-cache' );
-				} else {
-					esc_html_e( 'Database query results are being cached in memory.', 'prime-cache' );
-				}
-				?></small>
-			</div>
-			<?php if('off'!==$act&&'external'!==$act): ?><a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?prime_cache_object_cache=off'),'prime_cache_object_cache')); ?>" class="pc-btn pc-btn--r pc-btn--sm"><?php esc_html_e('Disable','prime-cache'); ?></a><?php endif; ?>
-		</div>
-
-		<div class="pc-grid pc-grid--3">
-		<?php foreach($be as $slug=>$i): $av=$i[3]; $on=($slug===$act); $eu=wp_nonce_url(admin_url('admin.php?prime_cache_object_cache='.$slug),'prime_cache_object_cache'); ?>
-			<div class="pc-card pc-oc <?php echo $on?'pc-oc--on':''; ?> <?php echo !$av?'pc-oc--off':''; ?>">
-				<div class="pc-oc__top"><span class="pc-oc__ico dashicons <?php echo esc_attr($i[4]); ?>"></span><b><?php echo esc_html($i[0]); ?></b>
-					<?php if($on): ?><span class="pc-badge pc-badge--g"><?php esc_html_e('Active','prime-cache'); ?></span>
-					<?php elseif(!$av): ?><span class="pc-badge pc-badge--m"><?php esc_html_e('Not Found','prime-cache'); ?></span>
-					<?php else: ?><span class="pc-badge pc-badge--b"><?php esc_html_e('Available','prime-cache'); ?></span><?php endif; ?></div>
-				<p class="pc-oc__desc"><?php echo esc_html($i[1]); ?></p>
-				<div class="pc-oc__foot"><span class="pc-meta"><?php
-				/* translators: %s: PHP extension name (e.g. "redis", "memcached") */
-				printf(esc_html__('Ext: %s','prime-cache'),'<code>'.esc_html($i[2]).'</code>');
-				?> <span class="pc-dot pc-dot--<?php echo $av?'g':'r'; ?> pc-dot--in"></span></span>
-					<?php if($on): ?><a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?prime_cache_object_cache=off'),'prime_cache_object_cache')); ?>" class="pc-btn pc-btn--o pc-btn--sm"><?php esc_html_e('Disable','prime-cache'); ?></a>
-					<?php elseif($av): ?><a href="<?php echo esc_url($eu); ?>" class="pc-btn pc-btn--p pc-btn--sm"><?php esc_html_e('Enable','prime-cache'); ?></a>
-					<?php else: ?>
-						<?php
-						// $i[5] = has PHP extension; $i[6] = has bundled dropin.
-						// Show whichever is actually missing so the admin knows
-						// what to fix rather than chasing the wrong thing.
-						$has_ext_x    = isset( $i[5] ) ? (bool) $i[5] : false;
-						$has_dropin_x = isset( $i[6] ) ? (bool) $i[6] : false;
-						if ( ! $has_ext_x ) {
-							$dis_label = __( 'PHP Extension Required', 'prime-cache' );
-						} elseif ( ! $has_dropin_x ) {
-							$dis_label = __( 'Backend Not Bundled (Pro)', 'prime-cache' );
-						} else {
-							$dis_label = __( 'Not Available', 'prime-cache' );
-						}
-						?>
-						<span class="pc-btn pc-btn--o pc-btn--sm pc-btn--dis"><?php echo esc_html( $dis_label ); ?></span>
-					<?php endif; ?></div>
-			</div>
-		<?php endforeach; ?>
-		</div>
-
-		<div class="pc-card"><span class="pc-card__h"><?php esc_html_e('What is Object Cache?','prime-cache'); ?></span><p class="pc-help" style="margin:0;line-height:1.7"><?php esc_html_e('WordPress executes many database queries during page generation. Object cache stores query results in memory, returning subsequent requests for the same data without hitting the database. Especially effective for sites with many logged-in users or WooCommerce environments with uncacheable pages.','prime-cache'); ?></p></div>
-		<?php
-	}
 
 	/* ── notices ───────────────────────────────────────────── */
 
@@ -2836,9 +2368,6 @@ class Prime_Cache_Admin_Settings {
 .pc-card__h{display:block;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--c-muted);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--c-subtle)}
 .pc-card__row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .pc-card__row .pc-card__h{margin:0;padding:0;border:none}
-.pc-upsell{background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 100%);border:1.5px solid #c4b5fd;box-shadow:0 2px 8px rgba(99,102,241,.08);margin-top:28px}
-.pc-upsell .pc-card__h{color:#6366f1;font-size:14px}
-.pc-upsell p{font-size:13px;color:#475569;line-height:1.7;margin:0 0 14px}
 
 /* hit bar */
 .pc-bar{height:20px;background:var(--c-subtle);border-radius:10px;overflow:hidden}

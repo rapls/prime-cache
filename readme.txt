@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.6
+Stable tag: 1.10.7
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,11 +125,16 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.7 =
+* Changed: The optional add-on settings tabs (CDN, Object Cache, Heartbeat, Database) are no longer rendered by the free plugin. The free plugin only reserves the tab slots; the optional add-on renders them when active. No change for sites without the add-on.
+* Improved: Admin notices that include a value now limit allowed HTML to a single formatting tag via wp_kses().
+* Changed: Optional add-on information is shown only on the Add-ons screen (removed from the dashboard).
+
 = 1.10.6 =
 * Hardening: Coding-standards pass for WordPress.org. Request data ($_GET / $_POST / $_FILES / $_SERVER) is consistently unslashed and sanitized before use, and the bundled code now passes Plugin Check (the pre-WordPress page-cache drop-in and direct cache-file operations are documented as intended). No change to features or behavior.
 
 = 1.10.5 =
-* Changed: Optional add-on features are no longer shown as disabled setting controls inside the free plugin's tabs; the "Add-ons" screen is now a plain text feature list.
+* Changed: Optional add-on information is now shown only as a plain text feature list.
 * Changed: While the add-on is inactive, its option keys are forced off/empty when settings are saved or imported, so they are never stored by the free plugin.
 * Changed: Trimmed the bundled WP-CLI commands to the core cache operations (flush, preload, status).
 * Improved: When saving settings cannot write or remove the .htaccess optimization rules (for example a read-only .htaccess), an admin notice now explains the problem instead of silently reporting success.
@@ -190,6 +195,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.7 =
+The optional add-on settings tabs are now rendered by the add-on rather than the free plugin. No change for sites without the add-on.
 
 = 1.10.6 =
 Coding-standards and Plugin Check hardening (input unslashing/sanitization). No feature or behavior changes.
