@@ -140,9 +140,10 @@ class Prime_Cache_Admin_Settings {
 		$s['varnish_ip']            = sanitize_textarea_field( $input['varnish_ip'] ?? '' );
 		$s['sucuri_enabled']        = ! empty( $input['sucuri_enabled'] );
 		// Secret key: not emitted as a hidden input (see hidden()), so it is
-		// absent from $input unless its own tab is the one being saved. Preserve
-		// the stored value rather than clearing it.
-		$s['sucuri_api_key']        = isset( $input['sucuri_api_key'] )
+		// absent from $input unless its own tab is the one being saved. The field
+		// also never pre-fills the stored secret, so an empty submission means
+		// "keep the current key" — only a non-blank value replaces it.
+		$s['sucuri_api_key']        = ( isset( $input['sucuri_api_key'] ) && '' !== trim( (string) $input['sucuri_api_key'] ) )
 			? sanitize_text_field( $input['sucuri_api_key'] )
 			: ( $old['sucuri_api_key'] ?? '' );
 		$s['heartbeat_enabled']     = ! empty( $input['heartbeat_enabled'] );
@@ -167,11 +168,11 @@ class Prime_Cache_Admin_Settings {
 		$s['cloudflare_enabled']    = ! empty( $input['cloudflare_enabled'] );
 		$s['cloudflare_email']      = sanitize_email( $input['cloudflare_email'] ?? '' );
 		// Secret key: not emitted as a hidden input (see hidden()) and also
-		// suppressed when PRIME_CACHE_CF_API_TOKEN is defined. When the field is
-		// not part of the submitted form it is absent from $input, so preserve
-		// the stored value rather than clearing the secret; only a real
-		// submission of its own tab updates it.
-		if ( isset( $input['cloudflare_api_key'] ) && ! defined( 'PRIME_CACHE_CF_API_TOKEN' ) ) {
+		// suppressed when PRIME_CACHE_CF_API_TOKEN is defined. The field never
+		// pre-fills the stored secret, so it is absent when another tab is saved
+		// and blank when its own tab is saved without a change — both mean "keep
+		// the current key". Only a non-blank value replaces the stored secret.
+		if ( isset( $input['cloudflare_api_key'] ) && '' !== trim( (string) $input['cloudflare_api_key'] ) && ! defined( 'PRIME_CACHE_CF_API_TOKEN' ) ) {
 			$s['cloudflare_api_key'] = sanitize_text_field( $input['cloudflare_api_key'] );
 		} else {
 			$s['cloudflare_api_key'] = $old['cloudflare_api_key'] ?? '';
@@ -289,11 +290,17 @@ class Prime_Cache_Admin_Settings {
 		}
 
 		// Add-on features are implemented by a separate add-on, not by this plugin.
-		// Without it active, force their options to off / empty BEFORE the config
-		// file and .htaccess are written below, so a POST or imported settings file
-		// can never leave add-on settings stored — or written into the generated
-		// config / .htaccess — by the free plugin.
-		if ( ! prime_cache_is_pro() ) {
+		// When the add-on is not installed, force their options to off / empty
+		// BEFORE the config file and .htaccess are written below, so a POST or
+		// imported settings file can never leave add-on settings stored — or
+		// written into the generated config / .htaccess — by the free plugin.
+		//
+		// The add-on advertises its presence via the `prime_cache_addon_active`
+		// filter regardless of license state, so an installed-but-unlicensed
+		// add-on keeps its saved settings (the add-on itself gates whether the
+		// features run). With no add-on installed the filter stays false and the
+		// lock below clears everything, leaving free-only behavior unchanged.
+		if ( ! apply_filters( 'prime_cache_addon_active', false ) ) {
 			$addon_bool_keys = array(
 				'combine_css', 'combine_mobile_only', 'optimize_css_delivery',
 				'remove_unused_css', 'async_css', 'critical_css_auto',
