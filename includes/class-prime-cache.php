@@ -1230,10 +1230,11 @@ class Prime_Cache {
 			$info[ 'WooCommerce' ] = WC()->version;
 		}
 
-		// Pro.
-		$info[ 'Prime Cache Pro' ] = prime_cache_is_pro()
-			? __( 'Active', 'prime-cache' )
-			: __( 'Inactive', 'prime-cache' );
+		// Optional add-on — only surfaced when an add-on is actually active, so the
+		// free plugin's System Info never advertises an inactive add-on.
+		if ( prime_cache_is_pro() ) {
+			$info[ __( 'Optional Add-on', 'prime-cache' ) ] = __( 'Active', 'prime-cache' );
+		}
 
 		return $info;
 	}

@@ -612,7 +612,7 @@ class Prime_Cache_Admin_Settings {
 					</a>
 					<?php endforeach; ?>
 				<?php if ( ! prime_cache_is_pro() ) : ?>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=prime-cache&tab=upgrade' ) ); ?>" class="pc-nav__item pc-nav__upgrade<?php echo 'upgrade' === $tab ? ' pc-nav__item--on' : ''; ?>">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=prime-cache&tab=upgrade' ) ); ?>" class="pc-nav__item pc-nav__addons<?php echo 'upgrade' === $tab ? ' pc-nav__item--on' : ''; ?>">
 					<span class="dashicons dashicons-admin-plugins"></span><?php esc_html_e( 'Add-ons', 'prime-cache' ); ?>
 				</a>
 				<?php endif; ?>
@@ -1092,7 +1092,7 @@ class Prime_Cache_Admin_Settings {
 					<span class="pc-meta"><?php echo esc_html( size_format( $settings['inline_css_threshold'] ) ); ?></span>
 				</div>
 				<?php if ( ! prime_cache_is_pro() ) : ?>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[async_css_free]" value="1" <?php checked( $settings['async_css_free'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Load CSS Asynchronously (Free)', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Convert non-first <link rel="stylesheet"> tags to non-render-blocking loading via media="print" + onload swap. The first stylesheet on the page is intentionally left synchronous to preserve LCP and prevent unstyled flash for above-the-fold content. Use the "Excluded CSS Files" list above for additional stylesheets that must remain render-blocking. Pro users get more sophisticated CSS delivery options (Critical CSS, Remove Unused CSS) and should leave this off.', 'prime-cache' ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- Literal tag is descriptive text inside a translated label, not an actual stylesheet. ?></small></span></label>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[async_css_free]" value="1" <?php checked( $settings['async_css_free'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Load CSS Asynchronously (Free)', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Convert non-first <link rel="stylesheet"> tags to non-render-blocking loading via media="print" + onload swap. The first stylesheet on the page is intentionally left synchronous to preserve LCP and prevent unstyled flash for above-the-fold content. Use the "Excluded CSS Files" list above for additional stylesheets that must remain render-blocking.', 'prime-cache' ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- Literal tag is descriptive text inside a translated label, not an actual stylesheet. ?></small></span></label>
 				<?php endif; ?>
 			</div>
 
@@ -1363,9 +1363,9 @@ class Prime_Cache_Admin_Settings {
 			do_action( 'prime_cache_media_after_optimization', $settings );
 			?>
 
-			<!-- Format Conversion (WebP / AVIF) — WebP is Free, AVIF is Pro -->
+			<!-- Image format conversion. WebP is a free feature; the add-on adds AVIF and shows it only when active. -->
 			<div class="pc-card">
-				<span class="pc-card__h"><?php esc_html_e( 'Format Conversion (WebP / AVIF)', 'prime-cache' ); ?></span>
+				<span class="pc-card__h"><?php echo esc_html( $is_pro ? __( 'Format Conversion (WebP / AVIF)', 'prime-cache' ) : __( 'WebP Conversion', 'prime-cache' ) ); ?></span>
 				<label class="pc-sw">
 					<input type="checkbox" name="prime_cache_settings[img_conversion_enabled]" value="1" <?php checked( ! empty( $settings['img_conversion_enabled'] ) ); ?>>
 					<span class="pc-sw__track"></span>
@@ -2331,11 +2331,11 @@ class Prime_Cache_Admin_Settings {
 .pc-nav__item:hover .dashicons{color:#64748b}
 .pc-nav__item--on{background:#ede9fe;color:var(--c-pri);font-weight:600}
 .pc-nav__item--on .dashicons{color:var(--c-pri)}
-.pc-nav__upgrade{background:linear-gradient(135deg,#6366f1,#7c3aed) !important;color:#fff !important;font-weight:600;border-radius:6px;margin:12px 10px 0;padding:10px 14px !important;text-align:center;transition:opacity .2s}
-.pc-nav__upgrade .dashicons{color:#fbbf24}
-.pc-nav__upgrade:hover{opacity:.9;color:#fff !important;background:linear-gradient(135deg,#4f46e5,#6d28d9) !important}
-/* Pro badge — available for Pro plugin to use when injecting cards via hooks. */
-.pc-pro-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.5px;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;padding:1px 6px;border-radius:4px;margin-left:auto;line-height:16px}
+.pc-nav__addons{background:linear-gradient(135deg,#6366f1,#7c3aed) !important;color:#fff !important;font-weight:600;border-radius:6px;margin:12px 10px 0;padding:10px 14px !important;text-align:center;transition:opacity .2s}
+.pc-nav__addons .dashicons{color:#fbbf24}
+.pc-nav__addons:hover{opacity:.9;color:#fff !important;background:linear-gradient(135deg,#4f46e5,#6d28d9) !important}
+/* Add-on badge — available for the optional add-on to use when injecting cards via hooks. */
+.pc-addon-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.5px;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;padding:1px 6px;border-radius:4px;margin-left:auto;line-height:16px}
 
 /* power toggle in sidebar */
 .pc-side__foot{padding:16px 20px;border-top:1px solid var(--c-subtle)}

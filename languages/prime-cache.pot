@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Prime Cache\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-27 12:16+0900\n"
+"POT-Creation-Date: 2026-05-27 14:34+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -152,7 +152,7 @@ msgstr ""
 #: includes/admin/class-admin-settings.php:805
 #: includes/admin/class-admin-settings.php:829
 #: includes/admin/class-admin-settings.php:872
-#: includes/class-prime-cache.php:1493
+#: includes/class-prime-cache.php:1502
 msgid "Page Cache"
 msgstr ""
 
@@ -247,7 +247,7 @@ msgstr ""
 #: includes/admin/class-admin-settings.php:711
 #: includes/admin/class-admin-settings.php:794
 #: includes/admin/class-admin-settings.php:817
-#: includes/class-prime-cache.php:1235 includes/class-prime-cache.php:1493
+#: includes/class-prime-cache.php:1236 includes/class-prime-cache.php:1502
 msgid "Active"
 msgstr ""
 
@@ -256,12 +256,12 @@ msgid "Cache Status"
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:713
-#: includes/class-prime-cache.php:1481
+#: includes/class-prime-cache.php:1490
 msgid "Hit Rate"
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:717
-#: includes/class-prime-cache.php:1482
+#: includes/class-prime-cache.php:1491
 msgid "Pages"
 msgstr ""
 
@@ -301,7 +301,7 @@ msgstr ""
 #. translators: %s: total cache size (e.g. "12 MB")
 #. translators: %s: total cache size (e.g. "12 MB").
 #: includes/admin/class-admin-settings.php:752
-#: includes/class-prime-cache.php:1489
+#: includes/class-prime-cache.php:1498
 #, php-format
 msgid "Size: %s"
 msgstr ""
@@ -360,8 +360,7 @@ msgstr ""
 
 #: includes/admin/class-admin-settings.php:794
 #: includes/admin/class-admin-settings.php:817
-#: includes/class-prime-cache.php:1236 includes/class-prime-cache.php:1492
-#: includes/class-prime-cache.php:1493
+#: includes/class-prime-cache.php:1501 includes/class-prime-cache.php:1502
 msgid "Inactive"
 msgstr ""
 
@@ -673,7 +672,7 @@ msgid "Save Settings"
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:986
-#: includes/class-prime-cache.php:1496
+#: includes/class-prime-cache.php:1505
 msgid "Clear Cache"
 msgstr ""
 
@@ -774,9 +773,7 @@ msgid ""
 "loading via media=\"print\" + onload swap. The first stylesheet on the page "
 "is intentionally left synchronous to preserve LCP and prevent unstyled flash "
 "for above-the-fold content. Use the \"Excluded CSS Files\" list above for "
-"additional stylesheets that must remain render-blocking. Pro users get more "
-"sophisticated CSS delivery options (Critical CSS, Remove Unused CSS) and "
-"should leave this off."
+"additional stylesheets that must remain render-blocking."
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:1104
@@ -1296,6 +1293,10 @@ msgstr ""
 
 #: includes/admin/class-admin-settings.php:1368
 msgid "Format Conversion (WebP / AVIF)"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:1368
+msgid "WebP Conversion"
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:1373
@@ -2306,7 +2307,7 @@ msgid ""
 msgstr ""
 
 #: includes/class-prime-cache.php:477 includes/class-prime-cache.php:629
-#: includes/class-prime-cache.php:1497
+#: includes/class-prime-cache.php:1506
 msgid "Settings"
 msgstr ""
 
@@ -2397,7 +2398,7 @@ msgstr ""
 msgid "None"
 msgstr ""
 
-#: includes/class-prime-cache.php:1216 includes/class-prime-cache.php:1492
+#: includes/class-prime-cache.php:1216 includes/class-prime-cache.php:1501
 msgid "Object Cache"
 msgstr ""
 
@@ -2413,19 +2414,23 @@ msgstr ""
 msgid "Published Posts"
 msgstr ""
 
-#: includes/class-prime-cache.php:1677
+#: includes/class-prime-cache.php:1236
+msgid "Optional Add-on"
+msgstr ""
+
+#: includes/class-prime-cache.php:1686
 msgid ""
 "Settings imported but config file could not be written. Cache may not "
 "reflect the new settings until the next save."
 msgstr ""
 
-#: includes/class-prime-cache.php:1682
+#: includes/class-prime-cache.php:1691
 msgid ""
 "Settings imported but advanced-cache.php is managed by another plugin. Page "
 "caching will not work until the other plugin is deactivated."
 msgstr ""
 
-#: includes/class-prime-cache.php:1684
+#: includes/class-prime-cache.php:1693
 msgid "Settings imported but advanced-cache.php could not be updated."
 msgstr ""
 

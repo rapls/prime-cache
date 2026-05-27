@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.7
+Stable tag: 1.10.8
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,10 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.8 =
+* Changed: Settings-screen wording now refers only to free features (no add-on/AVIF feature names in the free UI). The image conversion card is titled "WebP Conversion" in the free plugin, and the asynchronous-CSS option description no longer references add-on options.
+* Changed: System Information lists the optional add-on only when it is active.
+
 = 1.10.7 =
 * Changed: The optional add-on settings tabs (CDN, Object Cache, Heartbeat, Database) are no longer rendered by the free plugin. The free plugin only reserves the tab slots; the optional add-on renders them when active. No change for sites without the add-on.
 * Improved: Admin notices that include a value now limit allowed HTML to a single formatting tag via wp_kses().
@@ -196,6 +200,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.8 =
+Settings-screen wording cleanup so the free plugin's UI refers only to free features. No functional changes.
 
 = 1.10.7 =
 The optional add-on settings tabs are now rendered by the add-on rather than the free plugin. No change for sites without the add-on.
