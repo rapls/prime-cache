@@ -126,7 +126,7 @@ No. The free plugin does not send your data or API requests to any third-party s
 == Changelog ==
 
 = 1.10.11 =
-* Changed: The dashboard cache HIT/MISS labels are now translatable, with formatting tags kept outside the translated strings. Internal code comments and the Add-ons navigation styling were tidied. No functional changes.
+* Changed: Minor admin UI and translation cleanup. No functional changes.
 
 = 1.10.10 =
 * Changed: Dashboard cache statistics place formatting tags outside the translated strings (consistent with the rest of the admin UI); no HTML is passed through a translation placeholder. No functional changes.

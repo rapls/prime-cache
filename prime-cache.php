@@ -24,8 +24,8 @@ if ( ! defined( 'PRIME_CACHE_CONFIG_DIR' ) ) {
 define( 'PRIME_CACHE_DROPIN_SOURCE', PRIME_CACHE_PATH . 'dropins/page-cache.php' );
 
 /**
- * Check if the optional add-on is active (filterable; the add-on sets this true
- * when present and licensed).
+ * Check if the optional add-on is active. The separate add-on can set this
+ * filter to true when present.
  *
  * @return bool
  */
