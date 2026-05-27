@@ -646,7 +646,7 @@ class Prime_Cache_Admin_Settings {
 						// If this is a registered add-on tab, let the add-on render it; otherwise
 						// fall back to the dashboard (e.g. a bookmarked add-on tab URL with no
 						// add-on active).
-						if ( isset( $tabs[ $tab ] ) && has_action( 'prime_cache_render_admin_tab' ) ) {
+						if ( isset( $tabs[ $tab ] ) && false !== has_action( 'prime_cache_render_admin_tab' ) ) {
 							do_action( 'prime_cache_render_admin_tab', $tab, $settings, $this );
 						} else {
 							$this->tab_dashboard( $settings );
