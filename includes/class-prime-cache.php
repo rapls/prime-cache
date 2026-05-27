@@ -1409,17 +1409,18 @@ class Prime_Cache {
 			return;
 		}
 
-		// Object cache is an add-on feature. Refuse to install/switch the dropin
-		// unless the add-on is active and licensed, even if a request reaches here
-		// (e.g. a stale bookmarked link while the add-on is inactive/expired).
-		if ( ! prime_cache_is_pro() ) {
-			return;
-		}
-
 		$backend = sanitize_key( $_GET['prime_cache_object_cache'] );
 		$allowed = array_merge( array( 'off' ), array_keys( Prime_Cache_Config::get_available_object_caches() ) );
 
 		if ( ! in_array( $backend, $allowed, true ) ) {
+			return;
+		}
+
+		// Object cache is an add-on feature: only allow ENABLING a backend when the
+		// add-on is active and licensed. Always allow 'off' so an admin can still
+		// remove our own drop-in if the add-on/license later becomes inactive,
+		// rather than being stranded on a stale object-cache configuration.
+		if ( 'off' !== $backend && ! prime_cache_is_pro() ) {
 			return;
 		}
 
