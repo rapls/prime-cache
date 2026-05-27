@@ -35,7 +35,7 @@ class Prime_Cache_File_Optimizer {
 		$this->cache_dir = WP_CONTENT_DIR . '/cache/prime-cache-fo/';
 		$this->cache_url = content_url( '/cache/prime-cache-fo/' );
 
-		// Pro cron handlers are registered by class-file-optimizer-pro.php.
+		// Add-on cron handlers are registered by class-file-optimizer-pro.php.
 
 		// Flush rewrite rules on next request after setting toggle (deferred from save).
 		if ( get_option( 'prime_cache_flush_rewrite' ) ) {
@@ -177,7 +177,7 @@ class Prime_Cache_File_Optimizer {
 		// while the original handle/URL is still identifiable.
 		$html = $this->mark_preserved_scripts( $html );
 
-		// Pro hook: runs before Free optimizations (DNS prefetch, analytics, fonts, UCSS, critical CSS).
+		// Add-on hook: runs before Free optimizations (DNS prefetch, analytics, fonts, UCSS, critical CSS).
 		$html = apply_filters( 'prime_cache_before_optimize', $html, $s );
 
 		// Remove query strings from static resources.
@@ -196,7 +196,7 @@ class Prime_Cache_File_Optimizer {
 			$html = $this->async_google_fonts( $html );
 		}
 
-		// Pro hook: CSS combine, async, critical CSS.
+		// Add-on hook: CSS combine, async, critical CSS.
 		$html = apply_filters( 'prime_cache_process_css', $html, $s );
 
 		// JS optimizations (Free: minify only via ob_start pipeline).
@@ -204,7 +204,7 @@ class Prime_Cache_File_Optimizer {
 			$html = $this->process_js( $html );
 		}
 
-		// Pro hook: JS combine.
+		// Add-on hook: JS combine.
 		$html = apply_filters( 'prime_cache_process_js', $html, $s );
 
 		// Mobile detection must match the cache-key side (dropin / .htaccess) so
@@ -353,7 +353,7 @@ class Prime_Cache_File_Optimizer {
 		$excludes   = $this->parse_list( $s['exclude_css'] );
 		$is_pro     = prime_cache_is_pro();
 		$do_minify  = ! empty( $s['minify_css'] );
-		// Free-only async: skip when Pro handles CSS (async_css, combine_css, critical_css).
+		// Free-only async: skip when the add-on handles CSS (async_css, combine_css, critical_css).
 		$do_inline  = ! $is_pro && ! empty( $s['inline_small_css'] );
 		$do_async   = ! $is_pro && ! empty( $s['async_css_free'] );
 		$threshold  = (int) ( $s['inline_css_threshold'] ?? 8192 );
@@ -841,7 +841,7 @@ class Prime_Cache_File_Optimizer {
 	 *     jQuery core, where plugin code assumes its presence at parse time).
 	 *
 	 * Subsequent pipeline stages already honor `data-no-delay`:
-	 *   - Pro combine_js_files() skips any script with data-* attributes.
+	 *   - The add-on combine_js_files() skips any script with data-* attributes.
 	 *   - delay_all_scripts() skips any script with data-no-delay.
 	 */
 	private function mark_preserved_scripts( $html ) {
@@ -1287,7 +1287,7 @@ class Prime_Cache_File_Optimizer {
 		$file = sanitize_file_name( $wp->query_vars['pc_static_file'] );
 		$ext  = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) );
 
-		// search_dirs below also looks under fonts/ (Pro local-font cache).
+		// search_dirs below also looks under fonts/ (add-on local-font cache).
 		// type_map must cover those extensions or font URLs 404 with no
 		// indication that the file actually existed on disk.
 		$type_map = array(

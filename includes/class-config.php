@@ -554,7 +554,7 @@ class Prime_Cache_Config {
 	 * @return string|false
 	 */
 	public static function get_object_cache_dropin_path( $backend ) {
-		// Object cache dropins are in Pro add-on.
+		// Object cache dropins are in the optional add-on.
 		$pro_path = defined( 'PRIME_CACHE_PRO_PATH' ) ? PRIME_CACHE_PRO_PATH : PRIME_CACHE_PATH;
 		$dropins = array(
 			'apcu'      => $pro_path . 'dropins/apcu-object-cache.php',

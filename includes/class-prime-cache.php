@@ -864,7 +864,7 @@ class Prime_Cache {
 					$merged['remove_unused_css'] = $ocd && 'remove_unused_css' === $method;
 
 					// Same coupling as sanitize_settings(): delay_js needs both
-					// cache_mobile and cache_mobile_separate. Pro presets (via the
+					// cache_mobile and cache_mobile_separate. optional add-on presets (via the
 					// prime_cache_preset_* filter) might set delay_js without these.
 					if ( ! empty( $merged['delay_js'] ) ) {
 						$merged['cache_mobile']          = true;

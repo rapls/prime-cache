@@ -380,7 +380,7 @@ class Prime_Cache_Admin_Settings {
 			set_transient( 'prime_cache_env_warnings', $warnings, 60 );
 		}
 
-		// Schedule immediate async fetch of local analytics files on save (Pro only).
+		// Schedule immediate async fetch of local analytics files on save (add-on only).
 		if ( prime_cache_is_pro() && ! empty( $s['local_analytics'] ) ) {
 			if ( ! wp_next_scheduled( 'prime_cache_refresh_local_analytics' ) ) {
 				$ok = wp_schedule_single_event( time(), 'prime_cache_refresh_local_analytics' );
@@ -1234,7 +1234,7 @@ class Prime_Cache_Admin_Settings {
 		</form>
 
 		<script>
-		/* CSS Delivery controls are injected by the Pro add-on and are absent in
+		/* CSS Delivery controls are injected by the optional add-on and are absent in
 		   Free. Keep this in its OWN IIFE so its early return cannot prevent the
 		   Free-only Delay JS presets handler below from binding. */
 		(function(){
@@ -1292,7 +1292,7 @@ class Prime_Cache_Admin_Settings {
 			'img_delivery_method','img_converter',
 		);
 		if ( $is_pro ) {
-			// AVIF + YouTube thumbnail stay Pro: their real inputs only render under Pro.
+			// AVIF + YouTube thumbnail stay in the add-on: their real inputs only render with the add-on.
 			$vis = array_merge( $vis, array(
 				'youtube_thumbnail',
 				'avif_enabled','avif_quality',
@@ -2237,7 +2237,7 @@ class Prime_Cache_Admin_Settings {
 			$cfg = prime_cache_get_settings();
 			$extra_notes = array();
 			// Add-on integrations: only claim "also purged" when the integration class
-			// is actually loaded. Otherwise an orphaned settings flag (Pro deactivated
+			// is actually loaded. Otherwise an orphaned settings flag (add-on deactivated
 			// but settings retained) would lie about side effects.
 			if ( ! empty( $cfg['varnish_enabled'] ) && class_exists( 'Prime_Cache_Varnish' ) ) {
 				$extra_notes[] = __( 'Varnish cache also purged.', 'prime-cache' );

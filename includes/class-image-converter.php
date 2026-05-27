@@ -51,10 +51,10 @@ class Prime_Cache_Image_Converter {
 	}
 
 	/**
-	 * Register upload/delivery/AJAX/column hooks once Pro detection is reliable.
+	 * Register upload/delivery/AJAX/column hooks once add-on detection is reliable.
 	 */
 	public function init() {
-		// When the Pro add-on's Prime_Cache_WebP engine is present it registers
+		// When the add-on's Prime_Cache_WebP engine is present it registers
 		// the same upload/delivery/AJAX/column hooks. Defer to it entirely to
 		// avoid double-processing every image and emitting duplicate
 		// <source>/column markup. Free's engine drives WebP when it is absent.
@@ -269,7 +269,7 @@ class Prime_Cache_Image_Converter {
 		// Try the preferred engine, then always fall back to GD. GD is the most
 		// widely available library, so it is the universal last resort even when
 		// the stored setting is 'imagick' — otherwise a site that downgraded from
-		// Pro with img_converter='imagick' on a host without Imagick would fail
+		// The add-on with img_converter='imagick' on a host without Imagick would fail
 		// every conversion. ('gd' skips the Imagick attempt above entirely.)
 		if ( 'imagick' === $method || ( 'auto' === $method && class_exists( 'Imagick' ) ) ) {
 			$success = $this->convert_imagick( $source, $dest, $format, $quality );
@@ -1365,7 +1365,7 @@ class Prime_Cache_Image_Converter {
 	 * Whether the server can encode AVIF (GD imageavif() or Imagick AVIF support).
 	 *
 	 * Used by the admin to warn when AVIF is requested but the server cannot
-	 * produce it. Independent of the Pro gate — this only reports raw server
+	 * produce it. Independent of the add-on gate — this only reports raw server
 	 * capability.
 	 *
 	 * @return bool
