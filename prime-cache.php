@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Prime Cache
  * Description: A fast and stable page caching plugin for WordPress.
- * Version: 1.10.8
+ * Version: 1.10.9
  * Author: rapls
  * License: GPL-2.0-or-later
  * Text Domain: prime-cache
@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PRIME_CACHE_VERSION', '1.10.8' );
+define( 'PRIME_CACHE_VERSION', '1.10.9' );
 define( 'PRIME_CACHE_FILE', __FILE__ );
 define( 'PRIME_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 
@@ -24,7 +24,8 @@ if ( ! defined( 'PRIME_CACHE_CONFIG_DIR' ) ) {
 define( 'PRIME_CACHE_DROPIN_SOURCE', PRIME_CACHE_PATH . 'dropins/page-cache.php' );
 
 /**
- * Check if Prime Cache Pro add-on is active.
+ * Check if the optional add-on is active (filterable; the add-on sets this true
+ * when present and licensed).
  *
  * @return bool
  */
@@ -46,7 +47,7 @@ require_once PRIME_CACHE_PATH . 'includes/class-post-metabox.php';
 require_once PRIME_CACHE_PATH . 'includes/class-compatibility.php';
 require_once PRIME_CACHE_PATH . 'includes/class-performance-tweaks.php';
 
-// Pro classes — loaded by prime-cache-pro add-on plugin:
+// Add-on classes are loaded by the separate optional add-on plugin, not here:
 // class-cloudflare.php, class-sucuri.php, class-varnish.php,
 // class-cdn.php, class-heartbeat.php, class-database-optimizer.php,
 // class-webp.php, object cache dropins

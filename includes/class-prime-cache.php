@@ -1492,12 +1492,7 @@ class Prime_Cache {
 		</div>
 		<ul style="margin:0;font-size:13px;line-height:2">
 			<li><?php printf( 'HIT: <b>%s</b> / MISS: <b>%s</b>', esc_html( number_format( $hs['hit'] ) ), esc_html( number_format( $hs['miss'] ) ) ); ?></li>
-			<li>
-				<?php
-				/* translators: %s: total cache size (e.g. "12 MB"). */
-				printf( esc_html__( 'Size: %s', 'prime-cache' ), '<b>' . esc_html( size_format( $size ) ) . '</b>' );
-				?>
-			</li>
+			<li><?php esc_html_e( 'Size', 'prime-cache' ); ?>: <b><?php echo esc_html( size_format( $size ) ); ?></b></li>
 			<li><?php esc_html_e( 'Object Cache', 'prime-cache' ); ?>: <b><?php echo 'off' === $oc ? esc_html__( 'Inactive', 'prime-cache' ) : esc_html( strtoupper( $oc ) ); ?></b></li>
 			<li><?php esc_html_e( 'Page Cache', 'prime-cache' ); ?>: <b><?php echo $s['cache_enabled'] ? esc_html__( 'Active', 'prime-cache' ) : esc_html__( 'Inactive', 'prime-cache' ); ?></b></li>
 		</ul>

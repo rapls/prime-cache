@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Prime Cache\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-27 14:34+0900\n"
+"POT-Creation-Date: 2026-05-27 17:24+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -152,7 +152,7 @@ msgstr ""
 #: includes/admin/class-admin-settings.php:805
 #: includes/admin/class-admin-settings.php:829
 #: includes/admin/class-admin-settings.php:872
-#: includes/class-prime-cache.php:1502
+#: includes/class-prime-cache.php:1497
 msgid "Page Cache"
 msgstr ""
 
@@ -247,7 +247,7 @@ msgstr ""
 #: includes/admin/class-admin-settings.php:711
 #: includes/admin/class-admin-settings.php:794
 #: includes/admin/class-admin-settings.php:817
-#: includes/class-prime-cache.php:1236 includes/class-prime-cache.php:1502
+#: includes/class-prime-cache.php:1236 includes/class-prime-cache.php:1497
 msgid "Active"
 msgstr ""
 
@@ -299,9 +299,7 @@ msgid "Total: %s"
 msgstr ""
 
 #. translators: %s: total cache size (e.g. "12 MB")
-#. translators: %s: total cache size (e.g. "12 MB").
 #: includes/admin/class-admin-settings.php:752
-#: includes/class-prime-cache.php:1498
 #, php-format
 msgid "Size: %s"
 msgstr ""
@@ -360,7 +358,7 @@ msgstr ""
 
 #: includes/admin/class-admin-settings.php:794
 #: includes/admin/class-admin-settings.php:817
-#: includes/class-prime-cache.php:1501 includes/class-prime-cache.php:1502
+#: includes/class-prime-cache.php:1496 includes/class-prime-cache.php:1497
 msgid "Inactive"
 msgstr ""
 
@@ -672,7 +670,7 @@ msgid "Save Settings"
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:986
-#: includes/class-prime-cache.php:1505
+#: includes/class-prime-cache.php:1500
 msgid "Clear Cache"
 msgstr ""
 
@@ -2307,7 +2305,7 @@ msgid ""
 msgstr ""
 
 #: includes/class-prime-cache.php:477 includes/class-prime-cache.php:629
-#: includes/class-prime-cache.php:1506
+#: includes/class-prime-cache.php:1501
 msgid "Settings"
 msgstr ""
 
@@ -2398,7 +2396,7 @@ msgstr ""
 msgid "None"
 msgstr ""
 
-#: includes/class-prime-cache.php:1216 includes/class-prime-cache.php:1501
+#: includes/class-prime-cache.php:1216 includes/class-prime-cache.php:1496
 msgid "Object Cache"
 msgstr ""
 
@@ -2418,19 +2416,23 @@ msgstr ""
 msgid "Optional Add-on"
 msgstr ""
 
-#: includes/class-prime-cache.php:1686
+#: includes/class-prime-cache.php:1495
+msgid "Size"
+msgstr ""
+
+#: includes/class-prime-cache.php:1681
 msgid ""
 "Settings imported but config file could not be written. Cache may not "
 "reflect the new settings until the next save."
 msgstr ""
 
-#: includes/class-prime-cache.php:1691
+#: includes/class-prime-cache.php:1686
 msgid ""
 "Settings imported but advanced-cache.php is managed by another plugin. Page "
 "caching will not work until the other plugin is deactivated."
 msgstr ""
 
-#: includes/class-prime-cache.php:1693
+#: includes/class-prime-cache.php:1688
 msgid "Settings imported but advanced-cache.php could not be updated."
 msgstr ""
 

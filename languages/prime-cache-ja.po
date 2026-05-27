@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Prime Cache\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-27 14:34+0900\n"
+"POT-Creation-Date: 2026-05-27 17:24+0900\n"
 "PO-Revision-Date: 2026-05-23 00:00+0900\n"
 "Last-Translator: rapls\n"
 "Language-Team: Japanese\n"
@@ -177,7 +177,7 @@ msgstr "ダッシュボード"
 #: includes/admin/class-admin-settings.php:805
 #: includes/admin/class-admin-settings.php:829
 #: includes/admin/class-admin-settings.php:872
-#: includes/class-prime-cache.php:1502
+#: includes/class-prime-cache.php:1497
 msgid "Page Cache"
 msgstr "ページキャッシュ"
 
@@ -275,7 +275,7 @@ msgstr "オプションのアドオンについて詳しく見る"
 #: includes/admin/class-admin-settings.php:711
 #: includes/admin/class-admin-settings.php:794
 #: includes/admin/class-admin-settings.php:817
-#: includes/class-prime-cache.php:1236 includes/class-prime-cache.php:1502
+#: includes/class-prime-cache.php:1236 includes/class-prime-cache.php:1497
 msgid "Active"
 msgstr "有効"
 
@@ -330,9 +330,7 @@ msgid "Total: %s"
 msgstr "合計: %s"
 
 #. translators: %s: total cache size (e.g. "12 MB")
-#. translators: %s: total cache size (e.g. "12 MB").
 #: includes/admin/class-admin-settings.php:752
-#: includes/class-prime-cache.php:1498
 #, php-format
 msgid "Size: %s"
 msgstr "容量: %s"
@@ -391,7 +389,7 @@ msgstr "外部管理"
 
 #: includes/admin/class-admin-settings.php:794
 #: includes/admin/class-admin-settings.php:817
-#: includes/class-prime-cache.php:1501 includes/class-prime-cache.php:1502
+#: includes/class-prime-cache.php:1496 includes/class-prime-cache.php:1497
 msgid "Inactive"
 msgstr "無効"
 
@@ -760,7 +758,7 @@ msgid "Save Settings"
 msgstr "設定を保存"
 
 #: includes/admin/class-admin-settings.php:986
-#: includes/class-prime-cache.php:1505
+#: includes/class-prime-cache.php:1500
 msgid "Clear Cache"
 msgstr "キャッシュをクリア"
 
@@ -2766,7 +2764,7 @@ msgstr ""
 "れるまでページキャッシュは動作しません。"
 
 #: includes/class-prime-cache.php:477 includes/class-prime-cache.php:629
-#: includes/class-prime-cache.php:1506
+#: includes/class-prime-cache.php:1501
 msgid "Settings"
 msgstr "設定"
 
@@ -2870,7 +2868,7 @@ msgstr "画像ライブラリ"
 msgid "None"
 msgstr "なし"
 
-#: includes/class-prime-cache.php:1216 includes/class-prime-cache.php:1501
+#: includes/class-prime-cache.php:1216 includes/class-prime-cache.php:1496
 msgid "Object Cache"
 msgstr "オブジェクトキャッシュ"
 
@@ -2890,7 +2888,11 @@ msgstr "公開投稿数"
 msgid "Optional Add-on"
 msgstr "オプションのアドオン"
 
-#: includes/class-prime-cache.php:1686
+#: includes/class-prime-cache.php:1495
+msgid "Size"
+msgstr "サイズ"
+
+#: includes/class-prime-cache.php:1681
 msgid ""
 "Settings imported but config file could not be written. Cache may not "
 "reflect the new settings until the next save."
@@ -2898,7 +2900,7 @@ msgstr ""
 "設定はインポートされましたが、設定ファイルを書き込めませんでした。次回保存す"
 "るまでキャッシュに新しい設定が反映されない可能性があります。"
 
-#: includes/class-prime-cache.php:1691
+#: includes/class-prime-cache.php:1686
 msgid ""
 "Settings imported but advanced-cache.php is managed by another plugin. Page "
 "caching will not work until the other plugin is deactivated."
@@ -2906,7 +2908,7 @@ msgstr ""
 "設定をインポートしましたが、advanced-cache.php は別のプラグインによって管理さ"
 "れています。そのプラグインを無効化するまでページキャッシュは動作しません。"
 
-#: includes/class-prime-cache.php:1693
+#: includes/class-prime-cache.php:1688
 msgid "Settings imported but advanced-cache.php could not be updated."
 msgstr ""
 "設定はインポートされましたが、advanced-cache.php を更新できませんでした。"

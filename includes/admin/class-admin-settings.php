@@ -2334,10 +2334,8 @@ class Prime_Cache_Admin_Settings {
 .pc-nav__addons{background:linear-gradient(135deg,#6366f1,#7c3aed) !important;color:#fff !important;font-weight:600;border-radius:6px;margin:12px 10px 0;padding:10px 14px !important;text-align:center;transition:opacity .2s}
 .pc-nav__addons .dashicons{color:#fbbf24}
 .pc-nav__addons:hover{opacity:.9;color:#fff !important;background:linear-gradient(135deg,#4f46e5,#6d28d9) !important}
-/* Add-on badge — for the optional add-on to use when injecting cards via hooks.
-   .pc-pro-badge is kept as a backward-compatible alias so an add-on build that
-   still emits the previous class name keeps its styling after a free-only update. */
-.pc-addon-badge, .pc-pro-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.5px;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;padding:1px 6px;border-radius:4px;margin-left:auto;line-height:16px}
+/* Add-on badge — for the optional add-on to use when injecting cards via hooks. */
+.pc-addon-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.5px;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;padding:1px 6px;border-radius:4px;margin-left:auto;line-height:16px}
 
 /* power toggle in sidebar */
 .pc-side__foot{padding:16px 20px;border-top:1px solid var(--c-subtle)}
