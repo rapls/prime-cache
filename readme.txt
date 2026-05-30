@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.12
+Stable tag: 1.10.13
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.13 =
+* Hardened: The pre-WP page-cache drop-in config file no longer copies Cloudflare or Sucuri API keys. Those credentials are only used by add-on code under WordPress, so keeping them out of the on-disk config reduces their exposure via backups, server misconfiguration, log dumps and support bundles.
+
 = 1.10.12 =
 * Changed: Settings managed by an installed companion add-on are now preserved while the add-on is present, even when it is temporarily inactive. Installs without the add-on are unaffected.
 * Hardened: API key fields keep their stored value when submitted blank, so saved secrets are never echoed back into the settings page or cleared by accident.
@@ -214,6 +217,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.13 =
+The drop-in config file no longer holds Cloudflare or Sucuri API keys — they were never used pre-WordPress and are now kept out of on-disk config. Recommended.
 
 = 1.10.12 =
 Add-on settings are preserved while the companion add-on is installed, and saved API keys are kept when their field is left blank. No change for installs without the add-on.

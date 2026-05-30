@@ -358,9 +358,22 @@ class Prime_Cache_Config {
 			$lines[] = 'defined( \'ABSPATH\' ) || exit;';
 			$lines[] = '';
 
+			// Keys that hold API credentials. The pre-WP page-cache drop-in never
+			// touches these (Cloudflare / Sucuri are purged from inside WordPress),
+			// so there is no reason to mirror the secrets into a PHP file on disk —
+			// minimising their footprint reduces exposure via backups, server
+			// misconfiguration, log dumps and support-bundle sharing.
+			$secret_keys = array(
+				'cloudflare_api_key',
+				'sucuri_api_key',
+			);
+
 			foreach ( $settings as $key => $value ) {
 				// Validate key: lowercase letters, digits, and underscores allowed.
 				if ( ! preg_match( '#^[a-z0-9_]+$#', $key ) ) {
+					continue;
+				}
+				if ( in_array( $key, $secret_keys, true ) ) {
 					continue;
 				}
 				if ( is_bool( $value ) ) {
