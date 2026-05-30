@@ -7,8 +7,32 @@ class Prime_Cache_Admin_Settings {
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_init', array( $this, 'handle_cf_dismiss' ) );
+		add_action( 'admin_init', array( $this, 'redirect_legacy_addons_tab' ) );
 		add_action( 'admin_notices', array( $this, 'show_notices' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+	}
+
+	/**
+	 * Send legacy "?page=prime-cache&tab=upgrade" requests to the new Pro Features
+	 * submenu so bookmarked URLs keep working after the in-settings tab is retired.
+	 */
+	public function redirect_legacy_addons_tab() {
+		if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		if ( ! isset( $_GET['page'], $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only URL inspection.
+			return;
+		}
+		$page = sanitize_key( wp_unslash( $_GET['page'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$tab  = sanitize_key( wp_unslash( $_GET['tab'] ) );  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( 'prime-cache' !== $page || 'upgrade' !== $tab ) {
+			return;
+		}
+		if ( prime_cache_is_pro() ) {
+			return;
+		}
+		wp_safe_redirect( admin_url( 'admin.php?page=prime-cache-pro-features' ) );
+		exit;
 	}
 
 	public function handle_cf_dismiss() {
@@ -21,6 +45,21 @@ class Prime_Cache_Admin_Settings {
 
 	public function add_menu() {
 		add_menu_page( 'Prime Cache', 'Prime Cache', 'manage_options', 'prime-cache', array( $this, 'render_page' ), 'dashicons-performance', 80 );
+
+		// "Pro Features" submenu — informational landing page for the optional
+		// add-on. Hidden when the add-on is already active. The page contains no
+		// saveable settings and no disabled feature controls; it is a static
+		// description plus links to the add-on's external sales page.
+		if ( ! prime_cache_is_pro() ) {
+			add_submenu_page(
+				'prime-cache',
+				__( 'Pro Features', 'prime-cache' ),
+				__( 'Pro Features', 'prime-cache' ) . ' <span class="pc-pro-menu-badge">PRO</span>',
+				'manage_options',
+				'prime-cache-pro-features',
+				array( $this, 'render_pro_features_page' )
+			);
+		}
 	}
 
 	public function register_settings() {
@@ -28,7 +67,7 @@ class Prime_Cache_Admin_Settings {
 	}
 
 	public function enqueue_assets( $h ) {
-		if ( 'toplevel_page_prime-cache' !== $h ) return;
+		if ( 'toplevel_page_prime-cache' !== $h && 'prime-cache_page_prime-cache-pro-features' !== $h ) return;
 		wp_add_inline_style( 'wp-admin', $this->get_inline_css() );
 	}
 
@@ -618,11 +657,6 @@ class Prime_Cache_Admin_Settings {
 						<span class="dashicons <?php echo esc_attr( $t[0] ); ?>"></span><?php echo esc_html( $t[1] ); ?>
 					</a>
 					<?php endforeach; ?>
-				<?php if ( ! prime_cache_is_pro() ) : ?>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=prime-cache&tab=upgrade' ) ); ?>" class="pc-nav__item pc-nav__addons<?php echo 'upgrade' === $tab ? ' pc-nav__item--on' : ''; ?>">
-					<span class="dashicons dashicons-admin-plugins"></span><?php esc_html_e( 'Add-ons', 'prime-cache' ); ?>
-				</a>
-				<?php endif; ?>
 				</nav>
 				<div class="pc-side__foot">
 					<?php $toggle_url = wp_nonce_url( admin_url( 'admin.php?pc_action=toggle_cache&tab=' . $tab ), 'prime_cache_admin_action' ); ?>
@@ -646,7 +680,6 @@ class Prime_Cache_Admin_Settings {
 					case 'exclusions':    $this->tab_exclusions( $settings ); break;
 					case 'tools':         $this->tab_tools( $settings ); break;
 					case 'dashboard':     $this->tab_dashboard( $settings ); break;
-					case 'upgrade':       if ( ! prime_cache_is_pro() ) { $this->tab_upgrade(); } else { $this->tab_dashboard( $settings ); } break;
 					default:
 						// Tabs contributed by an add-on via the prime_cache_admin_tabs filter
 						// are rendered by the add-on (the free plugin ships no body for them).
@@ -666,23 +699,115 @@ class Prime_Cache_Admin_Settings {
 		<?php
 	}
 
-	/* ── tab: add-ons ────────────────────────────────────── */
+	/* ── Pro Features landing page ──────────────────────── */
 
-	private function tab_upgrade() {
-		$url = 'https://raplsworks.com/prime-cache-pro/';
+	/**
+	 * Render the dedicated "Pro Features" submenu page.
+	 *
+	 * Purely informational landing page: a hero, a free/pro growth-steps table,
+	 * result-based value cards, a recommended-for list, and a final CTA. No
+	 * settings are saved here and no feature controls (toggles, inputs) appear,
+	 * so this page does not introduce Trialware patterns. External purchase
+	 * links are limited to two well-marked CTAs (hero and footer); every other
+	 * upsell entry point in the admin links here internally.
+	 */
+	public function render_pro_features_page() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'prime-cache' ) );
+		}
+
+		$buy_url = 'https://raplsworks.com/prime-cache-pro/';
 		?>
-		<div class="pc-card">
-			<h2 style="margin-top:0"><?php esc_html_e( 'Optional add-ons', 'prime-cache' ); ?></h2>
-			<p><?php esc_html_e( 'Additional performance features are available as a separate add-on from the author website. They are not included in this WordPress.org version and are not required for the free plugin to work.', 'prime-cache' ); ?></p>
-			<ul style="list-style:disc;margin:12px 0 16px 20px;line-height:1.9">
-				<li><?php esc_html_e( 'Object cache integration (Redis, Memcached, APCu)', 'prime-cache' ); ?></li>
-				<li><?php esc_html_e( 'AVIF image conversion', 'prime-cache' ); ?></li>
-				<li><?php esc_html_e( 'Advanced CSS and JavaScript optimization', 'prime-cache' ); ?></li>
-				<li><?php esc_html_e( 'Advanced preloading options', 'prime-cache' ); ?></li>
-				<li><?php esc_html_e( 'External cache service integrations', 'prime-cache' ); ?></li>
-				<li><?php esc_html_e( 'Database optimization and Heartbeat control', 'prime-cache' ); ?></li>
-			</ul>
-			<p><a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Learn more about optional add-ons', 'prime-cache' ); ?> &rarr;</a></p>
+		<div class="wrap pc-admin pc-pro-features-page">
+
+			<section class="pc-pro-hero">
+				<span class="pc-pro-eyebrow"><?php esc_html_e( 'Prime Cache Pro', 'prime-cache' ); ?></span>
+				<h1><?php esc_html_e( 'Go beyond page caching.', 'prime-cache' ); ?></h1>
+				<p><?php esc_html_e( 'Prime Cache Free covers the essentials: page cache, browser cache, minification, lazy loading, WebP, and preload.', 'prime-cache' ); ?></p>
+				<p><?php esc_html_e( 'Prime Cache Pro adds advanced optimization for production sites — Critical CSS, unused CSS cleanup, object cache, AVIF, external cache purge, sitemap preload, and database cleanup.', 'prime-cache' ); ?></p>
+				<p>
+					<a class="pc-pro-cta" href="<?php echo esc_url( $buy_url ); ?>" target="_blank" rel="noopener noreferrer">
+						<?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?>
+					</a>
+				</p>
+			</section>
+
+			<section class="pc-pro-section">
+				<h2 class="pc-pro-section__h"><?php esc_html_e( 'Free handles the foundation. Pro handles the bottlenecks.', 'prime-cache' ); ?></h2>
+				<table class="pc-pro-steps">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'Prime Cache Free', 'prime-cache' ); ?></th>
+							<th><?php esc_html_e( 'Prime Cache Pro', 'prime-cache' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr><td><?php esc_html_e( 'Page cache', 'prime-cache' ); ?></td><td><?php esc_html_e( 'Object cache', 'prime-cache' ); ?></td></tr>
+						<tr><td><?php esc_html_e( 'Browser cache', 'prime-cache' ); ?></td><td><?php esc_html_e( 'Critical CSS', 'prime-cache' ); ?></td></tr>
+						<tr><td><?php esc_html_e( 'Minification', 'prime-cache' ); ?></td><td><?php esc_html_e( 'Remove unused CSS', 'prime-cache' ); ?></td></tr>
+						<tr><td><?php esc_html_e( 'WebP conversion', 'prime-cache' ); ?></td><td><?php esc_html_e( 'AVIF conversion', 'prime-cache' ); ?></td></tr>
+						<tr><td><?php esc_html_e( 'Basic preload', 'prime-cache' ); ?></td><td><?php esc_html_e( 'Sitemap and resource preload', 'prime-cache' ); ?></td></tr>
+						<tr><td><?php esc_html_e( 'Manual purge', 'prime-cache' ); ?></td><td><?php esc_html_e( 'Cloudflare, Sucuri, and Varnish purge', 'prime-cache' ); ?></td></tr>
+						<tr><td><?php esc_html_e( 'Basic tools', 'prime-cache' ); ?></td><td><?php esc_html_e( 'Scheduled database cleanup', 'prime-cache' ); ?></td></tr>
+					</tbody>
+				</table>
+			</section>
+
+			<section class="pc-pro-section">
+				<h2 class="pc-pro-section__h"><?php esc_html_e( 'What Pro adds, by outcome', 'prime-cache' ); ?></h2>
+				<div class="pc-pro-card-grid">
+					<div class="pc-pro-card">
+						<h3><?php esc_html_e( 'Improve first paint', 'prime-cache' ); ?></h3>
+						<p><?php esc_html_e( 'Generate Critical CSS and optimize CSS delivery for above-the-fold rendering.', 'prime-cache' ); ?></p>
+					</div>
+					<div class="pc-pro-card">
+						<h3><?php esc_html_e( 'Reduce unused weight', 'prime-cache' ); ?></h3>
+						<p><?php esc_html_e( 'Remove unused CSS so each page loads less unnecessary stylesheet code.', 'prime-cache' ); ?></p>
+					</div>
+					<div class="pc-pro-card">
+						<h3><?php esc_html_e( 'Keep external caches in sync', 'prime-cache' ); ?></h3>
+						<p><?php esc_html_e( 'Automatically purge Cloudflare, Sucuri, and Varnish when content changes.', 'prime-cache' ); ?></p>
+					</div>
+					<div class="pc-pro-card">
+						<h3><?php esc_html_e( 'Go beyond WebP', 'prime-cache' ); ?></h3>
+						<p><?php esc_html_e( 'Add AVIF conversion for even smaller modern image delivery.', 'prime-cache' ); ?></p>
+					</div>
+					<div class="pc-pro-card">
+						<h3><?php esc_html_e( 'Warm important pages automatically', 'prime-cache' ); ?></h3>
+						<p><?php esc_html_e( 'Use sitemap and resource preloading to prepare key pages before visitors arrive.', 'prime-cache' ); ?></p>
+					</div>
+					<div class="pc-pro-card">
+						<h3><?php esc_html_e( 'Clean long-running sites', 'prime-cache' ); ?></h3>
+						<p><?php esc_html_e( 'Schedule database cleanup for revisions, transients, expired data, and overhead.', 'prime-cache' ); ?></p>
+					</div>
+					<div class="pc-pro-card">
+						<h3><?php esc_html_e( 'Add persistent object cache', 'prime-cache' ); ?></h3>
+						<p><?php esc_html_e( 'Use Redis, Memcached, or APCu for dynamic workloads and admin-heavy sites.', 'prime-cache' ); ?></p>
+					</div>
+				</div>
+			</section>
+
+			<section class="pc-pro-section">
+				<h2 class="pc-pro-section__h"><?php esc_html_e( 'Recommended for', 'prime-cache' ); ?></h2>
+				<ul class="pc-pro-list">
+					<li><?php esc_html_e( 'Sites pushing for higher Core Web Vitals', 'prime-cache' ); ?></li>
+					<li><?php esc_html_e( 'Sites running Cloudflare, Sucuri, or Varnish', 'prime-cache' ); ?></li>
+					<li><?php esc_html_e( 'Long-running sites with database overhead', 'prime-cache' ); ?></li>
+					<li><?php esc_html_e( 'Image-heavy sites that want AVIF on top of WebP', 'prime-cache' ); ?></li>
+					<li><?php esc_html_e( 'Production workflows that need automated purging and preloading', 'prime-cache' ); ?></li>
+					<li><?php esc_html_e( 'Servers with Redis, Memcached, or APCu available', 'prime-cache' ); ?></li>
+				</ul>
+			</section>
+
+			<section class="pc-pro-footer-cta">
+				<h2><?php esc_html_e( 'Ready to go beyond page caching?', 'prime-cache' ); ?></h2>
+				<p>
+					<a class="pc-pro-cta" href="<?php echo esc_url( $buy_url ); ?>" target="_blank" rel="noopener noreferrer">
+						<?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?>
+					</a>
+				</p>
+			</section>
+
 		</div>
 		<?php
 	}
@@ -2332,9 +2457,39 @@ class Prime_Cache_Admin_Settings {
 .pc-nav__item:hover .dashicons{color:#64748b}
 .pc-nav__item--on{background:#ede9fe;color:var(--c-pri);font-weight:600}
 .pc-nav__item--on .dashicons{color:var(--c-pri)}
-.pc-nav__addons{margin-top:10px;border-top:1px solid #e5e7eb;padding-top:12px;border-radius:0}
-/* Add-on badge — for the optional add-on to use when injecting cards via hooks. */
-.pc-addon-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.5px;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;padding:1px 6px;border-radius:4px;margin-left:auto;line-height:16px}
+
+/* Pro Features submenu — small inline badge that appears in the WordPress
+   sidebar after the "Pro Features" label. Kept restrained (solid colour, small
+   text) to read as a wayfinding label rather than promotional ornament. */
+.pc-pro-menu-badge{display:inline-block;margin-left:4px;padding:1px 5px;border-radius:999px;background:#1d4ed8;color:#fff;font-size:10px;font-weight:600;line-height:1.4;vertical-align:1px}
+
+/* Pro Features landing page — a single informational screen with a hero,
+   foundation/bottlenecks table, outcome cards, recommended-for list, and a
+   final CTA. No saveable controls; styling is intentionally calm so the page
+   reads as a feature description, not as advertising. */
+.pc-pro-features-page{max-width:1080px}
+.pc-pro-hero{margin:18px 0 24px;padding:24px;border-radius:12px;background:linear-gradient(135deg,#f7fbff,#eef7ff);border:1px solid #dbeafe}
+.pc-pro-hero h1{margin:8px 0 10px;font-size:24px;line-height:1.3}
+.pc-pro-hero p{margin:0 0 10px;font-size:14px;line-height:1.6;max-width:780px}
+.pc-pro-eyebrow{display:inline-block;padding:2px 8px;border-radius:999px;background:#1d4ed8;color:#fff;font-size:11px;font-weight:600;letter-spacing:.3px}
+.pc-pro-cta{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;background:#1d4ed8;color:#fff;text-decoration:none;font-weight:600;font-size:14px}
+.pc-pro-cta:hover,.pc-pro-cta:focus{background:#1e40af;color:#fff}
+.pc-pro-section{margin:24px 0}
+.pc-pro-section__h{margin:0 0 12px;font-size:18px;line-height:1.4}
+.pc-pro-steps{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
+.pc-pro-steps th,.pc-pro-steps td{padding:10px 14px;text-align:left;border-bottom:1px solid #f1f5f9;font-size:14px;line-height:1.5}
+.pc-pro-steps thead th{background:#f8fafc;font-weight:600}
+.pc-pro-steps tbody tr:last-child td{border-bottom:0}
+.pc-pro-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.pc-pro-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px}
+.pc-pro-card h3{margin:0 0 6px;font-size:14px;line-height:1.4}
+.pc-pro-card p{margin:0;font-size:13px;line-height:1.55;color:#4b5563}
+.pc-pro-list{margin:0;padding:0;list-style:none}
+.pc-pro-list li{padding:8px 0 8px 22px;position:relative;font-size:14px;line-height:1.5;border-bottom:1px solid #f1f5f9}
+.pc-pro-list li:last-child{border-bottom:0}
+.pc-pro-list li::before{content:"";position:absolute;left:4px;top:14px;width:8px;height:8px;border-radius:50%;background:#1d4ed8}
+.pc-pro-footer-cta{margin:24px 0;padding:20px 24px;background:#f7fbff;border:1px solid #dbeafe;border-radius:10px;text-align:left}
+.pc-pro-footer-cta h2{margin:0 0 12px;font-size:16px}
 
 /* power toggle in sidebar */
 .pc-side__foot{padding:16px 20px;border-top:1px solid var(--c-subtle)}

@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.13
+Stable tag: 1.10.14
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,10 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.14 =
+* Added: Dedicated "Pro Features" submenu (with a small PRO label) that opens a single informational page describing the optional add-on. Contains a foundation/bottlenecks comparison, outcome-focused descriptions of the add-on's features, and a list of sites it is recommended for. The page contains no saveable settings and no disabled controls; the legacy "Add-ons" tab inside Settings has been retired and bookmarked URLs are forwarded to the new page.
+* Changed: The plugin's "Plugins" list row link now points to the new in-admin "Pro Features" page instead of going straight to an external sales page.
+
 = 1.10.13 =
 * Hardened: The pre-WP page-cache drop-in config file no longer copies Cloudflare or Sucuri API keys. Those credentials are only used by add-on code under WordPress, so keeping them out of the on-disk config reduces their exposure via backups, server misconfiguration, log dumps and support bundles.
 
@@ -217,6 +221,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.14 =
+Adds a dedicated "Pro Features" submenu page that describes the optional add-on. No saveable settings and no disabled controls were added. Recommended.
 
 = 1.10.13 =
 The drop-in config file no longer holds Cloudflare or Sucuri API keys — they were never used pre-WordPress and are now kept out of on-disk config. Recommended.

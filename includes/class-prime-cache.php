@@ -477,7 +477,7 @@ class Prime_Cache {
 		$settings = '<a href="' . esc_url( admin_url( 'admin.php?page=prime-cache' ) ) . '">' . esc_html__( 'Settings', 'prime-cache' ) . '</a>';
 		array_unshift( $links, $settings );
 		if ( ! prime_cache_is_pro() ) {
-			$links['add_ons'] = '<a href="' . esc_url( 'https://raplsworks.com/prime-cache-pro/' ) . '" target="_blank" rel="noopener">' . esc_html__( 'Add-ons', 'prime-cache' ) . '</a>';
+			$links['pro_features'] = '<a href="' . esc_url( admin_url( 'admin.php?page=prime-cache-pro-features' ) ) . '">' . esc_html__( 'Pro Features', 'prime-cache' ) . '</a>';
 		}
 		return $links;
 	}

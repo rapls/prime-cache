@@ -2440,3 +2440,187 @@ msgid ""
 "regenerated. Caching will continue to use the previous settings until the "
 "file write succeeds. Check that wp-content is writable."
 msgstr ""
+
+#: includes/admin/class-admin-settings.php:24
+msgid "Pro Features"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:709
+msgid "You do not have permission to access this page."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:716
+msgid "Prime Cache Pro"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:717
+msgid "Go beyond page caching."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:718
+msgid "Prime Cache Free covers the essentials: page cache, browser cache, minification, lazy loading, WebP, and preload."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:719
+msgid "Prime Cache Pro adds advanced optimization for production sites — Critical CSS, unused CSS cleanup, object cache, AVIF, external cache purge, sitemap preload, and database cleanup."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:722
+msgid "Get Prime Cache Pro"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:728
+msgid "Free handles the foundation. Pro handles the bottlenecks."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:732
+msgid "Prime Cache Free"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:737
+msgid "Page cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:737
+msgid "Object cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:738
+msgid "Browser cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:738
+msgid "Critical CSS"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:739
+msgid "Minification"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:739
+msgid "Remove unused CSS"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:740
+msgid "WebP conversion"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:740
+msgid "AVIF conversion"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:741
+msgid "Basic preload"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:741
+msgid "Sitemap and resource preload"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:742
+msgid "Manual purge"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:742
+msgid "Cloudflare, Sucuri, and Varnish purge"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:743
+msgid "Basic tools"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:743
+msgid "Scheduled database cleanup"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:749
+msgid "What Pro adds, by outcome"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:752
+msgid "Improve first paint"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:753
+msgid "Generate Critical CSS and optimize CSS delivery for above-the-fold rendering."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:756
+msgid "Reduce unused weight"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:757
+msgid "Remove unused CSS so each page loads less unnecessary stylesheet code."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:760
+msgid "Keep external caches in sync"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:761
+msgid "Automatically purge Cloudflare, Sucuri, and Varnish when content changes."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:764
+msgid "Go beyond WebP"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:765
+msgid "Add AVIF conversion for even smaller modern image delivery."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:768
+msgid "Warm important pages automatically"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:769
+msgid "Use sitemap and resource preloading to prepare key pages before visitors arrive."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:772
+msgid "Clean long-running sites"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:773
+msgid "Schedule database cleanup for revisions, transients, expired data, and overhead."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:776
+msgid "Add persistent object cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:777
+msgid "Use Redis, Memcached, or APCu for dynamic workloads and admin-heavy sites."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:784
+msgid "Recommended for"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:786
+msgid "Sites pushing for higher Core Web Vitals"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:787
+msgid "Sites running Cloudflare, Sucuri, or Varnish"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:788
+msgid "Long-running sites with database overhead"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:789
+msgid "Image-heavy sites that want AVIF on top of WebP"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:790
+msgid "Production workflows that need automated purging and preloading"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:791
+msgid "Servers with Redis, Memcached, or APCu available"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:797
+msgid "Ready to go beyond page caching?"
+msgstr ""

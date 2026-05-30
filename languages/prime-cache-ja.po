@@ -2920,3 +2920,187 @@ msgstr ""
 "Prime Cache の設定は保存されましたが、設定ファイルを再生成できませんでした。"
 "ファイルの書き込みが成功するまで、キャッシュは以前の設定で動作し続けます。wp-"
 "content が書き込み可能かどうかを確認してください。"
+
+#: includes/admin/class-admin-settings.php:24
+msgid "Pro Features"
+msgstr "Pro 機能"
+
+#: includes/admin/class-admin-settings.php:709
+msgid "You do not have permission to access this page."
+msgstr "このページへのアクセス権がありません。"
+
+#: includes/admin/class-admin-settings.php:716
+msgid "Prime Cache Pro"
+msgstr "Prime Cache Pro"
+
+#: includes/admin/class-admin-settings.php:717
+msgid "Go beyond page caching."
+msgstr "ページキャッシュの次へ。"
+
+#: includes/admin/class-admin-settings.php:718
+msgid "Prime Cache Free covers the essentials: page cache, browser cache, minification, lazy loading, WebP, and preload."
+msgstr "Prime Cache Free は土台をカバーします:ページキャッシュ、ブラウザーキャッシュ、最小化、遅延読み込み、WebP、プリロード。"
+
+#: includes/admin/class-admin-settings.php:719
+msgid "Prime Cache Pro adds advanced optimization for production sites — Critical CSS, unused CSS cleanup, object cache, AVIF, external cache purge, sitemap preload, and database cleanup."
+msgstr "Prime Cache Pro は本番サイト向けの高度な最適化を追加します — Critical CSS、未使用 CSS の整理、オブジェクトキャッシュ、AVIF、外部キャッシュパージ、サイトマッププリロード、データベースクリーンアップ。"
+
+#: includes/admin/class-admin-settings.php:722
+msgid "Get Prime Cache Pro"
+msgstr "Prime Cache Pro を入手"
+
+#: includes/admin/class-admin-settings.php:728
+msgid "Free handles the foundation. Pro handles the bottlenecks."
+msgstr "Free で土台を整え、Pro でボトルネックを潰す。"
+
+#: includes/admin/class-admin-settings.php:732
+msgid "Prime Cache Free"
+msgstr "Prime Cache Free"
+
+#: includes/admin/class-admin-settings.php:737
+msgid "Page cache"
+msgstr "ページキャッシュ"
+
+#: includes/admin/class-admin-settings.php:737
+msgid "Object cache"
+msgstr "オブジェクトキャッシュ"
+
+#: includes/admin/class-admin-settings.php:738
+msgid "Browser cache"
+msgstr "ブラウザーキャッシュ"
+
+#: includes/admin/class-admin-settings.php:738
+msgid "Critical CSS"
+msgstr "Critical CSS"
+
+#: includes/admin/class-admin-settings.php:739
+msgid "Minification"
+msgstr "最小化"
+
+#: includes/admin/class-admin-settings.php:739
+msgid "Remove unused CSS"
+msgstr "未使用 CSS の削除"
+
+#: includes/admin/class-admin-settings.php:740
+msgid "WebP conversion"
+msgstr "WebP 変換"
+
+#: includes/admin/class-admin-settings.php:740
+msgid "AVIF conversion"
+msgstr "AVIF 変換"
+
+#: includes/admin/class-admin-settings.php:741
+msgid "Basic preload"
+msgstr "基本のプリロード"
+
+#: includes/admin/class-admin-settings.php:741
+msgid "Sitemap and resource preload"
+msgstr "サイトマップとリソースのプリロード"
+
+#: includes/admin/class-admin-settings.php:742
+msgid "Manual purge"
+msgstr "手動パージ"
+
+#: includes/admin/class-admin-settings.php:742
+msgid "Cloudflare, Sucuri, and Varnish purge"
+msgstr "Cloudflare / Sucuri / Varnish の自動パージ"
+
+#: includes/admin/class-admin-settings.php:743
+msgid "Basic tools"
+msgstr "基本ツール"
+
+#: includes/admin/class-admin-settings.php:743
+msgid "Scheduled database cleanup"
+msgstr "データベースクリーンアップの定期実行"
+
+#: includes/admin/class-admin-settings.php:749
+msgid "What Pro adds, by outcome"
+msgstr "Pro が追加するもの (結果別)"
+
+#: includes/admin/class-admin-settings.php:752
+msgid "Improve first paint"
+msgstr "ファーストペイントを改善"
+
+#: includes/admin/class-admin-settings.php:753
+msgid "Generate Critical CSS and optimize CSS delivery for above-the-fold rendering."
+msgstr "Critical CSS を生成し、ファーストビューの描画に向けて CSS 配信を最適化します。"
+
+#: includes/admin/class-admin-settings.php:756
+msgid "Reduce unused weight"
+msgstr "不要なバイト数を削減"
+
+#: includes/admin/class-admin-settings.php:757
+msgid "Remove unused CSS so each page loads less unnecessary stylesheet code."
+msgstr "未使用 CSS を削除し、各ページが読み込む不要なスタイルシートを減らします。"
+
+#: includes/admin/class-admin-settings.php:760
+msgid "Keep external caches in sync"
+msgstr "外部キャッシュを同期"
+
+#: includes/admin/class-admin-settings.php:761
+msgid "Automatically purge Cloudflare, Sucuri, and Varnish when content changes."
+msgstr "コンテンツが変わると Cloudflare、Sucuri、Varnish のキャッシュも自動でパージします。"
+
+#: includes/admin/class-admin-settings.php:764
+msgid "Go beyond WebP"
+msgstr "WebP のさらに先へ"
+
+#: includes/admin/class-admin-settings.php:765
+msgid "Add AVIF conversion for even smaller modern image delivery."
+msgstr "AVIF 変換を追加し、より小さい最新形式で画像を配信します。"
+
+#: includes/admin/class-admin-settings.php:768
+msgid "Warm important pages automatically"
+msgstr "重要なページを自動で温める"
+
+#: includes/admin/class-admin-settings.php:769
+msgid "Use sitemap and resource preloading to prepare key pages before visitors arrive."
+msgstr "サイトマップとリソースのプリロードで、訪問者が来る前に主要ページを準備します。"
+
+#: includes/admin/class-admin-settings.php:772
+msgid "Clean long-running sites"
+msgstr "長く運用したサイトを軽くする"
+
+#: includes/admin/class-admin-settings.php:773
+msgid "Schedule database cleanup for revisions, transients, expired data, and overhead."
+msgstr "リビジョン、トランジェント、期限切れデータ、テーブルオーバーヘッドのクリーンアップをスケジュール実行します。"
+
+#: includes/admin/class-admin-settings.php:776
+msgid "Add persistent object cache"
+msgstr "永続的なオブジェクトキャッシュを追加"
+
+#: includes/admin/class-admin-settings.php:777
+msgid "Use Redis, Memcached, or APCu for dynamic workloads and admin-heavy sites."
+msgstr "Redis、Memcached、APCu を使い、動的処理や管理画面が多いサイトに対応します。"
+
+#: includes/admin/class-admin-settings.php:784
+msgid "Recommended for"
+msgstr "こんなサイトにおすすめ"
+
+#: includes/admin/class-admin-settings.php:786
+msgid "Sites pushing for higher Core Web Vitals"
+msgstr "Core Web Vitals をさらに改善したいサイト"
+
+#: includes/admin/class-admin-settings.php:787
+msgid "Sites running Cloudflare, Sucuri, or Varnish"
+msgstr "Cloudflare / Sucuri / Varnish を使っているサイト"
+
+#: includes/admin/class-admin-settings.php:788
+msgid "Long-running sites with database overhead"
+msgstr "長く運用していてデータベースが重くなってきたサイト"
+
+#: includes/admin/class-admin-settings.php:789
+msgid "Image-heavy sites that want AVIF on top of WebP"
+msgstr "画像が多く、WebP に加えて AVIF まで対応したいサイト"
+
+#: includes/admin/class-admin-settings.php:790
+msgid "Production workflows that need automated purging and preloading"
+msgstr "キャッシュパージやプリロードの自動化が必要な本番運用"
+
+#: includes/admin/class-admin-settings.php:791
+msgid "Servers with Redis, Memcached, or APCu available"
+msgstr "Redis / Memcached / APCu が利用可能なサーバー環境"
+
+#: includes/admin/class-admin-settings.php:797
+msgid "Ready to go beyond page caching?"
+msgstr "ページキャッシュの次へ進む準備はできましたか?"
