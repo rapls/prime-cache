@@ -1021,6 +1021,44 @@ class Prime_Cache_Admin_Settings {
 		<?php
 	}
 
+	/**
+	 * One informational card placed at the very end of a related settings tab,
+	 * describing the optional add-on's matching higher-tier features. Hidden when
+	 * the add-on is active or the viewer lacks manage_options. Always links
+	 * internally to the Pro Features submenu — no external purchase URL, no
+	 * pricing, no countdown, no disabled controls.
+	 *
+	 * Call sites pass already-translated $args['title'] and $args['body'] so
+	 * each card's strings are extractable via __()/esc_html__() at the call site.
+	 *
+	 * @param array $args Required: 'title' (string), 'body' (string).
+	 */
+	private function render_pro_context_card( $args ) {
+		if ( prime_cache_is_pro() ) {
+			return;
+		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		$title = isset( $args['title'] ) ? (string) $args['title'] : '';
+		$body  = isset( $args['body'] ) ? (string) $args['body'] : '';
+		if ( '' === $title && '' === $body ) {
+			return;
+		}
+		$href = admin_url( 'admin.php?page=prime-cache-pro-features' );
+		?>
+		<div class="pc-card pc-pro-context-card">
+			<h3 class="pc-pro-context-card__h"><?php echo esc_html( $title ); ?></h3>
+			<p class="pc-pro-context-card__body"><?php echo esc_html( $body ); ?></p>
+			<p class="pc-pro-context-card__cta">
+				<a class="pc-pro-cta pc-pro-cta--sm" href="<?php echo esc_url( $href ); ?>">
+					<?php esc_html_e( 'View Pro Features', 'prime-cache' ); ?>
+				</a>
+			</p>
+		</div>
+		<?php
+	}
+
 	/* ── tab: page cache ──────────────────────────────────── */
 
 	private function tab_page( $settings, $on ) {
@@ -1436,6 +1474,12 @@ class Prime_Cache_Admin_Settings {
 		})();
 		</script>
 		<?php
+		// Single informational card at the very end of the tab pointing to the
+		// Pro Features submenu — no settings, no disabled controls.
+		$this->render_pro_context_card( array(
+			'title' => __( 'Advanced CSS optimization', 'prime-cache' ),
+			'body'  => __( 'Prime Cache Pro adds Critical CSS generation, unused CSS cleanup, and advanced CSS delivery for sites that need deeper front-end optimization.', 'prime-cache' ),
+		) );
 	}
 
 	/* ── tab: media ───────────────────────────────────────── */
@@ -1780,6 +1824,12 @@ class Prime_Cache_Admin_Settings {
 		})();
 		</script>
 		<?php
+		// AVIF lives in the optional add-on; surface it at the end of the Media
+		// tab as a single informational pointer, never as a disabled control.
+		$this->render_pro_context_card( array(
+			'title' => __( 'Need smaller modern images?', 'prime-cache' ),
+			'body'  => __( 'Prime Cache Pro adds AVIF conversion for sites that want to go beyond WebP.', 'prime-cache' ),
+		) );
 	}
 
 
@@ -2531,6 +2581,16 @@ class Prime_Cache_Admin_Settings {
 .pc-pro-dashboard-card__body{margin:0 0 12px;font-size:13px;line-height:1.6;color:#4b5563;max-width:780px}
 .pc-pro-dashboard-card__cta{margin:0}
 .pc-pro-cta--sm{padding:6px 12px;font-size:13px}
+
+/* Per-tab contextual Pro Features card (Phase 3, one per related tab). Shares
+   the same restrained dashboard styling; tighter spacing so the card nests at
+   the very end of a settings tab without competing with surrounding controls.
+   Strictly informational — no fields, no toggles, no warning colour. */
+.pc-pro-context-card{margin-top:16px;border-left:3px solid #1d4ed8;background:#fff}
+.pc-pro-context-card__h{margin:0 0 6px;font-size:15px;line-height:1.4}
+.pc-pro-context-card__body{margin:0 0 10px;font-size:13px;line-height:1.6;color:#4b5563;max-width:760px}
+.pc-pro-context-card__cta{margin:0}
+.pc-pro-context-card .pc-pro-cta--sm{padding:4px 10px;font-size:13px;line-height:1.6}
 
 /* power toggle in sidebar */
 .pc-side__foot{padding:16px 20px;border-top:1px solid var(--c-subtle)}

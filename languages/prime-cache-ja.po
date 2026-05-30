@@ -3116,3 +3116,19 @@ msgstr "Prime Cache Free は土台をカバーします。Prime Cache Pro は本
 #: includes/admin/class-admin-settings.php:1017
 msgid "View Pro Features"
 msgstr "Pro 機能を見る"
+
+#: includes/admin/class-admin-settings.php:1455
+msgid "Advanced CSS optimization"
+msgstr "より高度な CSS 最適化"
+
+#: includes/admin/class-admin-settings.php:1456
+msgid "Prime Cache Pro adds Critical CSS generation, unused CSS cleanup, and advanced CSS delivery for sites that need deeper front-end optimization."
+msgstr "Prime Cache Pro は、フロントエンドをさらに最適化したいサイト向けに、Critical CSS の生成、未使用 CSS の整理、高度な CSS 配信を追加します。"
+
+#: includes/admin/class-admin-settings.php:1802
+msgid "Need smaller modern images?"
+msgstr "より小さい最新形式の画像が必要ですか?"
+
+#: includes/admin/class-admin-settings.php:1803
+msgid "Prime Cache Pro adds AVIF conversion for sites that want to go beyond WebP."
+msgstr "Prime Cache Pro は、WebP のさらに先を求めるサイト向けに AVIF 変換を追加します。"

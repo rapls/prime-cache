@@ -2636,3 +2636,19 @@ msgstr ""
 #: includes/admin/class-admin-settings.php:1017
 msgid "View Pro Features"
 msgstr ""
+
+#: includes/admin/class-admin-settings.php:1455
+msgid "Advanced CSS optimization"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:1456
+msgid "Prime Cache Pro adds Critical CSS generation, unused CSS cleanup, and advanced CSS delivery for sites that need deeper front-end optimization."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:1802
+msgid "Need smaller modern images?"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:1803
+msgid "Prime Cache Pro adds AVIF conversion for sites that want to go beyond WebP."
+msgstr ""

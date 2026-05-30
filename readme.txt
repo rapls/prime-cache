@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.15
+Stable tag: 1.10.16
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.16 =
+* Added: Two small informational cards at the very end of the File Optimization and Media settings tabs that describe related optional add-on features (Critical CSS / Remove Unused CSS / Advanced CSS delivery; AVIF). Each card links only to the in-admin Pro Features page (no external purchase URL), is hidden when the add-on is active, and contains no settings, no disabled controls, and no upgrade-prompt wording.
+
 = 1.10.15 =
 * Added: A single small informational card at the end of the Prime Cache dashboard tab pointing to the in-admin Pro Features page. Hidden when the optional add-on is active, links only internally (no external purchase URL), no pricing or countdown, and is placed after all KPI and system blocks so it never interrupts the dashboard's main content.
 
@@ -224,6 +227,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.16 =
+Adds two small informational cards (File Optimization and Media tab ends) pointing to the in-admin Pro Features page. Internal link only, hidden when the add-on is active, no settings or disabled controls. Recommended.
 
 = 1.10.15 =
 Adds one small informational card on the Prime Cache dashboard pointing to the Pro Features page. Internal link only, hidden when the add-on is active. Recommended.
