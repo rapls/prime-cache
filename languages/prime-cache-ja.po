@@ -3104,3 +3104,15 @@ msgstr "Redis / Memcached / APCu が利用可能なサーバー環境"
 #: includes/admin/class-admin-settings.php:797
 msgid "Ready to go beyond page caching?"
 msgstr "ページキャッシュの次へ進む準備はできましたか?"
+
+#: includes/admin/class-admin-settings.php:1013
+msgid "Looking for advanced optimization?"
+msgstr "さらに高度な最適化をお探しですか?"
+
+#: includes/admin/class-admin-settings.php:1014
+msgid "Prime Cache Free covers the essentials. Prime Cache Pro adds advanced CSS optimization, object cache, AVIF, external cache purge, and database cleanup for production sites."
+msgstr "Prime Cache Free は土台をカバーします。Prime Cache Pro は本番サイト向けに、高度な CSS 最適化、オブジェクトキャッシュ、AVIF、外部キャッシュパージ、データベースクリーンアップを追加します。"
+
+#: includes/admin/class-admin-settings.php:1017
+msgid "View Pro Features"
+msgstr "Pro 機能を見る"

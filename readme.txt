@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.14
+Stable tag: 1.10.15
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.15 =
+* Added: A single small informational card at the end of the Prime Cache dashboard tab pointing to the in-admin Pro Features page. Hidden when the optional add-on is active, links only internally (no external purchase URL), no pricing or countdown, and is placed after all KPI and system blocks so it never interrupts the dashboard's main content.
+
 = 1.10.14 =
 * Added: Dedicated "Pro Features" submenu (with a small PRO label) that opens a single informational page describing the optional add-on. Contains a foundation/bottlenecks comparison, outcome-focused descriptions of the add-on's features, and a list of sites it is recommended for. The page contains no saveable settings and no disabled controls; the legacy "Add-ons" tab inside Settings has been retired and bookmarked URLs are forwarded to the new page.
 * Changed: The plugin's "Plugins" list row link now points to the new in-admin "Pro Features" page instead of going straight to an external sales page.
@@ -221,6 +224,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.15 =
+Adds one small informational card on the Prime Cache dashboard pointing to the Pro Features page. Internal link only, hidden when the add-on is active. Recommended.
 
 = 1.10.14 =
 Adds a dedicated "Pro Features" submenu page that describes the optional add-on. No saveable settings and no disabled controls were added. Recommended.

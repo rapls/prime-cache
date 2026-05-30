@@ -986,8 +986,39 @@ class Prime_Cache_Admin_Settings {
 			</div>
 		</div>
 		<?php
-		// Optional add-on information lives only on the Add-ons tab (tab_upgrade)
-		// to keep the dashboard free of upsell prompts.
+		// One discreet informational card pointing at the Pro Features submenu.
+		// Sits at the very end of the dashboard so it cannot interrupt KPI or
+		// system blocks; hidden when the optional add-on is active; links only
+		// to the in-admin Pro Features page (no external purchase URL).
+		$this->render_pro_dashboard_card();
+	}
+
+	/**
+	 * One-card Pro Features pointer shown at the bottom of the dashboard.
+	 *
+	 * Hidden when the optional add-on is active, gated on manage_options. Pure
+	 * information: no pricing, no countdown, no Unlock/Locked language, and the
+	 * only link is the internal Pro Features submenu.
+	 */
+	private function render_pro_dashboard_card() {
+		if ( prime_cache_is_pro() ) {
+			return;
+		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		$href = admin_url( 'admin.php?page=prime-cache-pro-features' );
+		?>
+		<div class="pc-card pc-pro-dashboard-card">
+			<h3 class="pc-pro-dashboard-card__h"><?php esc_html_e( 'Looking for advanced optimization?', 'prime-cache' ); ?></h3>
+			<p class="pc-pro-dashboard-card__body"><?php esc_html_e( 'Prime Cache Free covers the essentials. Prime Cache Pro adds advanced CSS optimization, object cache, AVIF, external cache purge, and database cleanup for production sites.', 'prime-cache' ); ?></p>
+			<p class="pc-pro-dashboard-card__cta">
+				<a class="pc-pro-cta pc-pro-cta--sm" href="<?php echo esc_url( $href ); ?>">
+					<?php esc_html_e( 'View Pro Features', 'prime-cache' ); ?>
+				</a>
+			</p>
+		</div>
+		<?php
 	}
 
 	/* ── tab: page cache ──────────────────────────────────── */
@@ -2490,6 +2521,16 @@ class Prime_Cache_Admin_Settings {
 .pc-pro-list li::before{content:"";position:absolute;left:4px;top:14px;width:8px;height:8px;border-radius:50%;background:#1d4ed8}
 .pc-pro-footer-cta{margin:24px 0;padding:20px 24px;background:#f7fbff;border:1px solid #dbeafe;border-radius:10px;text-align:left}
 .pc-pro-footer-cta h2{margin:0 0 12px;font-size:16px}
+
+/* Single Pro Features pointer card on the dashboard (Phase 2). Reuses the
+   pc-card frame so it blends with surrounding KPI/system cards; a thin left
+   accent and the existing blue CTA mark it as informational. No shadow, no
+   animation, no countdown — strictly a wayfinding card. */
+.pc-pro-dashboard-card{margin-top:20px;border-left:3px solid #1d4ed8}
+.pc-pro-dashboard-card__h{margin:0 0 8px;font-size:15px;line-height:1.4}
+.pc-pro-dashboard-card__body{margin:0 0 12px;font-size:13px;line-height:1.6;color:#4b5563;max-width:780px}
+.pc-pro-dashboard-card__cta{margin:0}
+.pc-pro-cta--sm{padding:6px 12px;font-size:13px}
 
 /* power toggle in sidebar */
 .pc-side__foot{padding:16px 20px;border-top:1px solid var(--c-subtle)}

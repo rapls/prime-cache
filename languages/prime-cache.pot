@@ -2624,3 +2624,15 @@ msgstr ""
 #: includes/admin/class-admin-settings.php:797
 msgid "Ready to go beyond page caching?"
 msgstr ""
+
+#: includes/admin/class-admin-settings.php:1013
+msgid "Looking for advanced optimization?"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:1014
+msgid "Prime Cache Free covers the essentials. Prime Cache Pro adds advanced CSS optimization, object cache, AVIF, external cache purge, and database cleanup for production sites."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:1017
+msgid "View Pro Features"
+msgstr ""
