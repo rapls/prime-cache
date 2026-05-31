@@ -69,6 +69,27 @@ class Prime_Cache_Admin_Settings {
 	public function enqueue_assets( $h ) {
 		if ( 'toplevel_page_prime-cache' !== $h && 'prime-cache_page_prime-cache-pro-features' !== $h ) return;
 		wp_add_inline_style( 'wp-admin', $this->get_inline_css() );
+		// Register a footer-bound stub handle so the per-tab UI helper IIFEs can
+		// be attached via wp_add_inline_script(). The IIFEs depend on element IDs
+		// rendered by render_settings_page() further down the response, so the
+		// handle deliberately lives in the footer (in_footer=true). 'jquery' is
+		// listed as a dependency because the Media-tab bulk-scan handler uses
+		// jQuery; the other helpers are vanilla but ordering only matters for
+		// the bulk-scan one.
+		wp_register_script( 'prime-cache-admin-ui', '', array( 'jquery' ), PRIME_CACHE_VERSION, true );
+		wp_enqueue_script( 'prime-cache-admin-ui' );
+	}
+
+	/**
+	 * Append a tab-specific UI helper script. The render_* methods call this
+	 * instead of emitting raw <script> tags so Plugin Check sees the JS travel
+	 * through wp_add_inline_script(). The stub handle 'prime-cache-admin-ui' is
+	 * registered in enqueue_assets() above.
+	 *
+	 * @param string $js Raw JavaScript body (no surrounding <script> tags).
+	 */
+	private function inline_admin_script( $js ) {
+		wp_add_inline_script( 'prime-cache-admin-ui', $js );
 	}
 
 	public function sanitize_settings( $input ) {
@@ -1200,49 +1221,54 @@ class Prime_Cache_Admin_Settings {
 			</div>
 		</form>
 
-		<script>
-		(function(){
-			var vi=document.getElementById('pc-lv'),ui=document.getElementById('pc-lu'),hi=document.getElementById('pc-lh'),eq=document.getElementById('pc-leq'),cs=document.querySelectorAll('.pc-chip');
-			if(!vi||!ui||!hi)return;
-			var U=<?php echo wp_json_encode(__('Unlimited','prime-cache'), JSON_HEX_TAG);?>;
-			var uL={31536000:<?php echo wp_json_encode(__('year(s)','prime-cache'), JSON_HEX_TAG);?>,2592000:<?php echo wp_json_encode(__('month(s)','prime-cache'), JSON_HEX_TAG);?>,604800:<?php echo wp_json_encode(__('week(s)','prime-cache'), JSON_HEX_TAG);?>,86400:<?php echo wp_json_encode(__('day(s)','prime-cache'), JSON_HEX_TAG);?>,3600:<?php echo wp_json_encode(__('hour(s)','prime-cache'), JSON_HEX_TAG);?>,60:<?php echo wp_json_encode(__('minute(s)','prime-cache'), JSON_HEX_TAG);?>,1:<?php echo wp_json_encode(__('sec','prime-cache'), JSON_HEX_TAG);?>};
-			function hum(s){if(s<=0)return'= '+U;var k=[31536000,2592000,604800,86400,3600,60,1];for(var i=0;i<k.length;i++){if(s>=k[i]&&s%k[i]===0)return'= '+(s/k[i])+' '+uL[k[i]];}return'= '+s+' '+uL[1];}
-			function C(){var s=(parseInt(vi.value,10)||0)*(parseInt(ui.value,10)||1);hi.value=s;eq.textContent=hum(s);cs.forEach(function(b){b.classList.toggle('is-on',parseInt(b.dataset.s,10)===s);});}
-			vi.addEventListener('input',C);ui.addEventListener('change',C);
-			cs.forEach(function(b){b.addEventListener('click',function(){var s=parseInt(b.dataset.s,10);if(s===0){vi.value=0;}
-				else if(s%31536000===0){ui.value='31536000';vi.value=s/31536000;}
-				else if(s%2592000===0){ui.value='2592000';vi.value=s/2592000;}
-				else if(s%604800===0){ui.value='604800';vi.value=s/604800;}
-				else if(s%86400===0){ui.value='86400';vi.value=s/86400;}
-				else if(s%3600===0){ui.value='3600';vi.value=s/3600;}
-				else if(s%60===0){ui.value='60';vi.value=s/60;}
-				else{ui.value='1';vi.value=s;}C();});});
-
-			/* Browser Cache lifetime fields */
-			document.querySelectorAll('[data-pc-bc-val]').forEach(function(valEl){
-				var fid=valEl.dataset.pcBcVal;
-				var unitEl=document.querySelector('[data-pc-bc-unit="'+fid+'"]');
-				var hidEl=document.querySelector('[data-pc-bc-hidden="'+fid+'"]');
-				var eqEl=document.querySelector('[data-pc-bc-eq="'+fid+'"]');
-				if(!unitEl||!hidEl)return;
-				function upd(){
-					var s=(parseInt(valEl.value,10)||0)*(parseInt(unitEl.value,10)||1);
-					hidEl.value=s;
-					if(eqEl){
-						if(s<=0) eqEl.textContent='(no-cache)';
-						else if(s>=31536000) eqEl.textContent='= '+(s/31536000)+' '+<?php echo wp_json_encode(__('year(s)','prime-cache'), JSON_HEX_TAG);?>;
-						else if(s>=2592000) eqEl.textContent='= '+Math.round(s/2592000*10)/10+' '+<?php echo wp_json_encode(__('month(s)','prime-cache'), JSON_HEX_TAG);?>;
-						else if(s>=86400) eqEl.textContent='= '+Math.round(s/86400*10)/10+' '+<?php echo wp_json_encode(__('day(s)','prime-cache'), JSON_HEX_TAG);?>;
-						else if(s>=3600) eqEl.textContent='= '+Math.round(s/3600*10)/10+' '+<?php echo wp_json_encode(__('hour(s)','prime-cache'), JSON_HEX_TAG);?>;
-						else eqEl.textContent='= '+s+' '+<?php echo wp_json_encode(__('sec','prime-cache'), JSON_HEX_TAG);?>;
-					}
-				}
-				valEl.addEventListener('input',upd);
-				unitEl.addEventListener('change',upd);
-			});
-		})();
-		</script>
 		<?php
+		$year_lbl  = wp_json_encode( __( 'year(s)',   'prime-cache' ), JSON_HEX_TAG );
+		$month_lbl = wp_json_encode( __( 'month(s)',  'prime-cache' ), JSON_HEX_TAG );
+		$week_lbl  = wp_json_encode( __( 'week(s)',   'prime-cache' ), JSON_HEX_TAG );
+		$day_lbl   = wp_json_encode( __( 'day(s)',    'prime-cache' ), JSON_HEX_TAG );
+		$hour_lbl  = wp_json_encode( __( 'hour(s)',   'prime-cache' ), JSON_HEX_TAG );
+		$min_lbl   = wp_json_encode( __( 'minute(s)', 'prime-cache' ), JSON_HEX_TAG );
+		$sec_lbl   = wp_json_encode( __( 'sec',       'prime-cache' ), JSON_HEX_TAG );
+		$unlim_lbl = wp_json_encode( __( 'Unlimited', 'prime-cache' ), JSON_HEX_TAG );
+		$this->inline_admin_script(
+			'(function(){'
+			. "var vi=document.getElementById('pc-lv'),ui=document.getElementById('pc-lu'),hi=document.getElementById('pc-lh'),eq=document.getElementById('pc-leq'),cs=document.querySelectorAll('.pc-chip');"
+			. 'if(!vi||!ui||!hi)return;'
+			. "var U={$unlim_lbl};"
+			. "var uL={31536000:{$year_lbl},2592000:{$month_lbl},604800:{$week_lbl},86400:{$day_lbl},3600:{$hour_lbl},60:{$min_lbl},1:{$sec_lbl}};"
+			. "function hum(s){if(s<=0)return'= '+U;var k=[31536000,2592000,604800,86400,3600,60,1];for(var i=0;i<k.length;i++){if(s>=k[i]&&s%k[i]===0)return'= '+(s/k[i])+' '+uL[k[i]];}return'= '+s+' '+uL[1];}"
+			. "function C(){var s=(parseInt(vi.value,10)||0)*(parseInt(ui.value,10)||1);hi.value=s;eq.textContent=hum(s);cs.forEach(function(b){b.classList.toggle('is-on',parseInt(b.dataset.s,10)===s);});}"
+			. "vi.addEventListener('input',C);ui.addEventListener('change',C);"
+			. "cs.forEach(function(b){b.addEventListener('click',function(){var s=parseInt(b.dataset.s,10);if(s===0){vi.value=0;}"
+			. "else if(s%31536000===0){ui.value='31536000';vi.value=s/31536000;}"
+			. "else if(s%2592000===0){ui.value='2592000';vi.value=s/2592000;}"
+			. "else if(s%604800===0){ui.value='604800';vi.value=s/604800;}"
+			. "else if(s%86400===0){ui.value='86400';vi.value=s/86400;}"
+			. "else if(s%3600===0){ui.value='3600';vi.value=s/3600;}"
+			. "else if(s%60===0){ui.value='60';vi.value=s/60;}"
+			. "else{ui.value='1';vi.value=s;}C();});});"
+			. "document.querySelectorAll('[data-pc-bc-val]').forEach(function(valEl){"
+			. "var fid=valEl.dataset.pcBcVal;"
+			. "var unitEl=document.querySelector('[data-pc-bc-unit=\"'+fid+'\"]');"
+			. "var hidEl=document.querySelector('[data-pc-bc-hidden=\"'+fid+'\"]');"
+			. "var eqEl=document.querySelector('[data-pc-bc-eq=\"'+fid+'\"]');"
+			. 'if(!unitEl||!hidEl)return;'
+			. 'function upd(){'
+			. 'var s=(parseInt(valEl.value,10)||0)*(parseInt(unitEl.value,10)||1);'
+			. 'hidEl.value=s;'
+			. 'if(eqEl){'
+			. "if(s<=0) eqEl.textContent='(no-cache)';"
+			. "else if(s>=31536000) eqEl.textContent='= '+(s/31536000)+' '+{$year_lbl};"
+			. "else if(s>=2592000) eqEl.textContent='= '+Math.round(s/2592000*10)/10+' '+{$month_lbl};"
+			. "else if(s>=86400) eqEl.textContent='= '+Math.round(s/86400*10)/10+' '+{$day_lbl};"
+			. "else if(s>=3600) eqEl.textContent='= '+Math.round(s/3600*10)/10+' '+{$hour_lbl};"
+			. "else eqEl.textContent='= '+s+' '+{$sec_lbl};"
+			. '}'
+			. '}'
+			. "valEl.addEventListener('input',upd);unitEl.addEventListener('change',upd);"
+			. '});'
+			. '})();'
+		);
 	}
 
 	/* ── tab: file optimization ────────────────────────────── */
@@ -1462,46 +1488,35 @@ class Prime_Cache_Admin_Settings {
 			<div class="pc-actions"><?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?></div>
 		</form>
 
-		<script>
-		/* CSS Delivery controls are injected by the optional add-on and are absent in
-		   Free. Keep this in its OWN IIFE so its early return cannot prevent the
-		   Free-only Delay JS presets handler below from binding. */
-		(function(){
-			var toggle=document.getElementById('pc-ocd-toggle'),
-				methods=document.getElementById('pc-ocd-methods'),
-				radios=methods?methods.querySelectorAll('input[type="radio"]'):[];
-			if(!toggle||!methods)return;
-
-			function syncToggle(){
-				methods.style.opacity=toggle.checked?'1':'.4';
-				methods.style.pointerEvents=toggle.checked?'':'none';
-			}
-			toggle.addEventListener('change',syncToggle);
-
-			function syncMethod(){
-				var val='';
-				radios.forEach(function(r){if(r.checked)val=r.value;});
-				var ucss=document.getElementById('pc-ucss-sub'),
-					async=document.getElementById('pc-async-sub');
-				if(ucss) ucss.style.display=(val==='remove_unused_css')?'':'none';
-				if(async) async.style.display=(val==='async_css')?'':'none';
-				// Update radio label highlight.
-				methods.querySelectorAll('.pc-radio').forEach(function(el){
-					el.classList.toggle('pc-radio--on',el.querySelector('input').checked);
-				});
-			}
-			radios.forEach(function(r){r.addEventListener('change',syncMethod);});
-		})();
-		/* Delay JS presets → hidden field. Free feature — must bind regardless of
-		   whether the Pro CSS-delivery controls above exist. */
-		(function(){
-			var cbs=document.querySelectorAll('input[name="pc_delay_presets[]"]'),hid=document.getElementById('pc-delay-presets-hidden');
-			if(!cbs.length||!hid)return;
-			function syncPresets(){var v=[];cbs.forEach(function(c){if(c.checked)v.push(c.value);});hid.value=v.join(',');}
-			cbs.forEach(function(c){c.addEventListener('change',syncPresets);});
-		})();
-		</script>
 		<?php
+		// CSS Delivery controls are injected by the optional add-on and are absent in Free.
+		// Wrapped in its own IIFE so an early return cannot prevent the Free-only Delay JS
+		// presets handler below from binding.
+		$this->inline_admin_script(
+			'(function(){'
+			. "var toggle=document.getElementById('pc-ocd-toggle'),methods=document.getElementById('pc-ocd-methods'),radios=methods?methods.querySelectorAll('input[type=\"radio\"]'):[];"
+			. 'if(!toggle||!methods)return;'
+			. "function syncToggle(){methods.style.opacity=toggle.checked?'1':'.4';methods.style.pointerEvents=toggle.checked?'':'none';}"
+			. "toggle.addEventListener('change',syncToggle);"
+			. "function syncMethod(){var val='';radios.forEach(function(r){if(r.checked)val=r.value;});"
+			. "var ucss=document.getElementById('pc-ucss-sub'),async=document.getElementById('pc-async-sub');"
+			. "if(ucss) ucss.style.display=(val==='remove_unused_css')?'':'none';"
+			. "if(async) async.style.display=(val==='async_css')?'':'none';"
+			. "methods.querySelectorAll('.pc-radio').forEach(function(el){el.classList.toggle('pc-radio--on',el.querySelector('input').checked);});"
+			. '}'
+			. "radios.forEach(function(r){r.addEventListener('change',syncMethod);});"
+			. '})();'
+		);
+		// Delay JS presets → hidden field. Free feature — must bind regardless of whether
+		// the Pro CSS-delivery controls above exist.
+		$this->inline_admin_script(
+			'(function(){'
+			. "var cbs=document.querySelectorAll('input[name=\"pc_delay_presets[]\"]'),hid=document.getElementById('pc-delay-presets-hidden');"
+			. 'if(!cbs.length||!hid)return;'
+			. "function syncPresets(){var v=[];cbs.forEach(function(c){if(c.checked)v.push(c.value);});hid.value=v.join(',');}"
+			. "cbs.forEach(function(c){c.addEventListener('change',syncPresets);});"
+			. '})();'
+		);
 	}
 
 	/* ── tab: media ───────────────────────────────────────── */
@@ -1735,128 +1750,77 @@ class Prime_Cache_Admin_Settings {
 				</div>
 			</div>
 		</div>
-		<script>
-		(function(){
-			if (typeof jQuery === 'undefined') return;
-			jQuery(function($){
-				var $btn = $('#pc-bulk-scan');
-				if (!$btn.length || $btn.data('pcBound')) return;
-				$btn.data('pcBound', true);
-				var $status   = $('#pc-bulk-status');
-				var $wrap     = $('#pc-bulk-progress-wrap');
-				var $fill     = $('#pc-bulk-progress-fill');
-				var $pct      = $('#pc-bulk-progress-pct');
-				var $count    = $('#pc-bulk-progress-count');
-				var $totalEl  = $('#pc-bulk-progress-total');
-				var nonce     = $btn.closest('.pc-card').data('pc-bulk-nonce') || '';
-				if (!nonce) return;
-
-				function showBar(total){
-					$totalEl.text(total);
-					$count.text(0);
-					$pct.text('0%');
-					$fill.css('width', '0%');
-					$wrap.find('.pc-bar').attr('aria-valuenow', 0);
-					$wrap.show();
-				}
-				function updateBar(done, total){
-					var p = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
-					$fill.css('width', p + '%');
-					$pct.text(p + '%');
-					$count.text(done);
-					$wrap.find('.pc-bar').attr('aria-valuenow', p);
-				}
-
-				var i18n = {
-					scanning:   <?php echo wp_json_encode( __( 'Scanning…', 'prime-cache' ) ); ?>,
-					none:       <?php echo wp_json_encode( __( 'No unoptimized images found.', 'prime-cache' ) ); ?>,
-					converting: <?php echo wp_json_encode( /* translators: %1$d: number of images processed so far, %2$d: total number of images. */ __( 'Converting %1$d / %2$d…', 'prime-cache' ) ); ?>,
-					done:       <?php echo wp_json_encode( /* translators: %d: number of images processed. */ __( 'Done. Processed %d images.', 'prime-cache' ) ); ?>,
-					error:      <?php echo wp_json_encode( /* translators: %s: error message. */ __( 'Error: %s', 'prime-cache' ) ); ?>,
-					unknown:    <?php echo wp_json_encode( __( 'unknown error', 'prime-cache' ) ); ?>,
-					ajaxErr:    <?php echo wp_json_encode( __( 'network error', 'prime-cache' ) ); ?>
-				};
-
-				function fmt(tpl){
-					var args = [].slice.call(arguments, 1), i = 0;
-					return tpl.replace(/%(?:(\d+)\$)?[ds]/g, function(_, p){
-						return args[p ? (parseInt(p, 10) - 1) : (i++)];
-					});
-				}
-
-				var BATCH = 30;
-
-				$btn.on('click', function(e){
-					e.preventDefault();
-					$btn.prop('disabled', true);
-					$status.text(i18n.scanning);
-					$wrap.hide();
-
-					$.post(ajaxurl, { action: 'pc_img_scan', nonce: nonce })
-						.done(function(resp){
-							if (!resp || !resp.success) {
-								var m = (resp && resp.data && resp.data.message) ? resp.data.message : i18n.unknown;
-								$status.text(fmt(i18n.error, m));
-								$btn.prop('disabled', false);
-								return;
-							}
-							var items = (resp.data && resp.data.items) ? resp.data.items.slice() : [];
-							var total = items.length;
-							if (!total) {
-								$status.text(i18n.none);
-								$btn.prop('disabled', false);
-								return;
-							}
-							var done = 0;
-							showBar(total);
-
-							function step(){
-								if (!items.length) {
-									updateBar(done, total);
-									$status.text(fmt(i18n.done, done));
-									$btn.prop('disabled', false);
-									return;
-								}
-								var batch = items.splice(0, BATCH);
-								$.post(ajaxurl, { action: 'pc_img_batch', nonce: nonce, items: batch })
-									.done(function(r){
-										if (r && r.success && r.data) {
-											var n = parseInt(r.data.processed, 10) || 0;
-											done += n;
-											// Server may stop early at its 25s time budget — re-queue the remainder.
-											if (n < batch.length) {
-												items = batch.slice(n).concat(items);
-											}
-											updateBar(done, total);
-											$status.text(fmt(i18n.converting, done, total));
-											step();
-										} else {
-											items = batch.concat(items);
-											var m2 = (r && r.data && r.data.message) ? r.data.message : i18n.unknown;
-											$status.text(fmt(i18n.error, m2));
-											$btn.prop('disabled', false);
-										}
-									})
-									.fail(function(){
-										items = batch.concat(items);
-										$status.text(fmt(i18n.error, i18n.ajaxErr));
-										$btn.prop('disabled', false);
-									});
-							}
-
-							updateBar(0, total);
-							$status.text(fmt(i18n.converting, 0, total));
-							step();
-						})
-						.fail(function(){
-							$status.text(fmt(i18n.error, i18n.ajaxErr));
-							$btn.prop('disabled', false);
-						});
-				});
-			});
-		})();
-		</script>
 		<?php
+		$i18n_obj = wp_json_encode(
+			array(
+				'scanning'   => __( 'Scanning…', 'prime-cache' ),
+				/* translators: %1$d: number of images processed so far, %2$d: total number of images. */
+				'converting' => __( 'Converting %1$d / %2$d…', 'prime-cache' ),
+				'none'       => __( 'No unoptimized images found.', 'prime-cache' ),
+				/* translators: %d: number of images processed. */
+				'done'       => __( 'Done. Processed %d images.', 'prime-cache' ),
+				/* translators: %s: error message. */
+				'error'      => __( 'Error: %s', 'prime-cache' ),
+				'unknown'    => __( 'unknown error', 'prime-cache' ),
+				'ajaxErr'    => __( 'network error', 'prime-cache' ),
+			)
+		);
+		$this->inline_admin_script(
+			'(function(){'
+			. "if (typeof jQuery === 'undefined') return;"
+			. 'jQuery(function($){'
+			. "var \$btn=$('#pc-bulk-scan');"
+			. "if (!\$btn.length || \$btn.data('pcBound')) return;"
+			. "\$btn.data('pcBound', true);"
+			. "var \$status=$('#pc-bulk-status'),\$wrap=$('#pc-bulk-progress-wrap'),\$fill=$('#pc-bulk-progress-fill'),"
+			. "\$pct=$('#pc-bulk-progress-pct'),\$count=$('#pc-bulk-progress-count'),\$totalEl=$('#pc-bulk-progress-total');"
+			. "var nonce=\$btn.closest('.pc-card').data('pc-bulk-nonce')||'';"
+			. 'if (!nonce) return;'
+			. "function showBar(total){\$totalEl.text(total);\$count.text(0);\$pct.text('0%');\$fill.css('width','0%');\$wrap.find('.pc-bar').attr('aria-valuenow',0);\$wrap.show();}"
+			. "function updateBar(done,total){var p=total>0?Math.min(100,Math.round((done/total)*100)):0;\$fill.css('width',p+'%');\$pct.text(p+'%');\$count.text(done);\$wrap.find('.pc-bar').attr('aria-valuenow',p);}"
+			. "var i18n={$i18n_obj};"
+			. "function fmt(tpl){var args=[].slice.call(arguments,1),i=0;return tpl.replace(/%(?:(\\d+)\\\$)?[ds]/g,function(_,p){return args[p?(parseInt(p,10)-1):(i++)];});}"
+			. 'var BATCH=30;'
+			. "\$btn.on('click',function(e){"
+			. 'e.preventDefault();'
+			. "\$btn.prop('disabled',true);\$status.text(i18n.scanning);\$wrap.hide();"
+			. "\$.post(ajaxurl,{action:'pc_img_scan',nonce:nonce})"
+			. '.done(function(resp){'
+			. 'if (!resp||!resp.success){'
+			. 'var m=(resp&&resp.data&&resp.data.message)?resp.data.message:i18n.unknown;'
+			. "\$status.text(fmt(i18n.error,m));\$btn.prop('disabled',false);return;"
+			. '}'
+			. 'var items=(resp.data&&resp.data.items)?resp.data.items.slice():[];var total=items.length;'
+			. "if(!total){\$status.text(i18n.none);\$btn.prop('disabled',false);return;}"
+			. 'var done=0;showBar(total);'
+			. 'function step(){'
+			. "if(!items.length){updateBar(done,total);\$status.text(fmt(i18n.done,done));\$btn.prop('disabled',false);return;}"
+			. 'var batch=items.splice(0,BATCH);'
+			. "\$.post(ajaxurl,{action:'pc_img_batch',nonce:nonce,items:batch})"
+			. '.done(function(r){'
+			. 'if (r&&r.success&&r.data){'
+			. 'var n=parseInt(r.data.processed,10)||0;done+=n;'
+			. 'if(n<batch.length){items=batch.slice(n).concat(items);}'
+			. "updateBar(done,total);\$status.text(fmt(i18n.converting,done,total));step();"
+			. '} else {'
+			. 'items=batch.concat(items);'
+			. 'var m2=(r&&r.data&&r.data.message)?r.data.message:i18n.unknown;'
+			. "\$status.text(fmt(i18n.error,m2));\$btn.prop('disabled',false);"
+			. '}'
+			. '})'
+			. '.fail(function(){'
+			. "items=batch.concat(items);\$status.text(fmt(i18n.error,i18n.ajaxErr));\$btn.prop('disabled',false);"
+			. '});'
+			. '}'
+			. "updateBar(0,total);\$status.text(fmt(i18n.converting,0,total));step();"
+			. '})'
+			. '.fail(function(){'
+			. "\$status.text(fmt(i18n.error,i18n.ajaxErr));\$btn.prop('disabled',false);"
+			. '});'
+			. '});'
+			. '});'
+			. '})();'
+		);
 	}
 
 
@@ -2251,15 +2215,31 @@ class Prime_Cache_Admin_Settings {
 						<input type="hidden" name="prime_cache_settings[hsts_max_age]" value="<?php echo esc_attr( $hsts_s ); ?>" id="pc-hsts-hidden">
 					</div>
 				</div>
-				<script>
-				(function(){
-					var v=document.getElementById('pc-hsts-val'),u=document.getElementById('pc-hsts-unit'),h=document.getElementById('pc-hsts-hidden'),e=document.getElementById('pc-hsts-eq');
-					if(!v||!u||!h)return;
-					var uL={31536000:<?php echo wp_json_encode(__('year(s)','prime-cache'), JSON_HEX_TAG);?>,2592000:<?php echo wp_json_encode(__('month(s)','prime-cache'), JSON_HEX_TAG);?>,604800:<?php echo wp_json_encode(__('week(s)','prime-cache'), JSON_HEX_TAG);?>,86400:<?php echo wp_json_encode(__('day(s)','prime-cache'), JSON_HEX_TAG);?>,3600:<?php echo wp_json_encode(__('hour(s)','prime-cache'), JSON_HEX_TAG);?>,60:<?php echo wp_json_encode(__('minute(s)','prime-cache'), JSON_HEX_TAG);?>,1:<?php echo wp_json_encode(__('sec','prime-cache'), JSON_HEX_TAG);?>};
-					function calc(){var s=(parseInt(v.value,10)||0)*(parseInt(u.value,10)||1);h.value=s;if(s<=0){e.textContent='(0)';}else{var k=[31536000,2592000,604800,86400,3600,60,1];for(var i=0;i<k.length;i++){if(s>=k[i]&&s%k[i]===0){e.textContent='= '+(s/k[i])+' '+uL[k[i]];return;}}e.textContent='= '+s+' '+uL[1];}}
-					v.addEventListener('input',calc);u.addEventListener('change',calc);
-				})();
-				</script>
+				<?php
+				$year_lbl  = wp_json_encode( __( 'year(s)',   'prime-cache' ), JSON_HEX_TAG );
+				$month_lbl = wp_json_encode( __( 'month(s)',  'prime-cache' ), JSON_HEX_TAG );
+				$week_lbl  = wp_json_encode( __( 'week(s)',   'prime-cache' ), JSON_HEX_TAG );
+				$day_lbl   = wp_json_encode( __( 'day(s)',    'prime-cache' ), JSON_HEX_TAG );
+				$hour_lbl  = wp_json_encode( __( 'hour(s)',   'prime-cache' ), JSON_HEX_TAG );
+				$min_lbl   = wp_json_encode( __( 'minute(s)', 'prime-cache' ), JSON_HEX_TAG );
+				$sec_lbl   = wp_json_encode( __( 'sec',       'prime-cache' ), JSON_HEX_TAG );
+				$this->inline_admin_script(
+					'(function(){'
+					. "var v=document.getElementById('pc-hsts-val'),u=document.getElementById('pc-hsts-unit'),h=document.getElementById('pc-hsts-hidden'),e=document.getElementById('pc-hsts-eq');"
+					. 'if(!v||!u||!h)return;'
+					. "var uL={31536000:{$year_lbl},2592000:{$month_lbl},604800:{$week_lbl},86400:{$day_lbl},3600:{$hour_lbl},60:{$min_lbl},1:{$sec_lbl}};"
+					. "function calc(){var s=(parseInt(v.value,10)||0)*(parseInt(u.value,10)||1);h.value=s;"
+					. "if(s<=0){e.textContent='(0)';}"
+					. 'else{'
+					. 'var k=[31536000,2592000,604800,86400,3600,60,1];'
+					. "for(var i=0;i<k.length;i++){if(s>=k[i]&&s%k[i]===0){e.textContent='= '+(s/k[i])+' '+uL[k[i]];return;}}"
+					. "e.textContent='= '+s+' '+uL[1];"
+					. '}'
+					. '}'
+					. "v.addEventListener('input',calc);u.addEventListener('change',calc);"
+					. '})();'
+				);
+				?>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[security_headers]" value="1" <?php checked( $settings['security_headers'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Security Response Headers', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Add X-Content-Type-Options (nosniff), X-Frame-Options (SAMEORIGIN), X-XSS-Protection, Referrer-Policy, and Permissions-Policy headers. Protects against clickjacking, MIME-type sniffing, and XSS attacks. Requires .htaccess Optimization on the Page Cache tab.', 'prime-cache' ); ?></small></span></label>
 			</div>
 

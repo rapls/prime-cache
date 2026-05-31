@@ -665,7 +665,7 @@ defined( 'ABSPATH' ) || exit;
 // WP_Filesystem API is not used on these cache paths. Disable the direct-file
 // sniff for this module.
 // phpcs:disable WordPress.WP.AlternativeFunctions
-define( 'PRIME_OBJECT_CACHE', true );
+define( 'PRIME_CACHE_OBJECT_CACHE_DROPIN', true );
 
 // Ensure cache keys are unique per WordPress install. DB_NAME alone collides
 // when two installs share a database via different table_prefix; mixing in an

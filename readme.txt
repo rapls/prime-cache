@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.22
+Stable tag: 1.10.23
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -59,6 +59,21 @@ Full documentation for every setting and every behavior:
 * Free 版マニュアル (日本語): https://raplsworks.com/prime-cache-free-manual-ja/
 * Pro Manual (English): https://raplsworks.com/prime-cache-manual-pro-en/
 * Pro 版マニュアル (日本語): https://raplsworks.com/prime-cache-manual-pro-ja/
+
+== External services ==
+
+The free Prime Cache plugin does not connect to any external service. No data is sent to any third party at any time by the free plugin.
+
+The following third-party hostnames appear inside the plugin's source code as **string literals only**, and the plugin never makes outbound requests to them:
+
+* `googletagmanager.com`, `google-analytics.com`, `connect.facebook.net`, `widget.intercom.io`, `embed.tawk.to` — listed in `includes/class-file-optimizer.php` as URL-pattern presets for the "Delay JS" feature. They are used **only** to recognize third-party scripts already present on the page (added by other plugins or the theme) and to defer their execution until first user interaction. The plugin itself does not load, fetch, or embed any of these services.
+* `cdnjs.cloudflare.com` — referenced **only** in code comments and admin-screen help text describing how some themes (e.g. Cocoon) replace bundled jQuery with a CDN version. The plugin does not call or include any resource from this host.
+
+If you install the optional Prime Cache Pro add-on, that separate plugin documents its own external service usage in its own readme — Prime Cache (free) on its own makes no outbound calls.
+
+== Why the page-cache drop-in keeps an open output buffer ==
+
+Page-cache plugins must capture the entire rendered HTML response so the body can be written to disk before the browser receives it. `dropins/page-cache.php` opens an `ob_start()` early in the request and lets PHP flush the buffer naturally at request shutdown — the captured body is written to the cache file inside the buffer callback. The buffer is deliberately not closed mid-request; doing so would either truncate the cached body or break the capture for plugins/themes that emit their last output during shutdown. This matches the design of every other major page-cache plugin (WP Super Cache, W3 Total Cache, WP Rocket, Cache Enabler, etc.). The HTML transformation pipeline in `includes/class-html-pipeline.php` follows the same pattern for the same reason.
 
 == Installation ==
 
@@ -133,6 +148,14 @@ Start with page caching and basic file optimization. Test your site after each c
 No. The free plugin does not send your data or API requests to any third-party service. Cache preloading only requests URLs on your own site. Some optional features may add browser resource hints (such as preconnect) for external assets your site already uses, but Prime Cache itself does not transmit data to external services.
 
 == Changelog ==
+
+= 1.10.23 =
+* Hardening: All five admin-settings inline <script> blocks are now attached via wp_add_inline_script() against a footer-registered stub handle (`prime-cache-admin-ui`), so Plugin Check no longer flags them as direct script output.
+* Hardening: The page-cache drop-in now stripslashes and (where applicable) length-caps `$_SERVER['HTTP_HOST']`, `HTTP_REFERER`, `HTTP_USER_AGENT`, and `HTTP_IF_MODIFIED_SINCE` before consumption, and validates `SERVER_PROTOCOL` against an allow-list before reflecting it in the 304 status line.
+* Hardening: Renamed the object-cache drop-in signature constant from `PRIME_OBJECT_CACHE` to `PRIME_CACHE_OBJECT_CACHE_DROPIN` to clear the plugin's `PRIME_CACHE_` prefix convention end-to-end.
+* Docs: Added an "External services" section to readme.txt clarifying that the free plugin makes no outbound calls — the third-party hostnames (Google Analytics, GTM, Facebook Pixel, Intercom, Tawk) appear only as Delay-JS detection patterns and `cdnjs.cloudflare.com` only in code comments / help text.
+* Docs: Added a "Why the page-cache drop-in keeps an open output buffer" section explaining the intentional ob_start() lifecycle shared with WP Super Cache / W3 Total Cache / WP Rocket.
+* Docs: The two HTML-pipeline `<style>` / `<script>` rewrite paths in includes/class-file-optimizer.php now carry phpcs:ignore rationale comments explaining why they must replace existing tags in-place rather than enqueue.
 
 = 1.10.22 =
 * Fixed: The wp_is_block_theme() calls in the system-info / theme-detection blocks now dispatch through call_user_func() with a function_exists() guard so Plugin Check's static analysis (which does not honor phpcs:ignore) stops reporting wp_function_not_compatible_with_requires_wp errors. Behavior on both WP 5.8 and 5.9+ is unchanged.
@@ -258,6 +281,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.23 =
+WordPress.org pre-review hardening pass: admin inline scripts now flow through wp_add_inline_script(), drop-in $_SERVER inputs are unslashed and validated, readme documents the (non-)use of external services, and the object-cache drop-in's signature constant is renamed to clear the PRIME_CACHE_ prefix. No behavior change.
 
 = 1.10.22 =
 Silences the two Plugin Check static-analysis errors (wp_is_block_theme on a WP 5.8 baseline) by dispatching the call dynamically. No behavior change.

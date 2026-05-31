@@ -178,7 +178,13 @@ $_pc_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : 
 // The plugin's plugins_loaded hook regenerates the config file early in the request
 // lifecycle so the first cacheable request after a plugin update is protected.
 require_once dirname( __FILE__ ) . '/../includes/cache-key-functions.php';
-$_pc_host = _prime_cache_normalize_host( isset( $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : '' );
+// _prime_cache_normalize_host() lower-cases, validates against an RFC 1123 host
+// charset, strips the port, and returns '' for anything that does not match —
+// so the raw $_SERVER['HTTP_HOST'] is sanitized before any downstream use. WP
+// helpers like wp_unslash() are not available in the drop-in (it runs before
+// WordPress loads), so stripslashes() is used directly.
+$_pc_host_raw = isset( $_SERVER['HTTP_HOST'] ) ? stripslashes( (string) $_SERVER['HTTP_HOST'] ) : '';
+$_pc_host     = _prime_cache_normalize_host( $_pc_host_raw );
 if ( '' === $_pc_host ) {
 	return;
 }
@@ -301,9 +307,13 @@ if ( ! empty( $prime_cache_config['cache_reject_ua'] ) ) {
 	}
 }
 
-// Rejected referrers.
+// Rejected referrers. $_SERVER['HTTP_REFERER'] is unslashed and length-capped
+// before being fed to preg_match() so a malicious Referer header cannot inject
+// regex meta-characters via slash-escaping or blow up the matcher on absurd
+// lengths. WP helpers are not available in the drop-in.
 if ( ! empty( $prime_cache_config['cache_reject_referrer'] ) && ! empty( $_SERVER['HTTP_REFERER'] ) ) {
-	$_pc_match = @preg_match( '#(' . $prime_cache_config['cache_reject_referrer'] . ')#i', $_SERVER['HTTP_REFERER'] );
+	$_pc_ref   = substr( stripslashes( (string) $_SERVER['HTTP_REFERER'] ), 0, 2048 );
+	$_pc_match = @preg_match( '#(' . $prime_cache_config['cache_reject_referrer'] . ')#i', $_pc_ref );
 	if ( false === $_pc_match || 1 === $_pc_match ) {
 		return;
 	}
@@ -311,8 +321,12 @@ if ( ! empty( $prime_cache_config['cache_reject_referrer'] ) && ! empty( $_SERVE
 
 // Mobile detection — single source of truth shared with file-optimizer's HTML
 // transforms (wrap_inline_jquery / delay_all_scripts). cache-key-functions.php
-// was already required above for normalize_host/normalize_path.
-$_pc_is_mobile = _prime_cache_is_mobile_ua( $_SERVER['HTTP_USER_AGENT'] ?? '' );
+// was already required above for normalize_host/normalize_path. The User-Agent
+// is unslashed and length-capped before _prime_cache_is_mobile_ua() consumes
+// it; that function does its own substring match against a known fragment list
+// and never echoes the value back. WP helpers are unavailable in the drop-in.
+$_pc_ua        = substr( stripslashes( (string) ( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ), 0, 1024 );
+$_pc_is_mobile = _prime_cache_is_mobile_ua( $_pc_ua );
 
 // Skip mobile if mobile caching is disabled.
 if ( $_pc_is_mobile && ! $prime_cache_config['cache_mobile'] ) {
@@ -555,10 +569,17 @@ if ( is_readable( $_pc_cache_file ) ) {
 
 		// HTTP 304 Not Modified — only for 200 responses.
 		// All cache-semantics headers (Vary, Last-Modified, meta) are already set above.
+		// The If-Modified-Since value is parsed through strtotime() (returns false on
+		// invalid input). SERVER_PROTOCOL is validated against an allow-list before
+		// being concatenated into the status-line header to guarantee a well-formed
+		// HTTP response. WP helpers are not available in the drop-in.
 		if ( 200 === $_pc_original_status && ! empty( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
-			$_pc_since = strtotime( $_SERVER['HTTP_IF_MODIFIED_SINCE'] );
+			$_pc_ims_raw = stripslashes( (string) $_SERVER['HTTP_IF_MODIFIED_SINCE'] );
+			$_pc_since   = strtotime( $_pc_ims_raw );
 			if ( $_pc_since && $_pc_since >= $_pc_modified_time ) {
-				header( $_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified', true, 304 );
+				$_pc_proto_raw = isset( $_SERVER['SERVER_PROTOCOL'] ) ? (string) $_SERVER['SERVER_PROTOCOL'] : '';
+				$_pc_proto     = in_array( $_pc_proto_raw, array( 'HTTP/1.0', 'HTTP/1.1', 'HTTP/2', 'HTTP/2.0', 'HTTP/3' ), true ) ? $_pc_proto_raw : 'HTTP/1.1';
+				header( $_pc_proto . ' 304 Not Modified', true, 304 );
 				header( 'Cache-Control: no-cache, must-revalidate' );
 				header( 'X-Prime-Cache: HIT-304' );
 				_prime_cache_record_stat( 'hit' );

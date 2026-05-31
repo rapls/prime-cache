@@ -390,6 +390,7 @@ class Prime_Cache_File_Optimizer {
 							if ( $do_minify ) {
 								$css = $self->minify_css_content( $css );
 							}
+							// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- Inline-CSS replacement for an existing <link> tag during HTML buffer transformation. Cannot use wp_enqueue_style() because the HTML has already left WordPress's enqueue pipeline (we are rewriting the rendered HTML during ob_start to inline small stylesheets) and we are deliberately replacing the original <link> with the inlined content to eliminate an HTTP request.
 							return '<style>' . $css . '</style>';
 						}
 					}
@@ -655,6 +656,7 @@ class Prime_Cache_File_Optimizer {
 						return $m[0];
 					}
 				}
+				// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Rewriting an existing inline jQuery <script> tag during HTML buffer transformation so its body is deferred to DOMContentLoaded. wp_add_inline_script() cannot be used because the HTML has already left WordPress's enqueue pipeline; we are replacing the matched original tag in-place.
 				return '<script>window.addEventListener("DOMContentLoaded",function(){' . $trimmed . '});</script>';
 			},
 			$html
