@@ -3,7 +3,7 @@
  * Plugin Name: Prime Cache
  * Plugin URI:  https://raplsworks.com/plugins/prime-cache/
  * Description: A fast and stable page caching plugin for WordPress.
- * Version: 1.10.21
+ * Version: 1.10.22
  * Author: rapls
  * Author URI:  https://raplsworks.com/
  * License: GPL-2.0-or-later
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PRIME_CACHE_VERSION', '1.10.21' );
+define( 'PRIME_CACHE_VERSION', '1.10.22' );
 define( 'PRIME_CACHE_FILE', __FILE__ );
 define( 'PRIME_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 
@@ -290,7 +290,7 @@ function prime_cache_get_settings( $force = false ) {
  */
 add_action( 'init', 'prime_cache_load_textdomain' );
 function prime_cache_load_textdomain() {
-	// phpcs:ignore WordPress.WP.DiscouragedFunctions.load_plugin_textdomain_load_plugin_textdomain,PluginCheck.CodeAnalysis.DiscouragedTextDomainFunctions.load_plugin_textdomain -- Bundled languages/*.mo files must still be loaded for sideloaded installs and for the period before translate.wordpress.org has distributed the language pack. WP_LANG_DIR/plugins is empty in those windows so just-in-time loading cannot find the file.
+	// phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- Bundled languages/*.mo files must still be loaded for sideloaded installs and for the period before translate.wordpress.org has distributed the language pack. WP_LANG_DIR/plugins is empty in those windows so just-in-time loading cannot find the file.
 	load_plugin_textdomain( 'prime-cache', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 

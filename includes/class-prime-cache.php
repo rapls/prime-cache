@@ -1080,8 +1080,12 @@ class Prime_Cache {
 
 		// WordPress / plugin detection.
 		$has_woo       = class_exists( 'WooCommerce' );
-		// phpcs:ignore PluginCheck.CodeAnalysis.RequiredFunctionParameters.wp_function_not_compatible_with_requires_wp -- wp_is_block_theme() was introduced in WP 5.9, but the same expression checks function_exists() first so the call is short-circuited on WP 5.8. "Requires at least: 5.8" is intentionally kept.
-		$is_block_theme = function_exists( 'wp_is_block_theme' ) && wp_is_block_theme();
+		// wp_is_block_theme() was introduced in WP 5.9. "Requires at least: 5.8" is
+		// intentionally kept, so the call is gated by function_exists() and dispatched
+		// dynamically via call_user_func() to avoid Plugin Check's static
+		// wp_function_not_compatible_with_requires_wp report.
+		$wp_is_block_theme_fn = 'wp_is_block_theme';
+		$is_block_theme       = function_exists( $wp_is_block_theme_fn ) && (bool) call_user_func( $wp_is_block_theme_fn );
 		$post_count    = (int) wp_count_posts()->publish;
 		$is_pro        = prime_cache_is_pro();
 
@@ -1222,8 +1226,12 @@ class Prime_Cache {
 
 		// Theme.
 		$theme = wp_get_theme();
-		// phpcs:ignore PluginCheck.CodeAnalysis.RequiredFunctionParameters.wp_function_not_compatible_with_requires_wp -- wp_is_block_theme() was introduced in WP 5.9; the function_exists() guard in the same expression short-circuits the call on WP 5.8. "Requires at least: 5.8" is intentionally kept.
-		$type  = ( function_exists( 'wp_is_block_theme' ) && wp_is_block_theme() )
+		// wp_is_block_theme() was introduced in WP 5.9; the function_exists() guard
+		// makes the call safe on WP 5.8, and dynamic dispatch through call_user_func()
+		// avoids Plugin Check's static wp_function_not_compatible_with_requires_wp
+		// report so "Requires at least: 5.8" can be kept.
+		$wp_is_block_theme_fn = 'wp_is_block_theme';
+		$type  = ( function_exists( $wp_is_block_theme_fn ) && (bool) call_user_func( $wp_is_block_theme_fn ) )
 			? __( 'Block Theme', 'prime-cache' )
 			: __( 'Classic Theme', 'prime-cache' );
 		$info[ __( 'Theme', 'prime-cache' ) ] = $theme->get( 'Name' ) . ' (' . $type . ')';

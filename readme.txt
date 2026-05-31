@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.21
+Stable tag: 1.10.22
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -50,6 +50,15 @@ Some additional performance features are available as a separate add-on from the
 * English (source)
 * Japanese translation included (WordPress Translation Style Guide compliant)
 * Translation-ready with .pot template
+
+= Documentation =
+
+Full documentation for every setting and every behavior:
+
+* Free Manual (English): https://raplsworks.com/prime-cache-free-manual-en/
+* Free 版マニュアル (日本語): https://raplsworks.com/prime-cache-free-manual-ja/
+* Pro Manual (English): https://raplsworks.com/prime-cache-manual-pro-en/
+* Pro 版マニュアル (日本語): https://raplsworks.com/prime-cache-manual-pro-ja/
 
 == Installation ==
 
@@ -124,6 +133,10 @@ Start with page caching and basic file optimization. Test your site after each c
 No. The free plugin does not send your data or API requests to any third-party service. Cache preloading only requests URLs on your own site. Some optional features may add browser resource hints (such as preconnect) for external assets your site already uses, but Prime Cache itself does not transmit data to external services.
 
 == Changelog ==
+
+= 1.10.22 =
+* Fixed: The wp_is_block_theme() calls in the system-info / theme-detection blocks now dispatch through call_user_func() with a function_exists() guard so Plugin Check's static analysis (which does not honor phpcs:ignore) stops reporting wp_function_not_compatible_with_requires_wp errors. Behavior on both WP 5.8 and 5.9+ is unchanged.
+* Fixed: Corrected the phpcs:ignore rule code on the load_plugin_textdomain() call so Plugin Check no longer reports the discouraged-function warning. The call itself is intentionally kept (see 1.10.21 changelog).
 
 = 1.10.21 =
 * Fixed: Restored bundled translation loading. The 1.10.20 removal of load_plugin_textdomain() relied on WordPress.org language packs, which are not available before translate.wordpress.org distributes them and never available for sideloaded installs — those environments showed the admin UI entirely in English. The call is now restored and runs on the init hook, with the Domain Path header added so the bundled languages/*.mo files are picked up reliably.
@@ -245,6 +258,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.22 =
+Silences the two Plugin Check static-analysis errors (wp_is_block_theme on a WP 5.8 baseline) by dispatching the call dynamically. No behavior change.
 
 = 1.10.21 =
 Restores bundled translation loading. Fixes the English-only admin UI seen on sideloaded installs and on sites running before WordPress.org has distributed the Japanese language pack.

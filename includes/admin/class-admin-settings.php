@@ -810,6 +810,16 @@ class Prime_Cache_Admin_Settings {
 				</p>
 			</section>
 
+			<section class="pc-pro-section pc-pro-docs">
+				<h2 class="pc-pro-section__h"><?php esc_html_e( 'Documentation', 'prime-cache' ); ?></h2>
+				<ul class="pc-pro-list">
+					<li><a href="https://raplsworks.com/prime-cache-free-manual-en/" target="_blank" rel="noopener noreferrer">Free Manual (English)</a></li>
+					<li><a href="https://raplsworks.com/prime-cache-free-manual-ja/" target="_blank" rel="noopener noreferrer">Free 版マニュアル (日本語)</a></li>
+					<li><a href="https://raplsworks.com/prime-cache-manual-pro-en/" target="_blank" rel="noopener noreferrer">Pro Manual (English)</a></li>
+					<li><a href="https://raplsworks.com/prime-cache-manual-pro-ja/" target="_blank" rel="noopener noreferrer">Pro 版マニュアル (日本語)</a></li>
+				</ul>
+			</section>
+
 		</div>
 		<?php
 	}
