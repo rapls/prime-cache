@@ -1414,8 +1414,8 @@ msgstr ""
 #: includes/admin/class-admin-settings.php:1472
 msgid ""
 "Skip PNG images during conversion. Useful for PNGs with transparency or "
-"sharp graphics where WebP/AVIF offers little benefit. JPEG images are still "
-"converted."
+"sharp graphics where WebP conversion offers little benefit. JPEG images are "
+"still converted."
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:1482

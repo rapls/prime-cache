@@ -997,7 +997,7 @@ class Prime_Cache_Admin_Settings {
 	 * One-card Pro Features pointer shown at the bottom of the dashboard.
 	 *
 	 * Hidden when the optional add-on is active, gated on manage_options. Pure
-	 * information: no pricing, no countdown, no Unlock/Locked language, and the
+	 * information: no pricing, no countdown, no upgrade-prompt wording, and the
 	 * only link is the internal Pro Features submenu.
 	 */
 	/**
@@ -1686,23 +1686,24 @@ class Prime_Cache_Admin_Settings {
 					<span class="pc-sw__track"></span>
 					<span class="pc-sw__body">
 						<b><?php esc_html_e( 'Exclude PNG Files', 'prime-cache' ); ?></b>
-						<small><?php esc_html_e( 'Skip PNG images during conversion. Useful for PNGs with transparency or sharp graphics where WebP/AVIF offers little benefit. JPEG images are still converted.', 'prime-cache' ); ?></small>
+						<small><?php esc_html_e( 'Skip PNG images during conversion. Useful for PNGs with transparency or sharp graphics where WebP conversion offers little benefit. JPEG images are still converted.', 'prime-cache' ); ?></small>
 					</span>
 				</label>
 			</div>
 
+			<?php
+			// AVIF lives in the optional add-on. Surfaced inside the form,
+			// immediately after the WebP / Format Conversion controls and just
+			// above the Save Settings button, so users see the higher tier
+			// before scrolling past the section rather than after it.
+			$this->render_pro_feature_row( array(
+				'title' => __( 'AVIF Conversion', 'prime-cache' ),
+				'body'  => __( 'Prime Cache Pro adds AVIF conversion for smaller modern image delivery. WebP conversion remains available in Prime Cache Free.', 'prime-cache' ),
+			) );
+			?>
+
 			<div class="pc-actions"><?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?></div>
 		</form>
-
-		<?php
-		// AVIF lives in the optional add-on. Surfaced here, immediately after the
-		// WebP / Format Conversion card, so users see at a glance that AVIF is
-		// a higher tier rather than a missing feature.
-		$this->render_pro_feature_row( array(
-			'title' => __( 'AVIF Conversion', 'prime-cache' ),
-			'body'  => __( 'Prime Cache Pro adds AVIF conversion for smaller modern image delivery. WebP conversion remains available in Prime Cache Free.', 'prime-cache' ),
-		) );
-		?>
 
 		<!-- Bulk Image Optimization (Free) -->
 		<div class="pc-card" data-pc-bulk-nonce="<?php echo esc_attr( wp_create_nonce( 'pc_img_nonce' ) ); ?>">

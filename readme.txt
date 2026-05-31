@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.17
+Stable tag: 1.10.18
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,11 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.18 =
+* Changed: The AVIF Conversion Pro feature row on the Media tab now appears inside the WebP form, immediately after the WebP / Format Conversion controls and just above the Save Settings button, so the higher tier is visible alongside its related setting rather than after it.
+* Changed: The "Exclude PNG Files" help text no longer mixes WebP and AVIF — it now refers to "WebP conversion" only, matching the free feature scope. The optional AVIF add-on is described in the dedicated Pro feature row.
+* Changed: Internal docblock wording cleaned up so the source no longer contains "Unlock" / "Locked" tokens, removing grep noise during self-audit.
+
 = 1.10.17 =
 * Changed: Replaced the two tab-end informational cards introduced in 1.10.16 with six in-context "Pro feature row" notes placed next to the related setting on the File Optimization (Critical CSS & Unused CSS), Media (AVIF Conversion), Preload (Advanced Preload), Cache Control (Persistent Object Cache, External Cache Purge), and Tools (Database Cleanup) tabs. Each row is read-only information — no settings, no toggles, no disabled controls — links only to the in-admin Pro Features page (no external purchase URL), is hidden when the optional add-on is active, and uses the same restrained dashboard-card colour palette.
 
@@ -230,6 +235,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.18 =
+The AVIF Pro feature row on the Media tab now appears above the Save Settings button (next to the WebP controls). The Exclude PNG Files help text and an internal docblock are also slightly clarified. Recommended.
 
 = 1.10.17 =
 Replaces the two tab-end informational cards with six in-context Pro feature rows placed next to each related setting (File Optimization, Media, Preload, Cache Control, Tools). Internal link only, hidden when the add-on is active, no settings or disabled controls. Recommended.

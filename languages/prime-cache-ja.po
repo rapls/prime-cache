@@ -1664,11 +1664,11 @@ msgstr "PNG ファイルを除外"
 #: includes/admin/class-admin-settings.php:1472
 msgid ""
 "Skip PNG images during conversion. Useful for PNGs with transparency or "
-"sharp graphics where WebP/AVIF offers little benefit. JPEG images are still "
-"converted."
+"sharp graphics where WebP conversion offers little benefit. JPEG images are "
+"still converted."
 msgstr ""
 "変換時に PNG 画像をスキップします。透過や輪郭のはっきりしたグラフィックなど、"
-"WebP/AVIF の効果が小さい PNG に有効です。JPEG 画像は引き続き変換されます。"
+"WebP 変換の効果が小さい PNG に有効です。JPEG 画像は引き続き変換されます。"
 
 #: includes/admin/class-admin-settings.php:1482
 msgid "Bulk Image Optimization"
