@@ -1,16 +1,19 @@
 <?php
 /**
  * Plugin Name: Prime Cache
+ * Plugin URI:  https://raplsworks.com/plugins/prime-cache/
  * Description: A fast and stable page caching plugin for WordPress.
- * Version: 1.10.20
+ * Version: 1.10.21
  * Author: rapls
+ * Author URI:  https://raplsworks.com/
  * License: GPL-2.0-or-later
  * Text Domain: prime-cache
+ * Domain Path: /languages
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PRIME_CACHE_VERSION', '1.10.20' );
+define( 'PRIME_CACHE_VERSION', '1.10.21' );
 define( 'PRIME_CACHE_FILE', __FILE__ );
 define( 'PRIME_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 
@@ -275,9 +278,21 @@ function prime_cache_get_settings( $force = false ) {
 	return $cached;
 }
 
-// WordPress 4.6+ loads translations from the Text Domain header automatically
-// for plugins hosted on WordPress.org, so no explicit load_plugin_textdomain()
-// call is needed here (and adding one is discouraged by Plugin Check).
+/**
+ * Load bundled plugin translations.
+ *
+ * WordPress.org language packs (delivered into wp-content/languages/plugins/)
+ * are used when available, but the bundled translations under languages/ are
+ * still required for sideloaded installs and for the window between a release
+ * and translate.wordpress.org distributing the language pack. WP 6.7+ also
+ * needs this hooked on init or later to avoid the
+ * "_load_textdomain_just_in_time was called incorrectly" notice.
+ */
+add_action( 'init', 'prime_cache_load_textdomain' );
+function prime_cache_load_textdomain() {
+	// phpcs:ignore WordPress.WP.DiscouragedFunctions.load_plugin_textdomain_load_plugin_textdomain,PluginCheck.CodeAnalysis.DiscouragedTextDomainFunctions.load_plugin_textdomain -- Bundled languages/*.mo files must still be loaded for sideloaded installs and for the period before translate.wordpress.org has distributed the language pack. WP_LANG_DIR/plugins is empty in those windows so just-in-time loading cannot find the file.
+	load_plugin_textdomain( 'prime-cache', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
 
 register_activation_hook( __FILE__, array( 'Prime_Cache', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'Prime_Cache', 'deactivate' ) );

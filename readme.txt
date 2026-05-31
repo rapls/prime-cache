@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.20
+Stable tag: 1.10.21
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.21 =
+* Fixed: Restored bundled translation loading. The 1.10.20 removal of load_plugin_textdomain() relied on WordPress.org language packs, which are not available before translate.wordpress.org distributes them and never available for sideloaded installs — those environments showed the admin UI entirely in English. The call is now restored and runs on the init hook, with the Domain Path header added so the bundled languages/*.mo files are picked up reliably.
+
 = 1.10.20 =
 * Changed: Removed the explicit load_plugin_textdomain() call. WordPress 4.6+ loads translations automatically for plugins hosted on WordPress.org via the Text Domain header, so the explicit load was redundant and is now flagged as discouraged by Plugin Check.
 * Changed: Documented the two static-analysis false positives that Plugin Check reports against this plugin so the reasoning travels with the code: (1) the file_put_contents() / rename() pairs that install the official advanced-cache.php and object-cache.php drop-ins write under WP_CONTENT_DIR (sibling of the plugin folder), not the plugin directory; (2) the wp_is_block_theme() calls are guarded by function_exists() in the same expression so they short-circuit safely on the supported WP 5.8 baseline. No behavior change.
@@ -242,6 +245,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.21 =
+Restores bundled translation loading. Fixes the English-only admin UI seen on sideloaded installs and on sites running before WordPress.org has distributed the Japanese language pack.
 
 = 1.10.20 =
 Removes the discouraged load_plugin_textdomain() call (WordPress auto-loads .org translations) and adds in-source rationale for two Plugin Check static-analysis false positives. No behavior change.
