@@ -476,6 +476,10 @@ class Prime_Cache {
 	public function plugin_action_links( $links ) {
 		$settings = '<a href="' . esc_url( admin_url( 'admin.php?page=prime-cache' ) ) . '">' . esc_html__( 'Settings', 'prime-cache' ) . '</a>';
 		array_unshift( $links, $settings );
+		$manual_url    = ( 0 === strpos( (string) get_user_locale(), 'ja' ) )
+			? 'https://raplsworks.com/prime-cache-free-manual-ja/'
+			: 'https://raplsworks.com/prime-cache-free-manual-en/';
+		$links['docs'] = '<a href="' . esc_url( $manual_url ) . '" target="_blank" rel="noopener">' . esc_html__( 'Documentation', 'prime-cache' ) . '</a>';
 		if ( ! prime_cache_is_pro() ) {
 			$links['pro_features'] = '<a href="' . esc_url( admin_url( 'admin.php?page=prime-cache-pro-features' ) ) . '">' . esc_html__( 'Pro Features', 'prime-cache' ) . '</a>';
 		}

@@ -716,7 +716,9 @@ class Prime_Cache_Admin_Settings {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'prime-cache' ) );
 		}
 
-		$buy_url = 'https://raplsworks.com/prime-cache-pro/';
+		$buy_url = ( 0 === strpos( (string) get_user_locale(), 'ja' ) )
+			? 'https://raplsworks.com/prime-cache-pro-ja/'
+			: 'https://raplsworks.com/prime-cache-pro-en/';
 		?>
 		<div class="wrap pc-admin pc-pro-features-page">
 
