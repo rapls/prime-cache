@@ -79,10 +79,12 @@ class Prime_Cache_Config {
 
 			// Atomic write: temp file + rename.
 			$tempfile = $dropin_path . '.tmp.' . getmypid();
-			if ( false === file_put_contents( $tempfile, $content ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents,PluginCheck.CodeAnalysis.WriteFile.PluginDirectoryWrite -- Writes the official WordPress advanced-cache.php drop-in into WP_CONTENT_DIR (sibling of the plugin folder), not into the plugin directory. WP_Filesystem cannot stream atomic temp+rename writes the same way, so the standard PHP file ops are required for the documented drop-in install pattern.
+			if ( false === file_put_contents( $tempfile, $content ) ) {
 				return false;
 			}
-			if ( ! rename( $tempfile, $dropin_path ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename,PluginCheck.CodeAnalysis.WriteFile.PluginDirectoryWrite -- rename() completes the atomic install of wp-content/advanced-cache.php (WP drop-in), not a file inside the plugin directory.
+			if ( ! rename( $tempfile, $dropin_path ) ) {
 				@unlink( $tempfile );
 				return false;
 			}
@@ -624,10 +626,12 @@ class Prime_Cache_Config {
 
 		// Atomic write: temp file + rename.
 		$tempfile = $file . '.tmp.' . getmypid();
-		if ( false === file_put_contents( $tempfile, $content ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents,PluginCheck.CodeAnalysis.WriteFile.PluginDirectoryWrite -- Writes the official WordPress object-cache.php drop-in into WP_CONTENT_DIR (sibling of the plugin folder), not into the plugin directory. Standard PHP file ops are required for the atomic temp+rename install pattern.
+		if ( false === file_put_contents( $tempfile, $content ) ) {
 			return false;
 		}
-		if ( ! rename( $tempfile, $file ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename,PluginCheck.CodeAnalysis.WriteFile.PluginDirectoryWrite -- rename() completes the atomic install of wp-content/object-cache.php (WP drop-in), not a file inside the plugin directory.
+		if ( ! rename( $tempfile, $file ) ) {
 			@unlink( $tempfile );
 			return false;
 		}

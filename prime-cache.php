@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Prime Cache
  * Description: A fast and stable page caching plugin for WordPress.
- * Version: 1.10.19
+ * Version: 1.10.20
  * Author: rapls
  * License: GPL-2.0-or-later
  * Text Domain: prime-cache
@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PRIME_CACHE_VERSION', '1.10.19' );
+define( 'PRIME_CACHE_VERSION', '1.10.20' );
 define( 'PRIME_CACHE_FILE', __FILE__ );
 define( 'PRIME_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 
@@ -275,9 +275,9 @@ function prime_cache_get_settings( $force = false ) {
 	return $cached;
 }
 
-add_action( 'init', function() {
-	load_plugin_textdomain( 'prime-cache', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-} );
+// WordPress 4.6+ loads translations from the Text Domain header automatically
+// for plugins hosted on WordPress.org, so no explicit load_plugin_textdomain()
+// call is needed here (and adding one is discouraged by Plugin Check).
 
 register_activation_hook( __FILE__, array( 'Prime_Cache', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'Prime_Cache', 'deactivate' ) );
