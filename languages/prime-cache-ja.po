@@ -3132,3 +3132,47 @@ msgstr "より小さい最新形式の画像が必要ですか?"
 #: includes/admin/class-admin-settings.php:1803
 msgid "Prime Cache Pro adds AVIF conversion for sites that want to go beyond WebP."
 msgstr "Prime Cache Pro は、WebP のさらに先を求めるサイト向けに AVIF 変換を追加します。"
+
+#: includes/admin/class-admin-settings.php:1693
+msgid "AVIF Conversion"
+msgstr "AVIF 変換"
+
+#: includes/admin/class-admin-settings.php:1694
+msgid "Prime Cache Pro adds AVIF conversion for smaller modern image delivery. WebP conversion remains available in Prime Cache Free."
+msgstr "Prime Cache Pro はより小さな最新形式での画像配信に向けて AVIF 変換を追加します。WebP 変換は Prime Cache Free でも引き続き利用できます。"
+
+#: includes/admin/class-admin-settings.php:1305
+msgid "Critical CSS & Unused CSS"
+msgstr "Critical CSS と未使用 CSS"
+
+#: includes/admin/class-admin-settings.php:1929
+msgid "Advanced Preload"
+msgstr "高度なプリロード"
+
+#: includes/admin/class-admin-settings.php:1930
+msgid "Prime Cache Pro adds sitemap preload, resource preload, DNS prefetch, and preconnect to warm important pages and assets before visitors arrive."
+msgstr "Prime Cache Pro はサイトマッププリロード、リソースプリロード、DNS プリフェッチ、preconnect を追加し、訪問者が来る前に主要なページとアセットを温めます。"
+
+#: includes/admin/class-admin-settings.php:1950
+msgid "Persistent Object Cache"
+msgstr "永続オブジェクトキャッシュ"
+
+#: includes/admin/class-admin-settings.php:1951
+msgid "Prime Cache Pro adds persistent object cache support for Redis, Memcached, and APCu environments, helping dynamic and admin-heavy sites reduce repeated database work."
+msgstr "Prime Cache Pro は Redis、Memcached、APCu 環境向けに永続オブジェクトキャッシュを追加し、動的な処理や管理画面が多いサイトでデータベースへの繰り返しアクセスを削減します。"
+
+#: includes/admin/class-admin-settings.php:1979
+msgid "External Cache Purge"
+msgstr "外部キャッシュのパージ"
+
+#: includes/admin/class-admin-settings.php:1980
+msgid "Prime Cache Pro can purge Cloudflare, Sucuri, and Varnish when content changes, keeping external cache layers in sync."
+msgstr "Prime Cache Pro はコンテンツの変更時に Cloudflare、Sucuri、Varnish のキャッシュもパージし、外部キャッシュレイヤーを同期させ続けます。"
+
+#: includes/admin/class-admin-settings.php:2206
+msgid "Database Cleanup"
+msgstr "データベースクリーンアップ"
+
+#: includes/admin/class-admin-settings.php:2207
+msgid "Prime Cache Pro adds scheduled cleanup for revisions, expired transients, and overhead on long-running WordPress sites."
+msgstr "Prime Cache Pro はリビジョン、期限切れトランジェント、テーブルオーバーヘッドのクリーンアップを長期運用の WordPress サイト向けにスケジュール実行できるようにします。"

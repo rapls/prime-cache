@@ -2652,3 +2652,47 @@ msgstr ""
 #: includes/admin/class-admin-settings.php:1803
 msgid "Prime Cache Pro adds AVIF conversion for sites that want to go beyond WebP."
 msgstr ""
+
+#: includes/admin/class-admin-settings.php:1693
+msgid "AVIF Conversion"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:1694
+msgid "Prime Cache Pro adds AVIF conversion for smaller modern image delivery. WebP conversion remains available in Prime Cache Free."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:1305
+msgid "Critical CSS & Unused CSS"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:1929
+msgid "Advanced Preload"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:1930
+msgid "Prime Cache Pro adds sitemap preload, resource preload, DNS prefetch, and preconnect to warm important pages and assets before visitors arrive."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:1950
+msgid "Persistent Object Cache"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:1951
+msgid "Prime Cache Pro adds persistent object cache support for Redis, Memcached, and APCu environments, helping dynamic and admin-heavy sites reduce repeated database work."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:1979
+msgid "External Cache Purge"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:1980
+msgid "Prime Cache Pro can purge Cloudflare, Sucuri, and Varnish when content changes, keeping external cache layers in sync."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:2206
+msgid "Database Cleanup"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:2207
+msgid "Prime Cache Pro adds scheduled cleanup for revisions, expired transients, and overhead on long-running WordPress sites."
+msgstr ""

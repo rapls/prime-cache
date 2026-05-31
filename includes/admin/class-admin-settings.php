@@ -1000,6 +1000,50 @@ class Prime_Cache_Admin_Settings {
 	 * information: no pricing, no countdown, no Unlock/Locked language, and the
 	 * only link is the internal Pro Features submenu.
 	 */
+	/**
+	 * In-context Pro feature row, placed near each related setting so users can
+	 * see at a glance which advanced features the optional add-on provides.
+	 * Renders as a single flex row (title + small inline PRO badge + body + a
+	 * "View Pro Features" button), not as a settings control: no toggles, no
+	 * inputs, no disabled state, no warning colour, no external purchase URL.
+	 * Hidden when the add-on is active or the viewer lacks manage_options.
+	 *
+	 * Call sites pass already-translated $args['title'] and $args['body'] so
+	 * the strings are extractable via __() at the call site.
+	 *
+	 * @param array $args Required: 'title' (string), 'body' (string).
+	 */
+	private function render_pro_feature_row( array $args ) {
+		if ( function_exists( 'prime_cache_is_pro' ) && prime_cache_is_pro() ) {
+			return;
+		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		$title = isset( $args['title'] ) ? (string) $args['title'] : '';
+		$body  = isset( $args['body'] ) ? (string) $args['body'] : '';
+		if ( '' === $title && '' === $body ) {
+			return;
+		}
+		$href = admin_url( 'admin.php?page=prime-cache-pro-features' );
+		?>
+		<div class="pc-pro-feature-row" role="note">
+			<div class="pc-pro-feature-row__main">
+				<h3 class="pc-pro-feature-row__title">
+					<?php echo esc_html( $title ); ?>
+					<span class="pc-pro-feature-row__badge">PRO</span>
+				</h3>
+				<p class="pc-pro-feature-row__body"><?php echo esc_html( $body ); ?></p>
+			</div>
+			<div class="pc-pro-feature-row__action">
+				<a class="button button-secondary pc-pro-feature-row__button" href="<?php echo esc_url( $href ); ?>">
+					<?php esc_html_e( 'View Pro Features', 'prime-cache' ); ?>
+				</a>
+			</div>
+		</div>
+		<?php
+	}
+
 	private function render_pro_dashboard_card() {
 		if ( prime_cache_is_pro() ) {
 			return;
@@ -1013,44 +1057,6 @@ class Prime_Cache_Admin_Settings {
 			<h3 class="pc-pro-dashboard-card__h"><?php esc_html_e( 'Looking for advanced optimization?', 'prime-cache' ); ?></h3>
 			<p class="pc-pro-dashboard-card__body"><?php esc_html_e( 'Prime Cache Free covers the essentials. Prime Cache Pro adds advanced CSS optimization, object cache, AVIF, external cache purge, and database cleanup for production sites.', 'prime-cache' ); ?></p>
 			<p class="pc-pro-dashboard-card__cta">
-				<a class="pc-pro-cta pc-pro-cta--sm" href="<?php echo esc_url( $href ); ?>">
-					<?php esc_html_e( 'View Pro Features', 'prime-cache' ); ?>
-				</a>
-			</p>
-		</div>
-		<?php
-	}
-
-	/**
-	 * One informational card placed at the very end of a related settings tab,
-	 * describing the optional add-on's matching higher-tier features. Hidden when
-	 * the add-on is active or the viewer lacks manage_options. Always links
-	 * internally to the Pro Features submenu — no external purchase URL, no
-	 * pricing, no countdown, no disabled controls.
-	 *
-	 * Call sites pass already-translated $args['title'] and $args['body'] so
-	 * each card's strings are extractable via __()/esc_html__() at the call site.
-	 *
-	 * @param array $args Required: 'title' (string), 'body' (string).
-	 */
-	private function render_pro_context_card( $args ) {
-		if ( prime_cache_is_pro() ) {
-			return;
-		}
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-		$title = isset( $args['title'] ) ? (string) $args['title'] : '';
-		$body  = isset( $args['body'] ) ? (string) $args['body'] : '';
-		if ( '' === $title && '' === $body ) {
-			return;
-		}
-		$href = admin_url( 'admin.php?page=prime-cache-pro-features' );
-		?>
-		<div class="pc-card pc-pro-context-card">
-			<h3 class="pc-pro-context-card__h"><?php echo esc_html( $title ); ?></h3>
-			<p class="pc-pro-context-card__body"><?php echo esc_html( $body ); ?></p>
-			<p class="pc-pro-context-card__cta">
 				<a class="pc-pro-cta pc-pro-cta--sm" href="<?php echo esc_url( $href ); ?>">
 					<?php esc_html_e( 'View Pro Features', 'prime-cache' ); ?>
 				</a>
@@ -1293,6 +1299,16 @@ class Prime_Cache_Admin_Settings {
 
 			<?php do_action( 'prime_cache_file_opt_css_delivery', $settings ); ?>
 
+			<?php
+			// In-context pointer for higher-tier CSS optimization (Critical CSS,
+			// Unused CSS removal, advanced delivery). Sits adjacent to the CSS
+			// minify / async / inline-small block so the relationship is obvious.
+			$this->render_pro_feature_row( array(
+				'title' => __( 'Critical CSS & Unused CSS', 'prime-cache' ),
+				'body'  => __( 'Prime Cache Pro adds Critical CSS generation, unused CSS cleanup, and advanced CSS delivery for sites that need deeper front-end optimization.', 'prime-cache' ),
+			) );
+			?>
+
 			<!-- JavaScript -->
 			<div class="pc-card">
 				<span class="pc-card__h">JavaScript</span>
@@ -1474,12 +1490,6 @@ class Prime_Cache_Admin_Settings {
 		})();
 		</script>
 		<?php
-		// Single informational card at the very end of the tab pointing to the
-		// Pro Features submenu — no settings, no disabled controls.
-		$this->render_pro_context_card( array(
-			'title' => __( 'Advanced CSS optimization', 'prime-cache' ),
-			'body'  => __( 'Prime Cache Pro adds Critical CSS generation, unused CSS cleanup, and advanced CSS delivery for sites that need deeper front-end optimization.', 'prime-cache' ),
-		) );
 	}
 
 	/* ── tab: media ───────────────────────────────────────── */
@@ -1684,6 +1694,16 @@ class Prime_Cache_Admin_Settings {
 			<div class="pc-actions"><?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?></div>
 		</form>
 
+		<?php
+		// AVIF lives in the optional add-on. Surfaced here, immediately after the
+		// WebP / Format Conversion card, so users see at a glance that AVIF is
+		// a higher tier rather than a missing feature.
+		$this->render_pro_feature_row( array(
+			'title' => __( 'AVIF Conversion', 'prime-cache' ),
+			'body'  => __( 'Prime Cache Pro adds AVIF conversion for smaller modern image delivery. WebP conversion remains available in Prime Cache Free.', 'prime-cache' ),
+		) );
+		?>
+
 		<!-- Bulk Image Optimization (Free) -->
 		<div class="pc-card" data-pc-bulk-nonce="<?php echo esc_attr( wp_create_nonce( 'pc_img_nonce' ) ); ?>">
 			<span class="pc-card__h"><?php esc_html_e( 'Bulk Image Optimization', 'prime-cache' ); ?></span>
@@ -1824,12 +1844,6 @@ class Prime_Cache_Admin_Settings {
 		})();
 		</script>
 		<?php
-		// AVIF lives in the optional add-on; surface it at the end of the Media
-		// tab as a single informational pointer, never as a disabled control.
-		$this->render_pro_context_card( array(
-			'title' => __( 'Need smaller modern images?', 'prime-cache' ),
-			'body'  => __( 'Prime Cache Pro adds AVIF conversion for sites that want to go beyond WebP.', 'prime-cache' ),
-		) );
 	}
 
 
@@ -1904,6 +1918,16 @@ class Prime_Cache_Admin_Settings {
 
 			<?php do_action( 'prime_cache_preload_after_links', $settings ); ?>
 
+			<?php
+			// Advanced preload (sitemap, resource, DNS prefetch, preconnect) lives
+			// in the optional add-on. Surface it right after the Free preload
+			// controls so users see the higher tier next to the related setting.
+			$this->render_pro_feature_row( array(
+				'title' => __( 'Advanced Preload', 'prime-cache' ),
+				'body'  => __( 'Prime Cache Pro adds sitemap preload, resource preload, DNS prefetch, and preconnect to warm important pages and assets before visitors arrive.', 'prime-cache' ),
+			) );
+			?>
+
 			<div class="pc-actions"><?php submit_button( __( 'Save Settings', 'prime-cache' ), 'primary large', 'submit', false ); ?></div>
 		</form>
 		<?php
@@ -1915,6 +1939,15 @@ class Prime_Cache_Admin_Settings {
 		$vis = array( 'cache_ignore_qs','cache_query_strings','cache_vary_cookies','purge_additional_urls' );
 		?>
 		<h2 class="pc-title"><?php esc_html_e( 'Cache Control','prime-cache' ); ?></h2>
+		<?php
+		// Free has no Object Cache settings tab (the optional add-on adds and
+		// renders it). Surface the higher-tier persistent object cache option
+		// at the top of Cache Control so it's discoverable in context.
+		$this->render_pro_feature_row( array(
+			'title' => __( 'Persistent Object Cache', 'prime-cache' ),
+			'body'  => __( 'Prime Cache Pro adds persistent object cache support for Redis, Memcached, and APCu environments, helping dynamic and admin-heavy sites reduce repeated database work.', 'prime-cache' ),
+		) );
+		?>
 		<form method="post" action="options.php"><?php settings_fields('prime_cache_settings_group'); $this->hidden($settings,$vis); ?>
 			<div class="pc-card"><span class="pc-card__h"><?php esc_html_e('Query Parameters','prime-cache'); ?></span>
 				<div class="pc-field"><label class="pc-lbl"><?php esc_html_e('Ignored Query Parameters','prime-cache'); ?></label><textarea name="prime_cache_settings[cache_ignore_qs]" rows="3" class="pc-ta"><?php echo esc_textarea($settings['cache_ignore_qs']); ?></textarea><p class="pc-help"><?php echo wp_kses(__('Comma-separated parameter names. These parameters are stripped and the same cache is served as if they were absent. Register ad-tracking parameters (utm_source, fbclid, gclid, etc.) to prevent unnecessary cache duplication. <strong>Note:</strong> Requests with any query string go through the PHP drop-in (the .htaccess fast-path requires an empty query string), still very fast but not zero-PHP.','prime-cache'),array('code'=>array(),'strong'=>array())); ?></p></div>
@@ -1926,6 +1959,14 @@ class Prime_Cache_Admin_Settings {
 			<div class="pc-card"><span class="pc-card__h"><?php esc_html_e('Purge Settings','prime-cache'); ?></span>
 				<div class="pc-field"><label class="pc-lbl"><?php esc_html_e('Always Purge URLs','prime-cache'); ?></label><textarea name="prime_cache_settings[purge_additional_urls]" rows="4" class="pc-ta" placeholder="https://example.com/custom-page/"><?php echo esc_textarea($settings['purge_additional_urls']); ?></textarea><p class="pc-help"><?php esc_html_e('One URL per line. Whenever any post is published, updated, trashed, or deleted, caches for these URLs are also cleared in addition to the standard related pages (home, categories, tags, author, date archives). Use for sitemaps, custom landing pages, or shortcode-based post listing pages that are not auto-detected.','prime-cache'); ?></p></div>
 			</div>
+			<?php
+			// Adjacent to the in-WordPress purge controls so the relationship to
+			// external cache layers is obvious. Hidden when the add-on is active.
+			$this->render_pro_feature_row( array(
+				'title' => __( 'External Cache Purge', 'prime-cache' ),
+				'body'  => __( 'Prime Cache Pro can purge Cloudflare, Sucuri, and Varnish when content changes, keeping external cache layers in sync.', 'prime-cache' ),
+			) );
+			?>
 			<div class="pc-actions"><?php submit_button(__('Save Settings','prime-cache'),'primary large','submit',false); ?></div>
 		</form>
 		<?php
@@ -2148,6 +2189,15 @@ class Prime_Cache_Admin_Settings {
 				<span class="dashicons dashicons-image-rotate" style="font-size:15px;width:15px;height:15px;line-height:15px"></span><?php esc_html_e( 'Reset to Defaults', 'prime-cache' ); ?>
 			</a>
 		</div>
+
+		<?php
+		// Database maintenance lives in the optional add-on. Tools is the most
+		// natural in-Free home for a pointer to scheduled DB cleanup.
+		$this->render_pro_feature_row( array(
+			'title' => __( 'Database Cleanup', 'prime-cache' ),
+			'body'  => __( 'Prime Cache Pro adds scheduled cleanup for revisions, expired transients, and overhead on long-running WordPress sites.', 'prime-cache' ),
+		) );
+		?>
 
 		<!-- Security -->
 		<form method="post" action="options.php">
@@ -2582,15 +2632,23 @@ class Prime_Cache_Admin_Settings {
 .pc-pro-dashboard-card__cta{margin:0}
 .pc-pro-cta--sm{padding:6px 12px;font-size:13px}
 
-/* Per-tab contextual Pro Features card (Phase 3, one per related tab). Shares
-   the same restrained dashboard styling; tighter spacing so the card nests at
-   the very end of a settings tab without competing with surrounding controls.
-   Strictly informational — no fields, no toggles, no warning colour. */
-.pc-pro-context-card{margin-top:16px;border-left:3px solid #1d4ed8;background:#fff}
-.pc-pro-context-card__h{margin:0 0 6px;font-size:15px;line-height:1.4}
-.pc-pro-context-card__body{margin:0 0 10px;font-size:13px;line-height:1.6;color:#4b5563;max-width:760px}
-.pc-pro-context-card__cta{margin:0}
-.pc-pro-context-card .pc-pro-cta--sm{padding:4px 10px;font-size:13px;line-height:1.6}
+/* In-context Pro feature row (Phase 3 row design). Placed next to each related
+   feature so the higher tier is visible in context. Reads as a horizontal info
+   line, not a settings control: white background, 1px outline, 4px blue left
+   accent, restrained typography. The mobile breakpoint stacks the button below
+   so the line stays legible on narrow screens. */
+.pc-pro-feature-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:16px 0;padding:14px 16px;border:1px solid #dcdcde;border-left:4px solid #1d4ed8;border-radius:6px;background:#fff}
+.pc-pro-feature-row__main{min-width:0}
+.pc-pro-feature-row__title{margin:0 0 4px;font-size:14px;line-height:1.35;font-weight:600;color:#1d2327}
+.pc-pro-feature-row__badge{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:999px;background:#1d4ed8;color:#fff;font-size:10px;font-weight:700;line-height:1.5;vertical-align:middle}
+.pc-pro-feature-row__body{margin:0;color:#50575e;font-size:13px;line-height:1.55}
+.pc-pro-feature-row__action{flex:0 0 auto}
+.pc-pro-feature-row__button{white-space:nowrap}
+@media (max-width:782px){
+  .pc-pro-feature-row{display:block}
+  .pc-pro-feature-row__action{margin-top:12px}
+}
+
 
 /* power toggle in sidebar */
 .pc-side__foot{padding:16px 20px;border-top:1px solid var(--c-subtle)}
