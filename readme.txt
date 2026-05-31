@@ -283,7 +283,7 @@ No. The free plugin does not send your data or API requests to any third-party s
 == Upgrade Notice ==
 
 = 1.10.23 =
-WordPress.org pre-review hardening pass: admin inline scripts now flow through wp_add_inline_script(), drop-in $_SERVER inputs are unslashed and validated, readme documents the (non-)use of external services, and the object-cache drop-in's signature constant is renamed to clear the PRIME_CACHE_ prefix. No behavior change.
+Pre-review hardening pass: admin inline scripts now go through wp_add_inline_script(); drop-in $_SERVER inputs are unslashed and validated; readme adds an External services section; the object-cache constant is renamed. No behavior change.
 
 = 1.10.22 =
 Silences the two Plugin Check static-analysis errors (wp_is_block_theme on a WP 5.8 baseline) by dispatching the call dynamically. No behavior change.
