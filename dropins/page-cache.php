@@ -69,29 +69,29 @@ $prime_cache_allowed_hosts = array();
 // where the user enabled cache_mixed_scheme.
 $prime_cache_site_scheme = '';
 
-$_pc_using_legacy_config = false;
+$prime_cache_pc_using_legacy_config = false;
 if ( defined( 'PRIME_CACHE_CONFIG_DIR' ) ) {
 	// Install-unique config file (ABSPATH + DB_NAME + table_prefix prevents
 	// shared wp-content collision while staying stable across salt rotation).
-	$_pc_install_seed = ABSPATH . '|' . ( defined( 'DB_NAME' ) ? DB_NAME : '' )
+	$prime_cache_pc_install_seed = ABSPATH . '|' . ( defined( 'DB_NAME' ) ? DB_NAME : '' )
 		. '|' . ( isset( $GLOBALS['table_prefix'] ) ? (string) $GLOBALS['table_prefix'] : '' );
-	$_pc_install_key  = substr( md5( $_pc_install_seed ), 0, 8 );
-	$_pc_config_file  = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $_pc_install_key . '.php';
-	if ( is_readable( $_pc_config_file ) ) {
-		include $_pc_config_file;
+	$prime_cache_pc_install_key  = substr( md5( $prime_cache_pc_install_seed ), 0, 8 );
+	$prime_cache_pc_config_file  = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $prime_cache_pc_install_key . '.php';
+	if ( is_readable( $prime_cache_pc_config_file ) ) {
+		include $prime_cache_pc_config_file;
 	} else {
 		// Fall back to the legacy AUTH_SALT-keyed filename so an upgrade
 		// where prime-cache-config/ is read-only doesn't disable caching
 		// until the admin manually fixes permissions. The PHP-side write
 		// path will eventually replace this file once writes succeed.
-		$_pc_legacy_seed = ABSPATH . '|' . ( defined( 'DB_NAME' ) ? DB_NAME : '' )
+		$prime_cache_pc_legacy_seed = ABSPATH . '|' . ( defined( 'DB_NAME' ) ? DB_NAME : '' )
 			. '|' . ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' );
-		$_pc_legacy_key  = substr( md5( $_pc_legacy_seed ), 0, 8 );
-		if ( $_pc_legacy_key !== $_pc_install_key ) {
-			$_pc_legacy_file = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $_pc_legacy_key . '.php';
-			if ( is_readable( $_pc_legacy_file ) ) {
-				include $_pc_legacy_file;
-				$_pc_using_legacy_config = true;
+		$prime_cache_pc_legacy_key  = substr( md5( $prime_cache_pc_legacy_seed ), 0, 8 );
+		if ( $prime_cache_pc_legacy_key !== $prime_cache_pc_install_key ) {
+			$prime_cache_pc_legacy_file = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $prime_cache_pc_legacy_key . '.php';
+			if ( is_readable( $prime_cache_pc_legacy_file ) ) {
+				include $prime_cache_pc_legacy_file;
+				$prime_cache_pc_using_legacy_config = true;
 			}
 		}
 	}
@@ -110,24 +110,24 @@ if ( empty( $prime_cache_config['cache_enabled'] ) ) {
  *
  * @param string $type 'hit' or 'miss'.
  */
-$_pc_deferred_stat = null;
+$prime_cache_pc_deferred_stat = null;
 
 function _prime_cache_record_stat( $type ) {
-	global $_pc_deferred_stat;
+	global $prime_cache_pc_deferred_stat;
 	// 1/10 sampling to reduce I/O. Stats are approximate.
 	if ( mt_rand( 1, 10 ) !== 1 ) {
 		return;
 	}
 	// Defer write to shutdown — keeps it off the critical TTFB path.
-	if ( null === $_pc_deferred_stat ) {
+	if ( null === $prime_cache_pc_deferred_stat ) {
 		register_shutdown_function( '_prime_cache_flush_stat' );
 	}
-	$_pc_deferred_stat = $type;
+	$prime_cache_pc_deferred_stat = $type;
 }
 
 function _prime_cache_flush_stat() {
-	global $_pc_deferred_stat;
-	if ( ! $_pc_deferred_stat ) return;
+	global $prime_cache_pc_deferred_stat;
+	if ( ! $prime_cache_pc_deferred_stat ) return;
 
 	$stats_file = PRIME_CACHE_CACHE_DIR . 'stats.json';
 	$stats      = array( 'hit' => 0, 'miss' => 0, 'since' => time() );
@@ -145,7 +145,7 @@ function _prime_cache_flush_stat() {
 				$stats = $current_data;
 			}
 		}
-		$stats[ $_pc_deferred_stat ] = isset( $stats[ $_pc_deferred_stat ] ) ? $stats[ $_pc_deferred_stat ] + 10 : 10;
+		$stats[ $prime_cache_pc_deferred_stat ] = isset( $stats[ $prime_cache_pc_deferred_stat ] ) ? $stats[ $prime_cache_pc_deferred_stat ] + 10 : 10;
 		ftruncate( $fp, 0 );
 		fseek( $fp, 0 );
 		fwrite( $fp, json_encode( $stats ) );
@@ -162,7 +162,7 @@ function _prime_cache_flush_stat() {
 if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || ! in_array( $_SERVER['REQUEST_METHOD'], array( 'GET', 'HEAD' ), true ) ) {
 	return;
 }
-$_pc_is_head = 'HEAD' === $_SERVER['REQUEST_METHOD'];
+$prime_cache_pc_is_head = 'HEAD' === $_SERVER['REQUEST_METHOD'];
 
 // Never cache authenticated requests (Basic Auth, Bearer tokens, Digest).
 if ( ! empty( $_SERVER['HTTP_AUTHORIZATION'] ) || ! empty( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] )
@@ -170,7 +170,7 @@ if ( ! empty( $_SERVER['HTTP_AUTHORIZATION'] ) || ! empty( $_SERVER['REDIRECT_HT
 	return;
 }
 
-$_pc_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
+$prime_cache_pc_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
 
 // Validate Host against the allowed list written by Prime_Cache_Config::write_config_file().
 // Fail-close: an empty list (config missing or pre-allowed-hosts schema) means we cannot
@@ -183,9 +183,9 @@ require_once dirname( __FILE__ ) . '/../includes/cache-key-functions.php';
 // so the raw $_SERVER['HTTP_HOST'] is sanitized before any downstream use. WP
 // helpers like wp_unslash() are not available in the drop-in (it runs before
 // WordPress loads), so stripslashes() is used directly.
-$_pc_host_raw = isset( $_SERVER['HTTP_HOST'] ) ? stripslashes( (string) $_SERVER['HTTP_HOST'] ) : '';
-$_pc_host     = _prime_cache_normalize_host( $_pc_host_raw );
-if ( '' === $_pc_host ) {
+$prime_cache_pc_host_raw = isset( $_SERVER['HTTP_HOST'] ) ? stripslashes( (string) $_SERVER['HTTP_HOST'] ) : '';
+$prime_cache_pc_host     = _prime_cache_normalize_host( $prime_cache_pc_host_raw );
+if ( '' === $prime_cache_pc_host ) {
 	return;
 }
 // Pre-allowlist legacy config files don't define $prime_cache_allowed_hosts,
@@ -194,8 +194,8 @@ if ( '' === $_pc_host ) {
 // know the host check can't be enforced (legacy config), skip it — that's
 // the same security posture the legacy version had. Modern config flows
 // always populate the array and stay fail-close.
-if ( ! $_pc_using_legacy_config ) {
-	if ( empty( $prime_cache_allowed_hosts ) || ! in_array( $_pc_host, $prime_cache_allowed_hosts, true ) ) {
+if ( ! $prime_cache_pc_using_legacy_config ) {
+	if ( empty( $prime_cache_allowed_hosts ) || ! in_array( $prime_cache_pc_host, $prime_cache_allowed_hosts, true ) ) {
 		return;
 	}
 }
@@ -204,13 +204,13 @@ if ( ! $_pc_using_legacy_config ) {
 // like /category/wp-admin-tutorials/ aren't accidentally excluded — match
 // these as a path segment (start-of-string or `/`) followed by the literal
 // trailed by `/`, end-of-string, or `?`.
-if ( preg_match( '#(?:^|/)(?:wp-admin|wp-login\.php|wp-cron\.php|xmlrpc\.php)(?:/|$|\?)#', $_pc_request_uri ) ) {
+if ( preg_match( '#(?:^|/)(?:wp-admin|wp-login\.php|wp-cron\.php|xmlrpc\.php)(?:/|$|\?)#', $prime_cache_pc_request_uri ) ) {
 	return;
 }
 
 // WooCommerce: always skip cart, checkout, account, and AJAX endpoints.
 // Boundary-aware to avoid matching /cartoon/, /checkout-guide/, /my-accounting/ etc.
-if ( preg_match( '#(?:^|/)(?:cart|checkout|my-account)(?:/|$|\?)|(?:^|/)wc-api(?:/|$)|(?:[?&](?:wc-ajax|add-to-cart)=)#i', $_pc_request_uri ) ) {
+if ( preg_match( '#(?:^|/)(?:cart|checkout|my-account)(?:/|$|\?)|(?:^|/)wc-api(?:/|$)|(?:[?&](?:wc-ajax|add-to-cart)=)#i', $prime_cache_pc_request_uri ) ) {
 	return;
 }
 // Cookies that always bypass cache regardless of cache_logged_in:
@@ -218,20 +218,20 @@ if ( preg_match( '#(?:^|/)(?:cart|checkout|my-account)(?:/|$|\?)|(?:^|/)wc-api(?
 // - comment_author_*: post page shows pre-filled form fields and pending-moderation notice
 // - wp-postpass_*: response is the unlocked post body, must not be served to others
 if ( ! empty( $_COOKIE ) ) {
-	foreach ( array_keys( $_COOKIE ) as $_pc_bypass_ck ) {
-		if ( 0 === strpos( $_pc_bypass_ck, 'woocommerce_cart_hash' )
-			|| 0 === strpos( $_pc_bypass_ck, 'wp_woocommerce_session_' )
-			|| 0 === strpos( $_pc_bypass_ck, 'woocommerce_items_in_cart' )
-			|| 0 === strpos( $_pc_bypass_ck, 'comment_author_' )
-			|| 0 === strpos( $_pc_bypass_ck, 'wp-postpass_' ) ) {
+	foreach ( array_keys( $_COOKIE ) as $prime_cache_pc_bypass_ck ) {
+		if ( 0 === strpos( $prime_cache_pc_bypass_ck, 'woocommerce_cart_hash' )
+			|| 0 === strpos( $prime_cache_pc_bypass_ck, 'wp_woocommerce_session_' )
+			|| 0 === strpos( $prime_cache_pc_bypass_ck, 'woocommerce_items_in_cart' )
+			|| 0 === strpos( $prime_cache_pc_bypass_ck, 'comment_author_' )
+			|| 0 === strpos( $prime_cache_pc_bypass_ck, 'wp-postpass_' ) ) {
 			return;
 		}
 	}
 }
 
 // Skip non-HTML extensions.
-$_pc_path = strtok( $_pc_request_uri, '?' );
-if ( $_pc_path && preg_match( '#\.(php|xml|xsl|json|css|js|map|txt)$#i', $_pc_path ) && ! preg_match( '#/index\.php$#', $_pc_path ) ) {
+$prime_cache_pc_path = strtok( $prime_cache_pc_request_uri, '?' );
+if ( $prime_cache_pc_path && preg_match( '#\.(php|xml|xsl|json|css|js|map|txt)$#i', $prime_cache_pc_path ) && ! preg_match( '#/index\.php$#', $prime_cache_pc_path ) ) {
 	return;
 }
 
@@ -239,38 +239,38 @@ if ( $_pc_path && preg_match( '#\.(php|xml|xsl|json|css|js|map|txt)$#i', $_pc_pa
 // - cache_ignore_qs: these params are stripped (same cache as without them).
 // - cache_query_strings: these params create unique cache entries per value.
 // - Any other param → skip caching entirely.
-$_pc_qs_suffix = '';
+$prime_cache_pc_qs_suffix = '';
 if ( ! empty( $_GET ) ) {
-	$_pc_ignored    = array_map( 'trim', explode( ',', $prime_cache_config['cache_ignore_qs'] ) );
-	$_pc_ignored    = array_filter( $_pc_ignored );
-	$_pc_cached_qs  = array_map( 'trim', explode( ',', $prime_cache_config['cache_query_strings'] ) );
-	$_pc_cached_qs  = array_filter( $_pc_cached_qs );
-	$_pc_remaining  = array_diff_key( $_GET, array_flip( $_pc_ignored ) );
+	$prime_cache_pc_ignored    = array_map( 'trim', explode( ',', $prime_cache_config['cache_ignore_qs'] ) );
+	$prime_cache_pc_ignored    = array_filter( $prime_cache_pc_ignored );
+	$prime_cache_pc_cached_qs  = array_map( 'trim', explode( ',', $prime_cache_config['cache_query_strings'] ) );
+	$prime_cache_pc_cached_qs  = array_filter( $prime_cache_pc_cached_qs );
+	$prime_cache_pc_remaining  = array_diff_key( $_GET, array_flip( $prime_cache_pc_ignored ) );
 
-	if ( ! empty( $_pc_remaining ) ) {
-		if ( empty( $_pc_cached_qs ) ) {
+	if ( ! empty( $prime_cache_pc_remaining ) ) {
+		if ( empty( $prime_cache_pc_cached_qs ) ) {
 			return; // Unknown params, don't cache.
 		}
 		// Keep only params that are in the cache_query_strings list.
-		$_pc_qs_to_cache = array_intersect_key( $_pc_remaining, array_flip( $_pc_cached_qs ) );
-		$_pc_unknown     = array_diff_key( $_pc_remaining, $_pc_qs_to_cache );
-		if ( ! empty( $_pc_unknown ) ) {
+		$prime_cache_pc_qs_to_cache = array_intersect_key( $prime_cache_pc_remaining, array_flip( $prime_cache_pc_cached_qs ) );
+		$prime_cache_pc_unknown     = array_diff_key( $prime_cache_pc_remaining, $prime_cache_pc_qs_to_cache );
+		if ( ! empty( $prime_cache_pc_unknown ) ) {
 			return; // Has params not in ignore or cache list.
 		}
 		// Build a deterministic suffix for the filename.
-		if ( ! empty( $_pc_qs_to_cache ) ) {
-			ksort( $_pc_qs_to_cache );
+		if ( ! empty( $prime_cache_pc_qs_to_cache ) ) {
+			ksort( $prime_cache_pc_qs_to_cache );
 			// 16 hex (64-bit) so an attacker can't cheaply craft a query-string
 			// value that collides with a victim's variant to poison its cache.
-			$_pc_qs_suffix = '-qs_' . substr( md5( http_build_query( $_pc_qs_to_cache ) ), 0, 16 );
+			$prime_cache_pc_qs_suffix = '-qs_' . substr( md5( http_build_query( $prime_cache_pc_qs_to_cache ) ), 0, 16 );
 		}
 	}
 }
 
 // Logged-in cookie check.
 if ( ! $prime_cache_config['cache_logged_in'] && ! empty( $_COOKIE ) ) {
-	foreach ( array_keys( $_COOKIE ) as $_pc_cookie_name ) {
-		if ( strpos( $_pc_cookie_name, 'wordpress_logged_in_' ) === 0 ) {
+	foreach ( array_keys( $_COOKIE ) as $prime_cache_pc_cookie_name ) {
+		if ( strpos( $prime_cache_pc_cookie_name, 'wordpress_logged_in_' ) === 0 ) {
 			return;
 		}
 	}
@@ -280,9 +280,9 @@ if ( ! $prime_cache_config['cache_logged_in'] && ! empty( $_COOKIE ) ) {
 // REJECT pattern that means "don't know if this should be excluded", and the
 // safe default for a "should I skip caching this" check is YES (fail-close).
 if ( ! empty( $prime_cache_config['cache_reject_cookies'] ) && ! empty( $_COOKIE ) ) {
-	foreach ( array_keys( $_COOKIE ) as $_pc_cookie_name ) {
-		$_pc_match = @preg_match( '#' . $prime_cache_config['cache_reject_cookies'] . '#i', $_pc_cookie_name );
-		if ( false === $_pc_match || 1 === $_pc_match ) {
+	foreach ( array_keys( $_COOKIE ) as $prime_cache_pc_cookie_name ) {
+		$prime_cache_pc_match = @preg_match( '#' . $prime_cache_config['cache_reject_cookies'] . '#i', $prime_cache_pc_cookie_name );
+		if ( false === $prime_cache_pc_match || 1 === $prime_cache_pc_match ) {
 			return;
 		}
 	}
@@ -290,18 +290,18 @@ if ( ! empty( $prime_cache_config['cache_reject_cookies'] ) && ! empty( $_COOKIE
 
 // Rejected URI patterns.
 if ( ! empty( $prime_cache_config['cache_reject_uri'] ) ) {
-	$_pc_match = @preg_match( '#(' . $prime_cache_config['cache_reject_uri'] . ')#i', $_pc_path );
-	if ( false === $_pc_match || 1 === $_pc_match ) {
+	$prime_cache_pc_match = @preg_match( '#(' . $prime_cache_config['cache_reject_uri'] . ')#i', $prime_cache_pc_path );
+	if ( false === $prime_cache_pc_match || 1 === $prime_cache_pc_match ) {
 		return;
 	}
 }
 
 // Rejected user agents.
 if ( ! empty( $prime_cache_config['cache_reject_ua'] ) ) {
-	$_pc_ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '';
-	if ( $_pc_ua ) {
-		$_pc_match = @preg_match( '#' . $prime_cache_config['cache_reject_ua'] . '#i', $_pc_ua );
-		if ( false === $_pc_match || 1 === $_pc_match ) {
+	$prime_cache_pc_ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '';
+	if ( $prime_cache_pc_ua ) {
+		$prime_cache_pc_match = @preg_match( '#' . $prime_cache_config['cache_reject_ua'] . '#i', $prime_cache_pc_ua );
+		if ( false === $prime_cache_pc_match || 1 === $prime_cache_pc_match ) {
 			return;
 		}
 	}
@@ -312,9 +312,9 @@ if ( ! empty( $prime_cache_config['cache_reject_ua'] ) ) {
 // regex meta-characters via slash-escaping or blow up the matcher on absurd
 // lengths. WP helpers are not available in the drop-in.
 if ( ! empty( $prime_cache_config['cache_reject_referrer'] ) && ! empty( $_SERVER['HTTP_REFERER'] ) ) {
-	$_pc_ref   = substr( stripslashes( (string) $_SERVER['HTTP_REFERER'] ), 0, 2048 );
-	$_pc_match = @preg_match( '#(' . $prime_cache_config['cache_reject_referrer'] . ')#i', $_pc_ref );
-	if ( false === $_pc_match || 1 === $_pc_match ) {
+	$prime_cache_pc_ref   = substr( stripslashes( (string) $_SERVER['HTTP_REFERER'] ), 0, 2048 );
+	$prime_cache_pc_match = @preg_match( '#(' . $prime_cache_config['cache_reject_referrer'] . ')#i', $prime_cache_pc_ref );
+	if ( false === $prime_cache_pc_match || 1 === $prime_cache_pc_match ) {
 		return;
 	}
 }
@@ -325,11 +325,11 @@ if ( ! empty( $prime_cache_config['cache_reject_referrer'] ) && ! empty( $_SERVE
 // is unslashed and length-capped before _prime_cache_is_mobile_ua() consumes
 // it; that function does its own substring match against a known fragment list
 // and never echoes the value back. WP helpers are unavailable in the drop-in.
-$_pc_ua        = substr( stripslashes( (string) ( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ), 0, 1024 );
-$_pc_is_mobile = _prime_cache_is_mobile_ua( $_pc_ua );
+$prime_cache_pc_ua        = substr( stripslashes( (string) ( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ), 0, 1024 );
+$prime_cache_pc_is_mobile = _prime_cache_is_mobile_ua( $prime_cache_pc_ua );
 
 // Skip mobile if mobile caching is disabled.
-if ( $_pc_is_mobile && ! $prime_cache_config['cache_mobile'] ) {
+if ( $prime_cache_pc_is_mobile && ! $prime_cache_config['cache_mobile'] ) {
 	return;
 }
 
@@ -353,15 +353,15 @@ if ( $_pc_is_mobile && ! $prime_cache_config['cache_mobile'] ) {
 // WordPress (after this drop-in). Serving the https cache to that request
 // would short-circuit the redirect and leak the secure response over plain
 // http. Bail in that case so WP can run and redirect.
-$_pc_request_is_ssl = ( ! empty( $_SERVER['HTTPS'] ) && 'off' !== $_SERVER['HTTPS'] )
+$prime_cache_pc_request_is_ssl = ( ! empty( $_SERVER['HTTPS'] ) && 'off' !== $_SERVER['HTTPS'] )
 	|| ( ! empty( $_SERVER['SERVER_PORT'] ) && 443 === (int) $_SERVER['SERVER_PORT'] )
 	|| ( defined( 'PRIME_CACHE_TRUST_X_FORWARDED_PROTO' ) && PRIME_CACHE_TRUST_X_FORWARDED_PROTO
 		&& ! empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] )
 		&& 'https' === $_SERVER['HTTP_X_FORWARDED_PROTO'] );
 
 if ( '' !== $prime_cache_site_scheme && empty( $prime_cache_config['cache_mixed_scheme'] ) ) {
-	$_pc_is_ssl = ( 'https' === $prime_cache_site_scheme );
-	if ( $_pc_is_ssl && ! $_pc_request_is_ssl ) {
+	$prime_cache_pc_is_ssl = ( 'https' === $prime_cache_site_scheme );
+	if ( $prime_cache_pc_is_ssl && ! $prime_cache_pc_request_is_ssl ) {
 		// site_scheme says https but the request shows no https signal.
 		// Default behavior: bail and let WP run (it will issue the
 		// http→https redirect). Serving the https cache to an unsignal-
@@ -384,7 +384,7 @@ if ( '' !== $prime_cache_site_scheme && empty( $prime_cache_config['cache_mixed_
 		}
 	}
 } else {
-	$_pc_is_ssl = $_pc_request_is_ssl;
+	$prime_cache_pc_is_ssl = $prime_cache_pc_request_is_ssl;
 }
 
 /**
@@ -392,11 +392,11 @@ if ( '' !== $prime_cache_site_scheme && empty( $prime_cache_config['cache_mixed_
  * Uses the host validated and normalized at the top of this file.
  */
 function _prime_cache_get_cache_dir() {
-	global $_pc_request_uri, $_pc_host;
+	global $prime_cache_pc_request_uri, $prime_cache_pc_host;
 
-	$path = _prime_cache_normalize_path( strtok( $_pc_request_uri, '?' ) );
+	$path = _prime_cache_normalize_path( strtok( $prime_cache_pc_request_uri, '?' ) );
 
-	return PRIME_CACHE_CACHE_DIR . $_pc_host . $path;
+	return PRIME_CACHE_CACHE_DIR . $prime_cache_pc_host . $path;
 }
 
 /**
@@ -440,56 +440,56 @@ function _prime_cache_get_filename( $is_ssl, $is_mobile, $use_mobile_separate, $
 }
 
 // Vary Cookies — create separate cache per cookie value combination.
-$_pc_vary_suffix = '';
+$prime_cache_pc_vary_suffix = '';
 if ( ! empty( $prime_cache_config['cache_vary_cookies'] ) && ! empty( $_COOKIE ) ) {
-	$_pc_vary_names = array_map( 'trim', explode( ',', $prime_cache_config['cache_vary_cookies'] ) );
-	$_pc_vary_names = array_filter( $_pc_vary_names );
-	$_pc_vary_vals  = array();
-	foreach ( $_pc_vary_names as $_pc_vn ) {
-		if ( isset( $_COOKIE[ $_pc_vn ] ) ) {
-			$_pc_vary_vals[ $_pc_vn ] = $_COOKIE[ $_pc_vn ];
+	$prime_cache_pc_vary_names = array_map( 'trim', explode( ',', $prime_cache_config['cache_vary_cookies'] ) );
+	$prime_cache_pc_vary_names = array_filter( $prime_cache_pc_vary_names );
+	$prime_cache_pc_vary_vals  = array();
+	foreach ( $prime_cache_pc_vary_names as $prime_cache_pc_vn ) {
+		if ( isset( $_COOKIE[ $prime_cache_pc_vn ] ) ) {
+			$prime_cache_pc_vary_vals[ $prime_cache_pc_vn ] = $_COOKIE[ $prime_cache_pc_vn ];
 		}
 	}
-	if ( ! empty( $_pc_vary_vals ) ) {
-		ksort( $_pc_vary_vals );
+	if ( ! empty( $prime_cache_pc_vary_vals ) ) {
+		ksort( $prime_cache_pc_vary_vals );
 		// serialize() is binary-safe; json_encode() returns false on invalid
 		// UTF-8 cookie values, and md5(false) === md5('') would collapse
 		// distinct cookie sets into the same vary bucket and serve the wrong
 		// variant.
 		// 16 hex (64-bit) so a colliding cookie value can't be crafted to overwrite
 		// another visitor's cached variant.
-		$_pc_vary_suffix = '-vc_' . substr( md5( serialize( $_pc_vary_vals ) ), 0, 16 );
+		$prime_cache_pc_vary_suffix = '-vc_' . substr( md5( serialize( $prime_cache_pc_vary_vals ) ), 0, 16 );
 	}
 }
 
-$_pc_cache_dir  = _prime_cache_get_cache_dir();
-$_pc_filename   = _prime_cache_get_filename( $_pc_is_ssl, $_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], false, $_pc_vary_suffix, $_pc_qs_suffix );
+$prime_cache_pc_cache_dir  = _prime_cache_get_cache_dir();
+$prime_cache_pc_filename   = _prime_cache_get_filename( $prime_cache_pc_is_ssl, $prime_cache_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], false, $prime_cache_pc_vary_suffix, $prime_cache_pc_qs_suffix );
 
 // ----- Try to Serve Cached File -----
 
-$_pc_cache_file = $_pc_cache_dir . $_pc_filename;
+$prime_cache_pc_cache_file = $prime_cache_pc_cache_dir . $prime_cache_pc_filename;
 
 // Also check for 404-prefixed cache file when cache_404 is enabled.
-$_pc_serving_404 = false;
-if ( ! is_readable( $_pc_cache_file ) && ! empty( $prime_cache_config['cache_404'] ) ) {
-	$_pc_404_filename = _prime_cache_get_filename( $_pc_is_ssl, $_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], false, $_pc_vary_suffix, $_pc_qs_suffix, 404 );
-	$_pc_404_file     = $_pc_cache_dir . $_pc_404_filename;
-	if ( is_readable( $_pc_404_file ) ) {
-		$_pc_cache_file  = $_pc_404_file;
-		$_pc_filename    = $_pc_404_filename;
-		$_pc_serving_404 = true;
+$prime_cache_pc_serving_404 = false;
+if ( ! is_readable( $prime_cache_pc_cache_file ) && ! empty( $prime_cache_config['cache_404'] ) ) {
+	$prime_cache_pc_404_filename = _prime_cache_get_filename( $prime_cache_pc_is_ssl, $prime_cache_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], false, $prime_cache_pc_vary_suffix, $prime_cache_pc_qs_suffix, 404 );
+	$prime_cache_pc_404_file     = $prime_cache_pc_cache_dir . $prime_cache_pc_404_filename;
+	if ( is_readable( $prime_cache_pc_404_file ) ) {
+		$prime_cache_pc_cache_file  = $prime_cache_pc_404_file;
+		$prime_cache_pc_filename    = $prime_cache_pc_404_filename;
+		$prime_cache_pc_serving_404 = true;
 	}
 }
 
-if ( is_readable( $_pc_cache_file ) ) {
+if ( is_readable( $prime_cache_pc_cache_file ) ) {
 	// TOCTOU guard: a concurrent purge between is_readable() and filemtime()
 	// would yield false here. Treat that as "no cache" so WordPress regenerates
 	// rather than emitting Last-Modified=1970 from a false mtime.
-	$_pc_modified_time = @filemtime( $_pc_cache_file );
-	$_pc_lifespan      = isset( $prime_cache_config['cache_lifespan'] ) ? (int) $prime_cache_config['cache_lifespan'] : 0;
+	$prime_cache_pc_modified_time = @filemtime( $prime_cache_pc_cache_file );
+	$prime_cache_pc_lifespan      = isset( $prime_cache_config['cache_lifespan'] ) ? (int) $prime_cache_config['cache_lifespan'] : 0;
 
 	// Skip serving if mtime read failed or cache file has expired — let WordPress regenerate it.
-	if ( false === $_pc_modified_time || ( $_pc_lifespan > 0 && ( time() - $_pc_modified_time ) > $_pc_lifespan ) ) {
+	if ( false === $prime_cache_pc_modified_time || ( $prime_cache_pc_lifespan > 0 && ( time() - $prime_cache_pc_modified_time ) > $prime_cache_pc_lifespan ) ) {
 		// Fall through to output buffering below.
 	} else {
 
@@ -497,15 +497,15 @@ if ( is_readable( $_pc_cache_file ) ) {
 	// TOCTOU: file_get_contents may return false if the meta file is purged
 	// between is_readable() and the read. PHP 8 json_decode( false, true )
 	// throws TypeError, so guard with is_string() before decoding.
-	$_pc_meta_file = $_pc_cache_dir . $_pc_filename . '.meta.json';
-	$_pc_meta           = null;
-	$_pc_original_status = 200;
-	if ( is_readable( $_pc_meta_file ) ) {
-		$_pc_meta_raw = @file_get_contents( $_pc_meta_file );
-		if ( is_string( $_pc_meta_raw ) ) {
-			$_pc_meta = json_decode( $_pc_meta_raw, true );
-			if ( is_array( $_pc_meta ) && ! empty( $_pc_meta['status'] ) ) {
-				$_pc_original_status = (int) $_pc_meta['status'];
+	$prime_cache_pc_meta_file = $prime_cache_pc_cache_dir . $prime_cache_pc_filename . '.meta.json';
+	$prime_cache_pc_meta           = null;
+	$prime_cache_pc_original_status = 200;
+	if ( is_readable( $prime_cache_pc_meta_file ) ) {
+		$prime_cache_pc_meta_raw = @file_get_contents( $prime_cache_pc_meta_file );
+		if ( is_string( $prime_cache_pc_meta_raw ) ) {
+			$prime_cache_pc_meta = json_decode( $prime_cache_pc_meta_raw, true );
+			if ( is_array( $prime_cache_pc_meta ) && ! empty( $prime_cache_pc_meta['status'] ) ) {
+				$prime_cache_pc_original_status = (int) $prime_cache_pc_meta['status'];
 			}
 		}
 	}
@@ -513,51 +513,51 @@ if ( is_readable( $_pc_cache_file ) ) {
 	// Determine response file BEFORE sending any headers. Doing it up here means
 	// a TOCTOU bail (cache file vanished mid-flight) falls through to the OB
 	// path with NO Prime-Cache headers leaking onto the regenerated response.
-	$_pc_accept_gzip = isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && strpos( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) !== false;
-	$_pc_gz_status   = $_pc_serving_404 ? 404 : 200;
-	$_pc_gz_file     = $_pc_cache_dir . _prime_cache_get_filename( $_pc_is_ssl, $_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], true, $_pc_vary_suffix, $_pc_qs_suffix, $_pc_gz_status );
-	$_pc_use_gz      = $_pc_accept_gzip && is_readable( $_pc_gz_file );
-	$_pc_serve_file  = $_pc_use_gz ? $_pc_gz_file : $_pc_cache_file;
-	$_pc_serve_size  = @filesize( $_pc_serve_file );
-	if ( false === $_pc_serve_size && $_pc_use_gz && is_readable( $_pc_cache_file ) ) {
+	$prime_cache_pc_accept_gzip = isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && strpos( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) !== false;
+	$prime_cache_pc_gz_status   = $prime_cache_pc_serving_404 ? 404 : 200;
+	$prime_cache_pc_gz_file     = $prime_cache_pc_cache_dir . _prime_cache_get_filename( $prime_cache_pc_is_ssl, $prime_cache_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], true, $prime_cache_pc_vary_suffix, $prime_cache_pc_qs_suffix, $prime_cache_pc_gz_status );
+	$prime_cache_pc_use_gz      = $prime_cache_pc_accept_gzip && is_readable( $prime_cache_pc_gz_file );
+	$prime_cache_pc_serve_file  = $prime_cache_pc_use_gz ? $prime_cache_pc_gz_file : $prime_cache_pc_cache_file;
+	$prime_cache_pc_serve_size  = @filesize( $prime_cache_pc_serve_file );
+	if ( false === $prime_cache_pc_serve_size && $prime_cache_pc_use_gz && is_readable( $prime_cache_pc_cache_file ) ) {
 		// gz vanished but HTML still there — serve uncompressed instead of
 		// punting to a wasteful regeneration.
-		$_pc_use_gz     = false;
-		$_pc_serve_file = $_pc_cache_file;
-		$_pc_serve_size = @filesize( $_pc_serve_file );
+		$prime_cache_pc_use_gz     = false;
+		$prime_cache_pc_serve_file = $prime_cache_pc_cache_file;
+		$prime_cache_pc_serve_size = @filesize( $prime_cache_pc_serve_file );
 	}
 
-	if ( false !== $_pc_serve_size ) {
+	if ( false !== $prime_cache_pc_serve_size ) {
 		// Restore meta headers FIRST — needed for both 304 and 200 responses.
-		if ( is_array( $_pc_meta ) && ! empty( $_pc_meta['headers'] ) ) {
-			foreach ( $_pc_meta['headers'] as $_pc_header ) {
+		if ( is_array( $prime_cache_pc_meta ) && ! empty( $prime_cache_pc_meta['headers'] ) ) {
+			foreach ( $prime_cache_pc_meta['headers'] as $prime_cache_pc_header ) {
 				// Defensive validation: meta.json could be tampered with on
 				// disk. Reject non-strings and any value containing CR/LF or
 				// NUL bytes — emitting them via header() would let an attacker
 				// who can write to the cache directory inject response headers.
-				if ( ! is_string( $_pc_header ) ) {
+				if ( ! is_string( $prime_cache_pc_header ) ) {
 					continue;
 				}
-				if ( false !== strpbrk( $_pc_header, "\r\n\0" ) ) {
+				if ( false !== strpbrk( $prime_cache_pc_header, "\r\n\0" ) ) {
 					continue;
 				}
 				// Require Name: value shape so a stray data line cannot become
 				// a header by accident.
-				if ( false === strpos( $_pc_header, ':' ) ) {
+				if ( false === strpos( $prime_cache_pc_header, ':' ) ) {
 					continue;
 				}
-				$_pc_replace = true;
-				if ( 0 === strncasecmp( $_pc_header, 'Link:', 5 ) || 0 === strncasecmp( $_pc_header, 'X-', 2 ) ) {
-					$_pc_replace = false;
+				$prime_cache_pc_replace = true;
+				if ( 0 === strncasecmp( $prime_cache_pc_header, 'Link:', 5 ) || 0 === strncasecmp( $prime_cache_pc_header, 'X-', 2 ) ) {
+					$prime_cache_pc_replace = false;
 				}
-				header( $_pc_header, $_pc_replace );
+				header( $prime_cache_pc_header, $prime_cache_pc_replace );
 			}
 		}
-		if ( is_array( $_pc_meta ) && 200 !== $_pc_original_status ) {
-			http_response_code( $_pc_original_status );
+		if ( is_array( $prime_cache_pc_meta ) && 200 !== $prime_cache_pc_original_status ) {
+			http_response_code( $prime_cache_pc_original_status );
 		}
 
-		header( 'Last-Modified: ' . gmdate( 'D, d M Y H:i:s', $_pc_modified_time ) . ' GMT' );
+		header( 'Last-Modified: ' . gmdate( 'D, d M Y H:i:s', $prime_cache_pc_modified_time ) . ' GMT' );
 
 		// All Vary headers BEFORE 304 — must be consistent with 200 responses.
 		if ( ! empty( $prime_cache_config['cache_vary_cookies'] ) ) {
@@ -573,13 +573,13 @@ if ( is_readable( $_pc_cache_file ) ) {
 		// invalid input). SERVER_PROTOCOL is validated against an allow-list before
 		// being concatenated into the status-line header to guarantee a well-formed
 		// HTTP response. WP helpers are not available in the drop-in.
-		if ( 200 === $_pc_original_status && ! empty( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
-			$_pc_ims_raw = stripslashes( (string) $_SERVER['HTTP_IF_MODIFIED_SINCE'] );
-			$_pc_since   = strtotime( $_pc_ims_raw );
-			if ( $_pc_since && $_pc_since >= $_pc_modified_time ) {
-				$_pc_proto_raw = isset( $_SERVER['SERVER_PROTOCOL'] ) ? (string) $_SERVER['SERVER_PROTOCOL'] : '';
-				$_pc_proto     = in_array( $_pc_proto_raw, array( 'HTTP/1.0', 'HTTP/1.1', 'HTTP/2', 'HTTP/2.0', 'HTTP/3' ), true ) ? $_pc_proto_raw : 'HTTP/1.1';
-				header( $_pc_proto . ' 304 Not Modified', true, 304 );
+		if ( 200 === $prime_cache_pc_original_status && ! empty( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
+			$prime_cache_pc_ims_raw = stripslashes( (string) $_SERVER['HTTP_IF_MODIFIED_SINCE'] );
+			$prime_cache_pc_since   = strtotime( $prime_cache_pc_ims_raw );
+			if ( $prime_cache_pc_since && $prime_cache_pc_since >= $prime_cache_pc_modified_time ) {
+				$prime_cache_pc_proto_raw = isset( $_SERVER['SERVER_PROTOCOL'] ) ? (string) $_SERVER['SERVER_PROTOCOL'] : '';
+				$prime_cache_pc_proto     = in_array( $prime_cache_pc_proto_raw, array( 'HTTP/1.0', 'HTTP/1.1', 'HTTP/2', 'HTTP/2.0', 'HTTP/3' ), true ) ? $prime_cache_pc_proto_raw : 'HTTP/1.1';
+				header( $prime_cache_pc_proto . ' 304 Not Modified', true, 304 );
 				header( 'Cache-Control: no-cache, must-revalidate' );
 				header( 'X-Prime-Cache: HIT-304' );
 				_prime_cache_record_stat( 'hit' );
@@ -590,22 +590,22 @@ if ( is_readable( $_pc_cache_file ) ) {
 		header( 'X-Prime-Cache: HIT' );
 
 		// Browser cache: allow browsers to cache the HTML for a short period.
-		$_pc_html_maxage = isset( $prime_cache_config['browser_cache_html'] ) ? (int) $prime_cache_config['browser_cache_html'] : 0;
-		if ( $_pc_html_maxage > 0 && ! empty( $prime_cache_config['browser_cache'] ) ) {
-			header( 'Cache-Control: public, max-age=' . $_pc_html_maxage . ', must-revalidate' );
+		$prime_cache_pc_html_maxage = isset( $prime_cache_config['browser_cache_html'] ) ? (int) $prime_cache_config['browser_cache_html'] : 0;
+		if ( $prime_cache_pc_html_maxage > 0 && ! empty( $prime_cache_config['browser_cache'] ) ) {
+			header( 'Cache-Control: public, max-age=' . $prime_cache_pc_html_maxage . ', must-revalidate' );
 		} else {
 			header( 'Cache-Control: no-cache, must-revalidate' );
 		}
 
 		_prime_cache_record_stat( 'hit' );
-		if ( $_pc_use_gz ) {
+		if ( $prime_cache_pc_use_gz ) {
 			header( 'Content-Encoding: gzip' );
 		}
-		header( 'Content-Length: ' . $_pc_serve_size );
+		header( 'Content-Length: ' . $prime_cache_pc_serve_size );
 
 		// Output body (GET only — HEAD gets headers without body).
-		if ( ! $_pc_is_head ) {
-			@readfile( $_pc_serve_file );
+		if ( ! $prime_cache_pc_is_head ) {
+			@readfile( $prime_cache_pc_serve_file );
 		}
 		exit;
 	}
@@ -618,7 +618,7 @@ if ( is_readable( $_pc_cache_file ) ) {
 // ----- Start Output Buffering -----
 
 ob_start( function ( $buffer ) {
-	global $prime_cache_config, $_pc_is_ssl, $_pc_is_mobile, $_pc_vary_suffix, $_pc_qs_suffix;
+	global $prime_cache_config, $prime_cache_pc_is_ssl, $prime_cache_pc_is_mobile, $prime_cache_pc_vary_suffix, $prime_cache_pc_qs_suffix;
 
 	// Post-buffering tests.
 	if ( strlen( $buffer ) < 255 ) {
@@ -626,12 +626,12 @@ ob_start( function ( $buffer ) {
 	}
 
 	// Check HTTP status code — allow 404 if cache_404 is enabled.
-	$_pc_status = http_response_code();
-	if ( 404 === $_pc_status ) {
+	$prime_cache_pc_status = http_response_code();
+	if ( 404 === $prime_cache_pc_status ) {
 		if ( empty( $prime_cache_config['cache_404'] ) ) {
 			return $buffer;
 		}
-	} elseif ( 200 !== $_pc_status ) {
+	} elseif ( 200 !== $prime_cache_pc_status ) {
 		return $buffer;
 	}
 
@@ -640,19 +640,19 @@ ob_start( function ( $buffer ) {
 	}
 
 	// Check response headers for cache-inhibiting signals.
-	$_pc_resp_headers = headers_list();
-	foreach ( $_pc_resp_headers as $_pc_rh ) {
-		$_pc_rh_lower = strtolower( $_pc_rh );
+	$prime_cache_pc_resp_headers = headers_list();
+	foreach ( $prime_cache_pc_resp_headers as $prime_cache_pc_rh ) {
+		$prime_cache_pc_rh_lower = strtolower( $prime_cache_pc_rh );
 		// Never cache responses that set cookies (session, consent, A/B, CSRF).
-		if ( 0 === strpos( $_pc_rh_lower, 'set-cookie:' ) ) {
+		if ( 0 === strpos( $prime_cache_pc_rh_lower, 'set-cookie:' ) ) {
 			return $buffer;
 		}
 		// Respect Cache-Control: private, no-store.
 		// Note: no-cache means "revalidate before use" — it does NOT prohibit
 		// server-side page caching. Plugins and themes commonly set no-cache
 		// as a default; only no-store and private genuinely prevent caching.
-		if ( 0 === strpos( $_pc_rh_lower, 'cache-control:' ) ) {
-			if ( preg_match( '#\b(private|no-store)\b#i', $_pc_rh ) ) {
+		if ( 0 === strpos( $prime_cache_pc_rh_lower, 'cache-control:' ) ) {
+			if ( preg_match( '#\b(private|no-store)\b#i', $prime_cache_pc_rh ) ) {
 				return $buffer;
 			}
 		}
@@ -661,14 +661,14 @@ ob_start( function ( $buffer ) {
 		// varies on a dimension we don't bucket by, so caching it would serve the wrong
 		// variant to the next visitor. Vary: Cookie is included because cache_vary_cookies
 		// only buckets specific named cookies, not "any cookie".
-		if ( 0 === stripos( $_pc_rh, 'vary:' ) ) {
-			$_pc_vary_value = trim( substr( $_pc_rh, 5 ) );
-			if ( '*' === $_pc_vary_value ) {
+		if ( 0 === stripos( $prime_cache_pc_rh, 'vary:' ) ) {
+			$prime_cache_pc_vary_value = trim( substr( $prime_cache_pc_rh, 5 ) );
+			if ( '*' === $prime_cache_pc_vary_value ) {
 				return $buffer;
 			}
-			$_pc_vary_tokens = preg_split( '#\s*,\s*#', strtolower( $_pc_vary_value ), -1, PREG_SPLIT_NO_EMPTY );
-			foreach ( $_pc_vary_tokens as $_pc_vary_token ) {
-				if ( 'accept-encoding' === $_pc_vary_token ) {
+			$prime_cache_pc_vary_tokens = preg_split( '#\s*,\s*#', strtolower( $prime_cache_pc_vary_value ), -1, PREG_SPLIT_NO_EMPTY );
+			foreach ( $prime_cache_pc_vary_tokens as $prime_cache_pc_vary_token ) {
+				if ( 'accept-encoding' === $prime_cache_pc_vary_token ) {
 					continue;
 				}
 				return $buffer;
@@ -695,10 +695,10 @@ ob_start( function ( $buffer ) {
 
 	// Skip posts with per-post cache disable metabox.
 	if ( function_exists( 'get_queried_object_id' ) ) {
-		$_pc_qid = get_queried_object_id();
-		if ( $_pc_qid && function_exists( 'get_post_meta' ) ) {
-			$_pc_disabled = get_post_meta( $_pc_qid, '_prime_cache_disabled', true );
-			if ( $_pc_disabled ) {
+		$prime_cache_pc_qid = get_queried_object_id();
+		if ( $prime_cache_pc_qid && function_exists( 'get_post_meta' ) ) {
+			$prime_cache_pc_disabled = get_post_meta( $prime_cache_pc_qid, '_prime_cache_disabled', true );
+			if ( $prime_cache_pc_disabled ) {
 				return $buffer;
 			}
 		}
@@ -707,13 +707,13 @@ ob_start( function ( $buffer ) {
 	// Build cache path.
 	$cache_dir = _prime_cache_get_cache_dir();
 	$filename  = _prime_cache_get_filename(
-		$_pc_is_ssl,
-		$_pc_is_mobile,
+		$prime_cache_pc_is_ssl,
+		$prime_cache_pc_is_mobile,
 		$prime_cache_config['cache_mobile_separate'],
 		false,
-		$_pc_vary_suffix,
-		$_pc_qs_suffix,
-		$_pc_status
+		$prime_cache_pc_vary_suffix,
+		$prime_cache_pc_qs_suffix,
+		$prime_cache_pc_status
 	);
 
 	// Create directory.
@@ -740,9 +740,9 @@ ob_start( function ( $buffer ) {
 
 	// Capture status and headers BEFORE any file write so meta can be persisted
 	// before the HTML becomes visible. Order matters: a HIT that sees the HTML
-	// file but no meta would default $_pc_original_status to 200 and skip the
+	// file but no meta would default $prime_cache_pc_original_status to 200 and skip the
 	// stored security headers — so meta must land first.
-	$_pc_current_status = http_response_code();
+	$prime_cache_pc_current_status = http_response_code();
 	$headers_list_raw   = headers_list();
 	$meta_headers       = array();
 	if ( ! empty( $headers_list_raw ) ) {
@@ -755,7 +755,7 @@ ob_start( function ( $buffer ) {
 		}
 	}
 
-	$meta_needed     = ( ! empty( $meta_headers ) || 200 !== $_pc_current_status );
+	$meta_needed     = ( ! empty( $meta_headers ) || 200 !== $prime_cache_pc_current_status );
 	$meta_file       = $cache_dir . $filename . '.meta.json';
 	$meta_old_backup = null; // Holds the prior meta body so we can roll back if HTML fails.
 	if ( $meta_needed ) {
@@ -765,12 +765,12 @@ ob_start( function ( $buffer ) {
 		// served body would be stale but the response status/headers would
 		// describe what new HTML was supposed to be.
 		if ( file_exists( $meta_file ) ) {
-			$_pc_old_meta = @file_get_contents( $meta_file );
-			if ( is_string( $_pc_old_meta ) ) {
-				$meta_old_backup = $_pc_old_meta;
+			$prime_cache_pc_old_meta = @file_get_contents( $meta_file );
+			if ( is_string( $prime_cache_pc_old_meta ) ) {
+				$meta_old_backup = $prime_cache_pc_old_meta;
 			}
 		}
-		$meta_data = json_encode( array( 'headers' => $meta_headers, 'status' => $_pc_current_status ) );
+		$meta_data = json_encode( array( 'headers' => $meta_headers, 'status' => $prime_cache_pc_current_status ) );
 		$meta_tmp  = $meta_file . '.tmp.' . getmypid();
 		$meta_ok   = false;
 		if ( false !== file_put_contents( $meta_tmp, $meta_data ) ) {
@@ -784,7 +784,7 @@ ob_start( function ( $buffer ) {
 		}
 	}
 
-	$_pc_rollback_meta = function () use ( $meta_needed, $meta_file, $meta_old_backup ) {
+	$prime_cache_pc_rollback_meta = function () use ( $meta_needed, $meta_file, $meta_old_backup ) {
 		if ( ! $meta_needed ) {
 			return;
 		}
@@ -807,26 +807,26 @@ ob_start( function ( $buffer ) {
 	$tempfile = $filepath . '.tmp.' . getmypid();
 
 	if ( false === file_put_contents( $tempfile, $content ) ) {
-		$_pc_rollback_meta();
+		$prime_cache_pc_rollback_meta();
 		return $buffer;
 	}
 
 	if ( ! rename( $tempfile, $filepath ) ) {
 		@unlink( $tempfile );
-		$_pc_rollback_meta();
+		$prime_cache_pc_rollback_meta();
 		return $buffer;
 	}
 
 	// Gzip variant.
 	if ( $prime_cache_config['gzip_compression'] && function_exists( 'gzencode' ) ) {
 		$gz_filename = _prime_cache_get_filename(
-			$_pc_is_ssl,
-			$_pc_is_mobile,
+			$prime_cache_pc_is_ssl,
+			$prime_cache_pc_is_mobile,
 			$prime_cache_config['cache_mobile_separate'],
 			true,
-			$_pc_vary_suffix,
-			$_pc_qs_suffix,
-			$_pc_status
+			$prime_cache_pc_vary_suffix,
+			$prime_cache_pc_qs_suffix,
+			$prime_cache_pc_status
 		);
 		$gz_filepath = $cache_dir . $gz_filename;
 		$gz_tempfile = $gz_filepath . '.tmp.' . getmypid();

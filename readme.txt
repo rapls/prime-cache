@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.23
+Stable tag: 1.10.24
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -149,6 +149,10 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.24 =
+* Hardening: Prefixed the three image-conversion AJAX actions (`pc_img_scan` / `pc_img_batch` / `pc_img_stats` are now `prime_cache_img_*`), the bulk-convert nonce (`pc_img_nonce` -> `prime_cache_img_nonce`), and the image-dimension transient key (`pc_imgdim_` -> `prime_cache_imgdim_`) to the plugin's full `prime_cache_` namespace. Uninstall cleanup removes both the new and the legacy transient keys.
+* Hardening: Renamed every internal page-cache drop-in variable from the short `$_pc_` prefix to the unique `$prime_cache_pc_` prefix so nothing leaks into the global scope under a generic name after the drop-in returns control to WordPress on a cache miss. No behavior change.
+
 = 1.10.23 =
 * Hardening: All five admin-settings inline <script> blocks are now attached via wp_add_inline_script() against a footer-registered stub handle (`prime-cache-admin-ui`), so Plugin Check no longer flags them as direct script output.
 * Hardening: The page-cache drop-in now stripslashes and (where applicable) length-caps `$_SERVER['HTTP_HOST']`, `HTTP_REFERER`, `HTTP_USER_AGENT`, and `HTTP_IF_MODIFIED_SINCE` before consumption, and validates `SERVER_PROTOCOL` against an allow-list before reflecting it in the 304 status line.
@@ -281,6 +285,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.24 =
+Prefix hardening: image AJAX actions, the bulk nonce, the image-dimension transient, and all page-cache drop-in variables now use the full prime_cache_ namespace. No behavior change.
 
 = 1.10.23 =
 Pre-review hardening pass: admin inline scripts now go through wp_add_inline_script(); drop-in $_SERVER inputs are unslashed and validated; readme adds an External services section; the object-cache constant is renamed. No behavior change.

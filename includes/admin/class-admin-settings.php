@@ -1733,7 +1733,7 @@ class Prime_Cache_Admin_Settings {
 		</form>
 
 		<!-- Bulk Image Optimization (Free) -->
-		<div class="pc-card" data-pc-bulk-nonce="<?php echo esc_attr( wp_create_nonce( 'pc_img_nonce' ) ); ?>">
+		<div class="pc-card" data-pc-bulk-nonce="<?php echo esc_attr( wp_create_nonce( 'prime_cache_img_nonce' ) ); ?>">
 			<span class="pc-card__h"><?php esc_html_e( 'Bulk Image Optimization', 'prime-cache' ); ?></span>
 			<p class="pc-help"><?php esc_html_e( 'Scan and optimize existing images in your media library. Progress is saved — you can pause and resume at any time.', 'prime-cache' ); ?></p>
 			<div class="pc-field">
@@ -1784,7 +1784,7 @@ class Prime_Cache_Admin_Settings {
 			. "\$btn.on('click',function(e){"
 			. 'e.preventDefault();'
 			. "\$btn.prop('disabled',true);\$status.text(i18n.scanning);\$wrap.hide();"
-			. "\$.post(ajaxurl,{action:'pc_img_scan',nonce:nonce})"
+			. "\$.post(ajaxurl,{action:'prime_cache_img_scan',nonce:nonce})"
 			. '.done(function(resp){'
 			. 'if (!resp||!resp.success){'
 			. 'var m=(resp&&resp.data&&resp.data.message)?resp.data.message:i18n.unknown;'
@@ -1796,7 +1796,7 @@ class Prime_Cache_Admin_Settings {
 			. 'function step(){'
 			. "if(!items.length){updateBar(done,total);\$status.text(fmt(i18n.done,done));\$btn.prop('disabled',false);return;}"
 			. 'var batch=items.splice(0,BATCH);'
-			. "\$.post(ajaxurl,{action:'pc_img_batch',nonce:nonce,items:batch})"
+			. "\$.post(ajaxurl,{action:'prime_cache_img_batch',nonce:nonce,items:batch})"
 			. '.done(function(r){'
 			. 'if (r&&r.success&&r.data){'
 			. 'var n=parseInt(r.data.processed,10)||0;done+=n;'

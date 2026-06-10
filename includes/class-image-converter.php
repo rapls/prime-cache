@@ -104,9 +104,9 @@ class Prime_Cache_Image_Converter {
 		}
 
 		// AJAX batch handlers (registered regardless — bulk/column work for WebP in Free).
-		add_action( 'wp_ajax_pc_img_scan', array( $this, 'ajax_scan' ) );
-		add_action( 'wp_ajax_pc_img_batch', array( $this, 'ajax_batch' ) );
-		add_action( 'wp_ajax_pc_img_stats', array( $this, 'ajax_stats' ) );
+		add_action( 'wp_ajax_prime_cache_img_scan', array( $this, 'ajax_scan' ) );
+		add_action( 'wp_ajax_prime_cache_img_batch', array( $this, 'ajax_batch' ) );
+		add_action( 'wp_ajax_prime_cache_img_stats', array( $this, 'ajax_stats' ) );
 
 		// Media Library column.
 		add_filter( 'manage_media_columns', array( $this, 'add_media_column' ) );
@@ -717,7 +717,7 @@ class Prime_Cache_Image_Converter {
 	 * AJAX: Scan for unconverted images.
 	 */
 	public function ajax_scan() {
-		check_ajax_referer( 'pc_img_nonce', 'nonce' );
+		check_ajax_referer( 'prime_cache_img_nonce', 'nonce' );
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error();
 		}
@@ -845,7 +845,7 @@ class Prime_Cache_Image_Converter {
 	 * AJAX: Process a batch of images.
 	 */
 	public function ajax_batch() {
-		check_ajax_referer( 'pc_img_nonce', 'nonce' );
+		check_ajax_referer( 'prime_cache_img_nonce', 'nonce' );
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error();
 		}
@@ -1051,7 +1051,7 @@ class Prime_Cache_Image_Converter {
 	 * AJAX: Get optimization statistics.
 	 */
 	public function ajax_stats() {
-		check_ajax_referer( 'pc_img_nonce', 'nonce' );
+		check_ajax_referer( 'prime_cache_img_nonce', 'nonce' );
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error();
 		}

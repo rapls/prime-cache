@@ -6,3 +6,8 @@ vendor/
 *.log
 .env
 docs/*.patch
+docs/CLAUDE.md
+dropins/CLAUDE.md
+includes/CLAUDE.md
+includes/admin/CLAUDE.md
+**/CLAUDE.md

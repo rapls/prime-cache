@@ -104,7 +104,7 @@ class Prime_Cache_Media_Optimizer {
 		// stale dimensions for up to a week — that would resurrect CLS shifts on
 		// the very pages this module is supposed to stabilize.
 		$mtime     = @filemtime( $path );
-		$cache_key = 'pc_imgdim_' . md5( $path . '|' . ( false === $mtime ? '0' : $mtime ) );
+		$cache_key = 'prime_cache_imgdim_' . md5( $path . '|' . ( false === $mtime ? '0' : $mtime ) );
 		$cached    = get_transient( $cache_key );
 		if ( false !== $cached ) {
 			return $cached;
