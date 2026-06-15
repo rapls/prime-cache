@@ -206,9 +206,12 @@ class Prime_Cache_Config {
 	 * @return string|false
 	 */
 	private static function get_advanced_cache_content() {
+		// Primary path comes from the constant defined in the main plugin file.
+		// The fallback derives the plugin's own location from __FILE__ (this
+		// file lives in <plugin>/includes/), never a hardcoded plugins path.
 		$dropin_source = defined( 'PRIME_CACHE_DROPIN_SOURCE' )
 			? PRIME_CACHE_DROPIN_SOURCE
-			: WP_CONTENT_DIR . '/plugins/prime-cache/dropins/page-cache.php';
+			: plugin_dir_path( dirname( __FILE__ ) ) . 'dropins/page-cache.php';
 
 		$config_dir = defined( 'PRIME_CACHE_CONFIG_DIR' )
 			? PRIME_CACHE_CONFIG_DIR
@@ -341,7 +344,11 @@ class Prime_Cache_Config {
 		global $table_prefix;
 		$install_seed = ABSPATH . '|' . DB_NAME . '|' . ( isset( $table_prefix ) ? $table_prefix : '' );
 		$install_key  = substr( md5( $install_seed ), 0, 8 );
-		$file = $config_dir . 'site-config-' . $install_key . '.php';
+		// Settings are stored as plain JSON data (never executable PHP). The
+		// drop-in needs them before WordPress and the options API are available,
+		// so it reads this mirror of the options-table values directly.
+		$file    = $config_dir . 'site-config-' . $install_key . '.json';
+		$old_php = $config_dir . 'site-config-' . $install_key . '.php';
 
 		// Serialize concurrent writes (settings save / schema migration / preset
 		// apply / self-heal can all land in the same instant). Without a lock,
@@ -353,16 +360,9 @@ class Prime_Cache_Config {
 		}
 
 		try {
-			$lines   = array();
-			$lines[] = '<?php';
-			$lines[] = '/** Prime Cache site config — generated ' . gmdate( 'Y-m-d H:i:s' ) . ' UTC */';
-
-			$lines[] = 'defined( \'ABSPATH\' ) || exit;';
-			$lines[] = '';
-
 			// Keys that hold API credentials. The pre-WP page-cache drop-in never
 			// touches these (Cloudflare / Sucuri are purged from inside WordPress),
-			// so there is no reason to mirror the secrets into a PHP file on disk —
+			// so there is no reason to mirror the secrets into a file on disk —
 			// minimising their footprint reduces exposure via backups, server
 			// misconfiguration, log dumps and support-bundle sharing.
 			$secret_keys = array(
@@ -370,6 +370,7 @@ class Prime_Cache_Config {
 				'sucuri_api_key',
 			);
 
+			$config_data = array();
 			foreach ( $settings as $key => $value ) {
 				// Validate key: lowercase letters, digits, and underscores allowed.
 				if ( ! preg_match( '#^[a-z0-9_]+$#', $key ) ) {
@@ -379,11 +380,11 @@ class Prime_Cache_Config {
 					continue;
 				}
 				if ( is_bool( $value ) ) {
-					$lines[] = '$prime_cache_config[\'' . $key . '\'] = ' . ( $value ? 'true' : 'false' ) . ';';
+					$config_data[ $key ] = $value;
 				} elseif ( is_int( $value ) ) {
-					$lines[] = '$prime_cache_config[\'' . $key . '\'] = ' . (int) $value . ';';
+					$config_data[ $key ] = (int) $value;
 				} else {
-					$lines[] = '$prime_cache_config[\'' . $key . '\'] = \'' . addslashes( (string) $value ) . '\';';
+					$config_data[ $key ] = (string) $value;
 				}
 			}
 
@@ -420,12 +421,6 @@ class Prime_Cache_Config {
 				$allowed_hosts
 			);
 			$allowed_hosts = array_values( array_unique( array_filter( $allowed_hosts ) ) );
-			$host_literals = array();
-			foreach ( $allowed_hosts as $h ) {
-				// Normalized hosts contain only [a-z0-9.\-_], so addslashes is a belt-and-braces guard.
-				$host_literals[] = "'" . addslashes( $h ) . "'";
-			}
-			$lines[] = '$prime_cache_allowed_hosts = array(' . implode( ', ', $host_literals ) . ');';
 
 			// Site scheme: derived from home_url(). The dropin trusts this over spoofable
 			// $_SERVER['HTTPS']/X-Forwarded-Proto headers, which auto-handles reverse proxies.
@@ -435,26 +430,28 @@ class Prime_Cache_Config {
 			if ( 'http' !== $site_scheme && 'https' !== $site_scheme ) {
 				$site_scheme = ''; // Unknown — dropin will fall through to header detection.
 			}
-			$lines[] = '$prime_cache_site_scheme = \'' . $site_scheme . '\';';
 
-			$lines[] = '';
+			$content = wp_json_encode(
+				array(
+					'config'        => $config_data,
+					'allowed_hosts' => $allowed_hosts,
+					'site_scheme'   => $site_scheme,
+				)
+			);
+			if ( false === $content ) {
+				return false;
+			}
 
-			$content = implode( "\n", $lines );
-
-			// Skip the write entirely when the resulting config matches the existing
-			// file. The timestamp comment changes every call, so strip just that line
-			// from both sides and byte-compare the rest. Comparing the full body
-			// (rather than extracted data lines) is necessary because textarea values
-			// can contain literal newlines — addslashes() does not escape them.
+			// Skip the write entirely when the resulting config matches the
+			// existing file byte-for-byte (the payload carries no timestamp).
+			// The self-heal pass on admin_init regenerates on every admin load,
+			// so this keeps mtime stable for backup tools and file watchers.
 			if ( file_exists( $file ) ) {
 				$existing = @file_get_contents( $file ); // phpcs:ignore
-				if ( false !== $existing ) {
-					$strip            = '#^/\*\* Prime Cache site config[^\n]*\*/\n?#m';
-					$new_normalized   = preg_replace( $strip, '', $content );
-					$exist_normalized = preg_replace( $strip, '', $existing );
-					if ( $new_normalized === $exist_normalized ) {
-						return true;
-					}
+				if ( false !== $existing && $existing === $content ) {
+					self::protect_config_dir( $config_dir );
+					@unlink( $old_php );
+					return true;
 				}
 			}
 
@@ -467,6 +464,12 @@ class Prime_Cache_Config {
 				@unlink( $tempfile );
 				return false;
 			}
+
+			// Defence in depth + cleanup: block direct web access to the data
+			// files, and remove any executable PHP config left by older versions.
+			self::protect_config_dir( $config_dir );
+			@unlink( $old_php );
+
 			return true;
 		} finally {
 			if ( $lock_fp ) {
@@ -492,10 +495,13 @@ class Prime_Cache_Config {
 		global $table_prefix;
 		$install_seed = ABSPATH . '|' . DB_NAME . '|' . ( isset( $table_prefix ) ? $table_prefix : '' );
 		$install_key  = substr( md5( $install_seed ), 0, 8 );
-		$file = $config_dir . 'site-config-' . $install_key . '.php';
-
-		if ( file_exists( $file ) ) {
-			@unlink( $file );
+		// Current format is JSON; pre-1.10.25 builds wrote PHP. Remove both for
+		// this install's key.
+		foreach ( array( '.json', '.php' ) as $ext ) {
+			$file = $config_dir . 'site-config-' . $install_key . $ext;
+			if ( file_exists( $file ) ) {
+				@unlink( $file );
+			}
 		}
 
 		// Also remove the previous-format file if a pre-upgrade build of this
@@ -504,18 +510,21 @@ class Prime_Cache_Config {
 		$legacy_seed = ABSPATH . '|' . DB_NAME . '|' . ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' );
 		$legacy_key  = substr( md5( $legacy_seed ), 0, 8 );
 		if ( $legacy_key !== $install_key ) {
-			$legacy_file = $config_dir . 'site-config-' . $legacy_key . '.php';
-			if ( file_exists( $legacy_file ) ) {
-				@unlink( $legacy_file );
+			foreach ( array( '.json', '.php' ) as $ext ) {
+				$legacy_file = $config_dir . 'site-config-' . $legacy_key . $ext;
+				if ( file_exists( $legacy_file ) ) {
+					@unlink( $legacy_file );
+				}
 			}
 		}
 
 		// Only clean up the legacy fixed-name config (pre-install-key era).
-		// Do NOT glob-delete site-config-*.php — other installs sharing this
+		// Do NOT glob-delete site-config-* — other installs sharing this
 		// wp-content directory have their own install-key-based config files.
-		$legacy_plain = $config_dir . 'site-config.php';
-		if ( file_exists( $legacy_plain ) ) {
-			@unlink( $legacy_plain );
+		foreach ( array( 'site-config.json', 'site-config.php' ) as $legacy_plain ) {
+			if ( file_exists( $config_dir . $legacy_plain ) ) {
+				@unlink( $config_dir . $legacy_plain );
+			}
 		}
 
 		// Remove the per-config-dir flock sentinel write_config_file() leaves
@@ -523,13 +532,31 @@ class Prime_Cache_Config {
 		// on every deactivation that ever called write_config_file().
 		@unlink( $config_dir . '.prime-cache-config.lock' );
 
-		// Remove config dir if empty. Use scandir so dotfiles (lockfile,
-		// hidden temp) are visible — glob('*') alone would silently miss
-		// them and the rmdir below would fail every time.
+		// Remove config dir if no other install's config remains. Use scandir so
+		// dotfiles (lockfile, .htaccess, hidden temp) are visible — glob('*')
+		// would silently miss them and the rmdir below would fail every time.
 		if ( is_dir( $config_dir ) ) {
 			$entries = @scandir( $config_dir );
 			if ( false !== $entries ) {
 				$entries = array_diff( $entries, array( '.', '..' ) );
+				// Any remaining per-install config (JSON or legacy PHP) means a
+				// co-resident install still owns this directory.
+				$peers = false;
+				foreach ( $entries as $entry ) {
+					if ( 0 === strpos( $entry, 'site-config-' )
+						&& ( '.json' === substr( $entry, -5 ) || '.php' === substr( $entry, -4 ) ) ) {
+						$peers = true;
+						break;
+					}
+				}
+				if ( ! $peers ) {
+					// Last install — drop the guard files protect_config_dir()
+					// created so the directory can be removed cleanly.
+					@unlink( $config_dir . '.htaccess' );
+					@unlink( $config_dir . 'index.html' );
+					$entries = @scandir( $config_dir );
+					$entries = ( false !== $entries ) ? array_diff( $entries, array( '.', '..' ) ) : array( 'x' );
+				}
 				if ( empty( $entries ) ) {
 					@rmdir( $config_dir );
 				}
@@ -537,6 +564,32 @@ class Prime_Cache_Config {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Block direct web access to the config data files.
+	 *
+	 * The drop-in reads plain-JSON data files from this directory. They contain
+	 * no secrets (API keys are excluded from write_config_file), but a deny-all
+	 * .htaccess and an empty index.html keep them from being fetched directly or
+	 * browsed via a directory listing on Apache. This is defence in depth, not
+	 * the primary protection.
+	 *
+	 * @param string $config_dir Absolute path to the config directory.
+	 * @return void
+	 */
+	private static function protect_config_dir( $config_dir ) {
+		$htaccess = $config_dir . '.htaccess';
+		if ( ! file_exists( $htaccess ) ) {
+			$rules = "# Generated by Prime Cache — deny direct web access to config data.\n"
+				. "<IfModule mod_authz_core.c>\n\tRequire all denied\n</IfModule>\n"
+				. "<IfModule !mod_authz_core.c>\n\tOrder allow,deny\n\tDeny from all\n</IfModule>\n";
+			@file_put_contents( $htaccess, $rules ); // phpcs:ignore
+		}
+		$index = $config_dir . 'index.html';
+		if ( ! file_exists( $index ) ) {
+			@file_put_contents( $index, '' ); // phpcs:ignore
+		}
 	}
 
 	/**

@@ -21,7 +21,7 @@ class Prime_Cache {
 	 * $prime_cache_allowed_hosts, $prime_cache_site_scheme) become active
 	 * without waiting for an admin visit or a manual settings save.
 	 */
-	const CONFIG_SCHEMA_VERSION = 11;
+	const CONFIG_SCHEMA_VERSION = 12;
 
 	/**
 	 * @var Prime_Cache|null
@@ -325,7 +325,7 @@ class Prime_Cache {
 		global $table_prefix;
 		$install_seed = ABSPATH . '|' . DB_NAME . '|' . ( isset( $table_prefix ) ? $table_prefix : '' );
 		$install_key  = substr( md5( $install_seed ), 0, 8 );
-		$config_file  = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $install_key . '.php';
+		$config_file  = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $install_key . '.json';
 
 		if ( ! file_exists( $config_file ) ) {
 			if ( ! Prime_Cache_Config::write_config_file( $settings ) ) {

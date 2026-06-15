@@ -69,28 +69,66 @@ $prime_cache_allowed_hosts = array();
 // where the user enabled cache_mixed_scheme.
 $prime_cache_site_scheme = '';
 
+/**
+ * Read a JSON site-config file and merge it into the drop-in config globals.
+ *
+ * The drop-in runs before WordPress, so it cannot use get_option() or the
+ * WP_Filesystem API. The config is plain data (never executable PHP): the
+ * plugin stores its settings via the WordPress Settings API and mirrors the
+ * subset the drop-in needs to this file.
+ *
+ * @param string $file          Absolute path to the JSON config file.
+ * @param array  $config        Config array to merge into (by reference).
+ * @param array  $allowed_hosts Allowed-host list to populate (by reference).
+ * @param string $site_scheme   Canonical scheme to populate (by reference).
+ * @return bool True when the file was read and decoded into config.
+ */
+function _prime_cache_load_config_file( $file, &$config, &$allowed_hosts, &$site_scheme ) {
+	if ( ! is_readable( $file ) ) {
+		return false;
+	}
+	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Drop-in runs before WordPress; WP_Filesystem is unavailable. Reads a local plain-JSON data file.
+	$prime_cache_pc_raw = file_get_contents( $file );
+	if ( false === $prime_cache_pc_raw || '' === $prime_cache_pc_raw ) {
+		return false;
+	}
+	$prime_cache_pc_data = json_decode( $prime_cache_pc_raw, true );
+	if ( ! is_array( $prime_cache_pc_data ) ) {
+		return false;
+	}
+	if ( isset( $prime_cache_pc_data['config'] ) && is_array( $prime_cache_pc_data['config'] ) ) {
+		$config = array_merge( $config, $prime_cache_pc_data['config'] );
+	}
+	if ( isset( $prime_cache_pc_data['allowed_hosts'] ) && is_array( $prime_cache_pc_data['allowed_hosts'] ) ) {
+		$allowed_hosts = $prime_cache_pc_data['allowed_hosts'];
+	}
+	if ( isset( $prime_cache_pc_data['site_scheme'] ) && is_string( $prime_cache_pc_data['site_scheme'] ) ) {
+		$site_scheme = $prime_cache_pc_data['site_scheme'];
+	}
+	return true;
+}
+
 $prime_cache_pc_using_legacy_config = false;
 if ( defined( 'PRIME_CACHE_CONFIG_DIR' ) ) {
 	// Install-unique config file (ABSPATH + DB_NAME + table_prefix prevents
 	// shared wp-content collision while staying stable across salt rotation).
+	// The file is plain JSON data, read (not executed) by the loader above.
 	$prime_cache_pc_install_seed = ABSPATH . '|' . ( defined( 'DB_NAME' ) ? DB_NAME : '' )
 		. '|' . ( isset( $GLOBALS['table_prefix'] ) ? (string) $GLOBALS['table_prefix'] : '' );
 	$prime_cache_pc_install_key  = substr( md5( $prime_cache_pc_install_seed ), 0, 8 );
-	$prime_cache_pc_config_file  = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $prime_cache_pc_install_key . '.php';
-	if ( is_readable( $prime_cache_pc_config_file ) ) {
-		include $prime_cache_pc_config_file;
-	} else {
+	$prime_cache_pc_config_file  = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $prime_cache_pc_install_key . '.json';
+
+	if ( ! _prime_cache_load_config_file( $prime_cache_pc_config_file, $prime_cache_config, $prime_cache_allowed_hosts, $prime_cache_site_scheme ) ) {
 		// Fall back to the legacy AUTH_SALT-keyed filename so an upgrade
 		// where prime-cache-config/ is read-only doesn't disable caching
 		// until the admin manually fixes permissions. The PHP-side write
-		// path will eventually replace this file once writes succeed.
+		// path will replace this file once writes succeed.
 		$prime_cache_pc_legacy_seed = ABSPATH . '|' . ( defined( 'DB_NAME' ) ? DB_NAME : '' )
 			. '|' . ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' );
 		$prime_cache_pc_legacy_key  = substr( md5( $prime_cache_pc_legacy_seed ), 0, 8 );
 		if ( $prime_cache_pc_legacy_key !== $prime_cache_pc_install_key ) {
-			$prime_cache_pc_legacy_file = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $prime_cache_pc_legacy_key . '.php';
-			if ( is_readable( $prime_cache_pc_legacy_file ) ) {
-				include $prime_cache_pc_legacy_file;
+			$prime_cache_pc_legacy_file = PRIME_CACHE_CONFIG_DIR . 'site-config-' . $prime_cache_pc_legacy_key . '.json';
+			if ( _prime_cache_load_config_file( $prime_cache_pc_legacy_file, $prime_cache_config, $prime_cache_allowed_hosts, $prime_cache_site_scheme ) ) {
 				$prime_cache_pc_using_legacy_config = true;
 			}
 		}

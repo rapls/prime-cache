@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.24
+Stable tag: 1.10.25
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -149,6 +149,12 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.25 =
+* Hardening: The pre-WordPress page-cache drop-in now reads its settings from a non-executable JSON data file (`site-config-*.json`) instead of a generated PHP file. Settings remain stored canonically via the Settings API; the JSON file only mirrors the subset the drop-in needs before WordPress (and the options API) is available. Existing PHP config files are regenerated on upgrade and removed. A deny-all `.htaccess` and `index.html` are added to the config directory as defence in depth (the data contains no secrets).
+* Hardening: URL-to-path and path-to-URL resolution now route through shared, relocation-aware mappers built on wp_get_upload_dir(), content_url(), plugins_url(), and home_url() instead of assuming everything lives directly under ABSPATH. WebP conversion, CSS inline/minify, and media optimization keep working when wp-content or uploads has been relocated, and external hosts and path-traversal are rejected.
+* Hardening: The advanced-cache.php generator's fallback drop-in path is derived from plugin_dir_path() (the plugin's own location) rather than a hardcoded wp-content/plugins path.
+* Docs: Reworded the Local jQuery help text and a code comment so they no longer name a specific CDN host. The free plugin never loads files from a remote host; the Local jQuery feature only re-points an existing handle back to WordPress core.
+
 = 1.10.24 =
 * Hardening: Prefixed the three image-conversion AJAX actions (`pc_img_scan` / `pc_img_batch` / `pc_img_stats` are now `prime_cache_img_*`), the bulk-convert nonce (`pc_img_nonce` -> `prime_cache_img_nonce`), and the image-dimension transient key (`pc_imgdim_` -> `prime_cache_imgdim_`) to the plugin's full `prime_cache_` namespace. Uninstall cleanup removes both the new and the legacy transient keys.
 * Hardening: Renamed every internal page-cache drop-in variable from the short `$_pc_` prefix to the unique `$prime_cache_pc_` prefix so nothing leaks into the global scope under a generic name after the drop-in returns control to WordPress on a cache miss. No behavior change.
@@ -285,6 +291,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.25 =
+The drop-in now reads a non-executable JSON config instead of a generated PHP file (regenerated automatically on upgrade), and URL/path resolution is relocation-aware (uploads, content, plugins) instead of assuming ABSPATH. No behavior change on standard installs.
 
 = 1.10.24 =
 Prefix hardening: image AJAX actions, the bulk nonce, the image-dimension transient, and all page-cache drop-in variables now use the full prime_cache_ namespace. No behavior change.

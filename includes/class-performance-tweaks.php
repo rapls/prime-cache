@@ -213,9 +213,11 @@ class Prime_Cache_Performance_Tweaks {
 	/**
 	 * Restore WordPress's bundled jQuery when a theme/plugin overrides it with a CDN URL.
 	 *
-	 * Cocoon and some themes replace jQuery with cdnjs.cloudflare.com versions.
-	 * External CDN adds ~600ms of connection overhead on mobile (DNS+TCP+TLS).
-	 * This restores the local copy which loads from the same origin — no extra connection.
+	 * Some themes (for example Cocoon) replace jQuery with a copy served from a
+	 * public CDN. An external CDN adds ~600ms of connection overhead on mobile
+	 * (DNS+TCP+TLS). This restores the local copy, which loads from the same
+	 * origin with no extra connection. The plugin itself never loads anything
+	 * from a remote host; it only re-points an existing handle back to core.
 	 */
 	public function restore_local_jquery() {
 		if ( is_admin() ) {

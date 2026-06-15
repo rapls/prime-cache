@@ -525,8 +525,11 @@ class Prime_Cache_File_Optimizer {
 				return null; // Nothing to resolve (e.g. `?query` only).
 			}
 			$abs = realpath( $css_dir . '/' . $path );
-			if ( $abs && self::path_within( $abs, ABSPATH ) ) {
-				return site_url( '/' . ltrim( str_replace( ABSPATH, '', $abs ), '/' ) ) . $suffix;
+			if ( $abs ) {
+				$rebased = self::map_path_to_url( $abs );
+				if ( false !== $rebased ) {
+					return $rebased . $suffix;
+				}
 			}
 			return null;
 		};
@@ -1464,26 +1467,7 @@ class Prime_Cache_File_Optimizer {
 	}
 
 	public function url_to_path( $url ) {
-		$home_url  = home_url( '/' );
-		$home_path = ABSPATH;
-
-		if ( 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ) {
-			$path = ABSPATH . ltrim( $url, '/' );
-		} elseif ( 0 === strpos( $url, $home_url ) ) {
-			$path = $home_path . substr( $url, strlen( $home_url ) );
-		} else {
-			return false;
-		}
-
-		// Strip query string.
-		$path = strtok( $path, '?' );
-
-		$real = realpath( $path );
-		if ( $real && self::path_within( $real, realpath( ABSPATH ) ) ) {
-			return $real;
-		}
-
-		return false;
+		return self::map_url_to_path( $url );
 	}
 
 	/**
@@ -1501,5 +1485,138 @@ class Prime_Cache_File_Optimizer {
 		$root      = rtrim( $root, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR;
 		$candidate = rtrim( $candidate, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR;
 		return 0 === strpos( $candidate, $root );
+	}
+
+	/**
+	 * Build (URL base, directory base) pairs from WordPress' own location
+	 * helpers, ordered most-specific first (uploads, plugins, content, then
+	 * the site root). Both URL->path and path->URL mapping share this list so
+	 * the two directions stay consistent on relocated wp-content / uploads
+	 * layouts.
+	 *
+	 * @return array[] List of array( url_base, dir_base ).
+	 */
+	private static function location_roots() {
+		$roots   = array();
+		$uploads = wp_get_upload_dir();
+		if ( empty( $uploads['error'] ) && ! empty( $uploads['baseurl'] ) && ! empty( $uploads['basedir'] ) ) {
+			$roots[] = array( $uploads['baseurl'], $uploads['basedir'] );
+		}
+		if ( defined( 'WP_PLUGIN_DIR' ) ) {
+			$roots[] = array( plugins_url(), WP_PLUGIN_DIR );
+		}
+		$roots[] = array( content_url(), WP_CONTENT_DIR );
+		$roots[] = array( home_url(), untrailingslashit( ABSPATH ) );
+		return $roots;
+	}
+
+	/**
+	 * Resolve a local URL to an absolute filesystem path.
+	 *
+	 * Maps through WordPress' location helpers instead of assuming every URL
+	 * lives directly under ABSPATH, so it keeps working when wp-content or the
+	 * uploads folder has been moved. Returns false for external hosts or paths
+	 * that resolve outside the install roots (ABSPATH or a relocated
+	 * wp-content).
+	 *
+	 * @param string $url Absolute or root-relative URL.
+	 * @return string|false Real filesystem path, or false.
+	 */
+	public static function map_url_to_path( $url ) {
+		if ( ! is_string( $url ) || '' === $url ) {
+			return false;
+		}
+
+		// Drop query string / fragment before touching the filesystem.
+		$url = strtok( $url, '?#' );
+		if ( false === $url || '' === $url ) {
+			return false;
+		}
+
+		$roots = self::location_roots();
+
+		// Refuse URLs that point at a host we do not serve content from.
+		$url_host = wp_parse_url( $url, PHP_URL_HOST );
+		if ( ! empty( $url_host ) ) {
+			$allowed = false;
+			foreach ( $roots as $root ) {
+				$root_host = wp_parse_url( $root[0], PHP_URL_HOST );
+				if ( $root_host && 0 === strcasecmp( $root_host, $url_host ) ) {
+					$allowed = true;
+					break;
+				}
+			}
+			if ( ! $allowed ) {
+				return false;
+			}
+		}
+
+		// Compare on the path component so scheme/host differences do not matter.
+		$url_path = ( '/' === $url[0] && ( ! isset( $url[1] ) || '/' !== $url[1] ) )
+			? $url
+			: (string) wp_parse_url( $url, PHP_URL_PATH );
+		if ( '' === $url_path ) {
+			return false;
+		}
+
+		$candidate = false;
+		foreach ( $roots as $root ) {
+			$root_path = rtrim( (string) wp_parse_url( $root[0], PHP_URL_PATH ), '/' );
+			$needle    = $root_path . '/';
+			if ( '/' === $needle || 0 === strpos( $url_path . '/', $needle ) ) {
+				$relative  = ltrim( substr( $url_path, strlen( $root_path ) ), '/' );
+				$candidate = rtrim( $root[1], '/\\' ) . '/' . $relative;
+				break;
+			}
+		}
+		if ( false === $candidate ) {
+			return false;
+		}
+
+		$real = realpath( $candidate );
+		if ( false === $real ) {
+			return false;
+		}
+
+		// Keep the result inside the install — ABSPATH or a relocated wp-content.
+		foreach ( array( WP_CONTENT_DIR, ABSPATH ) as $install_root ) {
+			if ( self::path_within( $real, realpath( $install_root ) ) ) {
+				return $real;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Resolve an absolute filesystem path back to its public URL.
+	 *
+	 * The inverse of map_url_to_path(); deepest directory wins so a file under
+	 * uploads maps to the uploads URL rather than the broader content URL.
+	 * Returns false when the path is outside the install roots.
+	 *
+	 * @param string $abs Absolute filesystem path.
+	 * @return string|false Public URL, or false.
+	 */
+	public static function map_path_to_url( $abs ) {
+		$real = realpath( $abs );
+		if ( false === $real ) {
+			return false;
+		}
+		$real = str_replace( '\\', '/', $real );
+
+		foreach ( self::location_roots() as $root ) {
+			$dir = realpath( $root[1] );
+			if ( false === $dir ) {
+				continue;
+			}
+			$dir = rtrim( str_replace( '\\', '/', $dir ), '/' );
+			if ( '' !== $dir && 0 === strpos( $real . '/', $dir . '/' ) ) {
+				$relative = ltrim( substr( $real, strlen( $dir ) ), '/' );
+				return rtrim( $root[0], '/' ) . ( '' !== $relative ? '/' . $relative : '' );
+			}
+		}
+
+		return false;
 	}
 }

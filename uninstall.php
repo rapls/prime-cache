@@ -224,12 +224,14 @@ foreach ( $pc_uninstall_hosts as $host ) {
 // Drop the parent dir only if no other install left files behind.
 $pc_uninstall_rmdir_if_empty( $cache_dir );
 
-// Remove only this install's config file (site-config-{install_key}.php).
+// Remove only this install's config file (site-config-{install_key}.json).
+// Current format is JSON; pre-1.10.25 builds wrote PHP — remove both.
 global $table_prefix;
 $pc_install_seed = ABSPATH . '|' . ( defined( 'DB_NAME' ) ? DB_NAME : '' )
 	. '|' . ( isset( $table_prefix ) ? (string) $table_prefix : '' );
 $pc_install_key  = substr( md5( $pc_install_seed ), 0, 8 );
 $config_dir      = WP_CONTENT_DIR . '/prime-cache-config/';
+@unlink( $config_dir . 'site-config-' . $pc_install_key . '.json' );
 @unlink( $config_dir . 'site-config-' . $pc_install_key . '.php' );
 
 // Pre-upgrade builds keyed the filename off AUTH_SALT. If a rotate-then-
@@ -239,13 +241,13 @@ $pc_legacy_seed = ABSPATH . '|' . ( defined( 'DB_NAME' ) ? DB_NAME : '' )
 	. '|' . ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' );
 $pc_legacy_key  = substr( md5( $pc_legacy_seed ), 0, 8 );
 if ( $pc_legacy_key !== $pc_install_key ) {
+	@unlink( $config_dir . 'site-config-' . $pc_legacy_key . '.json' );
 	@unlink( $config_dir . 'site-config-' . $pc_legacy_key . '.php' );
 }
 // Remove the per-config-dir flock file too — write_config_file() leaves
 // `.prime-cache-config.lock` behind on every settings save, which would
 // otherwise keep the rmdir-if-empty check below from succeeding.
 @unlink( $config_dir . '.prime-cache-config.lock' );
-$pc_uninstall_rmdir_if_empty( $config_dir );
 
 // File optimizer cache: contents are content-hashed and may be shared with other
 // installs running Prime Cache against the same wp-content. Detect "last install
@@ -262,15 +264,27 @@ if ( is_dir( $config_dir ) ) {
 			if ( '.' === $entry || '..' === $entry ) {
 				continue;
 			}
-			// Only `site-config-*.php` files indicate live peers. Other
-			// detritus (lockfile, stale temp) doesn't count.
-			if ( 0 === strpos( $entry, 'site-config-' ) && '.php' === substr( $entry, -4 ) ) {
+			// Only `site-config-*` data files (JSON now, PHP pre-1.10.25)
+			// indicate live peers. Other detritus (lockfile, .htaccess,
+			// index.html, stale temp) doesn't count.
+			if ( 0 === strpos( $entry, 'site-config-' )
+				&& ( '.json' === substr( $entry, -5 ) || '.php' === substr( $entry, -4 ) ) ) {
 				$pc_other_configs_remain = true;
 				break;
 			}
 		}
 	}
 }
+
+// If no peer install remains, drop the guard files write_config_file() created
+// (deny-all .htaccess + empty index.html) so the config directory can be
+// removed cleanly. Otherwise leave the directory and its guards intact.
+if ( ! $pc_other_configs_remain ) {
+	@unlink( $config_dir . '.htaccess' );
+	@unlink( $config_dir . 'index.html' );
+}
+$pc_uninstall_rmdir_if_empty( $config_dir );
+
 $pc_fo_dir = WP_CONTENT_DIR . '/cache/prime-cache-fo/';
 if ( $pc_other_configs_remain ) {
 	$pc_uninstall_rmdir_if_empty( $pc_fo_dir );

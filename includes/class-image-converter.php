@@ -1379,24 +1379,13 @@ class Prime_Cache_Image_Converter {
 	}
 
 	/**
-	 * Resolve a URL to an absolute filesystem path within ABSPATH.
+	 * Resolve a URL to an absolute filesystem path.
 	 *
-	 * This is a lightweight utility intentionally kept local to avoid coupling
-	 * the converter to the Free plugin's file optimizer or media optimizer.
-	 * The implementation is trivially identical to the url_to_path() helpers
-	 * in Prime_Cache_File_Optimizer and Prime_Cache_Media_Optimizer.
+	 * Delegates to the shared, relocation-aware mapper in the file optimizer so
+	 * the converter follows wp-content / uploads layout instead of assuming a
+	 * direct URL-to-ABSPATH mapping.
 	 */
 	private function url_to_path( $url ) {
-		$home_url = home_url( '/' );
-		if ( 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ) {
-			$path = ABSPATH . ltrim( $url, '/' );
-		} elseif ( 0 === strpos( $url, $home_url ) ) {
-			$path = ABSPATH . substr( $url, strlen( $home_url ) );
-		} else {
-			return false;
-		}
-		$path = strtok( $path, '?' );
-		$real = realpath( $path );
-		return ( $real && 0 === strpos( rtrim( $real, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR, rtrim( (string) realpath( ABSPATH ), DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR ) ) ? $real : false;
+		return Prime_Cache_File_Optimizer::map_url_to_path( $url );
 	}
 }

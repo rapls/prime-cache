@@ -122,17 +122,9 @@ class Prime_Cache_Media_Optimizer {
 	}
 
 	private function url_to_path( $url ) {
-		$home_url = home_url( '/' );
-		if ( 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ) {
-			$path = ABSPATH . ltrim( $url, '/' );
-		} elseif ( 0 === strpos( $url, $home_url ) ) {
-			$path = ABSPATH . substr( $url, strlen( $home_url ) );
-		} else {
-			return false;
-		}
-		$path = strtok( $path, '?' );
-		$real = realpath( $path );
-		return ( $real && Prime_Cache_File_Optimizer::path_within( $real, realpath( ABSPATH ) ) ) ? $real : false;
+		// Shared, relocation-aware mapper (wp-content / uploads layout) lives in
+		// the file optimizer; both helpers must resolve URLs identically.
+		return Prime_Cache_File_Optimizer::map_url_to_path( $url );
 	}
 
 	// ── Upload-time Image Processing ────────────────────────
