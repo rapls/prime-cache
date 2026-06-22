@@ -567,13 +567,36 @@ class Prime_Cache_Config {
 	}
 
 	/**
+	 * Candidate host names for this install, used to find host-named legacy
+	 * config files ("{host}.php" / "{host}.json" — the earliest pre-install-key
+	 * format). Derived from home_url() / site_url() so we only ever touch files
+	 * that belong to this install, never a co-resident install's host config.
+	 *
+	 * @return string[]
+	 */
+	private static function install_host_names() {
+		$hosts = array();
+		foreach ( array( 'home_url', 'site_url' ) as $fn ) {
+			if ( function_exists( $fn ) ) {
+				$host = wp_parse_url( $fn(), PHP_URL_HOST );
+				if ( is_string( $host ) && '' !== $host ) {
+					$hosts[] = $host;
+				}
+			}
+		}
+		return array_values( array_unique( $hosts ) );
+	}
+
+	/**
 	 * Remove this install's config files from the pre-1.10.26 location
 	 * (wp-content/prime-cache-config/). 1.10.26 moved config under
 	 * wp-content/cache/ so it sits inside a sanctioned cache location; this
 	 * sweeps the old directory on upgrade so nothing is orphaned there.
 	 *
-	 * Mirrors the peer-detection in delete_config_file(): only drops the shared
-	 * directory when no other install's site-config-* remains.
+	 * Removes every format this install ever wrote there: install-key JSON/PHP,
+	 * the AUTH_SALT-keyed variant, the plain site-config.*, and the earliest
+	 * host-named "{host}.php"/"{host}.json". Only drops the shared directory
+	 * when no other install's config data file (any *.php / *.json) remains.
 	 *
 	 * @return void
 	 */
@@ -610,18 +633,30 @@ class Prime_Cache_Config {
 				@unlink( $legacy_dir . $legacy_plain ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_unlink
 			}
 		}
+		// Earliest format: one file per host ("{host}.php", later "{host}.json").
+		// Only this install's own hosts, so a co-resident install's host config
+		// is never touched.
+		foreach ( self::install_host_names() as $host ) {
+			foreach ( array( '.php', '.json' ) as $ext ) {
+				$host_file = $legacy_dir . $host . $ext;
+				if ( file_exists( $host_file ) ) {
+					@unlink( $host_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_unlink
+				}
+			}
+		}
 		@unlink( $legacy_dir . '.prime-cache-config.lock' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_unlink
 
 		// Drop the dir (and its guard files) only when no peer install's config
 		// remains. scandir so dotfiles are visible — glob('*') would miss them.
+		// Any remaining *.php / *.json is a config data file we don't own, so a
+		// co-resident install still uses this directory — leave it intact.
 		$entries = @scandir( $legacy_dir );
 		if ( false === $entries ) {
 			return;
 		}
 		$entries = array_diff( $entries, array( '.', '..' ) );
 		foreach ( $entries as $entry ) {
-			if ( 0 === strpos( $entry, 'site-config-' )
-				&& ( '.json' === substr( $entry, -5 ) || '.php' === substr( $entry, -4 ) ) ) {
+			if ( '.json' === substr( $entry, -5 ) || '.php' === substr( $entry, -4 ) ) {
 				// A co-resident install still owns the legacy directory.
 				return;
 			}

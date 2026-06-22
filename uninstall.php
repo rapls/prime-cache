@@ -287,8 +287,10 @@ if ( ! $pc_other_configs_remain ) {
 $pc_uninstall_rmdir_if_empty( $config_dir );
 
 // Sweep the pre-1.10.26 config location (wp-content/prime-cache-config/) too, in
-// case this install was deleted before the upgrade self-heal moved it. Only this
-// install's files + the directory when no peer site-config-* remains.
+// case this install was deleted before the upgrade self-heal moved it. Removes
+// every format this install wrote there (install-key, AUTH_SALT-keyed, plain
+// site-config.*, and the earliest host-named "{host}.php"/"{host}.json"), then
+// drops the directory only when no peer install's config data file remains.
 $pc_legacy_config_dir = WP_CONTENT_DIR . '/prime-cache-config/';
 if ( is_dir( $pc_legacy_config_dir ) ) {
 	@unlink( $pc_legacy_config_dir . 'site-config-' . $pc_install_key . '.json' );
@@ -297,13 +299,27 @@ if ( is_dir( $pc_legacy_config_dir ) ) {
 		@unlink( $pc_legacy_config_dir . 'site-config-' . $pc_legacy_key . '.json' );
 		@unlink( $pc_legacy_config_dir . 'site-config-' . $pc_legacy_key . '.php' );
 	}
+	@unlink( $pc_legacy_config_dir . 'site-config.json' );
+	@unlink( $pc_legacy_config_dir . 'site-config.php' );
+	// Earliest format: one file per host. Only this install's own hosts.
+	$pc_legacy_hosts = array();
+	foreach ( array( home_url(), site_url() ) as $pc_legacy_url ) {
+		$pc_legacy_host = wp_parse_url( $pc_legacy_url, PHP_URL_HOST );
+		if ( is_string( $pc_legacy_host ) && '' !== $pc_legacy_host ) {
+			$pc_legacy_hosts[] = $pc_legacy_host;
+		}
+	}
+	foreach ( array_unique( $pc_legacy_hosts ) as $pc_legacy_host ) {
+		@unlink( $pc_legacy_config_dir . $pc_legacy_host . '.php' );
+		@unlink( $pc_legacy_config_dir . $pc_legacy_host . '.json' );
+	}
 	@unlink( $pc_legacy_config_dir . '.prime-cache-config.lock' );
 	$pc_legacy_peers = false;
 	$pc_legacy_iter  = @scandir( $pc_legacy_config_dir );
 	if ( is_array( $pc_legacy_iter ) ) {
 		foreach ( $pc_legacy_iter as $entry ) {
-			if ( 0 === strpos( $entry, 'site-config-' )
-				&& ( '.json' === substr( $entry, -5 ) || '.php' === substr( $entry, -4 ) ) ) {
+			// Any remaining *.php / *.json is a co-resident install's config.
+			if ( '.json' === substr( $entry, -5 ) || '.php' === substr( $entry, -4 ) ) {
 				$pc_legacy_peers = true;
 				break;
 			}
