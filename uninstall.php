@@ -230,7 +230,8 @@ global $table_prefix;
 $pc_install_seed = ABSPATH . '|' . ( defined( 'DB_NAME' ) ? DB_NAME : '' )
 	. '|' . ( isset( $table_prefix ) ? (string) $table_prefix : '' );
 $pc_install_key  = substr( md5( $pc_install_seed ), 0, 8 );
-$config_dir      = WP_CONTENT_DIR . '/prime-cache-config/';
+// 1.10.26+ stores config under wp-content/cache/ (a sanctioned cache location).
+$config_dir      = WP_CONTENT_DIR . '/cache/prime-cache-config/';
 @unlink( $config_dir . 'site-config-' . $pc_install_key . '.json' );
 @unlink( $config_dir . 'site-config-' . $pc_install_key . '.php' );
 
@@ -284,6 +285,36 @@ if ( ! $pc_other_configs_remain ) {
 	@unlink( $config_dir . 'index.html' );
 }
 $pc_uninstall_rmdir_if_empty( $config_dir );
+
+// Sweep the pre-1.10.26 config location (wp-content/prime-cache-config/) too, in
+// case this install was deleted before the upgrade self-heal moved it. Only this
+// install's files + the directory when no peer site-config-* remains.
+$pc_legacy_config_dir = WP_CONTENT_DIR . '/prime-cache-config/';
+if ( is_dir( $pc_legacy_config_dir ) ) {
+	@unlink( $pc_legacy_config_dir . 'site-config-' . $pc_install_key . '.json' );
+	@unlink( $pc_legacy_config_dir . 'site-config-' . $pc_install_key . '.php' );
+	if ( $pc_legacy_key !== $pc_install_key ) {
+		@unlink( $pc_legacy_config_dir . 'site-config-' . $pc_legacy_key . '.json' );
+		@unlink( $pc_legacy_config_dir . 'site-config-' . $pc_legacy_key . '.php' );
+	}
+	@unlink( $pc_legacy_config_dir . '.prime-cache-config.lock' );
+	$pc_legacy_peers = false;
+	$pc_legacy_iter  = @scandir( $pc_legacy_config_dir );
+	if ( is_array( $pc_legacy_iter ) ) {
+		foreach ( $pc_legacy_iter as $entry ) {
+			if ( 0 === strpos( $entry, 'site-config-' )
+				&& ( '.json' === substr( $entry, -5 ) || '.php' === substr( $entry, -4 ) ) ) {
+				$pc_legacy_peers = true;
+				break;
+			}
+		}
+	}
+	if ( ! $pc_legacy_peers ) {
+		@unlink( $pc_legacy_config_dir . '.htaccess' );
+		@unlink( $pc_legacy_config_dir . 'index.html' );
+	}
+	$pc_uninstall_rmdir_if_empty( $pc_legacy_config_dir );
+}
 
 $pc_fo_dir = WP_CONTENT_DIR . '/cache/prime-cache-fo/';
 if ( $pc_other_configs_remain ) {

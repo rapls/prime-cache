@@ -21,7 +21,7 @@ class Prime_Cache {
 	 * $prime_cache_allowed_hosts, $prime_cache_site_scheme) become active
 	 * without waiting for an admin visit or a manual settings save.
 	 */
-	const CONFIG_SCHEMA_VERSION = 12;
+	const CONFIG_SCHEMA_VERSION = 13;
 
 	/**
 	 * @var Prime_Cache|null
@@ -280,6 +280,16 @@ class Prime_Cache {
 		if ( ! Prime_Cache_Config::write_config_file( $settings ) ) {
 			return;
 		}
+		// 1.10.26 moved the config dir under wp-content/cache/. write_config_file
+		// above wrote to the new location; now regenerate advanced-cache.php so
+		// the drop-in's baked-in PRIME_CACHE_CONFIG_DIR points there too, then
+		// sweep the pre-1.10.26 wp-content/prime-cache-config/ directory. The
+		// regeneration only matters when we still own advanced-cache.php — skip
+		// it (don't bail the migration) when another plugin manages the drop-in.
+		if ( 'external' !== Prime_Cache_Config::get_advanced_cache_owner() ) {
+			Prime_Cache_Config::install_advanced_cache();
+		}
+		Prime_Cache_Config::cleanup_legacy_config_location();
 		// Regenerate .htaccess so existing installs pick up new fast-path rules
 		// (host allowlist, admin/login excludes, scheme gating, etc.) without
 		// waiting for the operator to re-save settings. Schema bumps are the

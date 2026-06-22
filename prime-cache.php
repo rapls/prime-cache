@@ -3,7 +3,7 @@
  * Plugin Name: Prime Cache
  * Plugin URI:  https://raplsworks.com/plugins/prime-cache/
  * Description: A fast and stable page caching plugin for WordPress.
- * Version: 1.10.25
+ * Version: 1.10.26
  * Author: rapls
  * Author URI:  https://raplsworks.com/
  * License: GPL-2.0-or-later
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PRIME_CACHE_VERSION', '1.10.25' );
+define( 'PRIME_CACHE_VERSION', '1.10.26' );
 define( 'PRIME_CACHE_FILE', __FILE__ );
 define( 'PRIME_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 
@@ -21,7 +21,11 @@ if ( ! defined( 'PRIME_CACHE_CACHE_DIR' ) ) {
 	define( 'PRIME_CACHE_CACHE_DIR', WP_CONTENT_DIR . '/cache/prime-cache/' );
 }
 if ( ! defined( 'PRIME_CACHE_CONFIG_DIR' ) ) {
-	define( 'PRIME_CACHE_CONFIG_DIR', WP_CONTENT_DIR . '/prime-cache-config/' );
+	// Lives under wp-content/cache/ (a sanctioned cache location, sibling of the
+	// page-cache and file-optimizer dirs) — never inside the plugin folder, which
+	// is wiped on upgrade and publicly readable. Kept separate from the
+	// page-cache dir so a cache purge never deletes the drop-in's settings.
+	define( 'PRIME_CACHE_CONFIG_DIR', WP_CONTENT_DIR . '/cache/prime-cache-config/' );
 }
 
 define( 'PRIME_CACHE_DROPIN_SOURCE', PRIME_CACHE_PATH . 'dropins/page-cache.php' );

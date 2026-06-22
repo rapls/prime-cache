@@ -402,9 +402,9 @@ class Prime_Cache_Admin_Settings {
 			// Surface failures from the dropin config write — without this the DB
 			// option is updated but the file the dropin reads stays stale, and the
 			// site silently behaves as if the setting save did nothing. The most
-			// common cause is a non-writable wp-content/prime-cache-config/ directory.
+			// common cause is a non-writable wp-content/cache/ directory.
 			if ( ! Prime_Cache_Config::write_config_file( $s ) ) {
-				$warnings[] = __( 'Settings saved to the database, but the drop-in config file could not be written. Page caching may not reflect your changes until the file is writable. Check that wp-content/prime-cache-config/ exists and is writable by PHP.', 'prime-cache' );
+				$warnings[] = __( 'Settings saved to the database, but the drop-in config file could not be written. Page caching may not reflect your changes until the file is writable. Check that wp-content/cache/ exists and is writable by PHP.', 'prime-cache' );
 			}
 
 			// Only touch .htaccess when the toggle or any rule-affecting setting

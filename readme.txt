@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.25
+Stable tag: 1.10.26
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -149,6 +149,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.26 =
+* Hardening: The drop-in's JSON config now lives under `wp-content/cache/prime-cache-config/` (a sanctioned cache location, alongside the page-cache and file-optimizer directories) instead of `wp-content/prime-cache-config/`. It is kept separate from the page-cache directory so a cache purge never removes the drop-in's settings. On upgrade the config is regenerated at the new path, advanced-cache.php is rewritten to point there, and the old directory is swept (only this install's files; co-resident installs are left untouched). Settings remain stored canonically via the Settings API.
+
 = 1.10.25 =
 * Hardening: The pre-WordPress page-cache drop-in now reads its settings from a non-executable JSON data file (`site-config-*.json`) instead of a generated PHP file. Settings remain stored canonically via the Settings API; the JSON file only mirrors the subset the drop-in needs before WordPress (and the options API) is available. Existing PHP config files are regenerated on upgrade and removed. A deny-all `.htaccess` and `index.html` are added to the config directory as defence in depth (the data contains no secrets).
 * Hardening: URL-to-path and path-to-URL resolution now route through shared, relocation-aware mappers built on wp_get_upload_dir(), content_url(), plugins_url(), and home_url() instead of assuming everything lives directly under ABSPATH. WebP conversion, CSS inline/minify, and media optimization keep working when wp-content or uploads has been relocated, and external hosts and path-traversal are rejected.
@@ -291,6 +294,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.26 =
+The drop-in's JSON config moves under wp-content/cache/ (a sanctioned cache location), separate from the page-cache directory so purges never remove it. Migrated automatically on upgrade; the old wp-content/prime-cache-config/ directory is cleaned up. No behavior change on standard installs.
 
 = 1.10.25 =
 The drop-in now reads a non-executable JSON config instead of a generated PHP file (regenerated automatically on upgrade), and URL/path resolution is relocation-aware (uploads, content, plugins) instead of assuming ABSPATH. No behavior change on standard installs.

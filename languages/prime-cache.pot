@@ -72,8 +72,7 @@ msgstr ""
 msgid ""
 "Settings saved to the database, but the drop-in config file could not be "
 "written. Page caching may not reflect your changes until the file is "
-"writable. Check that wp-content/prime-cache-config/ exists and is writable "
-"by PHP."
+"writable. Check that wp-content/cache/ exists and is writable by PHP."
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:371

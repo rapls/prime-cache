@@ -215,7 +215,7 @@ class Prime_Cache_Config {
 
 		$config_dir = defined( 'PRIME_CACHE_CONFIG_DIR' )
 			? PRIME_CACHE_CONFIG_DIR
-			: WP_CONTENT_DIR . '/prime-cache-config/';
+			: WP_CONTENT_DIR . '/cache/prime-cache-config/';
 
 		$cache_dir = defined( 'PRIME_CACHE_CACHE_DIR' )
 			? PRIME_CACHE_CACHE_DIR
@@ -326,7 +326,7 @@ class Prime_Cache_Config {
 	public static function write_config_file( $settings ) {
 		$config_dir = defined( 'PRIME_CACHE_CONFIG_DIR' )
 			? PRIME_CACHE_CONFIG_DIR
-			: WP_CONTENT_DIR . '/prime-cache-config/';
+			: WP_CONTENT_DIR . '/cache/prime-cache-config/';
 
 		if ( ! wp_mkdir_p( $config_dir ) ) {
 			return false;
@@ -487,7 +487,7 @@ class Prime_Cache_Config {
 	public static function delete_config_file() {
 		$config_dir = defined( 'PRIME_CACHE_CONFIG_DIR' )
 			? PRIME_CACHE_CONFIG_DIR
-			: WP_CONTENT_DIR . '/prime-cache-config/';
+			: WP_CONTENT_DIR . '/cache/prime-cache-config/';
 
 		// Match the install_seed formula used by write_config_file() — if
 		// these diverge, deactivation silently leaks the actual config file
@@ -564,6 +564,74 @@ class Prime_Cache_Config {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Remove this install's config files from the pre-1.10.26 location
+	 * (wp-content/prime-cache-config/). 1.10.26 moved config under
+	 * wp-content/cache/ so it sits inside a sanctioned cache location; this
+	 * sweeps the old directory on upgrade so nothing is orphaned there.
+	 *
+	 * Mirrors the peer-detection in delete_config_file(): only drops the shared
+	 * directory when no other install's site-config-* remains.
+	 *
+	 * @return void
+	 */
+	public static function cleanup_legacy_config_location() {
+		$legacy_dir = WP_CONTENT_DIR . '/prime-cache-config/';
+		if ( ! is_dir( $legacy_dir ) ) {
+			return;
+		}
+		// Never sweep the legacy dir if it is also the active dir (e.g. an
+		// installation that pins PRIME_CACHE_CONFIG_DIR back to the old path).
+		$active_dir = defined( 'PRIME_CACHE_CONFIG_DIR' )
+			? PRIME_CACHE_CONFIG_DIR
+			: WP_CONTENT_DIR . '/cache/prime-cache-config/';
+		if ( rtrim( $active_dir, '/' ) === rtrim( $legacy_dir, '/' ) ) {
+			return;
+		}
+
+		global $table_prefix;
+		$install_seed = ABSPATH . '|' . DB_NAME . '|' . ( isset( $table_prefix ) ? $table_prefix : '' );
+		$install_key  = substr( md5( $install_seed ), 0, 8 );
+		$legacy_seed  = ABSPATH . '|' . DB_NAME . '|' . ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' );
+		$legacy_key   = substr( md5( $legacy_seed ), 0, 8 );
+
+		foreach ( array_unique( array( $install_key, $legacy_key ) ) as $key ) {
+			foreach ( array( '.json', '.php' ) as $ext ) {
+				$file = $legacy_dir . 'site-config-' . $key . $ext;
+				if ( file_exists( $file ) ) {
+					@unlink( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_unlink
+				}
+			}
+		}
+		foreach ( array( 'site-config.json', 'site-config.php' ) as $legacy_plain ) {
+			if ( file_exists( $legacy_dir . $legacy_plain ) ) {
+				@unlink( $legacy_dir . $legacy_plain ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_unlink
+			}
+		}
+		@unlink( $legacy_dir . '.prime-cache-config.lock' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_unlink
+
+		// Drop the dir (and its guard files) only when no peer install's config
+		// remains. scandir so dotfiles are visible — glob('*') would miss them.
+		$entries = @scandir( $legacy_dir );
+		if ( false === $entries ) {
+			return;
+		}
+		$entries = array_diff( $entries, array( '.', '..' ) );
+		foreach ( $entries as $entry ) {
+			if ( 0 === strpos( $entry, 'site-config-' )
+				&& ( '.json' === substr( $entry, -5 ) || '.php' === substr( $entry, -4 ) ) ) {
+				// A co-resident install still owns the legacy directory.
+				return;
+			}
+		}
+		@unlink( $legacy_dir . '.htaccess' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_unlink
+		@unlink( $legacy_dir . 'index.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_unlink
+		$entries = @scandir( $legacy_dir );
+		if ( false !== $entries && 2 === count( $entries ) ) {
+			@rmdir( $legacy_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+		}
 	}
 
 	/**
