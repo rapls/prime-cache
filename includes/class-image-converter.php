@@ -906,29 +906,41 @@ class Prime_Cache_Image_Converter {
 			} elseif ( 'path' === $type ) {
 				// Theme/plugin/custom file.
 				$file = sanitize_text_field( $value );
-				// Security: must be within ABSPATH or a configured custom include dir.
+				// Security: must live inside a WordPress-managed location or a
+				// configured custom include dir.
 				$real = realpath( $file );
 				if ( ! $real || ! is_readable( $real ) ) {
 					$processed++;
 					continue;
 				}
 				$allowed = false;
-				if ( 0 === strpos( rtrim( $real, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR, rtrim( (string) realpath( ABSPATH ), DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR ) ) {
-					$allowed = true;
-				} else {
-					// Check against configured custom include directories.
-					$custom_dirs = trim( $this->settings['img_include_custom'] ?? '' );
-					if ( $custom_dirs ) {
-						foreach ( preg_split( '#[\r\n]+#', $custom_dirs ) as $cdir ) {
-							$cdir = trim( $cdir );
-							if ( $cdir && is_dir( $cdir ) ) {
-								$creal = realpath( $cdir );
-								if ( $creal && 0 === strpos( rtrim( $real, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR, rtrim( $creal, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR ) ) {
-									$allowed = true;
-									break;
-								}
-							}
+				// Resolve each allowed root through its own location API instead of
+				// assuming everything sits under ABSPATH: themes, plugins, and the
+				// uploads directory can each be relocated outside the WordPress root.
+				$allowed_roots = array( WP_CONTENT_DIR, get_theme_root(), ABSPATH );
+				if ( defined( 'WP_PLUGIN_DIR' ) ) {
+					$allowed_roots[] = WP_PLUGIN_DIR;
+				}
+				$uploads = wp_get_upload_dir();
+				if ( empty( $uploads['error'] ) && ! empty( $uploads['basedir'] ) ) {
+					$allowed_roots[] = $uploads['basedir'];
+				}
+				// Plus any admin-configured custom include directories.
+				$custom_dirs = trim( $this->settings['img_include_custom'] ?? '' );
+				if ( $custom_dirs ) {
+					foreach ( preg_split( '#[\r\n]+#', $custom_dirs ) as $cdir ) {
+						$cdir = trim( $cdir );
+						if ( '' !== $cdir ) {
+							$allowed_roots[] = $cdir;
 						}
+					}
+				}
+				$needle = rtrim( $real, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR;
+				foreach ( $allowed_roots as $root ) {
+					$rroot = realpath( $root );
+					if ( $rroot && 0 === strpos( $needle, rtrim( $rroot, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR ) ) {
+						$allowed = true;
+						break;
 					}
 				}
 				if ( ! $allowed ) {

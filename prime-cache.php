@@ -3,7 +3,7 @@
  * Plugin Name: Prime Cache
  * Plugin URI:  https://raplsworks.com/plugins/prime-cache/
  * Description: A fast and stable page caching plugin for WordPress.
- * Version: 1.10.26
+ * Version: 1.10.27
  * Author: rapls
  * Author URI:  https://raplsworks.com/
  * License: GPL-2.0-or-later
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PRIME_CACHE_VERSION', '1.10.26' );
+define( 'PRIME_CACHE_VERSION', '1.10.27' );
 define( 'PRIME_CACHE_FILE', __FILE__ );
 define( 'PRIME_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 

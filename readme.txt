@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.26
+Stable tag: 1.10.27
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -148,6 +148,10 @@ Start with page caching and basic file optimization. Test your site after each c
 No. The free plugin does not send your data or API requests to any third-party service. Cache preloading only requests URLs on your own site. Some optional features may add browser resource hints (such as preconnect) for external assets your site already uses, but Prime Cache itself does not transmit data to external services.
 
 == Changelog ==
+
+= 1.10.27 =
+* Hardening: advanced-cache.php is now produced by copying a bundled drop-in template (`dropins/advanced-cache.tpl.php`) and substituting this install's resolved paths, instead of assembling executable PHP from a string. The copied file is rewritten once on upgrade. WordPress includes the drop-in before plugin-location constants exist, so the loader path is still baked in at copy time.
+* Hardening: The image optimizer's "convert a file by path" guard now confines files to WordPress-managed locations resolved through their own APIs (WP_CONTENT_DIR, the plugins directory, get_theme_root(), and wp_get_upload_dir()), plus any configured custom include directories, instead of assuming everything lives under ABSPATH. This keeps the check working when themes, plugins, or uploads have been relocated outside the WordPress root.
 
 = 1.10.26 =
 * Hardening: The drop-in's JSON config now lives under `wp-content/cache/prime-cache-config/` (a sanctioned cache location, alongside the page-cache and file-optimizer directories) instead of `wp-content/prime-cache-config/`. It is kept separate from the page-cache directory so a cache purge never removes the drop-in's settings. On upgrade the config is regenerated at the new path, advanced-cache.php is rewritten to point there, and the old directory is fully swept — every legacy format this install wrote there (install-keyed, AUTH_SALT-keyed, plain, and the earliest host-named files) is removed, and the directory itself is dropped once no co-resident install's config remains. Settings remain stored canonically via the Settings API.
@@ -294,6 +298,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.27 =
+advanced-cache.php is now copied from a bundled template (with this install's paths substituted) instead of built from a string, and the image optimizer's path guard resolves allowed locations via WordPress APIs rather than assuming ABSPATH. No behavior change on standard installs.
 
 = 1.10.26 =
 The drop-in's JSON config moves under wp-content/cache/ (a sanctioned cache location), separate from the page-cache directory so purges never remove it. Migrated automatically on upgrade; the old wp-content/prime-cache-config/ directory is cleaned up. No behavior change on standard installs.
