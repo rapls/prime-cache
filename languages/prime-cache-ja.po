@@ -3176,3 +3176,35 @@ msgstr "データベースクリーンアップ"
 #: includes/admin/class-admin-settings.php:2207
 msgid "Prime Cache Pro adds scheduled cleanup for revisions, expired transients, and overhead on long-running WordPress sites."
 msgstr "Prime Cache Pro はリビジョン、期限切れトランジェント、テーブルオーバーヘッドのクリーンアップを長期運用の WordPress サイト向けにスケジュール実行できるようにします。"
+
+#: includes/admin/class-admin-settings.php:2529
+msgid "Page caching enabled. The WP_CACHE line was added to wp-config.php and caching is now active."
+msgstr "ページキャッシュを有効化しました。WP_CACHE の行を wp-config.php に追加し、キャッシュが有効になりました。"
+
+#: includes/admin/class-admin-settings.php:2530
+msgid "Prime Cache added the WP_CACHE line, but another definition in wp-config.php is forcing it off. Page caching will not work until that is corrected."
+msgstr "Prime Cache が WP_CACHE の行を追加しましたが、wp-config.php 内の別の定義によって無効化されています。これを修正するまでページキャッシュは動作しません。"
+
+#: includes/admin/class-admin-settings.php:2531
+msgid "wp-config.php is not writable, so the WP_CACHE line could not be added automatically. Add it manually (shown in the notice above) to enable page caching."
+msgstr "wp-config.php に書き込めないため、WP_CACHE の行を自動で追加できませんでした。ページキャッシュを有効にするには、上の通知に表示された行を手動で追加してください。"
+
+#: includes/admin/class-admin-settings.php:2588
+msgid "Page caching is ready, but it needs one line in your wp-config.php. Prime Cache does not edit wp-config.php without your permission."
+msgstr "ページキャッシュの準備は整っていますが、wp-config.php に 1 行の追記が必要です。Prime Cache は許可なく wp-config.php を編集しません。"
+
+#: includes/admin/class-admin-settings.php:2594
+msgid "Add the WP_CACHE line to wp-config.php"
+msgstr "WP_CACHE の行を wp-config.php に追加"
+
+#: includes/admin/class-admin-settings.php:2595
+msgid "Prefer to do it yourself? Add this line just after the opening PHP tag:"
+msgstr "自分で追記する場合は、PHP 開始タグの直後に次の行を追加してください:"
+
+#: includes/admin/class-admin-settings.php:2597
+msgid "You approved managing WP_CACHE, but the line is not active in wp-config.php — the file may not be writable, or another definition is forcing it off. Add this line just after the opening PHP tag:"
+msgstr "WP_CACHE の管理を許可済みですが、wp-config.php でこの行が有効になっていません。ファイルに書き込めないか、別の定義によって無効化されている可能性があります。PHP 開始タグの直後に次の行を追加してください:"
+
+#: includes/admin/class-admin-settings.php:2602
+msgid "Prime Cache marks its own line and removes only that line when deactivated."
+msgstr "Prime Cache は自身が追加した行に印を付け、無効化時にはその行のみを削除します。"

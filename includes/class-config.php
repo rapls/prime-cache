@@ -333,6 +333,49 @@ class Prime_Cache_Config {
 	}
 
 	/**
+	 * Option name recording that the site owner explicitly approved Prime Cache
+	 * managing the WP_CACHE line in wp-config.php.
+	 */
+	const WPCONFIG_CONSENT_OPTION = 'prime_cache_wpconfig_consent';
+
+	/**
+	 * Whether the site owner has explicitly approved editing wp-config.php.
+	 *
+	 * Per the WordPress.org guideline, the WP_CACHE constant is never written
+	 * to wp-config.php automatically — the owner approves it once (one click in
+	 * the admin notice) and the value is stored here. Only after that does the
+	 * activation / self-heal path (re)write the line.
+	 *
+	 * @return bool
+	 */
+	public static function has_wpconfig_consent() {
+		$consent = get_option( self::WPCONFIG_CONSENT_OPTION );
+		return is_array( $consent ) && ! empty( $consent['granted'] );
+	}
+
+	/**
+	 * Record (or clear) the owner's consent to manage the WP_CACHE line.
+	 *
+	 * @param bool $granted True to record consent, false to clear it.
+	 * @return void
+	 */
+	public static function record_wpconfig_consent( $granted = true ) {
+		if ( $granted ) {
+			update_option(
+				self::WPCONFIG_CONSENT_OPTION,
+				array(
+					'granted' => true,
+					'user'    => get_current_user_id(),
+					'time'    => time(),
+				),
+				false
+			);
+		} else {
+			delete_option( self::WPCONFIG_CONSENT_OPTION );
+		}
+	}
+
+	/**
 	 * Write the settings config file for the dropin to read.
 	 *
 	 * @param array $settings Plugin settings.

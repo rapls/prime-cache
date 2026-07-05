@@ -354,6 +354,7 @@ delete_option( 'prime_cache_preload_attempts' );
 delete_option( 'prime_cache_preload_lock' );
 delete_option( 'prime_cache_env_snapshot' );
 delete_option( 'prime_cache_host_history' );
+delete_option( 'prime_cache_wpconfig_consent' );
 delete_option( 'prime_cache_flush_rewrite' );
 delete_option( 'prime_cache_img_stats' );
 global $wpdb;

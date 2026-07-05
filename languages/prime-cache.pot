@@ -2696,3 +2696,35 @@ msgstr ""
 #: includes/admin/class-admin-settings.php:2207
 msgid "Prime Cache Pro adds scheduled cleanup for revisions, expired transients, and overhead on long-running WordPress sites."
 msgstr ""
+
+#: includes/admin/class-admin-settings.php:2529
+msgid "Page caching enabled. The WP_CACHE line was added to wp-config.php and caching is now active."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:2530
+msgid "Prime Cache added the WP_CACHE line, but another definition in wp-config.php is forcing it off. Page caching will not work until that is corrected."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:2531
+msgid "wp-config.php is not writable, so the WP_CACHE line could not be added automatically. Add it manually (shown in the notice above) to enable page caching."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:2588
+msgid "Page caching is ready, but it needs one line in your wp-config.php. Prime Cache does not edit wp-config.php without your permission."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:2594
+msgid "Add the WP_CACHE line to wp-config.php"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:2595
+msgid "Prefer to do it yourself? Add this line just after the opening PHP tag:"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:2597
+msgid "You approved managing WP_CACHE, but the line is not active in wp-config.php — the file may not be writable, or another definition is forcing it off. Add this line just after the opening PHP tag:"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:2602
+msgid "Prime Cache marks its own line and removes only that line when deactivated."
+msgstr ""

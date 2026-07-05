@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.27
+Stable tag: 1.10.28
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -147,7 +147,14 @@ Start with page caching and basic file optimization. Test your site after each c
 
 No. The free plugin does not send your data or API requests to any third-party service. Cache preloading only requests URLs on your own site. Some optional features may add browser resource hints (such as preconnect) for external assets your site already uses, but Prime Cache itself does not transmit data to external services.
 
+= Does Prime Cache modify wp-config.php? =
+
+Only with your explicit permission, and only one line. Page caching relies on the standard WordPress drop-in mechanism, which needs `define( 'WP_CACHE', true );` in wp-config.php. Prime Cache never adds this automatically: after activation it shows a notice with a one-click button to add the line, or you can paste it in yourself. The line is tagged as Prime Cache's own, and only that tagged line is removed when the plugin is deactivated. If you prefer, you can add the constant manually and Prime Cache will simply detect it.
+
 == Changelog ==
+
+= 1.10.28 =
+* Privacy/consent: Prime Cache no longer edits wp-config.php automatically. Enabling page caching requires the standard `define( 'WP_CACHE', true );` drop-in constant; the plugin now asks for the site owner's explicit permission first. After activation an admin notice offers a one-click button to add the line (or shows the snippet so you can add it yourself), and the self-heal path only (re)writes the line after that approval has been recorded. Deactivation still removes only Prime Cache's own tagged line. This addresses WordPress.org review feedback.
 
 = 1.10.27 =
 * Hardening: advanced-cache.php is now produced by copying a bundled drop-in template (`dropins/advanced-cache.tpl.php`) and substituting this install's resolved paths, instead of assembling executable PHP from a string. The copied file is rewritten once on upgrade. WordPress includes the drop-in before plugin-location constants exist, so the loader path is still baked in at copy time.
@@ -298,6 +305,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.28 =
+Prime Cache no longer edits wp-config.php on its own. Enabling page caching now asks for your explicit permission before adding the WP_CACHE line — click the one-time button in the admin notice, or add the line yourself. Existing installs that already have the line keep working unchanged.
 
 = 1.10.27 =
 advanced-cache.php is now copied from a bundled template (with this install's paths substituted) instead of built from a string, and the image optimizer's path guard resolves allowed locations via WordPress APIs rather than assuming ABSPATH. No behavior change on standard installs.

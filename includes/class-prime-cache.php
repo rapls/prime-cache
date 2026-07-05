@@ -324,8 +324,10 @@ class Prime_Cache {
 			Prime_Cache_Config::install_advanced_cache();
 		}
 
-		// 2. WP_CACHE not enabled in wp-config.php.
-		if ( ! Prime_Cache_Config::verify_wp_cache_enabled() ) {
+		// 2. WP_CACHE not enabled in wp-config.php. Only (re)write it once the
+		// owner has explicitly approved Prime Cache managing this line —
+		// otherwise the consent notice in show_notices() prompts for approval.
+		if ( ! Prime_Cache_Config::verify_wp_cache_enabled() && Prime_Cache_Config::has_wpconfig_consent() ) {
 			Prime_Cache_Config::set_wp_cache( true );
 		}
 
@@ -392,10 +394,15 @@ class Prime_Cache {
 		}
 
 		// Enable WP_CACHE in wp-config.php.
-		// If already defined as true at runtime, verify the file too.
+		// Per the WordPress.org guideline, wp-config.php is never modified
+		// without the site owner's explicit consent. If WP_CACHE is already
+		// enabled (runtime + file) there is nothing to do. If the owner
+		// previously approved Prime Cache managing this line, re-apply it.
+		// Otherwise leave wp-config.php untouched — the admin notice prompts
+		// for one-click approval (or a manual edit) after activation.
 		if ( defined( 'WP_CACHE' ) && WP_CACHE && Prime_Cache_Config::verify_wp_cache_enabled() ) {
 			// Already correct — no action needed.
-		} else {
+		} elseif ( Prime_Cache_Config::has_wpconfig_consent() ) {
 			$wp_cache_result = Prime_Cache_Config::set_wp_cache( true );
 			if ( ! $wp_cache_result ) {
 				$warnings[] = __( 'WP_CACHE could not be set to true. wp-config.php may not be writable.', 'prime-cache' );
@@ -403,6 +410,9 @@ class Prime_Cache {
 				$warnings[] = __( 'WP_CACHE is defined as false by another source in wp-config.php. Page caching will not work until this is corrected.', 'prime-cache' );
 			}
 		}
+		// else: no consent recorded yet — Prime_Cache_Admin_Settings::show_notices()
+		// renders an actionable notice asking the owner to approve adding the
+		// WP_CACHE line, so caching engages only after explicit consent.
 
 		// Schedule cron events.
 		if ( ! wp_next_scheduled( 'prime_cache_cleanup_expired' ) ) {
@@ -911,6 +921,25 @@ class Prime_Cache {
 				$redirect = add_query_arg( $redirect_args, admin_url( 'admin.php?page=prime-cache' ) );
 				wp_safe_redirect( $redirect );
 				exit;
+
+			case 'enable_wp_cache':
+				// The owner clicked "Add the WP_CACHE line" in the consent
+				// notice — this click IS the explicit consent required by the
+				// WordPress.org guideline. Record it, then write the line.
+				Prime_Cache_Config::record_wpconfig_consent( true );
+				$wp_cache_written = Prime_Cache_Config::set_wp_cache( true );
+				if ( $wp_cache_written && Prime_Cache_Config::verify_wp_cache_enabled() ) {
+					$msg = 'wp_cache_on';
+				} elseif ( $wp_cache_written ) {
+					// Written, but another define() forces it off.
+					$msg = 'wp_cache_conflict';
+				} else {
+					// wp-config.php not writable — the notice now shows the
+					// manual snippet (consent is recorded, so self-heal retries
+					// once the file becomes writable).
+					$msg = 'wp_cache_failed';
+				}
+				break;
 
 			case 'toggle_cache':
 				$s = prime_cache_get_settings();
