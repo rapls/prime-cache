@@ -2472,11 +2472,6 @@ class Prime_Cache_Admin_Settings {
 		$screen = get_current_screen();
 		if ( $screen && 'toplevel_page_prime-cache' === $screen->id ) {
 			$cfg = prime_cache_get_settings();
-			if ( ! empty( $cfg['cache_enabled'] ) && ( ! defined( 'WP_CACHE' ) || ! WP_CACHE ) ) {
-				echo '<div class="notice notice-error"><p><strong>Prime Cache:</strong> '
-					. esc_html__( 'WP_CACHE is not set to true. Page caching will not work. Please check wp-config.php — another define( \'WP_CACHE\', false ) may exist.', 'prime-cache' )
-					. '</p></div>';
-			}
 			$ac_owner = Prime_Cache_Config::get_advanced_cache_owner();
 			if ( ! empty( $cfg['cache_enabled'] ) && 'external' === $ac_owner ) {
 				echo '<div class="notice notice-error"><p><strong>Prime Cache:</strong> '
@@ -2526,13 +2521,10 @@ class Prime_Cache_Admin_Settings {
 				'preload_disabled' => __( 'Cannot start preload: preload is disabled. Enable "Cache Preload" in Preload settings first.', 'prime-cache' ),
 				'preload_schedule_failed' => __( 'Failed to schedule the preload event. Another plugin or filter may be blocking WP-Cron event registration. Check your error log or run preload manually with WP-CLI.', 'prime-cache' ),
 				'reset'           => __( 'All settings have been reset to defaults.', 'prime-cache' ),
-				'wp_cache_on'     => __( 'Page caching enabled. The WP_CACHE line was added to wp-config.php and caching is now active.', 'prime-cache' ),
-				'wp_cache_conflict' => __( 'Prime Cache added the WP_CACHE line, but another definition in wp-config.php is forcing it off. Page caching will not work until that is corrected.', 'prime-cache' ),
-				'wp_cache_failed' => __( 'wp-config.php is not writable, so the WP_CACHE line could not be added automatically. Add it manually (shown in the notice above) to enable page caching.', 'prime-cache' ),
 			);
 			$key   = sanitize_key( $_GET['pc_cleared'] );
 			$msg   = $msgs[ $key ] ?? __( 'Cache cleared successfully.', 'prime-cache' );
-			$class = in_array( $key, array( 'sucuri_error', 'url_error', 'preload_no_cache', 'preload_disabled', 'preload_schedule_failed', 'wp_cache_conflict', 'wp_cache_failed' ), true ) ? 'notice-warning' : 'notice-success';
+			$class = in_array( $key, array( 'sucuri_error', 'url_error', 'preload_no_cache', 'preload_disabled', 'preload_schedule_failed' ), true ) ? 'notice-warning' : 'notice-success';
 			echo '<div class="notice ' . esc_attr( $class ) . ' is-dismissible"><p>' . esc_html( $msg ) . '</p></div>';
 		}
 
@@ -2558,26 +2550,32 @@ class Prime_Cache_Admin_Settings {
 			}
 		}
 
-		$this->show_wp_cache_consent_notice();
+		$this->show_wp_cache_upgrade_notice();
 	}
 
 	/**
-	 * Prompt the site owner to approve adding WP_CACHE to wp-config.php.
+	 * Suggest the optional drop-in serving mode on the plugin's own screen.
 	 *
-	 * Page caching needs `define( 'WP_CACHE', true )`, but per the WordPress.org
-	 * guideline the plugin never edits wp-config.php without explicit consent.
-	 * While page caching is enabled but WP_CACHE is not yet in place, show an
-	 * actionable notice: a one-click "add the line" button (before consent), or
-	 * the manual snippet (after consent, when the file could not be written).
+	 * Page caching works out of the box in standard mode (the plugin serves
+	 * cached pages after WordPress core loads). Serving before WordPress loads
+	 * (drop-in mode) additionally needs `define( 'WP_CACHE', true )` in
+	 * wp-config.php — a change Prime Cache never makes itself. This notice
+	 * shows the exact line for site owners who want the extra speed, and only
+	 * on the Prime Cache settings screen so it never nags elsewhere.
 	 */
-	private function show_wp_cache_consent_notice() {
+	private function show_wp_cache_upgrade_notice() {
 		if ( ! current_user_can( 'manage_options' ) || is_multisite() ) {
 			return;
 		}
 
-		// Nothing to prompt when page caching is off, or when WP_CACHE is
-		// already active — either in wp-config.php or defined true at runtime
-		// by some other mechanism (in which case caching already works).
+		$screen = get_current_screen();
+		if ( ! $screen || 'toplevel_page_prime-cache' !== $screen->id ) {
+			return;
+		}
+
+		// Nothing to suggest when page caching is off, or when WP_CACHE is
+		// already true — at runtime (drop-in mode active) or in wp-config.php
+		// (the line was just added; it takes effect from the next request).
 		$settings = prime_cache_get_settings();
 		if ( empty( $settings['cache_enabled'] )
 			|| ( defined( 'WP_CACHE' ) && WP_CACHE )
@@ -2585,26 +2583,20 @@ class Prime_Cache_Admin_Settings {
 			return;
 		}
 
-		$has_consent = Prime_Cache_Config::has_wpconfig_consent();
-		$snippet     = "define( 'WP_CACHE', true );";
+		$snippet = "define( 'WP_CACHE', true );";
 
-		echo '<div class="notice notice-warning"><p><strong>Prime Cache:</strong> ';
-		if ( ! $has_consent ) {
-			echo esc_html__( 'Page caching is ready, but it needs one line in your wp-config.php. Prime Cache does not edit wp-config.php without your permission.', 'prime-cache' );
-			$enable_url = wp_nonce_url(
-				add_query_arg( 'pc_action', 'enable_wp_cache', admin_url( 'admin.php?page=prime-cache' ) ),
-				'prime_cache_admin_action'
-			);
-			echo '</p><p><a href="' . esc_url( $enable_url ) . '" class="button button-primary">'
-				. esc_html__( 'Add the WP_CACHE line to wp-config.php', 'prime-cache' ) . '</a></p>';
-			echo '<p>' . esc_html__( 'Prefer to do it yourself? Add this line just after the opening PHP tag:', 'prime-cache' ) . '</p>';
-		} else {
-			echo esc_html__( 'You approved managing WP_CACHE, but the line is not active in wp-config.php — the file may not be writable, or another definition is forcing it off. Add this line just after the opening PHP tag:', 'prime-cache' );
-			echo '</p>';
+		echo '<div class="notice notice-info"><p><strong>Prime Cache:</strong> ';
+		if ( defined( 'WP_CACHE' ) && ! WP_CACHE ) {
+			// Some other source defines it false — drop-in mode is unavailable
+			// until the owner changes that definition.
+			echo esc_html__( 'Page caching is active in standard mode. wp-config.php currently defines WP_CACHE as false, so the faster drop-in mode is unavailable. To enable it, change that definition to true — this is optional, and Prime Cache never edits wp-config.php itself.', 'prime-cache' );
+			echo '</p></div>';
+			return;
 		}
-		echo '<p><code>' . esc_html( $snippet ) . '</code></p>';
+		echo esc_html__( 'Page caching is active in standard mode. Optional speed-up: to serve cached pages before WordPress even loads (drop-in mode), add this line yourself near the top of wp-config.php:', 'prime-cache' );
+		echo '</p><p><code>' . esc_html( $snippet ) . '</code></p>';
 		echo '<p style="font-size:12px;color:#646970;">'
-			. esc_html__( 'Prime Cache marks its own line and removes only that line when deactivated.', 'prime-cache' )
+			. esc_html__( 'This step is optional — caching already works without it. Prime Cache never edits wp-config.php; adding or removing the line is always up to you.', 'prime-cache' )
 			. '</p></div>';
 	}
 

@@ -59,37 +59,10 @@ if ( file_exists( $object_dropin ) ) {
 	}
 }
 
-// Remove WP_CACHE from wp-config.php — only the line Prime Cache added.
-$config_paths = array(
-	ABSPATH . 'wp-config.php',
-	dirname( ABSPATH ) . '/wp-config.php',
-);
-
-foreach ( $config_paths as $config_path ) {
-	if ( file_exists( $config_path ) && is_writable( $config_path ) ) {
-		$config_content = file_get_contents( $config_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		if ( ! is_string( $config_content ) || false === strpos( $config_content, 'Added by Prime Cache' ) ) {
-			continue; // Unreadable or no Prime Cache line — check next candidate.
-		}
-		$config_content = preg_replace(
-			'#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*[^)]+\)\s*;\s*//\s*Added by Prime Cache[^\n]*\n?#mi',
-			'',
-			$config_content
-		);
-		if ( null === $config_content ) {
-			break; // PCRE error — leave wp-config.php untouched.
-		}
-		$config_content = preg_replace( "#\n{3,}#", "\n\n", $config_content );
-		// Atomic write: temp file + rename.
-		$tempfile = $config_path . '.tmp.' . getmypid();
-		if ( null !== $config_content && false !== file_put_contents( $tempfile, $config_content ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-			if ( ! rename( $tempfile, $config_path ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
-				@unlink( $tempfile );
-			}
-		}
-		break; // Found and cleaned — done.
-	}
-}
+// wp-config.php is never touched. A WP_CACHE line added manually by the site
+// owner (or by a pre-1.10.29 build) stays in place — it is a standard
+// WordPress constant, is harmless once advanced-cache.php is removed above,
+// and removing it is the owner's call.
 
 // Helper: recursively remove a directory tree.
 $pc_uninstall_rmtree = function ( $dir ) {

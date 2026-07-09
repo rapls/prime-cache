@@ -3,7 +3,7 @@
  * Plugin Name: Prime Cache
  * Plugin URI:  https://raplsworks.com/plugins/prime-cache/
  * Description: A fast and stable page caching plugin for WordPress.
- * Version: 1.10.28
+ * Version: 1.10.29
  * Author: rapls
  * Author URI:  https://raplsworks.com/
  * License: GPL-2.0-or-later
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PRIME_CACHE_VERSION', '1.10.28' );
+define( 'PRIME_CACHE_VERSION', '1.10.29' );
 define( 'PRIME_CACHE_FILE', __FILE__ );
 define( 'PRIME_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 
@@ -29,6 +29,23 @@ if ( ! defined( 'PRIME_CACHE_CONFIG_DIR' ) ) {
 }
 
 define( 'PRIME_CACHE_DROPIN_SOURCE', PRIME_CACHE_PATH . 'dropins/page-cache.php' );
+
+// Standard mode: when the WP_CACHE drop-in path is not active (the site owner
+// has not added the optional WP_CACHE line, so WordPress never loaded
+// advanced-cache.php), run the same page-cache engine from the plugin itself.
+// Page caching works out of the box with no wp-config.php change; the engine's
+// own guards skip admin/login/cron, non-GET requests, and logged-in users.
+// Adding `define( 'WP_CACHE', true );` manually upgrades serving to the
+// earlier (faster) drop-in path — PRIME_CACHE_SERVING is then already defined
+// by the time this file loads, and this block is a no-op. Skipped when
+// WP_CACHE is true but our drop-in did not run (another plugin owns
+// advanced-cache.php) and on multisite (page caching unsupported there).
+if ( ! defined( 'PRIME_CACHE_SERVING' )
+	&& ( ! defined( 'WP_CACHE' ) || ! WP_CACHE )
+	&& ! is_multisite() ) {
+	define( 'PRIME_CACHE_STANDARD_MODE', true );
+	require PRIME_CACHE_DROPIN_SOURCE;
+}
 
 /**
  * Check if the optional add-on is active. The separate add-on can set this

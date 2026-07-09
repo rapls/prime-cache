@@ -5,7 +5,7 @@ Donate link:
 Tags: cache, performance, speed, optimization, minify
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.28
+Stable tag: 1.10.29
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -149,9 +149,14 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 = Does Prime Cache modify wp-config.php? =
 
-Only with your explicit permission, and only one line. Page caching relies on the standard WordPress drop-in mechanism, which needs `define( 'WP_CACHE', true );` in wp-config.php. Prime Cache never adds this automatically: after activation it shows a notice with a one-click button to add the line, or you can paste it in yourself. The line is tagged as Prime Cache's own, and only that tagged line is removed when the plugin is deactivated. If you prefer, you can add the constant manually and Prime Cache will simply detect it.
+Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.29 =
+* Zero-configuration caching: page caching now works immediately after activation with no wp-config.php change. When the optional `WP_CACHE` drop-in constant is not present, the plugin serves cached pages itself in a new standard mode (WordPress core loads, but the theme, queries, and rendering are skipped). Adding `define( 'WP_CACHE', true );` manually upgrades serving to the faster drop-in mode.
+* wp-config.php is never written: all code that edited wp-config.php has been removed (including the 1.10.28 one-click consent button). The settings screen shows the optional line to add manually; deactivation and uninstall no longer touch the file. This addresses WordPress.org review feedback.
+* Object cache drop-in install moved to the optional add-on: the free plugin no longer generates or writes wp-content/object-cache.php; it only removes its own signed drop-in. Installing a backend (APCu / Redis / Memcached) is delegated to the add-on.
 
 = 1.10.28 =
 * Privacy/consent: Prime Cache no longer edits wp-config.php automatically. Enabling page caching requires the standard `define( 'WP_CACHE', true );` drop-in constant; the plugin now asks for the site owner's explicit permission first. After activation an admin notice offers a one-click button to add the line (or shows the snippet so you can add it yourself), and the self-heal path only (re)writes the line after that approval has been recorded. Deactivation still removes only Prime Cache's own tagged line. This addresses WordPress.org review feedback.
@@ -305,6 +310,9 @@ Only with your explicit permission, and only one line. Page caching relies on th
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.29 =
+Caching now works out of the box with no wp-config.php change (new standard mode), and the plugin never writes to wp-config.php at all. Adding the WP_CACHE line yourself remains an optional speed-up (drop-in mode). Existing installs that already have the line keep working unchanged.
 
 = 1.10.28 =
 Prime Cache no longer edits wp-config.php on its own. Enabling page caching now asks for your explicit permission before adding the WP_CACHE line — click the one-time button in the admin notice, or add the line yourself. Existing installs that already have the line keep working unchanged.

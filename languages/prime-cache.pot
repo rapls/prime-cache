@@ -2097,12 +2097,6 @@ msgid ""
 "optimization, lazy load, CDN, etc.) work normally."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2221
-msgid ""
-"WP_CACHE is not set to true. Page caching will not work. Please check wp-"
-"config.php — another define( 'WP_CACHE', false ) may exist."
-msgstr ""
-
 #: includes/admin/class-admin-settings.php:2227
 msgid ""
 "advanced-cache.php is managed by another plugin. Prime Cache page caching "
@@ -2286,16 +2280,6 @@ msgstr ""
 msgid ""
 "advanced-cache.php is managed by another active plugin. Prime Cache page "
 "caching will not work until the other plugin is deactivated."
-msgstr ""
-
-#: includes/class-prime-cache.php:391
-msgid "WP_CACHE could not be set to true. wp-config.php may not be writable."
-msgstr ""
-
-#: includes/class-prime-cache.php:393
-msgid ""
-"WP_CACHE is defined as false by another source in wp-config.php. Page "
-"caching will not work until this is corrected."
 msgstr ""
 
 #: includes/class-prime-cache.php:477 includes/class-prime-cache.php:629
@@ -2697,34 +2681,14 @@ msgstr ""
 msgid "Prime Cache Pro adds scheduled cleanup for revisions, expired transients, and overhead on long-running WordPress sites."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2529
-msgid "Page caching enabled. The WP_CACHE line was added to wp-config.php and caching is now active."
+#: includes/admin/class-admin-settings.php:2592
+msgid "Page caching is active in standard mode. wp-config.php currently defines WP_CACHE as false, so the faster drop-in mode is unavailable. To enable it, change that definition to true — this is optional, and Prime Cache never edits wp-config.php itself."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2530
-msgid "Prime Cache added the WP_CACHE line, but another definition in wp-config.php is forcing it off. Page caching will not work until that is corrected."
+#: includes/admin/class-admin-settings.php:2596
+msgid "Page caching is active in standard mode. Optional speed-up: to serve cached pages before WordPress even loads (drop-in mode), add this line yourself near the top of wp-config.php:"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2531
-msgid "wp-config.php is not writable, so the WP_CACHE line could not be added automatically. Add it manually (shown in the notice above) to enable page caching."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:2588
-msgid "Page caching is ready, but it needs one line in your wp-config.php. Prime Cache does not edit wp-config.php without your permission."
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:2594
-msgid "Add the WP_CACHE line to wp-config.php"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:2595
-msgid "Prefer to do it yourself? Add this line just after the opening PHP tag:"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:2597
-msgid "You approved managing WP_CACHE, but the line is not active in wp-config.php — the file may not be writable, or another definition is forcing it off. Add this line just after the opening PHP tag:"
-msgstr ""
-
-#: includes/admin/class-admin-settings.php:2602
-msgid "Prime Cache marks its own line and removes only that line when deactivated."
+#: includes/admin/class-admin-settings.php:2599
+msgid "This step is optional — caching already works without it. Prime Cache never edits wp-config.php; adding or removing the line is always up to you."
 msgstr ""

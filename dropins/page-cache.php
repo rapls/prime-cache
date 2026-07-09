@@ -1,9 +1,17 @@
 <?php
 /**
- * Page Cache Dropin.
+ * Page Cache engine.
  *
- * This file is loaded by wp-content/advanced-cache.php BEFORE WordPress initializes.
- * It must not use any WordPress functions — only pure PHP.
+ * Loaded from one of two places:
+ * - Drop-in mode: wp-content/advanced-cache.php includes this BEFORE WordPress
+ *   initializes (requires the site owner to have added the WP_CACHE constant
+ *   to wp-config.php themselves).
+ * - Standard mode: the main plugin file includes this at plugin-load time when
+ *   the drop-in path is not active, so caching works with no wp-config.php
+ *   change (WordPress core has loaded, but the theme/query/render is skipped).
+ *
+ * Because the drop-in path runs before WordPress, this file must not use any
+ * WordPress functions — only pure PHP.
  *
  * Flow:
  * 1. Load config file for the current host.

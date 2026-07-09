@@ -250,132 +250,6 @@ class Prime_Cache_Config {
 	}
 
 	/**
-	 * Set WP_CACHE to true in wp-config.php.
-	 *
-	 * @return bool
-	 */
-	public static function set_wp_cache( $enable = true ) {
-		$config_path = self::get_wp_config_path();
-		if ( ! $config_path || ! is_writable( $config_path ) ) {
-			return false;
-		}
-
-		$content = file_get_contents( $config_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		if ( false === $content ) {
-			return false;
-		}
-		$original_content = $content;
-
-		$prime_cache_marker = '// Added by Prime Cache';
-		$has_prime_line     = false !== strpos( $content, $prime_cache_marker );
-
-		// Only remove WP_CACHE lines that Prime Cache added (identified by comment marker).
-		if ( $has_prime_line ) {
-			$content = preg_replace(
-				'#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*[^)]+\)\s*;\s*//\s*Added by Prime Cache[^\n]*\n?#mi',
-				'',
-				$content
-			);
-		}
-
-		if ( $enable ) {
-			// Check if a WP_CACHE definition already exists (from another source).
-			if ( preg_match( '#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*(?:false|0|null)\s*\)#mi', $content ) ) {
-				// Another plugin left WP_CACHE as false — replace with true.
-				$content = preg_replace(
-					'#^(\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,\s*)(?:false|0|null)(\s*\).*)$#mi',
-					'${1}true${2} ' . $prime_cache_marker,
-					$content
-				);
-			} elseif ( ! preg_match( '#^\s*define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,#mi', $content ) ) {
-				// No WP_CACHE definition exists — add after opening PHP tag.
-				// Track the replacement count so we can detect a missed insertion
-				// (BOM/whitespace/comment before <?php) and fail loudly instead
-				// of returning a misleading success via the unchanged-content
-				// short-circuit below.
-				$replacements = 0;
-				$content = preg_replace(
-					'#^<\?php\s*#',
-					"<?php\ndefine( 'WP_CACHE', true ); " . $prime_cache_marker . "\n",
-					$content,
-					1,
-					$replacements
-				);
-				if ( null === $content || 1 !== $replacements ) {
-					return false;
-				}
-			}
-			// Otherwise WP_CACHE is already true (possibly set by another caching
-			// plugin) — leave the existing line untouched to avoid ownership churn.
-		}
-
-		// Clean up double blank lines.
-		$content = preg_replace( "#\n{3,}#", "\n\n", $content );
-
-		// Skip the rewrite when nothing actually changed. The self-heal pass on
-		// admin_init calls this on every admin page load — if the file already
-		// reflects the desired state, leave its mtime alone to avoid noise for
-		// backup tools and file watchers.
-		if ( $original_content === $content ) {
-			return true;
-		}
-
-		// Atomic write: temp file + rename.
-		$tempfile = $config_path . '.tmp.' . getmypid();
-		if ( false === file_put_contents( $tempfile, $content ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-			return false;
-		}
-		if ( ! rename( $tempfile, $config_path ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
-			@unlink( $tempfile );
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Option name recording that the site owner explicitly approved Prime Cache
-	 * managing the WP_CACHE line in wp-config.php.
-	 */
-	const WPCONFIG_CONSENT_OPTION = 'prime_cache_wpconfig_consent';
-
-	/**
-	 * Whether the site owner has explicitly approved editing wp-config.php.
-	 *
-	 * Per the WordPress.org guideline, the WP_CACHE constant is never written
-	 * to wp-config.php automatically — the owner approves it once (one click in
-	 * the admin notice) and the value is stored here. Only after that does the
-	 * activation / self-heal path (re)write the line.
-	 *
-	 * @return bool
-	 */
-	public static function has_wpconfig_consent() {
-		$consent = get_option( self::WPCONFIG_CONSENT_OPTION );
-		return is_array( $consent ) && ! empty( $consent['granted'] );
-	}
-
-	/**
-	 * Record (or clear) the owner's consent to manage the WP_CACHE line.
-	 *
-	 * @param bool $granted True to record consent, false to clear it.
-	 * @return void
-	 */
-	public static function record_wpconfig_consent( $granted = true ) {
-		if ( $granted ) {
-			update_option(
-				self::WPCONFIG_CONSENT_OPTION,
-				array(
-					'granted' => true,
-					'user'    => get_current_user_id(),
-					'time'    => time(),
-				),
-				false
-			);
-		} else {
-			delete_option( self::WPCONFIG_CONSENT_OPTION );
-		}
-	}
-
-	/**
 	 * Write the settings config file for the dropin to read.
 	 *
 	 * @param array $settings Plugin settings.
@@ -822,83 +696,25 @@ class Prime_Cache_Config {
 			return true;
 		}
 
-		$dropin_source = self::get_object_cache_dropin_path( $backend );
-		if ( ! $dropin_source || ! is_readable( $dropin_source ) ) {
-			return false;
-		}
-
-		// Refuse to overwrite another plugin's object-cache.php.
+		// Installing a backend is an add-on capability: the optional add-on
+		// ships the backend implementations and performs the drop-in install.
+		// The free plugin never writes wp-content/object-cache.php itself —
+		// it only removes its own signed drop-in (the 'off' branch above).
 		if ( file_exists( $file ) ) {
-			$existing = file_get_contents( $file ); // phpcs:ignore
-			// Unreadable or not ours — do not overwrite.
+			$existing = file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			// Unreadable or another plugin's drop-in — do not replace it.
 			if ( false === $existing || false === strpos( $existing, 'PRIME_CACHE_DROPIN_SIGNATURE' ) ) {
 				return false;
 			}
 		}
 
-		$content = self::get_object_cache_content( $backend, $dropin_source );
-
-		// Atomic write: temp file + rename.
-		$tempfile = $file . '.tmp.' . getmypid();
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents,PluginCheck.CodeAnalysis.WriteFile.PluginDirectoryWrite -- Writes the official WordPress object-cache.php drop-in into WP_CONTENT_DIR (sibling of the plugin folder), not into the plugin directory. Standard PHP file ops are required for the atomic temp+rename install pattern.
-		if ( false === file_put_contents( $tempfile, $content ) ) {
-			return false;
-		}
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename,PluginCheck.CodeAnalysis.WriteFile.PluginDirectoryWrite -- rename() completes the atomic install of wp-content/object-cache.php (WP drop-in), not a file inside the plugin directory.
-		if ( ! rename( $tempfile, $file ) ) {
-			@unlink( $tempfile );
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Generate the object-cache.php dropin content.
-	 *
-	 * This dropin is loaded by WordPress before plugins. It sets up a cache key
-	 * salt for multisite isolation, then loads the selected backend implementation.
-	 *
-	 * @param string $backend       Backend slug (apcu, redis, memcached).
-	 * @param string $dropin_source Absolute path to the backend dropin file.
-	 * @return string Generated PHP code.
-	 */
-	private static function get_object_cache_content( $backend, $dropin_source ) {
-		$escaped_path = addslashes( $dropin_source );
-		$version      = PRIME_CACHE_VERSION;
-		$label        = ucfirst( $backend );
-
-		return "<?php
-// PRIME_CACHE_DROPIN_SIGNATURE — do not remove this marker.
-/**
- * Object Cache dropin — {$label} backend.
- * Generated by Prime Cache {$version}. Do not edit manually.
- */
-defined( 'ABSPATH' ) || exit;
-
-// Prime Cache manages its own cache files directly for performance; the
-// WP_Filesystem API is not used on these cache paths. Disable the direct-file
-// sniff for this module.
-// phpcs:disable WordPress.WP.AlternativeFunctions
-define( 'PRIME_CACHE_OBJECT_CACHE_DROPIN', true );
-
-// Ensure cache keys are unique per WordPress install. DB_NAME alone collides
-// when two installs share a database via different table_prefix; mixing in an
-// ABSPATH+AUTH_SALT hash makes the salt install-unique without depending on
-// runtime state (\$table_prefix is not set at object-cache.php load time).
-if ( ! defined( 'WP_CACHE_KEY_SALT' ) ) {
-	\$pc_salt_seed = ( defined( 'DB_NAME' ) ? DB_NAME : '' )
-		. '|' . ABSPATH
-		. '|' . ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' );
-	define( 'WP_CACHE_KEY_SALT', ( defined( 'DB_NAME' ) ? DB_NAME : '' ) . ':' . substr( md5( \$pc_salt_seed ), 0, 8 ) . ':' );
-	unset( \$pc_salt_seed );
-}
-
-// Load the backend implementation.
-\$backend_file = '{$escaped_path}';
-if ( is_readable( \$backend_file ) ) {
-	require_once \$backend_file;
-}
-";
+		/**
+		 * Delegate the object-cache.php drop-in install to the add-on.
+		 *
+		 * @param bool   $installed Whether the drop-in was installed.
+		 * @param string $backend   Backend slug (apcu, redis, memcached).
+		 */
+		return (bool) apply_filters( 'prime_cache_install_object_cache_dropin', false, $backend );
 	}
 
 	/**
@@ -965,8 +781,10 @@ if ( is_readable( \$backend_file ) ) {
 	/**
 	 * Verify that WP_CACHE is set to true in wp-config.php by reading the file.
 	 *
-	 * This is necessary because PHP constants loaded at the start of the request
-	 * do not reflect changes made by set_wp_cache() during the same request.
+	 * Read-only diagnostic: Prime Cache never writes to wp-config.php. The
+	 * admin UI uses this to tell whether the faster drop-in serving path is
+	 * available (the site owner added the WP_CACHE line manually) or whether
+	 * pages are served in standard mode from the plugin.
 	 *
 	 * @return bool True if wp-config.php contains WP_CACHE set to true.
 	 */
