@@ -506,8 +506,12 @@ class Prime_Cache_Admin_Settings {
 		}
 		$r = array( 'files' => 0, 'size' => 0 );
 		if ( ! is_dir( PRIME_CACHE_CACHE_DIR ) ) return $r;
-		$it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( PRIME_CACHE_CACHE_DIR, RecursiveDirectoryIterator::SKIP_DOTS ) );
-		foreach ( $it as $f ) { if ( $f->isFile() && 'html' === $f->getExtension() ) $r['files']++; if ( $f->isFile() ) $r['size'] += $f->getSize(); }
+		// An unreadable subdirectory throws UnexpectedValueException mid-iteration — show partial stats instead of a fatal.
+		try {
+			$it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( PRIME_CACHE_CACHE_DIR, RecursiveDirectoryIterator::SKIP_DOTS ) );
+			foreach ( $it as $f ) { if ( $f->isFile() && 'html' === $f->getExtension() ) $r['files']++; if ( $f->isFile() ) $r['size'] += $f->getSize(); }
+		} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+		}
 		set_transient( 'prime_cache_dir_stats', $r, 60 );
 		return $r;
 	}
@@ -1126,7 +1130,7 @@ class Prime_Cache_Admin_Settings {
 					array( 'gzip_compression',       __( 'Gzip Compression','prime-cache' ),       __( 'Pre-compress cache files with gzip. Supported browsers receive the compressed version, reducing transfer size by 60-80%. Recommended for most environments.','prime-cache' ) ),
 					array( 'brotli_compression',     __( 'Brotli Compression','prime-cache' ),     __( 'Enable Brotli compression via mod_brotli (Apache 2.4+). Brotli achieves 15-25% better compression than gzip. Requires mod_brotli and .htaccess Optimization to be enabled. Falls back to gzip via mod_deflate if Brotli is unavailable.','prime-cache' ) ),
 					array( 'htaccess_enabled',       __( '.htaccess Optimization','prime-cache' ), __( 'Write optimization rules to .htaccess. Apache serves cached files directly without invoking PHP, significantly improving response time. Also enables mod_deflate compression and ETag removal. mod_expires and Cache-Control headers are added when "Enable Browser Cache Headers" is also on. No effect on Nginx.','prime-cache' ) ),
-					array( 'cache_404',              __( 'Cache 404 Pages','prime-cache' ),        __( 'Cache 404 (Not Found) pages. Reduces server load from repeated requests to non-existent URLs. The cached 404 page is served with proper 404 HTTP status code via the PHP drop-in. Note: .htaccess Optimization does not serve cached 404 pages (they always go through PHP to ensure the correct status code).','prime-cache' ) ),
+					array( 'cache_404',              __( 'Cache 404 Pages','prime-cache' ),        __( 'Cache 404 (Not Found) pages. Reduces server load from repeated requests to non-existent URLs. The cached 404 page is served with proper 404 HTTP status code via the PHP drop-in. Note: .htaccess Optimization does not serve cached 404 pages (they always go through PHP to ensure the correct status code). Each unique missing URL creates its own cache entry, so on sites exposed to random-URL scans this can grow disk usage; expired entries are removed by the hourly cleanup.','prime-cache' ) ),
 					array( 'cache_mixed_scheme',     __( 'Mixed HTTP/HTTPS Site','prime-cache' ),  __( 'Enable only if your site intentionally serves both http:// and https:// versions of the same URL. When disabled (recommended), the cache scheme follows your Site Address setting — safe and tamper-proof. Reverse proxies are auto-detected. When enabled, the drop-in falls back to per-request header detection; sites behind a reverse proxy must also define PRIME_CACHE_TRUST_X_FORWARDED_PROTO in wp-config.php.','prime-cache' ) ),
 					array( 'cache_footprint',        __( 'Cache Footprint','prime-cache' ),        __( 'Append an HTML comment with cache generation time to the source. Useful for verifying cache behavior via "View Source". Can be disabled in production.','prime-cache' ) ),
 				);

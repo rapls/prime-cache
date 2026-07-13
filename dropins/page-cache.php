@@ -562,7 +562,14 @@ if ( is_readable( $prime_cache_pc_cache_file ) ) {
 	$prime_cache_pc_accept_gzip = isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && strpos( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) !== false;
 	$prime_cache_pc_gz_status   = $prime_cache_pc_serving_404 ? 404 : 200;
 	$prime_cache_pc_gz_file     = $prime_cache_pc_cache_dir . _prime_cache_get_filename( $prime_cache_pc_is_ssl, $prime_cache_pc_is_mobile, $prime_cache_config['cache_mobile_separate'], true, $prime_cache_pc_vary_suffix, $prime_cache_pc_qs_suffix, $prime_cache_pc_gz_status );
-	$prime_cache_pc_use_gz      = $prime_cache_pc_accept_gzip && is_readable( $prime_cache_pc_gz_file );
+	// The .gz variant must be (a) enabled in the current config — after gzip is
+	// switched off the writer stops refreshing .gz files, so a leftover one may
+	// be stale — and (b) at least as new as the HTML it mirrors, so a failed or
+	// skipped .gz rewrite can never serve older content than the plain file.
+	$prime_cache_pc_use_gz      = $prime_cache_pc_accept_gzip
+		&& ! empty( $prime_cache_config['gzip_compression'] )
+		&& is_readable( $prime_cache_pc_gz_file )
+		&& (int) @filemtime( $prime_cache_pc_gz_file ) >= (int) $prime_cache_pc_modified_time;
 	$prime_cache_pc_serve_file  = $prime_cache_pc_use_gz ? $prime_cache_pc_gz_file : $prime_cache_pc_cache_file;
 	$prime_cache_pc_serve_size  = @filesize( $prime_cache_pc_serve_file );
 	if ( false === $prime_cache_pc_serve_size && $prime_cache_pc_use_gz && is_readable( $prime_cache_pc_cache_file ) ) {

@@ -1486,8 +1486,13 @@ class Prime_Cache {
 		if ( false === $dir_stats ) {
 			$dir_stats = array( 'files' => 0, 'size' => 0 );
 			if ( is_dir( PRIME_CACHE_CACHE_DIR ) ) {
-				$it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( PRIME_CACHE_CACHE_DIR, RecursiveDirectoryIterator::SKIP_DOTS ) );
-				foreach ( $it as $f ) { if ( $f->isFile() && 'html' === $f->getExtension() ) $dir_stats['files']++; if ( $f->isFile() ) $dir_stats['size'] += $f->getSize(); }
+				// An unreadable subdirectory throws UnexpectedValueException
+				// mid-iteration — show partial stats instead of a fatal.
+				try {
+					$it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( PRIME_CACHE_CACHE_DIR, RecursiveDirectoryIterator::SKIP_DOTS ) );
+					foreach ( $it as $f ) { if ( $f->isFile() && 'html' === $f->getExtension() ) $dir_stats['files']++; if ( $f->isFile() ) $dir_stats['size'] += $f->getSize(); }
+				} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				}
 			}
 			set_transient( 'prime_cache_dir_stats', $dir_stats, 60 );
 		}
@@ -1720,43 +1725,50 @@ class Prime_Cache {
 			return;
 		}
 
-		$now      = time();
-		$iterator = new RecursiveIteratorIterator(
-			new RecursiveDirectoryIterator( PRIME_CACHE_CACHE_DIR, RecursiveDirectoryIterator::SKIP_DOTS ),
-			RecursiveIteratorIterator::CHILD_FIRST
-		);
+		$now = time();
 
-		foreach ( $iterator as $item ) {
-			if ( ! $item->isFile() ) {
-				continue;
+		// An unreadable subdirectory throws UnexpectedValueException mid-
+		// iteration — skip this cron run instead of fataling inside WP-Cron.
+		try {
+			$iterator = new RecursiveIteratorIterator(
+				new RecursiveDirectoryIterator( PRIME_CACHE_CACHE_DIR, RecursiveDirectoryIterator::SKIP_DOTS ),
+				RecursiveIteratorIterator::CHILD_FIRST
+			);
+
+			foreach ( $iterator as $item ) {
+				if ( ! $item->isFile() ) {
+					continue;
+				}
+
+				// Skip stats.json and debug.log — only clean cache content files.
+				$basename = $item->getBasename();
+				if ( 'stats.json' === $basename || 'debug.log' === $basename ) {
+					continue;
+				}
+
+				$ext = $item->getExtension();
+				if ( ! in_array( $ext, array( 'html', 'gz', 'json' ), true ) ) {
+					continue;
+				}
+
+				if ( ( $now - $item->getMTime() ) > $lifespan ) {
+					@unlink( $item->getPathname() );
+				}
 			}
 
-			// Skip stats.json and debug.log — only clean cache content files.
-			$basename = $item->getBasename();
-			if ( 'stats.json' === $basename || 'debug.log' === $basename ) {
-				continue;
-			}
+			// Remove empty directories.
+			$dir_iterator = new RecursiveIteratorIterator(
+				new RecursiveDirectoryIterator( PRIME_CACHE_CACHE_DIR, RecursiveDirectoryIterator::SKIP_DOTS ),
+				RecursiveIteratorIterator::CHILD_FIRST
+			);
 
-			$ext = $item->getExtension();
-			if ( ! in_array( $ext, array( 'html', 'gz', 'json' ), true ) ) {
-				continue;
+			foreach ( $dir_iterator as $item ) {
+				if ( $item->isDir() ) {
+					@rmdir( $item->getPathname() );
+				}
 			}
-
-			if ( ( $now - $item->getMTime() ) > $lifespan ) {
-				@unlink( $item->getPathname() );
-			}
-		}
-
-		// Remove empty directories.
-		$dir_iterator = new RecursiveIteratorIterator(
-			new RecursiveDirectoryIterator( PRIME_CACHE_CACHE_DIR, RecursiveDirectoryIterator::SKIP_DOTS ),
-			RecursiveIteratorIterator::CHILD_FIRST
-		);
-
-		foreach ( $dir_iterator as $item ) {
-			if ( $item->isDir() ) {
-				@rmdir( $item->getPathname() );
-			}
+		} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Retry on the next scheduled run.
 		}
 	}
 }

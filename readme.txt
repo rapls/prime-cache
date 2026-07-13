@@ -1,20 +1,21 @@
 === Prime Cache ===
 
 Contributors: rapls
-Donate link:
-Tags: cache, performance, speed, optimization, minify
+Tags: cache, page cache, performance, speed, optimization
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.29
+Stable tag: 1.10.30
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A lightweight page caching and performance plugin for WordPress.
+Fast page caching that works out of the box — no wp-config.php edits. Plus WebP conversion, lazy load, minify, defer/delay JS, and preloading.
 
 == Description ==
 
-Prime Cache is a lightweight performance plugin for WordPress. It provides page caching, browser cache headers, basic file optimization, lazy loading, WebP conversion, cache preloading, and cache purge tools.
+Prime Cache is a lightweight performance plugin for WordPress. Page caching works immediately after activation — no wp-config.php edits, no manual setup. It also provides browser cache headers, file optimization (minify, defer, delay), lazy loading, WebP conversion, cache preloading, and automatic cache purge.
+
+For site owners who want the fastest possible path, the settings screen shows an optional one-line `WP_CACHE` snippet that upgrades serving to drop-in mode, where cached pages are served before WordPress core even loads. Adding it is entirely optional and entirely manual — the plugin never writes to wp-config.php.
 
 = Free Features =
 
@@ -43,7 +44,17 @@ Prime Cache is a lightweight performance plugin for WordPress. It provides page 
 
 = Optional Add-on Features =
 
-Some additional performance features are available as a separate add-on from the author website. They are not required for the free plugin to work.
+Prime Cache Pro, a separate add-on sold on the author's website (https://raplsworks.com/plugins/prime-cache/), extends the free plugin. It is not required for the free plugin to work:
+
+* AVIF conversion (on top of the shared WebP engine)
+* Critical CSS and Remove Unused CSS
+* CDN URL rewriting
+* Cloudflare, Sucuri, and Varnish integration
+* Object Cache backends (APCu / Redis / Memcached)
+* Sitemap-based cache preloading
+* Database cleanup
+* Heartbeat control
+* Self-hosted Google Fonts and Google Analytics
 
 = Internationalization =
 
@@ -77,11 +88,11 @@ Page-cache plugins must capture the entire rendered HTML response so the body ca
 
 == Installation ==
 
-1. Upload the `prime-cache` folder to `/wp-content/plugins/`
+1. Go to Plugins > Add New in your WordPress admin and search for "Prime Cache", then click Install Now (or upload the `prime-cache` folder to `/wp-content/plugins/`)
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Go to Prime Cache in the admin menu
 4. The Dashboard tab shows an overview of all features
-5. Enable Page Cache in the Page Cache tab to get started
+5. Enable Page Cache in the Page Cache tab to get started — no wp-config.php changes are needed
 
 = Quick Start =
 
@@ -92,14 +103,14 @@ Page-cache plugins must capture the entire rendered HTML response so the body ca
 
 == Screenshots ==
 
-1. Dashboard - Overview of cache status, hit rate, and feature status
-2. Page Cache - General settings and browser cache settings
-3. File Optimization - HTML/CSS/JS minification and performance tweaks
-4. Media - Lazy load, WebP conversion, and bulk optimization
-5. Preload - Cache warming and link prefetching
-6. Cache Control - Query string, cookie, and exclusion controls
+1. Dashboard - Cache hit rate, quick actions, and system / feature status
+2. Page Cache - General settings: mobile cache, gzip compression, .htaccess optimization, and 404 caching
+3. File Optimization - HTML/CSS/JS minification and optimization settings
+4. Media - Lazy load settings for images, iframes, and videos
+5. Preload - Cache preloading settings
+6. Cache Control - Ignored and cached query parameter controls
 7. Auto Purge - Automatic purge triggers
-8. Tools - Import/export, security headers, and system information
+8. Tools - Optimization presets, import/export, and system information
 
 == Frequently Asked Questions ==
 
@@ -152,6 +163,13 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.30 =
+* Fixed: after turning gzip compression off, a leftover .gz cache variant could keep serving older content than the regenerated HTML until cleanup. The drop-in now serves the .gz variant only when gzip is enabled in the current settings and the .gz file is at least as new as the HTML it mirrors.
+* Fixed: cache statistics and the hourly cleanup no longer risk a fatal error when a cache subdirectory becomes unreadable mid-scan; the scans are exception-guarded (partial stats are shown, and the cleanup retries on its next run).
+* Fixed: uninstall now also removes the prime_cache_config_schema option.
+* Clarified: the Cache 404 Pages setting description now notes the disk-usage trade-off on sites exposed to random-URL scans.
+* Listing: refreshed the description, installation steps, and screenshots for the WordPress.org plugin directory.
 
 = 1.10.29 =
 * Zero-configuration caching: page caching now works immediately after activation with no wp-config.php change. When the optional `WP_CACHE` drop-in constant is not present, the plugin serves cached pages itself in a new standard mode (WordPress core loads, but the theme, queries, and rendering are skipped). Adding `define( 'WP_CACHE', true );` manually upgrades serving to the faster drop-in mode.
@@ -310,6 +328,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.30 =
+Fixes a stale gzip-variant edge case after disabling gzip compression, guards cache scans against unreadable directories, and completes uninstall cleanup. Recommended for all users.
 
 = 1.10.29 =
 Caching now works out of the box with no wp-config.php change (new standard mode), and the plugin never writes to wp-config.php at all. Adding the WP_CACHE line yourself remains an optional speed-up (drop-in mode). Existing installs that already have the line keep working unchanged.
