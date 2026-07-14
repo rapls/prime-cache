@@ -1,13 +1,31 @@
-.DS_Store
-.claude/
-.serena/
-node_modules/
-vendor/
+# ── docs は同期しない（ローカル専用）──
+/docs/
+
+# WordPress / PHP
 *.log
+/vendor/
+composer.lock
+
+# Node（ビルドを使う場合）
+/node_modules/
+npm-debug.log*
+/build/
+/dist/
+
+# 環境・秘密情報
 .env
-docs/*.patch
-docs/CLAUDE.md
-dropins/CLAUDE.md
-includes/CLAUDE.md
-includes/admin/CLAUDE.md
-**/CLAUDE.md
+.env.*
+*.key
+*.pem
+
+# OS / エディタ
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# ビルド生成物・アーカイブ
+*.zip
+*.tar.gz
