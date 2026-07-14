@@ -1,59 +1,59 @@
 # Prime Cache
 
-A fast and stable page caching plugin for WordPress.
+WordPress を高速かつ安定して動かすページキャッシュプラグイン。
 
-Prime Cache speeds up your WordPress site with static page caching, file optimization, lazy loading, and modern image conversion — with a focus on stability and sensible defaults. It works on shared hosting and never edits `wp-config.php` for you.
+Prime Cache は、静的なページキャッシュ、ファイル最適化、遅延読み込み、最新の画像形式への変換で WordPress サイトを高速化します。安定性と「そのままで使える初期値」を重視した設計です。共用サーバーでも動作し、**`wp-config.php` を自動で書き換えることは一切ありません**。
 
 - **WordPress.org**: https://wordpress.org/plugins/prime-cache/
-- **Website**: https://raplsworks.com/plugins/prime-cache/
+- **プラグイン紹介ページ**: https://raplsworks.com/plugins/prime-cache/
 
-## Features (Free)
+## 無料版の機能
 
-- **Page caching** — static HTML cache with an optional `.htaccess` fast-path that serves cached pages directly from Apache, before PHP runs.
-- **Browser cache headers** — `Cache-Control` and `Expires` for CSS, JS, images, and fonts.
-- **Compression** — Gzip out of the box; Brotli when available (`mod_brotli`).
-- **File optimization** — HTML / CSS / JS minification, deferred and delayed JavaScript, async CSS, query-string removal.
-- **Lazy loading** — images, iframes, and videos, with a configurable number of leading images skipped to protect LCP.
-- **WebP conversion** — serve smaller images to modern browsers.
-- **Cache preloading** — warm the cache in the background via non-blocking requests.
-- **Performance tweaks** — disable emoji, embeds, Dashicons on the frontend, jQuery Migrate, XML-RPC, and more.
-- **Auto purge** — clear the right caches automatically when posts, comments, menus, or themes change.
+- **ページキャッシュ** — 静的な HTML キャッシュ。任意の `.htaccess` ファストパスを使うと、PHP を起動する前に Apache が直接キャッシュを配信します。
+- **ブラウザーキャッシュヘッダー** — CSS、JavaScript、画像、フォントに `Cache-Control` と `Expires` を付与します。
+- **圧縮** — Gzip は標準で有効。`mod_brotli` が使える環境では Brotli も利用できます。
+- **ファイル最適化** — HTML / CSS / JavaScript の最小化、JavaScript の defer と delay、CSS の非同期読み込み、クエリ文字列の削除。
+- **遅延読み込み** — 画像、iframe、動画に対応。LCP を守るため、先頭の画像を何枚スキップするかを設定できます。
+- **WebP 変換** — 対応ブラウザーに、より軽い画像を配信します。
+- **キャッシュのプリロード** — バックグラウンドの非ブロッキングなリクエストで、あらかじめキャッシュを温めます。
+- **パフォーマンスチューニング** — 絵文字、埋め込み、フロントエンドの Dashicons、jQuery Migrate、XML-RPC などを無効化できます。
+- **自動パージ** — 投稿、コメント、メニュー、テーマが変更されたときに、関連するキャッシュだけを自動的にクリアします。
 
-## Pro
+## Pro 版
 
-Prime Cache Pro adds advanced optimization for production sites:
+Prime Cache Pro は、本番サイト向けの高度な最適化を追加します。
 
-- Critical CSS generation and unused CSS cleanup
-- Persistent object cache (Redis, Memcached, APCu)
-- AVIF conversion (on top of WebP)
-- External cache purge (Cloudflare, Sucuri, Varnish)
-- Sitemap / resource preload, DNS prefetch, preconnect
-- Scheduled database cleanup (revisions, transients, overhead)
+- Critical CSS の生成と、未使用 CSS の削除
+- 永続オブジェクトキャッシュ (Redis、Memcached、APCu)
+- AVIF 変換 (WebP に追加)
+- 外部キャッシュのパージ (Cloudflare、Sucuri、Varnish)
+- サイトマップやリソースのプリロード、DNS プリフェッチ、preconnect
+- データベースクリーンアップの定期実行 (リビジョン、transient、オーバーヘッド)
 
-Details: https://raplsworks.com/plugins/prime-cache/
+詳細: https://raplsworks.com/plugins/prime-cache/
 
-## Requirements
+## 動作要件
 
-- WordPress 5.8 or later
-- PHP 7.4 or later
-- Apache with `.htaccess` support for the fast-path (optional; standard mode works anywhere)
+- WordPress 5.8以降
+- PHP 7.4以降
+- ファストパスを使う場合は `.htaccess` が利用できる Apache (任意。標準モードはどの環境でも動作します)
 
-## Installation
+## インストール
 
-1. Install **Prime Cache** from the WordPress plugin directory, or upload the plugin folder to `/wp-content/plugins/`.
-2. Activate it from the **Plugins** menu.
-3. Open **Prime Cache** in the admin menu and enable caching. The default settings are safe to start with.
+1. WordPress のプラグインディレクトリーから **Prime Cache** をインストールするか、プラグインのフォルダーを `/wp-content/plugins/` にアップロードします。
+2. 「プラグイン」メニューから有効化します。
+3. 管理メニューの **Prime Cache** を開き、キャッシュを有効化します。初期設定のまま使い始めても安全です。
 
-For the optional drop-in mode (serving cached pages before WordPress loads), the plugin shows step-by-step instructions in the admin — Prime Cache never edits `wp-config.php` itself.
+任意のドロップインモード (WordPress の読み込み前にキャッシュ済みのページを配信する方式) については、管理画面に手順が表示されます。Prime Cache が `wp-config.php` を書き換えることはありません。
 
-## Translations
+## 翻訳
 
-Japanese translation is maintained by the author. Contributions for other locales are welcome via [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/prime-cache/).
+日本語翻訳は作者が管理しています。他の言語への翻訳は [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/prime-cache/) から歓迎します。
 
-## License
+## ライセンス
 
-GPL-2.0-or-later. See [the GNU General Public License v2.0](https://www.gnu.org/licenses/gpl-2.0.html).
+GPL-2.0-or-later。[LICENSE](LICENSE) を参照してください。
 
 ---
 
-Built by [Rapls Works](https://raplsworks.com/).
+制作: [Rapls Works](https://raplsworks.com/)
