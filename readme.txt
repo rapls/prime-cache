@@ -169,6 +169,7 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Fixed: cache statistics and the hourly cleanup no longer risk a fatal error when a cache subdirectory becomes unreadable mid-scan; the scans are exception-guarded (partial stats are shown, and the cleanup retries on its next run).
 * Fixed: uninstall now also removes the prime_cache_config_schema option.
 * Clarified: the Cache 404 Pages setting description now notes the disk-usage trade-off on sites exposed to random-URL scans.
+* Improved: the standard-mode notice now includes collapsible step-by-step instructions for editing wp-config.php (file location, backup, the exact line to change or add, and how to verify).
 * Listing: refreshed the description, installation steps, and screenshots for the WordPress.org plugin directory.
 
 = 1.10.29 =

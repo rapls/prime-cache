@@ -3171,3 +3171,33 @@ msgstr "ページキャッシュは標準モードで動作しています。さ
 #: includes/admin/class-admin-settings.php:2599
 msgid "This step is optional — caching already works without it. Prime Cache never edits wp-config.php; adding or removing the line is always up to you."
 msgstr "この手順は任意です。追加しなくてもキャッシュは動作します。Prime Cache が wp-config.php を編集することはなく、行の追加と削除は常にサイト所有者が行います。"
+
+#: includes/admin/class-admin-settings.php:2607
+msgid "How to edit wp-config.php (step by step)"
+msgstr "wp-config.php の書き換え手順"
+
+#: includes/admin/class-admin-settings.php:2609
+msgid "Open the file manager in your hosting control panel (or connect with an FTP client) and find wp-config.php in the WordPress root directory — the same folder that contains wp-login.php and the wp-content folder."
+msgstr "レンタルサーバーの管理画面でファイルマネージャーを開くか、FTP クライアントで接続し、WordPress のルートディレクトリー (wp-login.php や wp-content フォルダーがある階層) にある wp-config.php を見つけます。"
+
+#: includes/admin/class-admin-settings.php:2610
+msgid "Save a copy of the file as a backup before editing."
+msgstr "編集する前に、ファイルのコピーをバックアップとして保存します。"
+
+#. translators: 1: the existing define line, 2: the corrected define line
+#: includes/admin/class-admin-settings.php:2614
+msgid "Find the line %1$s and change it to %2$s."
+msgstr "%1$s の行を見つけて %2$s に変更します。"
+
+#. translators: 1: the define line to add, 2: the opening PHP tag, 3: the "stop editing" comment
+#: includes/admin/class-admin-settings.php:2621
+msgid "Add the line %1$s directly below the opening %2$s tag, above the %3$s comment. Do not add anything before the %2$s tag."
+msgstr "%1$s の行を、先頭の %2$s タグのすぐ下 (%3$s コメントより上) に追加します。%2$s タグより前には何も書かないでください。"
+
+#: includes/admin/class-admin-settings.php:2627
+msgid "Save the file and reload this page. When the Dashboard tab shows \"WP_CACHE Constant: Active\" under System Status, drop-in mode is on and this notice disappears."
+msgstr "ファイルを保存してこのページを再読み込みします。ダッシュボードタブのシステム状態に「WP_CACHE Constant: Active」と表示されればドロップインモードが有効で、この通知は表示されなくなります。"
+
+#: includes/admin/class-admin-settings.php:2629
+msgid "Caution: a mistake in wp-config.php can temporarily take the whole site down — if that happens, restore the backup copy. If you prefer not to edit the file, you can simply keep using standard mode."
+msgstr "注意: wp-config.php の記述ミスはサイト全体が一時的に表示されなくなる原因になります。その場合はバックアップのコピーで元に戻してください。ファイルを編集しない場合も、そのまま標準モードで利用できます。"

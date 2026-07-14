@@ -2695,3 +2695,33 @@ msgstr ""
 #: includes/admin/class-admin-settings.php:2599
 msgid "This step is optional — caching already works without it. Prime Cache never edits wp-config.php; adding or removing the line is always up to you."
 msgstr ""
+
+#: includes/admin/class-admin-settings.php:2607
+msgid "How to edit wp-config.php (step by step)"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:2609
+msgid "Open the file manager in your hosting control panel (or connect with an FTP client) and find wp-config.php in the WordPress root directory — the same folder that contains wp-login.php and the wp-content folder."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:2610
+msgid "Save a copy of the file as a backup before editing."
+msgstr ""
+
+#. translators: 1: the existing define line, 2: the corrected define line
+#: includes/admin/class-admin-settings.php:2614
+msgid "Find the line %1$s and change it to %2$s."
+msgstr ""
+
+#. translators: 1: the define line to add, 2: the opening PHP tag, 3: the "stop editing" comment
+#: includes/admin/class-admin-settings.php:2621
+msgid "Add the line %1$s directly below the opening %2$s tag, above the %3$s comment. Do not add anything before the %2$s tag."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:2627
+msgid "Save the file and reload this page. When the Dashboard tab shows \"WP_CACHE Constant: Active\" under System Status, drop-in mode is on and this notice disappears."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php:2629
+msgid "Caution: a mistake in wp-config.php can temporarily take the whole site down — if that happens, restore the backup copy. If you prefer not to edit the file, you can simply keep using standard mode."
+msgstr ""

@@ -2587,19 +2587,49 @@ class Prime_Cache_Admin_Settings {
 			return;
 		}
 
-		$snippet = "define( 'WP_CACHE', true );";
+		$snippet       = "define( 'WP_CACHE', true );";
+		$defined_false = defined( 'WP_CACHE' ) && ! WP_CACHE;
 
 		echo '<div class="notice notice-info"><p><strong>Prime Cache:</strong> ';
-		if ( defined( 'WP_CACHE' ) && ! WP_CACHE ) {
+		if ( $defined_false ) {
 			// Some other source defines it false — drop-in mode is unavailable
 			// until the owner changes that definition.
 			echo esc_html__( 'Page caching is active in standard mode. wp-config.php currently defines WP_CACHE as false, so the faster drop-in mode is unavailable. To enable it, change that definition to true — this is optional, and Prime Cache never edits wp-config.php itself.', 'prime-cache' );
-			echo '</p></div>';
-			return;
+			echo '</p>';
+		} else {
+			echo esc_html__( 'Page caching is active in standard mode. Optional speed-up: to serve cached pages before WordPress even loads (drop-in mode), add this line yourself near the top of wp-config.php:', 'prime-cache' );
+			echo '</p><p><code>' . esc_html( $snippet ) . '</code></p>';
 		}
-		echo esc_html__( 'Page caching is active in standard mode. Optional speed-up: to serve cached pages before WordPress even loads (drop-in mode), add this line yourself near the top of wp-config.php:', 'prime-cache' );
-		echo '</p><p><code>' . esc_html( $snippet ) . '</code></p>';
-		echo '<p style="font-size:12px;color:#646970;">'
+
+		// Step-by-step guide, collapsed by default. Placeholders inject only
+		// our own static <code> markup into esc_html__()-escaped templates.
+		echo '<details style="margin:4px 0 8px"><summary style="cursor:pointer;font-weight:600">'
+			. esc_html__( 'How to edit wp-config.php (step by step)', 'prime-cache' )
+			. '</summary><ol style="margin:8px 0 4px 20px">';
+		echo '<li>' . esc_html__( 'Open the file manager in your hosting control panel (or connect with an FTP client) and find wp-config.php in the WordPress root directory — the same folder that contains wp-login.php and the wp-content folder.', 'prime-cache' ) . '</li>';
+		echo '<li>' . esc_html__( 'Save a copy of the file as a backup before editing.', 'prime-cache' ) . '</li>';
+		if ( $defined_false ) {
+			echo '<li>' . sprintf(
+				/* translators: 1: the existing define line, 2: the corrected define line */
+				esc_html__( 'Find the line %1$s and change it to %2$s.', 'prime-cache' ),
+				"<code>define( 'WP_CACHE', false );</code>",
+				'<code>' . esc_html( $snippet ) . '</code>'
+			) . '</li>';
+		} else {
+			echo '<li>' . sprintf(
+				/* translators: 1: the define line to add, 2: the opening PHP tag, 3: the "stop editing" comment */
+				esc_html__( 'Add the line %1$s directly below the opening %2$s tag, above the %3$s comment. Do not add anything before the %2$s tag.', 'prime-cache' ),
+				'<code>' . esc_html( $snippet ) . '</code>',
+				'<code>&lt;?php</code>',
+				"<code>/* That's all, stop editing! */</code>"
+			) . '</li>';
+		}
+		echo '<li>' . esc_html__( 'Save the file and reload this page. When the Dashboard tab shows "WP_CACHE Constant: Active" under System Status, drop-in mode is on and this notice disappears.', 'prime-cache' ) . '</li>';
+		echo '</ol><p style="font-size:12px;color:#646970">'
+			. esc_html__( 'Caution: a mistake in wp-config.php can temporarily take the whole site down — if that happens, restore the backup copy. If you prefer not to edit the file, you can simply keep using standard mode.', 'prime-cache' )
+			. '</p></details>';
+
+		echo '<p style="font-size:12px;color:#646970">'
 			. esc_html__( 'This step is optional — caching already works without it. Prime Cache never edits wp-config.php; adding or removing the line is always up to you.', 'prime-cache' )
 			. '</p></div>';
 	}
