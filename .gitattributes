@@ -9,3 +9,6 @@
 CLAUDE.md export-ignore
 **/CLAUDE.md export-ignore
 docs export-ignore
+
+# GitHub-only landing page — wp.org uses readme.txt instead.
+/README.md export-ignore
