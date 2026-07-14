@@ -1,6 +1,12 @@
 # ── docs は同期しない（ローカル専用）──
 /docs/
 
+# ── AI 開発ツールの設定・指示書は同期しない（ローカル専用）──
+CLAUDE.md
+**/CLAUDE.md
+.claude/
+.serena/
+
 # WordPress / PHP
 *.log
 /vendor/

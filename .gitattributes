@@ -1,0 +1,11 @@
+# Keep development-only files out of any `git archive` export (distribution ZIP).
+# .gitignore alone does not cover archives — export-ignore does.
+.gitattributes export-ignore
+.gitignore export-ignore
+.git export-ignore
+.github export-ignore
+.claude export-ignore
+.serena export-ignore
+CLAUDE.md export-ignore
+**/CLAUDE.md export-ignore
+docs export-ignore
