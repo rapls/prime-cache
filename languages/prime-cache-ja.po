@@ -475,7 +475,7 @@ msgstr ""
 "ユーザーと匿名訪問者が各ページのキャッシュを 1 つ共有するため、あるユーザー向"
 "けに生成されたページ (管理バー、nonce、ユーザー固有のコンテンツを含む) が、他"
 "のユーザーや一般訪問者に配信される可能性があります。すべての訪問者に完全に同"
-"一のコンテンツを配信するサイト (例: ユーザーごとの出力が無い会員制サイト) で"
+"一のコンテンツを配信するサイト (例: ユーザーごとの出力がない会員制サイト) で"
 "のみ有効化してください。"
 
 #: includes/admin/class-admin-settings.php:886
@@ -2922,7 +2922,7 @@ msgstr "ページキャッシュの次へ。"
 
 #: includes/admin/class-admin-settings.php:718
 msgid "Prime Cache Free covers the essentials: page cache, browser cache, minification, lazy loading, WebP, and preload."
-msgstr "Prime Cache Free は土台をカバーします:ページキャッシュ、ブラウザーキャッシュ、最小化、遅延読み込み、WebP、プリロード。"
+msgstr "Prime Cache Free は土台をカバーします: ページキャッシュ、ブラウザーキャッシュ、最小化、遅延読み込み、WebP、プリロード。"
 
 #: includes/admin/class-admin-settings.php:719
 msgid "Prime Cache Pro adds advanced optimization for production sites — Critical CSS, unused CSS cleanup, object cache, AVIF, external cache purge, sitemap preload, and database cleanup."
