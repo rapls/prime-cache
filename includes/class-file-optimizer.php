@@ -775,6 +775,10 @@ class Prime_Cache_File_Optimizer {
 		$defer_excl = $this->parse_list( $this->settings['exclude_defer_js'] );
 		$defer_excl[] = 'jquery';
 		$defer_excl[] = 'jquery-migrate';
+		// Google Site Kit webpack chunks must not be deferred out of order
+		// (see mark_preserved_scripts) — a deferred chunk runs after its
+		// siblings and throws "googlesitekit is not defined".
+		$defer_excl[] = 'google-site-kit';
 		if ( $this->matches_patterns( $src, $defer_excl ) ) {
 			return $tag;
 		}
@@ -873,6 +877,14 @@ class Prime_Cache_File_Optimizer {
 			'/jquery-migrate.min.js',
 			// WP Consent API (third-party scripts gate on its readiness).
 			'wp-consent-api',
+			// Google Site Kit — a multi-chunk webpack app whose runtime,
+			// vendor, and module bundles must load in their original order and
+			// share the same `window.googlesitekit` / webpackChunk registry.
+			// Combining, delaying, or deferring any chunk desynchronizes the
+			// registry and throws "googlesitekit is not defined". Only the
+			// base-data handle carries an inline block (auto-detected above);
+			// the sibling chunks do not, so match the plugin path directly.
+			'google-site-kit',
 		);
 
 		// Auto-detect external scripts paired with inline localize / add-inline
@@ -972,6 +984,9 @@ class Prime_Cache_File_Optimizer {
 		$excl[] = 'consent_api';
 		// Cocoon theme.
 		$excl[] = 'cocoon_localize_script_options';
+		// Google Site Kit — multi-chunk webpack app; delaying any chunk
+		// desynchronizes its shared registry ("googlesitekit is not defined").
+		$excl[] = 'google-site-kit';
 
 		// Safe mode: exclude local scripts.
 		$safe_mode = ! empty( $s['delay_js_safe_mode'] );

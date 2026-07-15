@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, speed, optimization
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.32
+Stable tag: 1.10.33
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -163,6 +163,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.33 =
+* Fixed: Google Site Kit is now always excluded from Combine, Delay, and Defer JavaScript. Site Kit ships as a multi-chunk webpack app whose runtime, vendor, and module bundles share one registry and must load in their original order; optimizing any single chunk desynchronized the registry and threw "googlesitekit is not defined" (Site Kit dashboards/snippets failed to load). Handled like jQuery and Divi — no manual exclusion needed.
 
 = 1.10.32 =
 * Fixed: the Defer/Delay JavaScript exclusion list matched case-sensitively, so a natural entry like "jQuery" did not match the actual script URL "jquery.min.js" and jQuery kept being deferred — breaking inline scripts with "jQuery is not a function". Exclusions now match case-insensitively.
