@@ -767,8 +767,14 @@ class Prime_Cache_File_Optimizer {
 			}
 		}
 
-		// Check defer exclusion list.
+		// Check defer exclusion list. Always exclude jQuery and its core
+		// dependencies: deferring them breaks the many inline scripts (printed
+		// by themes/plugins) that call jQuery()/$ during parsing, before a
+		// deferred jQuery has executed. The delay path force-excludes these
+		// too; keep the two consistent.
 		$defer_excl = $this->parse_list( $this->settings['exclude_defer_js'] );
+		$defer_excl[] = 'jquery';
+		$defer_excl[] = 'jquery-migrate';
 		if ( $this->matches_patterns( $src, $defer_excl ) ) {
 			return $tag;
 		}
@@ -1380,7 +1386,11 @@ class Prime_Cache_File_Optimizer {
 			if ( empty( $pattern ) ) {
 				continue;
 			}
-			if ( false !== strpos( $subject, $pattern ) ) {
+			// Case-insensitive: users naturally type "jQuery" while the script
+			// URL is "jquery.min.js". A case-sensitive match silently fails to
+			// exclude it, so jQuery gets deferred/delayed and the page breaks.
+			// The wildcard branch below already matches case-insensitively.
+			if ( false !== stripos( $subject, $pattern ) ) {
 				return true;
 			}
 			// Support wildcard.

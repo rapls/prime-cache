@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, speed, optimization
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.31
+Stable tag: 1.10.32
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -163,6 +163,10 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.32 =
+* Fixed: the Defer/Delay JavaScript exclusion list matched case-sensitively, so a natural entry like "jQuery" did not match the actual script URL "jquery.min.js" and jQuery kept being deferred — breaking inline scripts with "jQuery is not a function". Exclusions now match case-insensitively.
+* Fixed: jQuery and jquery-migrate are now always excluded from Defer JavaScript (they were already excluded from Delay), so deferring can no longer break themes/plugins that print inline jQuery calls.
 
 = 1.10.31 =
 * Fixed: "Reset settings to defaults" now also clears all caches. Previously the reset only restored the settings, so pages already cached under the old optimization settings (Remove Unused CSS, Delay JS, etc.) kept being served — sometimes with broken markup — even though the settings that produced them were gone.
@@ -332,6 +336,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.32 =
+Fixes "jQuery is not a function" errors when Defer JavaScript is on: jQuery is no longer deferred, and exclusion matching is now case-insensitive.
 
 = 1.10.31 =
 Reset settings now also clears all caches, so stale pages built under old optimization settings are no longer served after a reset.
