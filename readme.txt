@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, speed, optimization
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.30
+Stable tag: 1.10.31
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -163,6 +163,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.31 =
+* Fixed: "Reset settings to defaults" now also clears all caches. Previously the reset only restored the settings, so pages already cached under the old optimization settings (Remove Unused CSS, Delay JS, etc.) kept being served — sometimes with broken markup — even though the settings that produced them were gone.
 
 = 1.10.30 =
 * Fixed: after turning gzip compression off, a leftover .gz cache variant could keep serving older content than the regenerated HTML until cleanup. The drop-in now serves the .gz variant only when gzip is enabled in the current settings and the .gz file is at least as new as the HTML it mirrors.
@@ -329,6 +332,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.31 =
+Reset settings now also clears all caches, so stale pages built under old optimization settings are no longer served after a reset.
 
 = 1.10.30 =
 Fixes a stale gzip-variant edge case after disabling gzip compression, guards cache scans against unreadable directories, and completes uninstall cleanup. Recommended for all users.

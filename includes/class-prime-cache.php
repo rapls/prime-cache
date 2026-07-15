@@ -846,6 +846,11 @@ class Prime_Cache {
 						set_transient( 'prime_cache_env_warnings', $reset_warnings, 60 );
 					}
 				}
+				// Purge everything after a reset. Pages cached under the old
+				// optimization settings (e.g. Remove Unused CSS, Delay JS) would
+				// otherwise keep serving stale, potentially broken markup even
+				// though the settings that produced them are gone.
+				$this->clear_all_caches();
 				$redirect = add_query_arg( array( 'tab' => 'tools', 'pc_cleared' => 'reset' ), admin_url( 'admin.php?page=prime-cache' ) );
 				wp_safe_redirect( $redirect );
 				exit;
