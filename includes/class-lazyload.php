@@ -65,8 +65,12 @@ class Prime_Cache_LazyLoad {
 					$tag = preg_replace( '#\s+loading\s*=\s*(?:"lazy"|\'lazy\'|lazy(?=[\s/>]))#i', '', $tag );
 					// Add fetchpriority="high" to the very first image (LCP candidate).
 					// Word-boundary check so `data-fetchpriority="..."` doesn't
-					// suppress our attribute insertion.
-					if ( 1 === $count && ! preg_match( '#\bfetchpriority\s*=#i', $tag ) ) {
+					// suppress our attribute insertion. The add-on's LCP module
+					// disables this via the filter when it is active — it picks
+					// the LCP image with a better heuristic, and a second
+					// "high" image would dilute the priority boost.
+					if ( 1 === $count && ! preg_match( '#\bfetchpriority\s*=#i', $tag )
+						&& apply_filters( 'prime_cache_lazyload_first_image_priority', true ) ) {
 						$tag = preg_replace( '#^(<img)\b#i', '$1 fetchpriority="high"', $tag );
 					}
 					return $tag;

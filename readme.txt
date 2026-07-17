@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.35
+Stable tag: 1.10.36
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -167,6 +167,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.36 =
+* Changed: the lazy-load module's fetchpriority="high" stamp on the first image can now be disabled via the prime_cache_lazyload_first_image_priority filter. The Pro add-on's LCP Optimization uses it so only the image it identifies as the LCP candidate carries the high priority — two "high" images dilute the boost.
 
 = 1.10.35 =
 * Fixed (Cocoon theme): mobile drawer menus (hamburger / search / share / sidebar) stayed open when returning to a page via the browser's back/forward cache. Cocoon's checkbox-driven menus ship no pageshow handling, and this plugin's Delay JS / async CSS remove the in-flight requests that previously made pages bfcache-ineligible, surfacing the issue. A compatibility shim now closes the drawers on bfcache restore.
@@ -350,6 +353,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.36 =
+Lets the Pro LCP module take over the first-image fetchpriority stamp so the real LCP image gets the full priority boost.
 
 = 1.10.35 =
 Cocoon sites: fixes mobile drawer menus staying open after browser back navigation (bfcache restore).
