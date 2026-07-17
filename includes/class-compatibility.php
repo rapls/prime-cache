@@ -27,6 +27,27 @@ class Prime_Cache_Compatibility {
 
 	public function __construct() {
 		add_action( 'admin_notices', array( $this, 'check_conflicts' ) );
+		add_action( 'wp_footer', array( $this, 'cocoon_bfcache_menu_close' ), 99 );
+	}
+
+	/**
+	 * Cocoon: close the checkbox-driven mobile menus on back/forward cache
+	 * restore.
+	 *
+	 * Cocoon's hamburger/search/share/sidebar drawers are pure-CSS toggles
+	 * (`#navi-menu-input:checked ~ …`) with no pageshow handling of their
+	 * own. When the page is served from the browser's bfcache, the checkbox
+	 * state is restored as-is, so a drawer opened before navigating away
+	 * covers the restored page. This surfaces once this plugin's Delay JS /
+	 * async CSS remove the in-flight requests and unload listeners that
+	 * previously made pages bfcache-INeligible — so ship the missing
+	 * pageshow handler as a compatibility shim.
+	 */
+	public function cocoon_bfcache_menu_close() {
+		if ( false === strpos( (string) get_template(), 'cocoon' ) ) {
+			return;
+		}
+		echo '<script data-no-delay data-no-defer>window.addEventListener("pageshow",function(e){if(!e.persisted)return;var l=document.querySelectorAll(\'input[type=checkbox][id$="-menu-input"]\');for(var i=0;i<l.length;i++){if(l[i].checked)l[i].checked=false;}});</script>' . "\n";
 	}
 
 	/**
