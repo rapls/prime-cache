@@ -1,7 +1,7 @@
-=== Prime Cache ===
+=== Prime Cache – Page Cache, WebP, Lazy Load, Minify, Defer & Delay JS (Zero Config) ===
 
 Contributors: rapls
-Tags: cache, page cache, performance, speed, optimization
+Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.0
 Stable tag: 1.10.33
@@ -113,6 +113,10 @@ Page-cache plugins must capture the entire rendered HTML response so the body ca
 8. Tools - Optimization presets, import/export, and system information
 
 == Frequently Asked Questions ==
+
+= Does it improve my PageSpeed Insights / Core Web Vitals scores? =
+
+The features target the usual Core Web Vitals bottlenecks: page caching and preloading shorten server response time (TTFB, which feeds LCP), minification and defer/delay JavaScript reduce render-blocking resources, lazy loading and WebP conversion cut image weight, and skip-first-N lazy loading with fetchpriority=high protects the LCP image. Actual score changes depend on your theme, hosting, and other plugins — test with PageSpeed Insights before and after enabling each feature.
 
 = What are the server requirements? =
 
