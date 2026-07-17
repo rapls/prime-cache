@@ -603,5 +603,11 @@ class Prime_Cache_Purge {
 			$existing[] = __( 'Prime Cache settings were saved but the configuration file could not be regenerated. Caching will continue to use the previous settings until the file write succeeds. Check that wp-content is writable.', 'prime-cache' );
 			set_transient( 'prime_cache_activation_warnings', array_values( array_unique( $existing ) ), 5 * MINUTE_IN_SECONDS );
 		}
+		// Cached pages were rendered with the previous settings (lazy load,
+		// minify, defer/delay, image delivery, …), and with the default
+		// 7-day lifespan they would keep serving that stale HTML long after
+		// the admin changed the configuration. update_option only fires this
+		// hook when the value actually changed, so always purge here.
+		$this->purge_all();
 	}
 }

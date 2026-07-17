@@ -56,6 +56,13 @@ class Prime_Cache_LazyLoad {
 
 				// Skip first N images (likely above the fold).
 				if ( $count <= $skip_first ) {
+					// WordPress core (wp_filter_content_tags) and some themes add
+					// loading="lazy" of their own before this filter runs. The
+					// whole point of skip-first is that these images render
+					// eagerly — an above-the-fold LCP image left lazy-loaded can
+					// cost seconds of LCP — so strip a pre-existing lazy value
+					// rather than merely not adding one.
+					$tag = preg_replace( '#\s+loading\s*=\s*(?:"lazy"|\'lazy\'|lazy(?=[\s/>]))#i', '', $tag );
 					// Add fetchpriority="high" to the very first image (LCP candidate).
 					// Word-boundary check so `data-fetchpriority="..."` doesn't
 					// suppress our attribute insertion.

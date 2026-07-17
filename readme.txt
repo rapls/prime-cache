@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.33
+Stable tag: 1.10.34
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -167,6 +167,10 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.34 =
+* Fixed: Lazy Load's "skip first images" setting now removes a loading="lazy" attribute that WordPress core or the theme already added to one of the skipped images. Previously the skipped images only avoided getting a new lazy attribute, so an above-the-fold (LCP) image could stay lazy-loaded and delay rendering by seconds.
+* Improved: saving settings now purges the page cache automatically. Cached pages are rendered with the settings active at the time, so with the default 7-day lifespan a change to Lazy Load, minification, Defer/Delay JavaScript, image delivery, or any other HTML-affecting option could keep serving stale HTML long after the change. Settings now take effect on the next page view.
 
 = 1.10.33 =
 * Fixed: Google Site Kit is now always excluded from Combine, Delay, and Defer JavaScript. Site Kit ships as a multi-chunk webpack app whose runtime, vendor, and module bundles share one registry and must load in their original order; optimizing any single chunk desynchronized the registry and threw "googlesitekit is not defined" (Site Kit dashboards/snippets failed to load). Handled like jQuery and Divi — no manual exclusion needed.
@@ -343,6 +347,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.34 =
+Fixes above-the-fold images staying lazy-loaded despite the skip-first setting (a major LCP improvement on themes that add their own lazy attribute), and settings saves now purge the page cache automatically.
 
 = 1.10.32 =
 Fixes "jQuery is not a function" errors when Defer JavaScript is on: jQuery is no longer deferred, and exclusion matching is now case-insensitive.
