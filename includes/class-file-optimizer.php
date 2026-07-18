@@ -241,10 +241,10 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		// Delay JS: transform every external <script src="..."> tag via HTML pipeline.
-		// Inline scripts are intentionally left alone (see delay_all_scripts docblock).
-		// Mobile only — desktop suffers CLS regression when scripts are delayed
-		// because layout-dependent JS (sliders, menus) runs late.
-		if ( $s['delay_js'] && $is_mobile ) {
+		// Inline scripts are only delayed in Maximum Delay mode (see delay_all_scripts).
+		// Mobile by default — desktop risks CLS when layout-dependent JS (sliders,
+		// menus) runs late; the delay_js_desktop opt-in extends it to desktop.
+		if ( $s['delay_js'] && ( $is_mobile || ! empty( $s['delay_js_desktop'] ) ) ) {
 			$html = $this->delay_all_scripts( $html );
 		}
 
@@ -877,11 +877,40 @@ class Prime_Cache_File_Optimizer {
 	 *   - The add-on combine_js_files() skips any script with data-* attributes.
 	 *   - delay_all_scripts() skips any script with data-no-delay.
 	 */
+	/**
+	 * Whether Maximum Delay applies to the current request: Delay JS + Maximum
+	 * Delay on, Safe Mode off, and the request is in a delayed bucket (mobile,
+	 * or any device when delay_js_desktop is on).
+	 *
+	 * Public because the Pro add-on consults it to skip JS combine: combining
+	 * hoists external scripts up to the first tag's position, above the inline
+	 * config blocks that Maximum Delay leaves (delayed) in place — breaking
+	 * the document-order execution the mode depends on.
+	 */
+	public function delay_max_active() {
+		$s = $this->settings;
+		if ( empty( $s['delay_js'] ) || empty( $s['delay_js_max'] ) || ! empty( $s['delay_js_safe_mode'] ) ) {
+			return false;
+		}
+		if ( ! empty( $s['delay_js_desktop'] ) ) {
+			return true;
+		}
+		require_once PRIME_CACHE_PATH . 'includes/cache-key-functions.php';
+		return _prime_cache_is_mobile_ua( sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ) );
+	}
+
 	private function mark_preserved_scripts( $html ) {
+		// Maximum Delay: jQuery and the localize-pair inline blocks are
+		// delayed together with their dependents (document order preserves
+		// the chain), so they must NOT be stamped data-no-delay. Combine is
+		// skipped entirely under max delay (see delay_max_active), so losing
+		// the marker's combine protection is safe.
+		$max = $this->delay_max_active();
+
 		// Exact handle names — compared against the {handle} prefix of an
 		// extracted id attribute (`id="{handle}-js"`), so substring noise such
 		// as `id="xfoo-js-y"` cannot trigger a false positive on `foo`.
-		$exact_handles = array(
+		$exact_handles = $max ? array() : array(
 			// Core jQuery — many plugins assume it's loaded at parse time.
 			'jquery',
 			'jquery-migrate',
@@ -891,8 +920,6 @@ class Prime_Cache_File_Optimizer {
 		// attribute value only (not the whole tag), for scripts identified
 		// by path rather than enqueue handle.
 		$url_substrings = array(
-			'/jquery.min.js',
-			'/jquery-migrate.min.js',
 			// WP Consent API (third-party scripts gate on its readiness).
 			'wp-consent-api',
 			// Google Site Kit — a multi-chunk webpack app whose runtime,
@@ -904,13 +931,19 @@ class Prime_Cache_File_Optimizer {
 			// the sibling chunks do not, so match the plugin path directly.
 			'google-site-kit',
 		);
+		if ( ! $max ) {
+			$url_substrings[] = '/jquery.min.js';
+			$url_substrings[] = '/jquery-migrate.min.js';
+		}
 
 		// Auto-detect external scripts paired with inline localize / add-inline
 		// blocks. WordPress outputs these with id="{handle}-js-{before|extra|after}"
 		// (either single- or double-quoted). The matched handle is added to
 		// $exact_handles so the corresponding external script id gets protected
-		// regardless of which quote style the renderer uses.
-		if ( preg_match_all(
+		// regardless of which quote style the renderer uses. Skipped under
+		// Maximum Delay: both sides of the pair are delayed in place, so the
+		// document order already guarantees config-before-consumer.
+		if ( ! $max && preg_match_all(
 			'#<script\b[^>]*\bid\s*=\s*["\']([^"\']+)-js-(?:before|extra|after)["\'][^>]*>#i',
 			$html,
 			$m
@@ -923,7 +956,7 @@ class Prime_Cache_File_Optimizer {
 
 		return preg_replace_callback(
 			'#<script\b[^>]*>#i',
-			function ( $tag_match ) use ( $exact_handles, $url_substrings ) {
+			function ( $tag_match ) use ( $exact_handles, $url_substrings, $max ) {
 				$tag = $tag_match[0];
 
 				// Already marked — leave as-is (idempotent). Case-insensitive
@@ -934,7 +967,8 @@ class Prime_Cache_File_Optimizer {
 
 				// Inline extra/before/after blocks — must execute immediately
 				// so the paired external script sees the localized globals.
-				if ( preg_match( '#\bid\s*=\s*["\'][^"\']+-js-(?:before|extra|after)["\']#i', $tag ) ) {
+				// Under Maximum Delay the pair is delayed together instead.
+				if ( ! $max && preg_match( '#\bid\s*=\s*["\'][^"\']+-js-(?:before|extra|after)["\']#i', $tag ) ) {
 					return preg_replace( '#^<script\b#i', '<script data-no-delay', $tag, 1 );
 				}
 
@@ -984,30 +1018,46 @@ class Prime_Cache_File_Optimizer {
 	private function delay_all_scripts( $html ) {
 		$s = $this->settings;
 
+		// Safe mode: exclude local scripts.
+		$safe_mode = ! empty( $s['delay_js_safe_mode'] );
+
+		// Maximum Delay: also delay jQuery core and inline scripts. The loader
+		// executes all delayed scripts in document order and re-dispatches
+		// DOMContentLoaded/load, so jQuery-dependent code keeps working as long
+		// as it is delayed together with jQuery. Safe Mode wins when both are
+		// on (inline scripts are first-party by definition).
+		$max = $this->delay_max_active();
+
 		// Build exclusion patterns.
 		$excl = $this->parse_list( $s['exclude_delay_js'] );
 		$excl = array_merge( $excl, $this->get_delay_preset_patterns() );
 		// Built-in exclusions: URL patterns for scripts that must never be
 		// delayed (the HTML pipeline doesn't see WP enqueue handles).
-		// jQuery and core dependencies.
-		$excl[] = 'jquery';
-		$excl[] = 'jquery-migrate';
-		$excl[] = 'jquery.min.js';
-		$excl[] = 'jquery-migrate.min.js';
-		// Divi theme.
-		$excl[] = 'et-builder';
-		$excl[] = 'scripts.min.js';
-		// WP Consent API.
+		if ( ! $max ) {
+			// jQuery and core dependencies. In Maximum Delay mode these ARE
+			// delayed — everything that depends on them is delayed too, so
+			// document-order execution keeps the dependency chain intact.
+			$excl[] = 'jquery';
+			$excl[] = 'jquery-migrate';
+			$excl[] = 'jquery.min.js';
+			$excl[] = 'jquery-migrate.min.js';
+			// Divi theme. Only meaningful outside Maximum Delay: with jQuery
+			// delayed, an undelayed et-builder bundle would crash at parse
+			// time, so in max mode Divi is delayed along with jQuery.
+			$excl[] = 'et-builder';
+			$excl[] = 'scripts.min.js';
+			// Cocoon theme localize options — kept immediate so the (excluded)
+			// theme scripts can read them; in max mode both sides are delayed.
+			$excl[] = 'cocoon_localize_script_options';
+		}
+		// WP Consent API — consent must never wait for interaction.
 		$excl[] = 'wp-consent-api';
 		$excl[] = 'consent_api';
-		// Cocoon theme.
-		$excl[] = 'cocoon_localize_script_options';
 		// Google Site Kit — multi-chunk webpack app; delaying any chunk
 		// desynchronizes its shared registry ("googlesitekit is not defined").
+		// React-based (no jQuery dependency), so safe to keep undelayed even
+		// in Maximum Delay mode.
 		$excl[] = 'google-site-kit';
-
-		// Safe mode: exclude local scripts.
-		$safe_mode = ! empty( $s['delay_js_safe_mode'] );
 
 		// Non-JS types to skip.
 		$skip_types = array(
@@ -1028,7 +1078,7 @@ class Prime_Cache_File_Optimizer {
 		$delayed_count = 0;
 		$html = preg_replace_callback(
 			'#<\s*script(?<attr>\s[^>]*?)?>(?<content>.*?)?<\s*/\s*script\s*>#ims',
-			function( $m ) use ( $excl, $safe_mode, $skip_types, &$delayed_count ) {
+			function( $m ) use ( $excl, $safe_mode, $skip_types, $max, &$delayed_count ) {
 				$full = $m[0];
 				$attr = isset( $m['attr'] ) ? $m['attr'] : '';
 				$content = isset( $m['content'] ) ? $m['content'] : '';
@@ -1055,20 +1105,38 @@ class Prime_Cache_File_Optimizer {
 					$src = $src_m[1];
 				}
 
-				// Never delay inline scripts (no src attribute).
-				// Inline scripts include wp_localize_script config (et_pb_custom,
-				// consent_api, etc.) and wp_add_inline_script output. These must
-				// execute immediately to set up variables that their corresponding
-				// external scripts depend on.
-				// Only external scripts (with src) are delayed.
+				// Inline scripts (no src attribute): delayed only in Maximum
+				// Delay mode. Outside max mode they must execute immediately —
+				// they set up variables (wp_localize_script config, consent_api,
+				// widget setup) that undelayed external scripts depend on. In
+				// max mode the dependent external scripts are delayed too, so
+				// document-order execution preserves the dependency chain.
 				if ( empty( $src ) ) {
-					return $full;
+					if ( ! $max ) {
+						return $full;
+					}
+					// Nothing to execute — leave empty inline scripts alone.
+					if ( '' === trim( $content ) ) {
+						return $full;
+					}
+					// Exclusion patterns match against the tag attributes (id)
+					// and the script body for inline scripts.
+					foreach ( $excl as $pattern ) {
+						if ( '' === $pattern ) {
+							continue;
+						}
+						if ( false !== stripos( $attr, $pattern ) || false !== stripos( $content, $pattern ) ) {
+							return $full;
+						}
+					}
 				}
 
 				// Check exclusion patterns (match against src URL).
-				foreach ( $excl as $pattern ) {
-					if ( false !== stripos( $src, $pattern ) ) {
-						return $full;
+				if ( $src ) {
+					foreach ( $excl as $pattern ) {
+						if ( false !== stripos( $src, $pattern ) ) {
+							return $full;
+						}
 					}
 				}
 
@@ -1101,6 +1169,18 @@ class Prime_Cache_File_Optimizer {
 						'data-pc-src="$1"',
 						$attr
 					);
+				}
+
+				// Maximum Delay: normalize execution to pure document order by
+				// stripping defer/async from delayed tags. The loader otherwise
+				// runs the "normal" group (which now contains inline jQuery
+				// dependents) before the defer group (which would contain a
+				// defer'd jQuery) — document order is the only ordering that
+				// keeps every dependency chain intact. DOM readiness is already
+				// guaranteed because the loader waits for DOMContentLoaded
+				// before executing anything.
+				if ( $max ) {
+					$attr = preg_replace( '/\s(?:defer|async)(?:\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]+))?(?=[\s>]|$)/i', '', $attr );
 				}
 
 				// Add marker.

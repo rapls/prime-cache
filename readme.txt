@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.37
+Stable tag: 1.10.38
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -167,6 +167,12 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.38 =
+* Added: Maximum Delay mode — extends Delay JS to jQuery core and inline scripts. Scripts still execute in document order after user interaction, with DOMContentLoaded/load re-dispatched, so dependency chains keep working. During a PageSpeed lab run almost no JavaScript executes, dropping TBT to near zero. Consent scripts, JSON-LD and your exclusion list are never delayed.
+* Added: "Apply Delay JS on Desktop" option — Delay JS was mobile-only; this opt-in extends it to desktop responses to improve the desktop PageSpeed score as well.
+* Added: nginx direct-serving snippet — a copy-paste server-block configuration (shown in Cache settings) that lets nginx serve cached pages straight from disk without booting PHP, mirroring the .htaccess fast path condition for condition. Includes gzip_static support for the pre-compressed variants.
+* Improved: the Inline Small CSS threshold now also applies to the Pro add-on's combined stylesheet — when the combined result fits, it is inlined for zero render-blocking CSS requests without async-CSS restyle jank.
 
 = 1.10.37 =
 * Fixed: logged-in users are no longer run through the HTML optimization pipeline (minify, defer/delay JS, and the add-on's CSS optimizations) unless logged-in caching is enabled. Their pages bypass the page cache, so optimizing them was per-request overhead — and user-only elements such as the WP admin bar or Cocoon's front-side admin menu could render unstyled or invisible, because per-URL cached artifacts like the Remove Unused CSS output were computed from an anonymous view that does not contain them.
@@ -356,6 +362,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.38 =
+New Maximum Delay mode (delays jQuery + inline scripts for near-zero lab TBT), desktop Delay JS option, and an nginx direct-serving config generator.
 
 = 1.10.37 =
 Fixes admin-only front-end elements (WP admin bar, Cocoon's admin menu) rendering unstyled or invisible for logged-in users: the HTML optimization pipeline now skips logged-in requests unless logged-in caching is enabled.

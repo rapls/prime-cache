@@ -294,6 +294,8 @@ class Prime_Cache_Admin_Settings {
 		$s['woo_disable_cart_frag'] = ! empty( $input['woo_disable_cart_frag'] );
 		$s['delay_js_safe_mode']    = ! empty( $input['delay_js_safe_mode'] );
 		$s['delay_js_presets']      = sanitize_textarea_field( $input['delay_js_presets'] ?? '' );
+		$s['delay_js_max']          = ! empty( $input['delay_js_max'] );
+		$s['delay_js_desktop']      = ! empty( $input['delay_js_desktop'] );
 		$s['inline_small_css']      = ! empty( $input['inline_small_css'] );
 		$s['inline_css_threshold']  = isset( $input['inline_css_threshold'] ) ? max( 0, min( 65536, (int) $input['inline_css_threshold'] ) ) : 8192;
 		$s['local_analytics']       = ! empty( $input['local_analytics'] );
@@ -347,6 +349,11 @@ class Prime_Cache_Admin_Settings {
 		// Delay JS: warn about potential breakage.
 		if ( $s['delay_js'] && ! $defaults['delay_js'] ) {
 			$warnings[] = __( 'Delay JavaScript enabled. This is an advanced feature — some interactive elements may not work until user interaction. Add problematic scripts to the exclusion list if needed.', 'prime-cache' );
+		}
+
+		// Maximum Delay: warn — jQuery and inline scripts are also delayed.
+		if ( $s['delay_js'] && $s['delay_js_max'] ) {
+			$warnings[] = __( 'Maximum Delay enabled: jQuery and inline scripts are also delayed. Test menus, sliders and forms carefully. If you exclude a script from delay, it must not depend on jQuery (or add jquery to the exclusion list too).', 'prime-cache' );
 		}
 
 		// Add-on features are implemented by a separate add-on, not by this plugin.
@@ -1141,6 +1148,19 @@ class Prime_Cache_Admin_Settings {
 				<?php elseif ( ! empty( $settings['htaccess_enabled'] ) && ! Prime_Cache_Htaccess::is_writable() ) : ?><span class="pc-badge pc-badge--r"><?php esc_html_e( '.htaccess Not Writable','prime-cache' ); ?></span><?php endif; ?>
 			</div>
 
+			<?php $nginx_snippet = class_exists( 'Prime_Cache_Nginx' ) ? Prime_Cache_Nginx::build_snippet( $settings ) : ''; ?>
+			<?php if ( $nginx_snippet ) : ?>
+			<!-- Nginx PHP-less serving -->
+			<div class="pc-card">
+				<span class="pc-card__h"><?php esc_html_e( 'Nginx Direct Serving (PHP-less)', 'prime-cache' ); ?><?php if ( Prime_Cache_Nginx::is_nginx() ) : ?> <span class="pc-badge pc-badge--g"><?php esc_html_e( 'Nginx detected', 'prime-cache' ); ?></span><?php endif; ?></span>
+				<details<?php echo Prime_Cache_Nginx::is_nginx() ? ' open' : ''; ?>>
+					<summary style="cursor:pointer;margin-bottom:8px"><?php esc_html_e( 'Show the nginx configuration snippet', 'prime-cache' ); ?></summary>
+					<p class="pc-help"><?php esc_html_e( 'On nginx, .htaccess has no effect, so every cached page still boots PHP before the cache file is read. Pasting this snippet into the server block of your nginx site configuration lets nginx serve Prime Cache files directly from disk — response time (TTFB) typically drops from 100-300 ms to a few milliseconds. The snippet reflects your current settings; copy it again after changing cache settings. After editing, run "nginx -t" and reload nginx. If you cannot edit the nginx configuration (shared hosting), this optimization is not available — the PHP drop-in keeps working as before.', 'prime-cache' ); ?></p>
+					<textarea readonly rows="14" class="pc-ta" style="font-family:monospace;font-size:12px" onclick="this.select()"><?php echo esc_textarea( $nginx_snippet ); ?></textarea>
+				</details>
+			</div>
+			<?php endif; ?>
+
 			<?php do_action( 'prime_cache_page_settings_after_general', $settings ); ?>
 
 			<!-- Browser Cache -->
@@ -1292,7 +1312,7 @@ class Prime_Cache_Admin_Settings {
 			'disable_shortlink','disable_rsd_wlw','disable_rest_api_link',
 			'disable_wp_sitemap','add_blank_favicon',
 			'woo_disable_scripts','woo_disable_cart_frag',
-			'delay_js_safe_mode','delay_js_presets',
+			'delay_js_safe_mode','delay_js_presets','delay_js_max','delay_js_desktop',
 			'inline_small_css','inline_css_threshold','async_css_free',
 			'local_jquery','limit_dns_prefetch',
 		);
@@ -1328,7 +1348,7 @@ class Prime_Cache_Admin_Settings {
 					<textarea name="prime_cache_settings[exclude_css]" rows="3" class="pc-ta" placeholder="/wp-content/plugins/some-plugin/*.css&#10;some-handle.min.css"><?php echo esc_textarea( $settings['exclude_css'] ); ?></textarea>
 					<p class="pc-help"><?php esc_html_e( 'One pattern per line. These CSS files will not be minified, combined, or loaded asynchronously. Supports wildcards (*).', 'prime-cache' ); ?></p>
 				</div>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[inline_small_css]" value="1" <?php checked( $settings['inline_small_css'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Inline Small CSS Files', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Inline CSS files smaller than the threshold directly into the HTML as inline style blocks, eliminating HTTP requests for small stylesheets.', 'prime-cache' ); ?></small></span></label>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[inline_small_css]" value="1" <?php checked( $settings['inline_small_css'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Inline Small CSS Files', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Inline CSS files smaller than the threshold directly into the HTML as inline style blocks, eliminating HTTP requests for small stylesheets. With the Pro add-on and Combine CSS enabled, the combined stylesheet is also inlined when it fits within the threshold — zero render-blocking CSS requests without the restyle jank of async loading.', 'prime-cache' ); ?></small></span></label>
 				<div class="pc-field" style="margin-left:52px">
 					<label class="pc-lbl"><?php esc_html_e( 'Threshold (bytes)', 'prime-cache' ); ?></label>
 					<input type="number" name="prime_cache_settings[inline_css_threshold]" value="<?php echo esc_attr( $settings['inline_css_threshold'] ); ?>" min="0" max="65536" class="pc-inp" style="width:100px">
@@ -1356,7 +1376,7 @@ class Prime_Cache_Admin_Settings {
 				<span class="pc-card__h">JavaScript</span>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[minify_js]" value="1" <?php checked( $settings['minify_js'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Minify JavaScript', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Conservative JavaScript size reduction: trims trailing whitespace and collapses blank lines. Comments are preserved (regex-based comment removal is unsafe without a JS parser — gzip handles the bulk of size reduction). Already minified files (.min.js) are skipped.', 'prime-cache' ); ?></small></span></label>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[defer_js]" value="1" <?php checked( $settings['defer_js'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Load JavaScript Deferred', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Add the defer attribute to enqueued scripts (wp_enqueue_script) to eliminate render-blocking JavaScript. Scripts are downloaded in parallel and executed after HTML parsing. Manually inserted scripts in theme templates are not affected on desktop. Note: on mobile, inline jQuery patterns ($(document).ready, $(function(){...})) are automatically wrapped in DOMContentLoaded so they keep working when jQuery itself is deferred.', 'prime-cache' ); ?></small></span></label>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js]" value="1" <?php checked( $settings['delay_js'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Delay JavaScript Execution', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Delay every external script tag (one with a src attribute) in the HTML output (including third-party / CDN — not limited to wp_enqueue_script handles) until user interaction (scroll, click, keydown, touchstart, mousemove). Inline scripts (no src) are never delayed because they typically set up variables that external scripts depend on (wp_localize_script output, consent_api config, chat widget configs, etc.). Applied on mobile devices only to avoid CLS regression on desktop. Separate mobile cache is automatically enabled when this setting is on. Significantly improves mobile page load metrics but may cause a brief delay on first interaction. Use the exclusion list below for external scripts that must run before interaction.', 'prime-cache' ); ?></small></span></label>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js]" value="1" <?php checked( $settings['delay_js'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Delay JavaScript Execution', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Delay every external script tag (one with a src attribute) in the HTML output (including third-party / CDN — not limited to wp_enqueue_script handles) until user interaction (scroll, click, keydown, touchstart, mousemove). Inline scripts (no src) are not delayed unless Maximum Delay is enabled, because they typically set up variables that external scripts depend on (wp_localize_script output, consent_api config, chat widget configs, etc.). Applied on mobile devices only unless "Apply Delay JS on Desktop" is enabled. Separate mobile cache is automatically enabled when this setting is on. Significantly improves mobile page load metrics but may cause a brief delay on first interaction. Use the exclusion list below for external scripts that must run before interaction.', 'prime-cache' ); ?></small></span></label>
 
 				<div class="pc-field">
 					<label class="pc-lbl"><?php esc_html_e( 'Delay Timeout (ms)', 'prime-cache' ); ?></label>
@@ -1364,6 +1384,8 @@ class Prime_Cache_Admin_Settings {
 					<p class="pc-help"><?php esc_html_e( 'Auto-load delayed scripts after this many milliseconds even without user interaction. 0 = wait for interaction only.', 'prime-cache' ); ?></p>
 				</div>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js_safe_mode]" value="1" <?php checked( $settings['delay_js_safe_mode'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Delay JS Safe Mode', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Only delay external (third-party) scripts. All internal scripts from your site (wp-includes, wp-content) load immediately. Reduces performance gains but prevents most compatibility issues.', 'prime-cache' ); ?></small></span></label>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js_max]" value="1" <?php checked( $settings['delay_js_max'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Maximum Delay (also delay jQuery & inline scripts)', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Extends Delay JS to jQuery core and inline scripts. During a lab test (PageSpeed Insights) almost no JavaScript executes, so TBT drops to near zero — this is how the highest-scoring cache plugins reach their scores. Scripts still run in document order after interaction, and DOMContentLoaded / load events are re-dispatched, so most themes keep working. Consent scripts, JSON-LD and the exclusion list below are never delayed. Cannot be combined with Safe Mode (Safe Mode wins). Test menus, sliders and forms after enabling.', 'prime-cache' ); ?></small></span></label>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js_desktop]" value="1" <?php checked( $settings['delay_js_desktop'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Apply Delay JS on Desktop', 'prime-cache' ); ?></b><small><?php esc_html_e( 'By default Delay JS runs on mobile responses only. Enable this to also delay scripts on desktop — improves the desktop PageSpeed score the same way. If desktop layout depends on JavaScript (sliders, mega menus), verify there is no layout shift after enabling.', 'prime-cache' ); ?></small></span></label>
 				<?php do_action( 'prime_cache_file_opt_js_controls', $settings ); ?>
 				<div class="pc-field">
 					<label class="pc-lbl"><?php esc_html_e( 'Excluded JS Files', 'prime-cache' ); ?></label>

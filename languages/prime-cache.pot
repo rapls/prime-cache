@@ -2725,3 +2725,47 @@ msgstr ""
 #: includes/admin/class-admin-settings.php:2629
 msgid "Caution: a mistake in wp-config.php can temporarily take the whole site down — if that happens, restore the backup copy. If you prefer not to edit the file, you can simply keep using standard mode."
 msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Maximum Delay (also delay jQuery & inline scripts)"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Extends Delay JS to jQuery core and inline scripts. During a lab test (PageSpeed Insights) almost no JavaScript executes, so TBT drops to near zero — this is how the highest-scoring cache plugins reach their scores. Scripts still run in document order after interaction, and DOMContentLoaded / load events are re-dispatched, so most themes keep working. Consent scripts, JSON-LD and the exclusion list below are never delayed. Cannot be combined with Safe Mode (Safe Mode wins). Test menus, sliders and forms after enabling."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Apply Delay JS on Desktop"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "By default Delay JS runs on mobile responses only. Enable this to also delay scripts on desktop — improves the desktop PageSpeed score the same way. If desktop layout depends on JavaScript (sliders, mega menus), verify there is no layout shift after enabling."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Maximum Delay enabled: jQuery and inline scripts are also delayed. Test menus, sliders and forms carefully. If you exclude a script from delay, it must not depend on jQuery (or add jquery to the exclusion list too)."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Nginx Direct Serving (PHP-less)"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Nginx detected"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Show the nginx configuration snippet"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "On nginx, .htaccess has no effect, so every cached page still boots PHP before the cache file is read. Pasting this snippet into the server block of your nginx site configuration lets nginx serve Prime Cache files directly from disk — response time (TTFB) typically drops from 100-300 ms to a few milliseconds. The snippet reflects your current settings; copy it again after changing cache settings. After editing, run \"nginx -t\" and reload nginx. If you cannot edit the nginx configuration (shared hosting), this optimization is not available — the PHP drop-in keeps working as before."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Inline CSS files smaller than the threshold directly into the HTML as inline style blocks, eliminating HTTP requests for small stylesheets. With the Pro add-on and Combine CSS enabled, the combined stylesheet is also inlined when it fits within the threshold — zero render-blocking CSS requests without the restyle jank of async loading."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Delay every external script tag (one with a src attribute) in the HTML output (including third-party / CDN — not limited to wp_enqueue_script handles) until user interaction (scroll, click, keydown, touchstart, mousemove). Inline scripts (no src) are not delayed unless Maximum Delay is enabled, because they typically set up variables that external scripts depend on (wp_localize_script output, consent_api config, chat widget configs, etc.). Applied on mobile devices only unless \"Apply Delay JS on Desktop\" is enabled. Separate mobile cache is automatically enabled when this setting is on. Significantly improves mobile page load metrics but may cause a brief delay on first interaction. Use the exclusion list below for external scripts that must run before interaction."
+msgstr ""

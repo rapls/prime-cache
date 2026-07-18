@@ -3201,3 +3201,47 @@ msgstr "ファイルを保存してこのページを再読み込みします。
 #: includes/admin/class-admin-settings.php:2629
 msgid "Caution: a mistake in wp-config.php can temporarily take the whole site down — if that happens, restore the backup copy. If you prefer not to edit the file, you can simply keep using standard mode."
 msgstr "注意: wp-config.php の記述ミスはサイト全体が一時的に表示されなくなる原因になります。その場合はバックアップのコピーで元に戻してください。ファイルを編集しない場合も、そのまま標準モードで利用できます。"
+
+#: includes/admin/class-admin-settings.php
+msgid "Maximum Delay (also delay jQuery & inline scripts)"
+msgstr "最大 Delay (jQuery とインラインスクリプトも遅延)"
+
+#: includes/admin/class-admin-settings.php
+msgid "Extends Delay JS to jQuery core and inline scripts. During a lab test (PageSpeed Insights) almost no JavaScript executes, so TBT drops to near zero — this is how the highest-scoring cache plugins reach their scores. Scripts still run in document order after interaction, and DOMContentLoaded / load events are re-dispatched, so most themes keep working. Consent scripts, JSON-LD and the exclusion list below are never delayed. Cannot be combined with Safe Mode (Safe Mode wins). Test menus, sliders and forms after enabling."
+msgstr "Delay JS の対象を jQuery 本体とインラインスクリプトまで拡大します。ラボ計測 (PageSpeed Insights) 中はほぼすべての JavaScript が実行されなくなるため、TBT がほぼゼロになります。最高スコアを出すキャッシュプラグインと同じ仕組みです。操作後はドキュメント順に実行され、DOMContentLoaded / load イベントも再送出されるため、ほとんどのテーマはそのまま動作します。同意管理スクリプト・JSON-LD・下の除外リストは遅延されません。セーフモードとは併用できません (セーフモード優先)。有効化後はメニュー・スライダー・フォームをテストしてください。"
+
+#: includes/admin/class-admin-settings.php
+msgid "Apply Delay JS on Desktop"
+msgstr "デスクトップにも Delay JS を適用"
+
+#: includes/admin/class-admin-settings.php
+msgid "By default Delay JS runs on mobile responses only. Enable this to also delay scripts on desktop — improves the desktop PageSpeed score the same way. If desktop layout depends on JavaScript (sliders, mega menus), verify there is no layout shift after enabling."
+msgstr "Delay JS は通常モバイル応答のみに適用されます。有効にするとデスクトップでもスクリプトを遅延し、デスクトップの PageSpeed スコアも同様に改善します。デスクトップのレイアウトが JavaScript に依存する場合 (スライダー・メガメニュー) は、有効化後にレイアウトシフトがないか確認してください。"
+
+#: includes/admin/class-admin-settings.php
+msgid "Maximum Delay enabled: jQuery and inline scripts are also delayed. Test menus, sliders and forms carefully. If you exclude a script from delay, it must not depend on jQuery (or add jquery to the exclusion list too)."
+msgstr "最大 Delay が有効です: jQuery とインラインスクリプトも遅延されます。メニュー・スライダー・フォームを入念にテストしてください。スクリプトを遅延から除外する場合、そのスクリプトが jQuery に依存しないことを確認してください (依存する場合は jquery も除外リストに追加してください)。"
+
+#: includes/admin/class-admin-settings.php
+msgid "Nginx Direct Serving (PHP-less)"
+msgstr "Nginx 直接配信 (PHP レス)"
+
+#: includes/admin/class-admin-settings.php
+msgid "Nginx detected"
+msgstr "Nginx を検出"
+
+#: includes/admin/class-admin-settings.php
+msgid "Show the nginx configuration snippet"
+msgstr "nginx 設定スニペットを表示"
+
+#: includes/admin/class-admin-settings.php
+msgid "On nginx, .htaccess has no effect, so every cached page still boots PHP before the cache file is read. Pasting this snippet into the server block of your nginx site configuration lets nginx serve Prime Cache files directly from disk — response time (TTFB) typically drops from 100-300 ms to a few milliseconds. The snippet reflects your current settings; copy it again after changing cache settings. After editing, run \"nginx -t\" and reload nginx. If you cannot edit the nginx configuration (shared hosting), this optimization is not available — the PHP drop-in keeps working as before."
+msgstr "Nginx では .htaccess が無効なため、キャッシュ済みページでも毎回 PHP が起動してからキャッシュファイルを読み込まれます。このスニペットをサイトの nginx 設定の server ブロックに貼り付けると、Nginx がディスクから直接キャッシュファイルを配信し、応答時間 (TTFB) は通常 100〜300ms から数ミリ秒に短縮されます。スニペットは現在の設定を反映しています。キャッシュ設定を変更したら再度コピーしてください。編集後は「nginx -t」を実行してから nginx をリロードしてください。nginx 設定を編集できない環境 (共有ホスティング) ではこの最適化は利用できませんが、PHP ドロップインは従来どおり動作します。"
+
+#: includes/admin/class-admin-settings.php
+msgid "Inline CSS files smaller than the threshold directly into the HTML as inline style blocks, eliminating HTTP requests for small stylesheets. With the Pro add-on and Combine CSS enabled, the combined stylesheet is also inlined when it fits within the threshold — zero render-blocking CSS requests without the restyle jank of async loading."
+msgstr "しきい値より小さい CSS ファイルを HTML 内へ style ブロックとして直接インライン化し、小さなスタイルシートへの HTTP リクエストを削減します。Pro アドオンと CSS 結合が有効な場合、結合後のスタイルシートもしきい値以内ならインライン化され、非同期読み込みの再スタイル揺れなしでレンダーブロック CSS リクエストをゼロにできます。"
+
+#: includes/admin/class-admin-settings.php
+msgid "Delay every external script tag (one with a src attribute) in the HTML output (including third-party / CDN — not limited to wp_enqueue_script handles) until user interaction (scroll, click, keydown, touchstart, mousemove). Inline scripts (no src) are not delayed unless Maximum Delay is enabled, because they typically set up variables that external scripts depend on (wp_localize_script output, consent_api config, chat widget configs, etc.). Applied on mobile devices only unless \"Apply Delay JS on Desktop\" is enabled. Separate mobile cache is automatically enabled when this setting is on. Significantly improves mobile page load metrics but may cause a brief delay on first interaction. Use the exclusion list below for external scripts that must run before interaction."
+msgstr "HTML 出力内のすべての外部スクリプトタグ (src 属性を持つもの。サードパーティ / CDN を含み、wp_enqueue_script のハンドルに限定されません) を、ユーザー操作 (スクロール・クリック・キー入力・タッチ・マウス移動) まで遅延します。インラインスクリプト (src なし) は、外部スクリプトが依存する変数 (wp_localize_script の出力、consent_api 設定、チャットウィジェット設定など) を定義していることが多いため、最大 Delay が有効な場合を除いて遅延されません。「デスクトップにも Delay JS を適用」が有効な場合を除き、モバイル端末のみに適用されます。この設定を有効にすると、モバイル別キャッシュが自動的に有効になります。モバイルの読み込み指標を大幅に改善しますが、最初の操作時にわずかな遅延が発生する場合があります。操作前に実行が必要な外部スクリプトは下の除外リストへ追加してください。"

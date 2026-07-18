@@ -3,7 +3,7 @@
  * Plugin Name: Prime Cache – Page Cache, WebP, Lazy Load, Minify, Defer & Delay JS (Zero Config)
  * Plugin URI:  https://raplsworks.com/plugins/prime-cache/
  * Description: Fast page caching that works out of the box — no wp-config.php edits. Plus WebP conversion, lazy load, minify, defer/delay JS, and preloading.
- * Version: 1.10.37
+ * Version: 1.10.38
  * Author: rapls
  * Author URI:  https://raplsworks.com/
  * License: GPL-2.0-or-later
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PRIME_CACHE_VERSION', '1.10.37' );
+define( 'PRIME_CACHE_VERSION', '1.10.38' );
 define( 'PRIME_CACHE_FILE', __FILE__ );
 define( 'PRIME_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 
@@ -62,6 +62,7 @@ require_once PRIME_CACHE_PATH . 'includes/class-cache-storage.php';
 require_once PRIME_CACHE_PATH . 'includes/class-config.php';
 require_once PRIME_CACHE_PATH . 'includes/class-purge.php';
 require_once PRIME_CACHE_PATH . 'includes/class-htaccess.php';
+require_once PRIME_CACHE_PATH . 'includes/class-nginx.php';
 require_once PRIME_CACHE_PATH . 'includes/class-file-optimizer.php';
 require_once PRIME_CACHE_PATH . 'includes/class-preload.php';
 require_once PRIME_CACHE_PATH . 'includes/class-lazyload.php';
@@ -260,6 +261,13 @@ function prime_cache_get_settings( $force = false ) {
 		'woo_disable_cart_frag' => false,
 		'delay_js_safe_mode'    => false,
 		'delay_js_presets'      => '',
+		// Maximum Delay: also delay jQuery core and inline scripts. The delay
+		// loader executes everything in document order after interaction, so
+		// dependency order is preserved — but any script excluded from delay
+		// that needs jQuery at parse time will break. Off by default.
+		'delay_js_max'          => false,
+		// Apply Delay JS on desktop responses too (default: mobile only).
+		'delay_js_desktop'      => false,
 		'inline_small_css'      => false,
 		'inline_css_threshold'  => 8192,
 		'local_analytics'       => false,
