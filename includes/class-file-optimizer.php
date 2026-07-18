@@ -150,6 +150,9 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		$s = $this->settings;
+		// NOTE: the logged-in skip lives in process_html(), not here — this
+		// method runs at construction time, before pluggable.php defines
+		// is_user_logged_in().
 		return $s['minify_html'] || $s['remove_html_comments'] || $s['minify_css'] || $s['minify_js']
 			|| $s['remove_query_strings'] || $s['delay_js']
 			|| ! empty( $s['inline_small_css'] ) || ! empty( $s['async_css_free'] )
@@ -167,6 +170,21 @@ class Prime_Cache_File_Optimizer {
 	 */
 	public function process_html( $html ) {
 		if ( strlen( $html ) < 255 || false === stripos( $html, '</html>' ) ) {
+			return $html;
+		}
+
+		// Logged-in users bypass the page cache (unless logged-in caching is
+		// enabled), so optimizing their responses is per-request CPU with no
+		// cacheable output — and it is unsafe: their markup contains
+		// user-only elements (the WP admin bar, Cocoon's front-side admin
+		// menu, edit links) whose styles/scripts the per-URL cached
+		// artifacts — above all the Remove Unused CSS output, computed from
+		// an anonymous view without those elements — do not contain, so
+		// they render unstyled or invisible. Checked here (the OB callback)
+		// rather than at registration time, where pluggable.php is not yet
+		// loaded.
+		if ( function_exists( 'is_user_logged_in' ) && is_user_logged_in()
+			&& empty( $this->settings['cache_logged_in'] ) ) {
 			return $html;
 		}
 

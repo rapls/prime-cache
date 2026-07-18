@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.36
+Stable tag: 1.10.37
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -167,6 +167,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.37 =
+* Fixed: logged-in users are no longer run through the HTML optimization pipeline (minify, defer/delay JS, and the add-on's CSS optimizations) unless logged-in caching is enabled. Their pages bypass the page cache, so optimizing them was per-request overhead — and user-only elements such as the WP admin bar or Cocoon's front-side admin menu could render unstyled or invisible, because per-URL cached artifacts like the Remove Unused CSS output were computed from an anonymous view that does not contain them.
 
 = 1.10.36 =
 * Changed: the lazy-load module's fetchpriority="high" stamp on the first image can now be disabled via the prime_cache_lazyload_first_image_priority filter. The Pro add-on's LCP Optimization uses it so only the image it identifies as the LCP candidate carries the high priority — two "high" images dilute the boost.
@@ -353,6 +356,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.37 =
+Fixes admin-only front-end elements (WP admin bar, Cocoon's admin menu) rendering unstyled or invisible for logged-in users: the HTML optimization pipeline now skips logged-in requests unless logged-in caching is enabled.
 
 = 1.10.36 =
 Lets the Pro LCP module take over the first-image fetchpriority stamp so the real LCP image gets the full priority boost.
