@@ -3245,3 +3245,7 @@ msgstr "しきい値より小さい CSS ファイルを HTML 内へ style ブロ
 #: includes/admin/class-admin-settings.php
 msgid "Delay every external script tag (one with a src attribute) in the HTML output (including third-party / CDN — not limited to wp_enqueue_script handles) until user interaction (scroll, click, keydown, touchstart, mousemove). Inline scripts (no src) are not delayed unless Maximum Delay is enabled, because they typically set up variables that external scripts depend on (wp_localize_script output, consent_api config, chat widget configs, etc.). Applied on mobile devices only unless \"Apply Delay JS on Desktop\" is enabled. Separate mobile cache is automatically enabled when this setting is on. Significantly improves mobile page load metrics but may cause a brief delay on first interaction. Use the exclusion list below for external scripts that must run before interaction."
 msgstr "HTML 出力内のすべての外部スクリプトタグ (src 属性を持つもの。サードパーティ / CDN を含み、wp_enqueue_script のハンドルに限定されません) を、ユーザー操作 (スクロール・クリック・キー入力・タッチ・マウス移動) まで遅延します。インラインスクリプト (src なし) は、外部スクリプトが依存する変数 (wp_localize_script の出力、consent_api 設定、チャットウィジェット設定など) を定義していることが多いため、最大 Delay が有効な場合を除いて遅延されません。「デスクトップにも Delay JS を適用」が有効な場合を除き、モバイル端末のみに適用されます。この設定を有効にすると、モバイル別キャッシュが自動的に有効になります。モバイルの読み込み指標を大幅に改善しますが、最初の操作時にわずかな遅延が発生する場合があります。操作前に実行が必要な外部スクリプトは下の除外リストへ追加してください。"
+
+#: includes/admin/class-admin-settings.php:924
+msgid "Cache files written by the preload crawler (warm-ups). Not counted as visitor misses."
+msgstr "プリロードクローラーが生成したキャッシュファイル (ウォームアップ) です。訪問者の MISS には数えられません。"

@@ -525,14 +525,15 @@ class Prime_Cache_Admin_Settings {
 	private function get_hit_stats() {
 		// DB stores the persisted baseline; file stores increments since last sync.
 		$db = get_option( 'prime_cache_stats', array() );
-		$db = wp_parse_args( $db, array( 'hit' => 0, 'miss' => 0, 'since' => 0 ) );
+		$db = wp_parse_args( $db, array( 'hit' => 0, 'miss' => 0, 'preload' => 0, 'since' => 0 ) );
 
 		$f = PRIME_CACHE_CACHE_DIR . 'stats.json';
 		if ( is_readable( $f ) ) {
 			$j = json_decode( file_get_contents( $f ), true ); // phpcs:ignore
 			if ( is_array( $j ) ) {
-				$db['hit']  += (int) ( $j['hit'] ?? 0 );
-				$db['miss'] += (int) ( $j['miss'] ?? 0 );
+				$db['hit']     += (int) ( $j['hit'] ?? 0 );
+				$db['miss']    += (int) ( $j['miss'] ?? 0 );
+				$db['preload'] += (int) ( $j['preload'] ?? 0 );
 				if ( ! $db['since'] && ! empty( $j['since'] ) ) {
 					$db['since'] = (int) $j['since'];
 				}
@@ -920,6 +921,7 @@ class Prime_Cache_Admin_Settings {
 			<?php endif; ?>
 			<div class="pc-bar__info">
 				<span><?php esc_html_e( 'Total', 'prime-cache' ); ?>: <b><?php echo esc_html( number_format( $total ) ); ?></b></span>
+				<span title="<?php esc_attr_e( 'Cache files written by the preload crawler (warm-ups). Not counted as visitor misses.', 'prime-cache' ); ?>"><?php esc_html_e( 'Preload', 'prime-cache' ); ?>: <b><?php echo esc_html( number_format( $hs['preload'] ) ); ?></b></span>
 				<span><?php esc_html_e( 'Size', 'prime-cache' ); ?>: <b><?php echo esc_html( $this->fmt( $st['size'] ) ); ?></b></span>
 			</div>
 		</div>

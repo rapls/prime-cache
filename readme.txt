@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.38
+Stable tag: 1.10.39
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -167,6 +167,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.39 =
+* Improved: dashboard statistics now count cache files written by the preload crawler separately as "Preload" instead of inflating MISS, and preload fetches of already-warm pages are not counted at all — the hit rate now reflects real visitor traffic only. Existing counters are unaffected; use Reset to start fresh.
 
 = 1.10.38 =
 * Added: Maximum Delay mode — extends Delay JS to jQuery core and inline scripts. Scripts still execute in document order after user interaction, with DOMContentLoaded/load re-dispatched, so dependency chains keep working. During a PageSpeed lab run almost no JavaScript executes, dropping TBT to near zero. Consent scripts, JSON-LD and your exclusion list are never delayed.
@@ -362,6 +365,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.39 =
+Preload warm-ups are no longer counted as cache misses — the dashboard hit rate now reflects real visitors only.
 
 = 1.10.38 =
 New Maximum Delay mode (delays jQuery + inline scripts for near-zero lab TBT), desktop Delay JS option, and an nginx direct-serving config generator.

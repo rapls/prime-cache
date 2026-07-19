@@ -1347,11 +1347,11 @@ class Prime_Cache {
 		}
 
 		// Reset DB stats.
-		update_option( 'prime_cache_stats', array( 'hit' => 0, 'miss' => 0, 'since' => time() ), false );
+		update_option( 'prime_cache_stats', array( 'hit' => 0, 'miss' => 0, 'preload' => 0, 'since' => time() ), false );
 
 		// Reset file-based stats.
 		$stats_file = PRIME_CACHE_CACHE_DIR . 'stats.json';
-		$data = wp_json_encode( array( 'hit' => 0, 'miss' => 0, 'since' => time() ) );
+		$data = wp_json_encode( array( 'hit' => 0, 'miss' => 0, 'preload' => 0, 'since' => time() ) );
 		$fp = fopen( $stats_file, 'c' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 		if ( $fp ) {
 			flock( $fp, LOCK_EX );
@@ -1393,9 +1393,10 @@ class Prime_Cache {
 		$file_stats = $raw ? json_decode( $raw, true ) : null;
 
 		if ( is_array( $file_stats ) ) {
-			$db = get_option( 'prime_cache_stats', array( 'hit' => 0, 'miss' => 0, 'since' => 0 ) );
-			$db['hit']  = (int) ( $db['hit'] ?? 0 ) + (int) ( $file_stats['hit'] ?? 0 );
-			$db['miss'] = (int) ( $db['miss'] ?? 0 ) + (int) ( $file_stats['miss'] ?? 0 );
+			$db = get_option( 'prime_cache_stats', array( 'hit' => 0, 'miss' => 0, 'preload' => 0, 'since' => 0 ) );
+			$db['hit']     = (int) ( $db['hit'] ?? 0 ) + (int) ( $file_stats['hit'] ?? 0 );
+			$db['miss']    = (int) ( $db['miss'] ?? 0 ) + (int) ( $file_stats['miss'] ?? 0 );
+			$db['preload'] = (int) ( $db['preload'] ?? 0 ) + (int) ( $file_stats['preload'] ?? 0 );
 			if ( ! $db['since'] && ! empty( $file_stats['since'] ) ) {
 				$db['since'] = (int) $file_stats['since'];
 			}
@@ -1404,7 +1405,7 @@ class Prime_Cache {
 			// Reset file counters to zero (keep since).
 			ftruncate( $fp, 0 );
 			fseek( $fp, 0 );
-			fwrite( $fp, json_encode( array( 'hit' => 0, 'miss' => 0, 'since' => $db['since'] ) ) );
+			fwrite( $fp, json_encode( array( 'hit' => 0, 'miss' => 0, 'preload' => 0, 'since' => $db['since'] ) ) );
 		}
 
 		flock( $fp, LOCK_UN );
@@ -1470,14 +1471,15 @@ class Prime_Cache {
 	 */
 	public function render_dashboard_widget() {
 		// Merge DB baseline + file increments.
-		$db = get_option( 'prime_cache_stats', array( 'hit' => 0, 'miss' => 0, 'since' => 0 ) );
-		$hs = wp_parse_args( $db, array( 'hit' => 0, 'miss' => 0, 'since' => 0 ) );
+		$db = get_option( 'prime_cache_stats', array( 'hit' => 0, 'miss' => 0, 'preload' => 0, 'since' => 0 ) );
+		$hs = wp_parse_args( $db, array( 'hit' => 0, 'miss' => 0, 'preload' => 0, 'since' => 0 ) );
 		$stats_file = PRIME_CACHE_CACHE_DIR . 'stats.json';
 		if ( is_readable( $stats_file ) ) {
 			$d = json_decode( file_get_contents( $stats_file ), true ); // phpcs:ignore
 			if ( is_array( $d ) ) {
-				$hs['hit']  += (int) ( $d['hit'] ?? 0 );
-				$hs['miss'] += (int) ( $d['miss'] ?? 0 );
+				$hs['hit']     += (int) ( $d['hit'] ?? 0 );
+				$hs['miss']    += (int) ( $d['miss'] ?? 0 );
+				$hs['preload'] += (int) ( $d['preload'] ?? 0 );
 				if ( ! $hs['since'] && ! empty( $d['since'] ) ) {
 					$hs['since'] = (int) $d['since'];
 				}
@@ -1513,7 +1515,7 @@ class Prime_Cache {
 			<div style="text-align:center;padding:10px;background:#f0f9ff;border-radius:8px"><b style="font-size:20px;color:#1d4ed8"><?php echo esc_html( number_format( $files ) ); ?></b><br><span style="font-size:11px;color:#6b7280"><?php esc_html_e( 'Pages', 'prime-cache' ); ?></span></div>
 		</div>
 		<ul style="margin:0;font-size:13px;line-height:2">
-			<li><?php esc_html_e( 'HIT', 'prime-cache' ); ?>: <b><?php echo esc_html( number_format( $hs['hit'] ) ); ?></b> / <?php esc_html_e( 'MISS', 'prime-cache' ); ?>: <b><?php echo esc_html( number_format( $hs['miss'] ) ); ?></b></li>
+			<li><?php esc_html_e( 'HIT', 'prime-cache' ); ?>: <b><?php echo esc_html( number_format( $hs['hit'] ) ); ?></b> / <?php esc_html_e( 'MISS', 'prime-cache' ); ?>: <b><?php echo esc_html( number_format( $hs['miss'] ) ); ?></b> / <?php esc_html_e( 'Preload', 'prime-cache' ); ?>: <b><?php echo esc_html( number_format( $hs['preload'] ) ); ?></b></li>
 			<li><?php esc_html_e( 'Size', 'prime-cache' ); ?>: <b><?php echo esc_html( size_format( $size ) ); ?></b></li>
 			<li><?php esc_html_e( 'Object Cache', 'prime-cache' ); ?>: <b><?php echo 'off' === $oc ? esc_html__( 'Inactive', 'prime-cache' ) : esc_html( strtoupper( $oc ) ); ?></b></li>
 			<li><?php esc_html_e( 'Page Cache', 'prime-cache' ); ?>: <b><?php echo $s['cache_enabled'] ? esc_html__( 'Active', 'prime-cache' ) : esc_html__( 'Inactive', 'prime-cache' ); ?></b></li>

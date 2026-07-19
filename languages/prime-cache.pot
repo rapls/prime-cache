@@ -2769,3 +2769,7 @@ msgstr ""
 #: includes/admin/class-admin-settings.php
 msgid "Delay every external script tag (one with a src attribute) in the HTML output (including third-party / CDN — not limited to wp_enqueue_script handles) until user interaction (scroll, click, keydown, touchstart, mousemove). Inline scripts (no src) are not delayed unless Maximum Delay is enabled, because they typically set up variables that external scripts depend on (wp_localize_script output, consent_api config, chat widget configs, etc.). Applied on mobile devices only unless \"Apply Delay JS on Desktop\" is enabled. Separate mobile cache is automatically enabled when this setting is on. Significantly improves mobile page load metrics but may cause a brief delay on first interaction. Use the exclusion list below for external scripts that must run before interaction."
 msgstr ""
+
+#: includes/admin/class-admin-settings.php:924
+msgid "Cache files written by the preload crawler (warm-ups). Not counted as visitor misses."
+msgstr ""

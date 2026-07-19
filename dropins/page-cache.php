@@ -160,6 +160,16 @@ $prime_cache_pc_deferred_stat = null;
 
 function _prime_cache_record_stat( $type ) {
 	global $prime_cache_pc_deferred_stat;
+	// Requests from the plugin's own preload crawler (it sends
+	// X-Prime-Cache-Preload: 1) are warm-ups, not visitor traffic: a cache
+	// write is counted separately as 'preload', and a warm-cache fetch is not
+	// counted at all — so the dashboard hit rate reflects real visitors only.
+	if ( ! empty( $_SERVER['HTTP_X_PRIME_CACHE_PRELOAD'] ) ) {
+		if ( 'miss' !== $type ) {
+			return;
+		}
+		$type = 'preload';
+	}
 	// 1/10 sampling to reduce I/O. Stats are approximate.
 	if ( mt_rand( 1, 10 ) !== 1 ) {
 		return;
@@ -176,7 +186,7 @@ function _prime_cache_flush_stat() {
 	if ( ! $prime_cache_pc_deferred_stat ) return;
 
 	$stats_file = PRIME_CACHE_CACHE_DIR . 'stats.json';
-	$stats      = array( 'hit' => 0, 'miss' => 0, 'since' => time() );
+	$stats      = array( 'hit' => 0, 'miss' => 0, 'preload' => 0, 'since' => time() );
 
 	// Mode 'c+' (read+write), not 'c' (write-only): the stream_get_contents()
 	// read below silently returns false on a write-only handle, which would
