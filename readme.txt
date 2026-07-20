@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.39
+Stable tag: 1.10.40
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -172,6 +172,10 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.40 =
+* Added: 5-minute video tutorial embedded on the plugin page and linked from the documentation.
+* Improved: the Pro Features page now introduces AI Speed Diagnosis & consultation (BYOK) — measure your environment, get plain-language findings, apply validated fixes in one click, and ask follow-up questions in chat.
 
 = 1.10.39 =
 * Improved: dashboard statistics now count cache files written by the preload crawler separately as "Preload" instead of inflating MISS, and preload fetches of already-warm pages are not counted at all — the hit rate now reflects real visitor traffic only. Existing counters are unaffected; use Reset to start fresh.
@@ -370,6 +374,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.40 =
+Adds the 5-minute video tutorial and introduces the Pro AI Speed Diagnosis on the Pro Features page. No functional changes to caching.
 
 = 1.10.39 =
 Preload warm-ups are no longer counted as cache misses — the dashboard hit rate now reflects real visitors only.

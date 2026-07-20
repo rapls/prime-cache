@@ -3,7 +3,7 @@
  * Plugin Name: Prime Cache – Page Cache, WebP, Lazy Load, Minify, Defer & Delay JS (Zero Config)
  * Plugin URI:  https://raplsworks.com/plugins/prime-cache/
  * Description: Fast page caching that works out of the box — no wp-config.php edits. Plus WebP conversion, lazy load, minify, defer/delay JS, and preloading.
- * Version: 1.10.39
+ * Version: 1.10.40
  * Author: rapls
  * Author URI:  https://raplsworks.com/
  * License: GPL-2.0-or-later
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PRIME_CACHE_VERSION', '1.10.39' );
+define( 'PRIME_CACHE_VERSION', '1.10.40' );
 define( 'PRIME_CACHE_FILE', __FILE__ );
 define( 'PRIME_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 
