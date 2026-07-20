@@ -15,6 +15,10 @@ Fast page caching that works out of the box — no wp-config.php edits. Plus Web
 
 Prime Cache is a lightweight performance plugin for WordPress. Page caching works immediately after activation — no wp-config.php edits, no manual setup. It also provides browser cache headers, file optimization (minify, defer, delay), lazy loading, WebP conversion, cache preloading, and automatic cache purge.
 
+**Watch the 5-minute setup tutorial:**
+
+[youtube https://www.youtube.com/watch?v=ZUxESCRtaEU]
+
 For site owners who want the fastest possible path, the settings screen shows an optional one-line `WP_CACHE` snippet that upgrades serving to drop-in mode, where cached pages are served before WordPress core even loads. Adding it is entirely optional and entirely manual — the plugin never writes to wp-config.php.
 
 = Free Features =
@@ -46,6 +50,7 @@ For site owners who want the fastest possible path, the settings screen shows an
 
 Prime Cache Pro, a separate add-on sold on the author's website (https://raplsworks.com/plugins/prime-cache/), extends the free plugin. It is not required for the free plugin to work:
 
+* AI Speed Diagnosis & consultation — measures your server and homepage, explains what is slow in plain language, and applies validated fixes in one click (bring your own API key: Anthropic / OpenAI / OpenRouter / Gemini)
 * AVIF conversion (on top of the shared WebP engine)
 * Critical CSS and Remove Unused CSS
 * CDN URL rewriting

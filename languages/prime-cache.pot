@@ -2773,3 +2773,23 @@ msgstr ""
 #: includes/admin/class-admin-settings.php:924
 msgid "Cache files written by the preload crawler (warm-ups). Not counted as visitor misses."
 msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "New: AI Speed Diagnosis — Pro measures your server and homepage, has an AI explain what is slow in plain language, and applies validated fixes in one click. Ask follow-up questions in chat. Bring your own API key (Anthropic / OpenAI / OpenRouter / Gemini)."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Manual tuning"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "AI Speed Diagnosis & consultation (BYOK)"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Ask the AI what is slow"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "AI Speed Diagnosis measures your environment, explains bottlenecks in plain language, and applies validated fixes in one click — with your own API key."
+msgstr ""

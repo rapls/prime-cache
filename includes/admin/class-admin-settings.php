@@ -760,6 +760,7 @@ class Prime_Cache_Admin_Settings {
 				<h1><?php esc_html_e( 'Go beyond page caching.', 'prime-cache' ); ?></h1>
 				<p><?php esc_html_e( 'Prime Cache Free covers the essentials: page cache, browser cache, minification, lazy loading, WebP, and preload.', 'prime-cache' ); ?></p>
 				<p><?php esc_html_e( 'Prime Cache Pro adds advanced optimization for production sites — Critical CSS, unused CSS cleanup, object cache, AVIF, external cache purge, sitemap preload, and database cleanup.', 'prime-cache' ); ?></p>
+				<p><?php esc_html_e( 'New: AI Speed Diagnosis — Pro measures your server and homepage, has an AI explain what is slow in plain language, and applies validated fixes in one click. Ask follow-up questions in chat. Bring your own API key (Anthropic / OpenAI / OpenRouter / Gemini).', 'prime-cache' ); ?></p>
 				<p>
 					<a class="pc-pro-cta" href="<?php echo esc_url( $buy_url ); ?>" target="_blank" rel="noopener noreferrer">
 						<?php esc_html_e( 'Get Prime Cache Pro', 'prime-cache' ); ?>
@@ -784,6 +785,7 @@ class Prime_Cache_Admin_Settings {
 						<tr><td><?php esc_html_e( 'Basic preload', 'prime-cache' ); ?></td><td><?php esc_html_e( 'Sitemap and resource preload', 'prime-cache' ); ?></td></tr>
 						<tr><td><?php esc_html_e( 'Manual purge', 'prime-cache' ); ?></td><td><?php esc_html_e( 'Cloudflare, Sucuri, and Varnish purge', 'prime-cache' ); ?></td></tr>
 						<tr><td><?php esc_html_e( 'Basic tools', 'prime-cache' ); ?></td><td><?php esc_html_e( 'Scheduled database cleanup', 'prime-cache' ); ?></td></tr>
+						<tr><td><?php esc_html_e( 'Manual tuning', 'prime-cache' ); ?></td><td><?php esc_html_e( 'AI Speed Diagnosis & consultation (BYOK)', 'prime-cache' ); ?></td></tr>
 					</tbody>
 				</table>
 			</section>
@@ -818,6 +820,10 @@ class Prime_Cache_Admin_Settings {
 					<div class="pc-pro-card">
 						<h3><?php esc_html_e( 'Add persistent object cache', 'prime-cache' ); ?></h3>
 						<p><?php esc_html_e( 'Use Redis, Memcached, or APCu for dynamic workloads and admin-heavy sites.', 'prime-cache' ); ?></p>
+					</div>
+					<div class="pc-pro-card">
+						<h3><?php esc_html_e( 'Ask the AI what is slow', 'prime-cache' ); ?></h3>
+						<p><?php esc_html_e( 'AI Speed Diagnosis measures your environment, explains bottlenecks in plain language, and applies validated fixes in one click — with your own API key.', 'prime-cache' ); ?></p>
 					</div>
 				</div>
 			</section>
