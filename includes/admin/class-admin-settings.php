@@ -156,13 +156,14 @@ class Prime_Cache_Admin_Settings {
 		$s['combine_js']            = ! empty( $input['combine_js'] );
 		$s['defer_js']              = ! empty( $input['defer_js'] );
 		$s['delay_js']              = ! empty( $input['delay_js'] );
-		// Delay JS is mobile-only and writes a transformed cache variant. It needs
-		// (a) cache_mobile=true so the drop-in actually caches mobile responses,
-		// and (b) cache_mobile_separate=true so the mobile-transformed HTML doesn't
-		// leak to desktop visitors. Without (a) the preload pass would warm a
-		// mobile bucket the drop-in never writes to, wasting work.
-		if ( $s['delay_js'] ) {
-			$s['cache_mobile']          = true;
+		// Delay JS transforms the mobile HTML. When mobile caching is on, that
+		// transformed HTML must live in a separate mobile bucket so it is never
+		// served to desktop visitors — so enforce cache_mobile_separate in that
+		// case only. Do NOT force cache_mobile itself: when mobile caching is
+		// off, mobile pages are generated dynamically (never cached) and Delay
+		// JS still applies to that dynamic output, so disabling mobile caching
+		// is a valid choice we must preserve rather than silently re-enable.
+		if ( $s['delay_js'] && $s['cache_mobile'] ) {
 			$s['cache_mobile_separate'] = true;
 		}
 		$s['delay_js_timeout']      = isset( $input['delay_js_timeout'] ) ? max( 0, min( 30000, (int) $input['delay_js_timeout'] ) ) : 0;

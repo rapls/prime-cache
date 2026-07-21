@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.40
+Stable tag: 1.10.41
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -172,6 +172,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.41 =
+* Fixed: with Delay JavaScript enabled, saving settings on any tab re-enabled Mobile Cache and Separate Mobile Cache even after you turned them off. Delay JS no longer forces mobile caching on — it applies to dynamically generated mobile pages too — and only requires Separate Mobile Cache while Mobile Cache itself is on (to keep the mobile-transformed HTML out of the desktop cache). The same over-eager coupling in preset application is fixed.
 
 = 1.10.40 =
 * Added: 5-minute video tutorial embedded on the plugin page and linked from the documentation.
@@ -374,6 +377,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.41 =
+Fixes Mobile Cache / Separate Mobile Cache turning themselves back on after saving when Delay JavaScript is enabled.
 
 = 1.10.40 =
 Adds the 5-minute video tutorial and introduces the Pro AI Speed Diagnosis on the Pro Features page. No functional changes to caching.
