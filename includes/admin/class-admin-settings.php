@@ -2618,6 +2618,14 @@ class Prime_Cache_Admin_Settings {
 			return;
 		}
 
+		// An add-on may offer a one-click enable and render its own notice in
+		// place of these manual instructions; when it does, it asks the free
+		// plugin to stand down so the two do not stack. The free plugin itself
+		// never edits wp-config.php.
+		if ( apply_filters( 'prime_cache_wp_cache_notice_suppressed', false ) ) {
+			return;
+		}
+
 		$snippet       = "define( 'WP_CACHE', true );";
 		$defined_false = defined( 'WP_CACHE' ) && ! WP_CACHE;
 
