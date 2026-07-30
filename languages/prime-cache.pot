@@ -2684,46 +2684,60 @@ msgstr ""
 msgid "Prime Cache Pro adds scheduled cleanup for revisions, expired transients, and overhead on long-running WordPress sites."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2592
-msgid "Page caching is active in standard mode. wp-config.php currently defines WP_CACHE as false, so the faster drop-in mode is unavailable. To enable it, change that definition to true — this is optional, and Prime Cache never edits wp-config.php itself."
+#: includes/admin/class-admin-settings.php
+msgid "Page caching is running in standard mode. Your wp-config.php currently sets WP_CACHE to false, which keeps the faster drop-in mode turned off. Changing that one word — false to true — switches it on. The steps below are written so that anyone can do it."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2596
-msgid "Page caching is active in standard mode. Optional speed-up: to serve cached pages before WordPress even loads (drop-in mode), add this line yourself near the top of wp-config.php:"
+#: includes/admin/class-admin-settings.php
+msgid "Page caching is running in standard mode. There is an optional way to make it even faster: serving cached pages before WordPress loads (drop-in mode). It only takes adding one line to wp-config.php, and the steps below are written so that anyone can do it."
 msgstr ""
 
 #: includes/admin/class-admin-settings.php:2599
 msgid "This step is optional — caching already works without it. Prime Cache never edits wp-config.php; adding or removing the line is always up to you."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2607
-msgid "How to edit wp-config.php (step by step)"
+#: includes/admin/class-admin-settings.php
+msgid "How to turn on drop-in mode (step by step)"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2609
-msgid "Open the file manager in your hosting control panel (or connect with an FTP client) and find wp-config.php in the WordPress root directory — the same folder that contains wp-login.php and the wp-content folder."
+#: includes/admin/class-admin-settings.php
+msgid "Open your hosting control panel and start its File Manager (or connect with an FTP app). In your site's top folder — the one that also contains wp-login.php and the wp-content folder — open the file named wp-config.php."
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2610
-msgid "Save a copy of the file as a backup before editing."
+#: includes/admin/class-admin-settings.php
+msgid "Before you change anything, download a copy of wp-config.php and keep it somewhere safe. If anything goes wrong, you can upload this copy to undo the change."
 msgstr ""
 
-#. translators: 1: the existing define line, 2: the corrected define line
-#: includes/admin/class-admin-settings.php:2614
-msgid "Find the line %1$s and change it to %2$s."
+#: includes/admin/class-admin-settings.php
+msgid "Find the line that already mentions WP_CACHE and change the single word false to true, so it matches the \"After\" example. Change nothing else."
 msgstr ""
 
-#. translators: 1: the define line to add, 2: the opening PHP tag, 3: the "stop editing" comment
-#: includes/admin/class-admin-settings.php:2621
-msgid "Add the line %1$s directly below the opening %2$s tag, above the %3$s comment. Do not add anything before the %2$s tag."
+#: includes/admin/class-admin-settings.php
+msgid "Before"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2627
-msgid "Save the file and reload this page. When the Dashboard tab shows \"WP_CACHE Constant: Active\" under System Status, drop-in mode is on and this notice disappears."
+#: includes/admin/class-admin-settings.php
+msgid "After"
 msgstr ""
 
-#: includes/admin/class-admin-settings.php:2629
-msgid "Caution: a mistake in wp-config.php can temporarily take the whole site down — if that happens, restore the backup copy. If you prefer not to edit the file, you can simply keep using standard mode."
+#: includes/admin/class-admin-settings.php
+msgid "The very first line of the file is the opening PHP tag. Add the highlighted line on its own line, directly beneath it — exactly as shown below. Do not delete or change anything else."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "← add only this one line"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "← everything from here down stays exactly as it was"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Save the file, then reload this page. When System Status on the Dashboard tab shows \"WP_CACHE Constant: Active\", drop-in mode is on and this notice goes away."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Careful: a typo in wp-config.php can make the whole site show an error for a moment. If that happens, upload your backup copy to put it back. Not comfortable editing the file? You can simply keep using standard mode — caching already works."
 msgstr ""
 
 #: includes/admin/class-admin-settings.php
@@ -2792,4 +2806,20 @@ msgstr ""
 
 #: includes/admin/class-admin-settings.php
 msgid "AI Speed Diagnosis measures your environment, explains bottlenecks in plain language, and applies validated fixes in one click — with your own API key."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "You've been using Prime Cache for a week — we hope it's making your site faster! If you're enjoying it, a quick review on WordPress.org would mean a lot and helps other people find the plugin."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Leave a review"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "No thanks / already did"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Got it"
 msgstr ""

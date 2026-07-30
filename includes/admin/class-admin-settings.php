@@ -7,6 +7,8 @@ class Prime_Cache_Admin_Settings {
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_init', array( $this, 'handle_cf_dismiss' ) );
+		add_action( 'admin_init', array( $this, 'handle_review_actions' ) );
+		add_action( 'admin_init', array( $this, 'handle_delay_max_ack' ) );
 		add_action( 'admin_init', array( $this, 'redirect_legacy_addons_tab' ) );
 		add_action( 'admin_notices', array( $this, 'show_notices' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
@@ -39,6 +41,52 @@ class Prime_Cache_Admin_Settings {
 		if ( isset( $_GET['pc_dismiss_cf_alert'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'pc_dismiss_cf' ) && current_user_can( 'manage_options' ) ) {
 			delete_option( 'prime_cache_cf_purge_failed' );
 			wp_safe_redirect( remove_query_arg( array( 'pc_dismiss_cf_alert', '_wpnonce' ) ) );
+			exit;
+		}
+	}
+
+	/**
+	 * Handle the one-time review-request banner actions.
+	 *
+	 * Two nonce-protected GET actions, both of which permanently silence the
+	 * banner (it is a once-only request, never shown again after either):
+	 * - pc_review_visit: mark done, then send the user to the WordPress.org
+	 *   review form (external host, so wp_redirect rather than wp_safe_redirect).
+	 * - pc_dismiss_review: mark done and return to the current screen.
+	 */
+	public function handle_review_actions() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		if ( isset( $_GET['pc_review_visit'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'pc_review' ) ) {
+			update_option( 'prime_cache_review_notice_done', 1, false );
+			// External destination — wp_safe_redirect would reject the host.
+			wp_redirect( 'https://wordpress.org/support/plugin/prime-cache/reviews/#new-post' ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Intentional redirect to the plugin's public WordPress.org review page.
+			exit;
+		}
+
+		if ( isset( $_GET['pc_dismiss_review'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'pc_review' ) ) {
+			update_option( 'prime_cache_review_notice_done', 1, false );
+			wp_safe_redirect( remove_query_arg( array( 'pc_dismiss_review', '_wpnonce' ) ) );
+			exit;
+		}
+	}
+
+	/**
+	 * Acknowledge the "Maximum Delay" warning ("Got it" button).
+	 *
+	 * Sets a flag that permanently hides the warning while Maximum Delay stays
+	 * on. The flag is cleared again whenever the toggle changes state (see
+	 * sanitize_settings), so re-enabling the feature surfaces the warning anew.
+	 */
+	public function handle_delay_max_ack() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		if ( isset( $_GET['pc_delay_max_ack'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'pc_delay_max_ack' ) ) {
+			update_option( 'prime_cache_delay_max_ack', 1, false );
+			wp_safe_redirect( remove_query_arg( array( 'pc_delay_max_ack', '_wpnonce' ) ) );
 			exit;
 		}
 	}
@@ -296,6 +344,13 @@ class Prime_Cache_Admin_Settings {
 		$s['delay_js_safe_mode']    = ! empty( $input['delay_js_safe_mode'] );
 		$s['delay_js_presets']      = sanitize_textarea_field( $input['delay_js_presets'] ?? '' );
 		$s['delay_js_max']          = ! empty( $input['delay_js_max'] );
+		// The Maximum Delay warning carries a one-time "Got it" acknowledgement.
+		// Clear it whenever the toggle changes state (or the feature is off) so
+		// that (re-)enabling the feature shows the warning again; a steady on→on
+		// save leaves an existing acknowledgement in place (warning stays hidden).
+		if ( empty( $s['delay_js_max'] ) || empty( $old['delay_js_max'] ) ) {
+			delete_option( 'prime_cache_delay_max_ack' );
+		}
 		$s['delay_js_desktop']      = ! empty( $input['delay_js_desktop'] );
 		$s['inline_small_css']      = ! empty( $input['inline_small_css'] );
 		$s['inline_css_threshold']  = isset( $input['inline_css_threshold'] ) ? max( 0, min( 65536, (int) $input['inline_css_threshold'] ) ) : 8192;
@@ -352,10 +407,10 @@ class Prime_Cache_Admin_Settings {
 			$warnings[] = __( 'Delay JavaScript enabled. This is an advanced feature — some interactive elements may not work until user interaction. Add problematic scripts to the exclusion list if needed.', 'prime-cache' );
 		}
 
-		// Maximum Delay: warn — jQuery and inline scripts are also delayed.
-		if ( $s['delay_js'] && $s['delay_js_max'] ) {
-			$warnings[] = __( 'Maximum Delay enabled: jQuery and inline scripts are also delayed. Test menus, sliders and forms carefully. If you exclude a script from delay, it must not depend on jQuery (or add jquery to the exclusion list too).', 'prime-cache' );
-		}
+		// Maximum Delay is warned about via a separate, acknowledge-able notice
+		// (show_delay_max_warning_notice) rather than a per-save transient, so the
+		// warning persists until the user clicks "Got it" instead of nagging on
+		// every save. See handle_delay_max_ack() and the toggle reset above.
 
 		// Add-on features are implemented by a separate add-on, not by this plugin.
 		// When the add-on is not installed, force their options to off / empty
@@ -2586,6 +2641,97 @@ class Prime_Cache_Admin_Settings {
 		}
 
 		$this->show_wp_cache_upgrade_notice();
+		$this->show_delay_max_warning_notice();
+		$this->show_review_request_notice();
+	}
+
+	/**
+	 * Warn that Maximum Delay also delays jQuery and inline scripts.
+	 *
+	 * Shown on the Prime Cache settings screen whenever Delay JS + Maximum Delay
+	 * are both active, until the admin clicks "Got it" (handle_delay_max_ack).
+	 * The acknowledgement is reset whenever the toggle changes state, so the
+	 * warning reappears the next time Maximum Delay is enabled.
+	 */
+	private function show_delay_max_warning_notice() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		// Only while Maximum Delay is actually active.
+		$settings = prime_cache_get_settings();
+		if ( empty( $settings['delay_js'] ) || empty( $settings['delay_js_max'] ) ) {
+			return;
+		}
+
+		// Hidden for good once acknowledged (reset when the toggle changes state).
+		if ( get_option( 'prime_cache_delay_max_ack' ) ) {
+			return;
+		}
+
+		// Prime Cache's main settings screen only (where the toggle lives).
+		$screen = get_current_screen();
+		if ( ! $screen || 'toplevel_page_prime-cache' !== $screen->id ) {
+			return;
+		}
+
+		$ack_url = wp_nonce_url( add_query_arg( 'pc_delay_max_ack', '1' ), 'pc_delay_max_ack' );
+
+		echo '<div class="notice notice-warning"><p>'
+			. esc_html__( 'Maximum Delay enabled: jQuery and inline scripts are also delayed. Test menus, sliders and forms carefully. If you exclude a script from delay, it must not depend on jQuery (or add jquery to the exclusion list too).', 'prime-cache' )
+			. '</p><p>'
+			. '<a href="' . esc_url( $ack_url ) . '" class="button button-secondary">'
+			. esc_html__( 'Got it', 'prime-cache' ) . '</a>'
+			. '</p></div>';
+	}
+
+	/**
+	 * One-time "please review" banner, shown once the plugin has been in use for
+	 * a week. Only appears on Prime Cache's own screens (never nags across the
+	 * whole admin), only for admins, and never again once the user reviews or
+	 * dismisses it. Pro users are not asked (the review is for the free listing).
+	 */
+	private function show_review_request_notice() {
+		if ( ! current_user_can( 'manage_options' ) || prime_cache_is_pro() ) {
+			return;
+		}
+
+		// Already reviewed or dismissed — never show again.
+		if ( get_option( 'prime_cache_review_notice_done' ) ) {
+			return;
+		}
+
+		// Confine to Prime Cache's own admin screens.
+		$screen = get_current_screen();
+		if ( ! $screen || false === strpos( $screen->id, 'prime-cache' ) ) {
+			return;
+		}
+
+		// Start the clock for installs that predate the install-time option
+		// (upgrades). This backfills "now" so existing users get the request a
+		// week from their first visit after updating, not immediately.
+		$install_time = (int) get_option( 'prime_cache_install_time' );
+		if ( ! $install_time ) {
+			add_option( 'prime_cache_install_time', time(), '', false );
+			return;
+		}
+
+		// Wait until the plugin has been installed for at least a week.
+		if ( ( time() - $install_time ) < 7 * DAY_IN_SECONDS ) {
+			return;
+		}
+
+		$review_url  = wp_nonce_url( add_query_arg( 'pc_review_visit', '1' ), 'pc_review' );
+		$dismiss_url = wp_nonce_url( add_query_arg( 'pc_dismiss_review', '1' ), 'pc_review' );
+
+		echo '<div class="notice notice-info is-dismissible"><p><strong>Prime Cache</strong><br>'
+			. esc_html__( "You've been using Prime Cache for a week — we hope it's making your site faster! If you're enjoying it, a quick review on WordPress.org would mean a lot and helps other people find the plugin.", 'prime-cache' )
+			. '</p><p>'
+			. '<a href="' . esc_url( $review_url ) . '" class="button button-primary" target="_blank" rel="noopener">'
+			. esc_html__( 'Leave a review', 'prime-cache' ) . '</a> '
+			. '<a href="' . esc_url( $dismiss_url ) . '" class="button-link" style="margin-left:8px;">'
+			. esc_html__( 'No thanks / already did', 'prime-cache' ) . '</a>'
+			. '</p></div>';
 	}
 
 	/**
@@ -2629,43 +2775,68 @@ class Prime_Cache_Admin_Settings {
 		$snippet       = "define( 'WP_CACHE', true );";
 		$defined_false = defined( 'WP_CACHE' ) && ! WP_CACHE;
 
+		// Shared inline styles. The notice renders outside the settings-page
+		// wrapper, so the enqueued stylesheet cannot reach it — styles for the
+		// code examples must be inline. The <span>/<mark> markup below is all
+		// static (our own), and every dynamic value is passed through esc_html().
+		$pre_style  = 'margin:6px 0;padding:12px 14px;background:#f6f7f7;border:1px solid #dcdcde;border-radius:4px;overflow-x:auto;font-size:13px;line-height:1.7;white-space:pre;font-family:Menlo,Consolas,monospace';
+		$hl_style   = 'background:#fcf3d0;font-weight:700;padding:1px 3px;border-radius:2px';
+		$note_style = 'color:#2271b1;font-weight:600';
+
 		echo '<div class="notice notice-info"><p><strong>Prime Cache:</strong> ';
 		if ( $defined_false ) {
-			// Some other source defines it false — drop-in mode is unavailable
-			// until the owner changes that definition.
-			echo esc_html__( 'Page caching is active in standard mode. wp-config.php currently defines WP_CACHE as false, so the faster drop-in mode is unavailable. To enable it, change that definition to true — this is optional, and Prime Cache never edits wp-config.php itself.', 'prime-cache' );
-			echo '</p>';
+			echo esc_html__( 'Page caching is running in standard mode. Your wp-config.php currently sets WP_CACHE to false, which keeps the faster drop-in mode turned off. Changing that one word — false to true — switches it on. The steps below are written so that anyone can do it.', 'prime-cache' );
 		} else {
-			echo esc_html__( 'Page caching is active in standard mode. Optional speed-up: to serve cached pages before WordPress even loads (drop-in mode), add this line yourself near the top of wp-config.php:', 'prime-cache' );
-			echo '</p><p><code>' . esc_html( $snippet ) . '</code></p>';
+			echo esc_html__( 'Page caching is running in standard mode. There is an optional way to make it even faster: serving cached pages before WordPress loads (drop-in mode). It only takes adding one line to wp-config.php, and the steps below are written so that anyone can do it.', 'prime-cache' );
+		}
+		echo '</p>';
+
+		// Expanded by default (details open) so the visual guide is visible at a
+		// glance; the user can still collapse it.
+		echo '<details open style="margin:4px 0 8px"><summary style="cursor:pointer;font-weight:600">'
+			. esc_html__( 'How to turn on drop-in mode (step by step)', 'prime-cache' )
+			. '</summary>';
+
+		echo '<ol style="margin:10px 0 4px 20px;line-height:1.9">';
+		echo '<li>' . esc_html__( 'Open your hosting control panel and start its File Manager (or connect with an FTP app). In your site\'s top folder — the one that also contains wp-login.php and the wp-content folder — open the file named wp-config.php.', 'prime-cache' ) . '</li>';
+		echo '<li>' . esc_html__( 'Before you change anything, download a copy of wp-config.php and keep it somewhere safe. If anything goes wrong, you can upload this copy to undo the change.', 'prime-cache' ) . '</li>';
+
+		if ( $defined_false ) {
+			// Change false -> true. A literal before/after leaves no room for
+			// guesswork about which word to touch.
+			echo '<li>' . esc_html__( 'Find the line that already mentions WP_CACHE and change the single word false to true, so it matches the "After" example. Change nothing else.', 'prime-cache' ) . '</li></ol>';
+
+			echo '<p style="margin:2px 0;font-weight:600">' . esc_html__( 'Before', 'prime-cache' ) . '</p>';
+			echo '<pre style="' . esc_attr( $pre_style ) . '">'
+				. esc_html( "define( 'WP_CACHE', " ) . '<span style="' . esc_attr( $hl_style ) . '">' . esc_html( 'false' ) . '</span>' . esc_html( ' );' )
+				. '</pre>';
+			echo '<p style="margin:10px 0 2px;font-weight:600">' . esc_html__( 'After', 'prime-cache' ) . '</p>';
+			echo '<pre style="' . esc_attr( $pre_style ) . '">'
+				. esc_html( "define( 'WP_CACHE', " ) . '<span style="' . esc_attr( $hl_style ) . '">' . esc_html( 'true' ) . '</span>' . esc_html( ' );' )
+				. '</pre>';
+		} else {
+			// Add the line under <?php. Show it sitting in a realistic file so
+			// placement is unmistakable.
+			echo '<li>' . esc_html__( 'The very first line of the file is the opening PHP tag. Add the highlighted line on its own line, directly beneath it — exactly as shown below. Do not delete or change anything else.', 'prime-cache' ) . '</li></ol>';
+
+			echo '<pre style="' . esc_attr( $pre_style ) . '">'
+				. esc_html( '<?php' ) . "\n"
+				. '<span style="' . esc_attr( $hl_style ) . '">' . esc_html( $snippet ) . '</span>'
+				. '   <span style="' . esc_attr( $note_style ) . '">' . esc_html__( '← add only this one line', 'prime-cache' ) . '</span>' . "\n"
+				. "\n"
+				. esc_html( "define( 'DB_NAME', '...' );" )
+				. '   <span style="' . esc_attr( $note_style ) . '">' . esc_html__( '← everything from here down stays exactly as it was', 'prime-cache' ) . '</span>' . "\n"
+				. esc_html( '   ...' ) . "\n"
+				. esc_html( "/* That's all, stop editing! Happy publishing. */" )
+				. '</pre>';
 		}
 
-		// Step-by-step guide, collapsed by default. Placeholders inject only
-		// our own static <code> markup into esc_html__()-escaped templates.
-		echo '<details style="margin:4px 0 8px"><summary style="cursor:pointer;font-weight:600">'
-			. esc_html__( 'How to edit wp-config.php (step by step)', 'prime-cache' )
-			. '</summary><ol style="margin:8px 0 4px 20px">';
-		echo '<li>' . esc_html__( 'Open the file manager in your hosting control panel (or connect with an FTP client) and find wp-config.php in the WordPress root directory — the same folder that contains wp-login.php and the wp-content folder.', 'prime-cache' ) . '</li>';
-		echo '<li>' . esc_html__( 'Save a copy of the file as a backup before editing.', 'prime-cache' ) . '</li>';
-		if ( $defined_false ) {
-			echo '<li>' . sprintf(
-				/* translators: 1: the existing define line, 2: the corrected define line */
-				esc_html__( 'Find the line %1$s and change it to %2$s.', 'prime-cache' ),
-				"<code>define( 'WP_CACHE', false );</code>",
-				'<code>' . esc_html( $snippet ) . '</code>'
-			) . '</li>';
-		} else {
-			echo '<li>' . sprintf(
-				/* translators: 1: the define line to add, 2: the opening PHP tag, 3: the "stop editing" comment */
-				esc_html__( 'Add the line %1$s directly below the opening %2$s tag, above the %3$s comment. Do not add anything before the %2$s tag.', 'prime-cache' ),
-				'<code>' . esc_html( $snippet ) . '</code>',
-				'<code>&lt;?php</code>',
-				"<code>/* That's all, stop editing! */</code>"
-			) . '</li>';
-		}
-		echo '<li>' . esc_html__( 'Save the file and reload this page. When the Dashboard tab shows "WP_CACHE Constant: Active" under System Status, drop-in mode is on and this notice disappears.', 'prime-cache' ) . '</li>';
-		echo '</ol><p style="font-size:12px;color:#646970">'
-			. esc_html__( 'Caution: a mistake in wp-config.php can temporarily take the whole site down — if that happens, restore the backup copy. If you prefer not to edit the file, you can simply keep using standard mode.', 'prime-cache' )
+		echo '<p style="margin:8px 0 2px">'
+			. esc_html__( 'Save the file, then reload this page. When System Status on the Dashboard tab shows "WP_CACHE Constant: Active", drop-in mode is on and this notice goes away.', 'prime-cache' )
+			. '</p>';
+
+		echo '<p style="font-size:12px;color:#646970;margin-top:8px">'
+			. esc_html__( 'Careful: a typo in wp-config.php can make the whole site show an error for a moment. If that happens, upload your backup copy to put it back. Not comfortable editing the file? You can simply keep using standard mode — caching already works.', 'prime-cache' )
 			. '</p></details>';
 
 		echo '<p style="font-size:12px;color:#646970">'

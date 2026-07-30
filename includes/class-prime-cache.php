@@ -359,6 +359,13 @@ class Prime_Cache {
 		$settings = prime_cache_get_settings();
 		$warnings = array();
 
+		// Record the first-activation time so the one-time review request can
+		// surface after the plugin has been in use for a while. Only set it once
+		// — a later deactivate/reactivate must not reset the clock.
+		if ( ! get_option( 'prime_cache_install_time' ) ) {
+			add_option( 'prime_cache_install_time', time(), '', false );
+		}
+
 		// Multisite: page caching is not supported (pre-WP blog_id resolution
 		// is too complex to do safely). Warn and skip dropin installation.
 		if ( is_multisite() ) {

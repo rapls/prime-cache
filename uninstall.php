@@ -345,6 +345,9 @@ wp_clear_scheduled_hook( 'prime_cache_cf_deferred_purge' );
 wp_clear_scheduled_hook( 'prime_cache_cf_retry_full_purge' );
 delete_option( 'prime_cache_cf_full_purge_retries' );
 delete_option( 'prime_cache_cf_purge_failed' );
+delete_option( 'prime_cache_install_time' );
+delete_option( 'prime_cache_review_notice_done' );
+delete_option( 'prime_cache_delay_max_ack' );
 wp_clear_scheduled_hook( 'prime_cache_cleanup_gf_options' );
 // Clean up any remaining Google Fonts pending options.
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall cleanup of leftover options; runs once on deletion, not cacheable.

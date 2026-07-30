@@ -3160,47 +3160,61 @@ msgstr "データベースクリーンアップ"
 msgid "Prime Cache Pro adds scheduled cleanup for revisions, expired transients, and overhead on long-running WordPress sites."
 msgstr "Prime Cache Pro はリビジョン、期限切れトランジェント、テーブルオーバーヘッドのクリーンアップを長期運用の WordPress サイト向けにスケジュール実行できるようにします。"
 
-#: includes/admin/class-admin-settings.php:2592
-msgid "Page caching is active in standard mode. wp-config.php currently defines WP_CACHE as false, so the faster drop-in mode is unavailable. To enable it, change that definition to true — this is optional, and Prime Cache never edits wp-config.php itself."
-msgstr "ページキャッシュは標準モードで動作しています。wp-config.php で WP_CACHE が false に定義されているため、より高速なドロップインモードは利用できません。有効にするには、その定義を true に変更してください (任意です。Prime Cache が wp-config.php を編集することはありません)。"
+#: includes/admin/class-admin-settings.php
+msgid "Page caching is running in standard mode. Your wp-config.php currently sets WP_CACHE to false, which keeps the faster drop-in mode turned off. Changing that one word — false to true — switches it on. The steps below are written so that anyone can do it."
+msgstr "ページキャッシュは標準モードで動作しています。現在 wp-config.php で WP_CACHE が false になっているため、より高速なドロップインモードはオフのままです。この 1 語 (false を true) を書き換えるだけでオンになります。以下の手順は、どなたでもできるように書いています。"
 
-#: includes/admin/class-admin-settings.php:2596
-msgid "Page caching is active in standard mode. Optional speed-up: to serve cached pages before WordPress even loads (drop-in mode), add this line yourself near the top of wp-config.php:"
-msgstr "ページキャッシュは標準モードで動作しています。さらに高速化するには (任意): WordPress の読み込み前にキャッシュを返すドロップインモードを使うため、次の 1 行を wp-config.php の先頭付近に追加してください。"
+#: includes/admin/class-admin-settings.php
+msgid "Page caching is running in standard mode. There is an optional way to make it even faster: serving cached pages before WordPress loads (drop-in mode). It only takes adding one line to wp-config.php, and the steps below are written so that anyone can do it."
+msgstr "ページキャッシュは標準モードで動作しています。さらに速くする方法があります (任意)。WordPress の読み込み前にキャッシュを配信する「ドロップインモード」です。wp-config.php に 1 行を追加するだけで、以下の手順はどなたでもできるように書いています。"
 
 #: includes/admin/class-admin-settings.php:2599
 msgid "This step is optional — caching already works without it. Prime Cache never edits wp-config.php; adding or removing the line is always up to you."
 msgstr "この手順は任意です。追加しなくてもキャッシュは動作します。Prime Cache が wp-config.php を編集することはなく、行の追加と削除は常にサイト所有者が行います。"
 
-#: includes/admin/class-admin-settings.php:2607
-msgid "How to edit wp-config.php (step by step)"
-msgstr "wp-config.php の書き換え手順"
+#: includes/admin/class-admin-settings.php
+msgid "How to turn on drop-in mode (step by step)"
+msgstr "ドロップインモードを有効にする手順"
 
-#: includes/admin/class-admin-settings.php:2609
-msgid "Open the file manager in your hosting control panel (or connect with an FTP client) and find wp-config.php in the WordPress root directory — the same folder that contains wp-login.php and the wp-content folder."
-msgstr "レンタルサーバーの管理画面でファイルマネージャーを開くか、FTP クライアントで接続し、WordPress のルートディレクトリー (wp-login.php や wp-content フォルダーがある階層) にある wp-config.php を見つけます。"
+#: includes/admin/class-admin-settings.php
+msgid "Open your hosting control panel and start its File Manager (or connect with an FTP app). In your site's top folder — the one that also contains wp-login.php and the wp-content folder — open the file named wp-config.php."
+msgstr "ご利用のレンタルサーバーの管理画面で「ファイルマネージャー」を開きます (または FTP ソフトで接続します)。サイトの一番上のフォルダー (wp-login.php や wp-content フォルダーがある場所) にある wp-config.php というファイルを開きます。"
 
-#: includes/admin/class-admin-settings.php:2610
-msgid "Save a copy of the file as a backup before editing."
-msgstr "編集する前に、ファイルのコピーをバックアップとして保存します。"
+#: includes/admin/class-admin-settings.php
+msgid "Before you change anything, download a copy of wp-config.php and keep it somewhere safe. If anything goes wrong, you can upload this copy to undo the change."
+msgstr "変更する前に、wp-config.php のコピーをダウンロードして安全な場所に保管します。もし不具合が起きても、このコピーをアップロードすれば元に戻せます。"
 
-#. translators: 1: the existing define line, 2: the corrected define line
-#: includes/admin/class-admin-settings.php:2614
-msgid "Find the line %1$s and change it to %2$s."
-msgstr "%1$s の行を見つけて %2$s に変更します。"
+#: includes/admin/class-admin-settings.php
+msgid "Find the line that already mentions WP_CACHE and change the single word false to true, so it matches the \"After\" example. Change nothing else."
+msgstr "すでに WP_CACHE が書かれている行を探し、false という 1 語だけを true に書き換えて、「変更後」の見本と同じにします。ほかは何も変更しないでください。"
 
-#. translators: 1: the define line to add, 2: the opening PHP tag, 3: the "stop editing" comment
-#: includes/admin/class-admin-settings.php:2621
-msgid "Add the line %1$s directly below the opening %2$s tag, above the %3$s comment. Do not add anything before the %2$s tag."
-msgstr "%1$s の行を、先頭の %2$s タグのすぐ下 (%3$s コメントより上) に追加します。%2$s タグより前には何も書かないでください。"
+#: includes/admin/class-admin-settings.php
+msgid "Before"
+msgstr "変更前"
 
-#: includes/admin/class-admin-settings.php:2627
-msgid "Save the file and reload this page. When the Dashboard tab shows \"WP_CACHE Constant: Active\" under System Status, drop-in mode is on and this notice disappears."
-msgstr "ファイルを保存してこのページを再読み込みします。ダッシュボードタブのシステム状態に「WP_CACHE Constant: Active」と表示されればドロップインモードが有効で、この通知は表示されなくなります。"
+#: includes/admin/class-admin-settings.php
+msgid "After"
+msgstr "変更後"
 
-#: includes/admin/class-admin-settings.php:2629
-msgid "Caution: a mistake in wp-config.php can temporarily take the whole site down — if that happens, restore the backup copy. If you prefer not to edit the file, you can simply keep using standard mode."
-msgstr "注意: wp-config.php の記述ミスはサイト全体が一時的に表示されなくなる原因になります。その場合はバックアップのコピーで元に戻してください。ファイルを編集しない場合も、そのまま標準モードで利用できます。"
+#: includes/admin/class-admin-settings.php
+msgid "The very first line of the file is the opening PHP tag. Add the highlighted line on its own line, directly beneath it — exactly as shown below. Do not delete or change anything else."
+msgstr "ファイルの一番最初の行は PHP 開始タグです。その 1 行のすぐ下に、下の見本のとおり、ハイライトした行を 1 行だけ追加します。ほかは削除も変更もしないでください。"
+
+#: includes/admin/class-admin-settings.php
+msgid "← add only this one line"
+msgstr "← 追加するのはこの 1 行だけ"
+
+#: includes/admin/class-admin-settings.php
+msgid "← everything from here down stays exactly as it was"
+msgstr "← これより下は元のまま"
+
+#: includes/admin/class-admin-settings.php
+msgid "Save the file, then reload this page. When System Status on the Dashboard tab shows \"WP_CACHE Constant: Active\", drop-in mode is on and this notice goes away."
+msgstr "ファイルを保存し、このページを再読み込みします。ダッシュボードタブの「システム状態」に「WP_CACHE Constant: Active」と表示されれば、ドロップインモードが有効になり、この通知は消えます。"
+
+#: includes/admin/class-admin-settings.php
+msgid "Careful: a typo in wp-config.php can make the whole site show an error for a moment. If that happens, upload your backup copy to put it back. Not comfortable editing the file? You can simply keep using standard mode — caching already works."
+msgstr "注意: wp-config.php を打ち間違えると、一時的にサイト全体にエラーが表示されることがあります。その場合はバックアップのコピーをアップロードして元に戻してください。ファイルの編集に不安がある場合は、そのまま標準モードで使い続けても問題ありません (キャッシュはすでに動作しています)。"
 
 #: includes/admin/class-admin-settings.php
 msgid "Maximum Delay (also delay jQuery & inline scripts)"
@@ -3269,3 +3283,19 @@ msgstr "遅い原因を AI に相談"
 #: includes/admin/class-admin-settings.php
 msgid "AI Speed Diagnosis measures your environment, explains bottlenecks in plain language, and applies validated fixes in one click — with your own API key."
 msgstr "AI スピード診断が環境を計測し、ボトルネックを分かりやすく解説。検証済みの対策をワンクリックで適用できます。API キーはお客様ご自身のものを使用します。"
+
+#: includes/admin/class-admin-settings.php
+msgid "You've been using Prime Cache for a week — we hope it's making your site faster! If you're enjoying it, a quick review on WordPress.org would mean a lot and helps other people find the plugin."
+msgstr "Prime Cache をお使いいただいて 1 週間が経ちました。表示が速くなっていれば幸いです。もしお気に召しましたら、WordPress.org でレビューをいただけると大変励みになり、ほかの方がプラグインを見つける手助けにもなります。"
+
+#: includes/admin/class-admin-settings.php
+msgid "Leave a review"
+msgstr "レビューを書く"
+
+#: includes/admin/class-admin-settings.php
+msgid "No thanks / already did"
+msgstr "いいえ / 対応済み"
+
+#: includes/admin/class-admin-settings.php
+msgid "Got it"
+msgstr "了解した"

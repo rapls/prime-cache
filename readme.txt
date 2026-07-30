@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.42
+Stable tag: 1.10.44
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -172,6 +172,13 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.44 =
+* Improved: the "Maximum Delay" warning now has a "Got it" button. Instead of reappearing every time you save while Maximum Delay is on, the warning stays on the plugin screen until you acknowledge it once, then hides for good. It shows again if you turn Maximum Delay off and back on.
+* Improved: the optional "enable drop-in mode" (WP_CACHE) instructions are now beginner-friendly. The step-by-step guide is shown expanded with a copy-ready code line and a clear before/after example of wp-config.php, so anyone can make the one-line change with confidence.
+
+= 1.10.43 =
+* Added: a friendly one-time review request. After you've used Prime Cache for a week, a dismissible banner appears once on the plugin's own screens inviting you to leave a WordPress.org review. It never nags across the rest of the admin, and once you review or dismiss it, it never shows again.
 
 = 1.10.42 =
 * Added: an extension point so the optional add-on can replace the "enable drop-in mode" (WP_CACHE) notice with a one-click action. The free plugin still never edits wp-config.php itself — it only shows the manual instructions, and now steps aside cleanly when the add-on offers to do it for you. No change for sites without the add-on.
@@ -380,6 +387,12 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.44 =
+The "Maximum Delay" warning is now acknowledge-able: click "Got it" once and it stops reappearing on every save. It shows again only if you toggle Maximum Delay off and back on.
+
+= 1.10.43 =
+Adds a one-time, dismissible review request that appears on the plugin's own screens after a week of use. Shown once and never again after you review or dismiss it.
 
 = 1.10.42 =
 Adds an extension point so the optional add-on can offer one-click drop-in mode (WP_CACHE). No change for sites without the add-on; the free plugin still never edits wp-config.php.
