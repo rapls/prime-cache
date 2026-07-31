@@ -1017,15 +1017,24 @@ class Prime_Cache {
 					'lazyload_images'       => true,
 					'lazyload_iframes'      => true,
 					'lazyload_videos'       => true,
+					// Keep the first several images eager so the LCP image is never
+					// lazy-loaded (a common cause of a worse LCP after enabling lazy load).
+					'lazyload_skip_first'   => 6,
+					// Add width/height to images missing them to prevent layout shift (CLS).
+					'add_missing_dimensions' => true,
 					'browser_cache'         => true,
 					'htaccess_enabled'      => true,
 					'preload_links'         => true,
 					'minify_html'           => true,
+					'minify_html_dom'       => true,
 					'minify_css'            => true,
 					'minify_js'             => true,
 					'remove_html_comments'  => true,
 					'defer_js'              => true,
 					'delay_js'              => true,
+					// Longer fallback so delayed scripts keep waiting for a real
+					// interaction during a lab run (lower measured TBT).
+					'delay_js_timeout'      => 10000,
 					'disable_emoji'         => true,
 					'disable_wp_embed'      => true,
 					'disable_dashicons'     => true,
@@ -1120,11 +1129,20 @@ class Prime_Cache {
 			// .htaccess — only when writable (works on Xserver Nginx too).
 			'htaccess_enabled'      => $htaccess_ok,
 
-			// Minification — safe on all environments.
+			// Minification — safe on all environments. DOM-based HTML optimization
+			// goes deeper than the regex pass and falls back to regex on failure.
 			'minify_html'           => true,
+			'minify_html_dom'       => true,
 			'minify_css'            => true,
 			'minify_js'             => true,
 			'remove_html_comments'  => true,
+
+			// Lazy load — keep the first several images eager so the LCP image is
+			// never lazy-loaded.
+			'lazyload_skip_first'   => 6,
+
+			// Add width/height to images missing them to prevent layout shift (CLS).
+			'add_missing_dimensions' => true,
 
 			// jQuery — restore local copy if theme uses CDN.
 			'local_jquery'          => true,

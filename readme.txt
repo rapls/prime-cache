@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.44
+Stable tag: 1.10.45
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -172,6 +172,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.45 =
+* Improved: overhauled the optimization presets (Aggressive and Auto) for higher Core Web Vitals scores, based on real-world tuning. They now keep the first several images eager to protect LCP, add missing image width/height to reduce layout shift (CLS), enable DOM-based HTML optimization, and use a longer Delay JS fallback. With the Pro add-on, presets now favor Remove Unused CSS + Critical CSS instead of file combining (which provides no benefit on HTTP/2) and replace YouTube embeds with click-to-load thumbnails. Re-apply a preset from the Tools tab to pick up the new tuning.
 
 = 1.10.44 =
 * Improved: the "Maximum Delay" warning now has a "Got it" button. Instead of reappearing every time you save while Maximum Delay is on, the warning stays on the plugin screen until you acknowledge it once, then hides for good. It shows again if you turn Maximum Delay off and back on.
@@ -387,6 +390,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.45 =
+Presets retuned for higher Core Web Vitals scores (better LCP/CLS, DOM-based HTML optimization, smarter CSS delivery). Re-apply a preset from the Tools tab to pick up the new tuning.
 
 = 1.10.44 =
 The "Maximum Delay" warning is now acknowledge-able: click "Got it" once and it stops reappearing on every save. It shows again only if you toggle Maximum Delay off and back on.

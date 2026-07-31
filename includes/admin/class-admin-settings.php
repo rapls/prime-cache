@@ -2206,7 +2206,7 @@ class Prime_Cache_Admin_Settings {
 					),
 					'aggressive' => array(
 						__( 'Aggressive', 'prime-cache' ),
-						__( 'Maximum performance. Adds defer/delay JS, async CSS, separate mobile cache, preloading, lazy load for iframes/videos, and disables unused WordPress assets (emoji, embed, dashicons, oEmbed, block CSS). Additional add-ons may provide CSS/JS combining and Critical CSS generation. May require testing and exclusion rules for compatibility.', 'prime-cache' ),
+						__( 'Maximum performance. Adds defer/delay JS, async CSS, separate mobile cache, preloading, lazy load for iframes/videos, and disables unused WordPress assets (emoji, embed, dashicons, oEmbed, block CSS). With the Pro add-on it removes unused CSS, auto-generates Critical CSS, applies Maximum Delay (delaying jQuery and inline scripts), and self-hosts Google Fonts; file combining is intentionally left off since it does not help on HTTP/2. May require testing and exclusion rules for compatibility.', 'prime-cache' ),
 						'#ef4444',
 						'dashicons-controls-forward',
 					),
