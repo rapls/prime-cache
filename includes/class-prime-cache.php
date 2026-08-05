@@ -1078,15 +1078,14 @@ class Prime_Cache {
 		// .htaccess writer actually does (file when it exists, parent dir when not).
 		$htaccess_ok = Prime_Cache_Htaccess::is_writable();
 
-		// HTTP/2 detection: check via headers_list() or SERVER_PROTOCOL.
-		$http2 = false;
-		if ( function_exists( 'apache_get_modules' ) && in_array( 'mod_http2', apache_get_modules(), true ) ) {
-			$http2 = true;
-		} elseif ( ! empty( $_SERVER['SERVER_PROTOCOL'] ) && version_compare( str_replace( 'HTTP/', '', sanitize_text_field( wp_unslash( $_SERVER['SERVER_PROTOCOL'] ) ) ), '2', '>=' ) ) {
-			$http2 = true;
-		} elseif ( ! empty( $_SERVER['HTTP2'] ) || ! empty( $_SERVER['H2'] ) ) {
-			$http2 = true;
-		}
+		// NOTE: The Auto preset deliberately does NOT probe the HTTP protocol to
+		// decide whether to combine CSS/JS. Server-visible protocol
+		// ($_SERVER['SERVER_PROTOCOL']) is unreliable behind a reverse proxy or
+		// CDN that terminates HTTP/2 (nginx→Apache, Cloudflare, most managed
+		// hosts): PHP sees HTTP/1.1 on the back-end even when the visitor is on
+		// HTTP/2. Combining is left off (the option default) and the Pro add-on's
+		// preset_auto() keeps it off too. HTTP/1.1-only hosts (now rare) can
+		// enable combining manually.
 
 		// PHP extensions for object cache.
 		$has_redis     = class_exists( 'Redis' );
@@ -1230,12 +1229,11 @@ class Prime_Cache {
 		// the parent directory's writability matters (so we can create it).
 		$info[ '.htaccess' ] = Prime_Cache_Htaccess::is_writable() ? __( 'Writable', 'prime-cache' ) : __( 'Not writable', 'prime-cache' );
 
-		// HTTP protocol.
-		$proto = sanitize_text_field( wp_unslash( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1' ) );
-		if ( ! empty( $_SERVER['HTTP2'] ) || ! empty( $_SERVER['H2'] ) ) {
-			$proto = 'HTTP/2';
-		}
-		$info[ __( 'Protocol', 'prime-cache' ) ] = $proto;
+		// HTTP protocol is intentionally not shown. The server-visible protocol
+		// ($_SERVER['SERVER_PROTOCOL']) is unreliable behind a reverse proxy or
+		// CDN that terminates HTTP/2 (PHP sees HTTP/1.1 on the back-end even when
+		// visitors are on HTTP/2), so displaying it here was misleading. No
+		// setting depends on it anymore.
 
 		// PHP.
 		$info[ 'PHP' ] = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;

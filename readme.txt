@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.45
+Stable tag: 1.10.46
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -172,6 +172,10 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.46 =
+* Changed: the "How to turn on drop-in mode" step-by-step guide in the setup notice is now collapsed by default so the notice stays compact — click the summary to expand it. (Refines the 1.10.44 change, which showed it expanded.)
+* Changed: removed the "Protocol" line from the Auto preset's environment summary. The server-visible HTTP protocol is unreliable behind a reverse proxy or CDN (PHP can report HTTP/1.1 even when visitors are on HTTP/2), so displaying it was misleading; no setting depends on it.
 
 = 1.10.45 =
 * Improved: overhauled the optimization presets (Aggressive and Auto) for higher Core Web Vitals scores, based on real-world tuning. They now keep the first several images eager to protect LCP, add missing image width/height to reduce layout shift (CLS), enable DOM-based HTML optimization, and use a longer Delay JS fallback. With the Pro add-on, presets now favor Remove Unused CSS + Critical CSS instead of file combining (which provides no benefit on HTTP/2) and replace YouTube embeds with click-to-load thumbnails. Re-apply a preset from the Tools tab to pick up the new tuning.
@@ -390,6 +394,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.46 =
+Minor UI cleanup: the drop-in mode guide is collapsed by default, and the unreliable "Protocol" line was removed from the Auto preset's environment summary.
 
 = 1.10.45 =
 Presets retuned for higher Core Web Vitals scores (better LCP/CLS, DOM-based HTML optimization, smarter CSS delivery). Re-apply a preset from the Tools tab to pick up the new tuning.

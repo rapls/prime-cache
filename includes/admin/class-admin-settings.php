@@ -2791,9 +2791,9 @@ class Prime_Cache_Admin_Settings {
 		}
 		echo '</p>';
 
-		// Expanded by default (details open) so the visual guide is visible at a
-		// glance; the user can still collapse it.
-		echo '<details open style="margin:4px 0 8px"><summary style="cursor:pointer;font-weight:600">'
+		// Collapsed by default so the notice stays compact; the user expands the
+		// summary to reveal the visual step-by-step guide when needed.
+		echo '<details style="margin:4px 0 8px"><summary style="cursor:pointer;font-weight:600">'
 			. esc_html__( 'How to turn on drop-in mode (step by step)', 'prime-cache' )
 			. '</summary>';
 
