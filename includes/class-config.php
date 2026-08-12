@@ -758,6 +758,20 @@ class Prime_Cache_Config {
 			return 'broken';
 		}
 
+		// The backend file is present and readable, but the drop-in still bails at
+		// runtime when the PHP extension is unusable (e.g. APCu is loaded but
+		// apc.enabled=0, or apcu_enabled() is false). In that state it never
+		// defines wp_cache_init(), so WordPress falls back to its internal cache
+		// and wp_using_ext_object_cache() is false — yet nothing above can see it,
+		// since the file, signature, and backend path all check out. Confirm the
+		// object cache actually initialized as external before reporting it active;
+		// otherwise the dashboard would claim caching is on while no caching
+		// happens. Report 'broken' so callers surface the mismatch. Guarded on
+		// function_exists because this can run before the cache API is loaded.
+		if ( function_exists( 'wp_using_ext_object_cache' ) && ! wp_using_ext_object_cache() ) {
+			return 'broken';
+		}
+
 		return $backend;
 	}
 
