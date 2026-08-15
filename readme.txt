@@ -19,6 +19,10 @@ Prime Cache is a lightweight performance plugin for WordPress. Page caching work
 
 [youtube https://www.youtube.com/watch?v=ZUxESCRtaEU]
 
+**Then take it further — how to push a stuck PageSpeed score from an orange 82 into the green 90s (Japanese narration):**
+
+[youtube https://www.youtube.com/watch?v=n0oQ3w9nuuU]
+
 For site owners who want the fastest possible path, the settings screen shows an optional one-line `WP_CACHE` snippet that upgrades serving to drop-in mode, where cached pages are served before WordPress core even loads. Adding it is entirely optional and entirely manual — the plugin never writes to wp-config.php.
 
 = Free Features =

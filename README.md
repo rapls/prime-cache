@@ -7,6 +7,16 @@ Prime Cache は、静的なページキャッシュ、ファイル最適化、�
 - **WordPress.org**: https://wordpress.org/plugins/prime-cache/
 - **プラグイン紹介ページ**: https://raplsworks.com/plugins/prime-cache/
 
+## デモ動画
+
+[![WordPress を5分で高速化 — Prime Cache 設定](https://img.youtube.com/vi/ZUxESCRtaEU/hqdefault.jpg)](https://www.youtube.com/watch?v=ZUxESCRtaEU)
+
+**[WordPress を5分で高速化 — Prime Cache 設定（wp-config 編集なし・追加設定なし）](https://www.youtube.com/watch?v=ZUxESCRtaEU)** — インストールから設定、効果測定までの実際の流れ。
+
+[![PageSpeed 82点はまだオレンジ｜緑の90点台に乗せるまで](https://img.youtube.com/vi/n0oQ3w9nuuU/hqdefault.jpg)](https://www.youtube.com/watch?v=n0oQ3w9nuuU)
+
+**[PageSpeed 82点はまだ「オレンジ」｜緑の90点台に乗せるまで](https://www.youtube.com/watch?v=n0oQ3w9nuuU)** — オレンジの 82 点から、どの設定を変えれば緑の 90 点台に乗るのかを実演。
+
 ## 無料版の機能
 
 - **ページキャッシュ** — 静的な HTML キャッシュ。任意の `.htaccess` ファストパスを使うと、PHP を起動する前に Apache が直接キャッシュを配信します。
