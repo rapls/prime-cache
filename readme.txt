@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.10.47
+Stable tag: 1.10.48
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -176,6 +176,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.48 =
+* Fixed: "Inline Small CSS Files" now preserves each stylesheet's media condition. Inlining a small media-scoped stylesheet — for example a theme's mobile-only CSS loaded via `<link media="(max-width:800px)">` — previously dropped the media query, so those rules applied at every screen size and could break the desktop layout. The inlined CSS is now wrapped in its matching @media block.
 
 = 1.10.47 =
 * Fixed: the Object Cache status could show a backend as "Active" when it was installed but not actually running — for example when the PHP extension is present but disabled at runtime, so WordPress had quietly fallen back to its internal cache. The status now confirms the object cache really initialized before reporting it active, and shows "Installed but not running" otherwise. (Pairs with Prime Cache Pro 1.9.6.)
@@ -401,6 +404,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.48 =
+Fixes "Inline Small CSS Files" dropping a stylesheet's media condition, which could apply mobile-only CSS on desktop and break the layout. Inlined CSS is now wrapped in its @media block.
 
 = 1.10.47 =
 Fixes a false "Active" Object Cache status when a backend is installed but not actually running (e.g. the PHP extension is disabled at runtime). Pairs with Prime Cache Pro 1.9.6.

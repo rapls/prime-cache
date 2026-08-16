@@ -408,6 +408,17 @@ class Prime_Cache_File_Optimizer {
 							if ( $do_minify ) {
 								$css = $self->minify_css_content( $css );
 							}
+							// Preserve the link's media condition. A stylesheet loaded as
+							// <link media="(max-width:800px)"> only applies at that
+							// breakpoint; inlining its CSS into a bare <style> would apply
+							// those rules at every viewport and break the layout (e.g. a
+							// theme's mobile-only header rules leaking onto desktop). Wrap
+							// the inlined CSS in the matching @media block so its scope is
+							// kept. media="all" (or no media attribute) inlines unwrapped.
+							if ( preg_match( '#\smedia=["\']([^"\']+)["\']#i', $tag, $media_m )
+								&& 'all' !== strtolower( trim( $media_m[1] ) ) ) {
+								$css = '@media ' . trim( $media_m[1] ) . '{' . $css . '}';
+							}
 							// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- Inline-CSS replacement for an existing <link> tag during HTML buffer transformation. Cannot use wp_enqueue_style() because the HTML has already left WordPress's enqueue pipeline (we are rewriting the rendered HTML during ob_start to inline small stylesheets) and we are deliberately replacing the original <link> with the inlined content to eliminate an HTTP request.
 							return '<style>' . $css . '</style>';
 						}
