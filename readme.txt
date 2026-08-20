@@ -3,7 +3,7 @@
 Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
-Tested up to: 7.0
+Tested up to: 7.1
 Stable tag: 1.10.49
 Requires PHP: 7.4
 License: GPLv2 or later
