@@ -491,10 +491,14 @@ class Prime_Cache_File_Optimizer {
 			return false;
 		}
 
-		// Same-second redeploy with different content shares (url, mtime); add
-		// filesize so that path produces a fresh hash and doesn't serve the
-		// previous build from the cached output file.
-		$hash = md5( $url . '|' . filemtime( $path ) . '|' . filesize( $path ) );
+		// Key on the resolved file identity (path + mtime + size), NOT the raw
+		// request URL. The minified output depends solely on the file's content;
+		// the URL's query string does not affect it. Some themes (e.g. Cocoon)
+		// vary the stylesheet's ?ver= query per page/render, so keying on $url
+		// would mint a fresh hash for byte-identical CSS on every hit and grow
+		// the cache without bound. filemtime + filesize still force a new hash
+		// on a same-path redeploy so a content change is never served stale.
+		$hash = md5( $path . '|' . filemtime( $path ) . '|' . filesize( $path ) );
 		$out  = $this->cache_dir . 'css/' . $hash . '.css';
 		$out_url = $this->cache_url . 'css/' . $hash . '.css';
 
@@ -1332,7 +1336,10 @@ class Prime_Cache_File_Optimizer {
 			return false;
 		}
 
-		$hash = md5( $url . '|' . filemtime( $path ) . '|' . filesize( $path ) );
+		// Key on the resolved file identity (path + mtime + size), not the raw
+		// request URL — a per-render ?ver= query would otherwise mint a fresh
+		// hash for identical JS on every hit and grow the cache without bound.
+		$hash = md5( $path . '|' . filemtime( $path ) . '|' . filesize( $path ) );
 		$out  = $this->cache_dir . 'js/' . $hash . '.js';
 		$out_url = $this->cache_url . 'js/' . $hash . '.js';
 
