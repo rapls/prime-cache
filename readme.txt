@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.50
+Stable tag: 1.10.51
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -176,6 +176,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.51 =
+* Fixed: the Cocoon theme's mobile slide-in sidebar no longer opens blank when Delay JavaScript is on. Cocoon fills that drawer by moving the sidebar into it the instant the sidebar button is tapped, using a handler in the theme's main script. With Delay JavaScript — and especially Maximum Delay — that script was held back until the first interaction, which is after the tap has already happened, so the handler was not yet attached and the drawer opened empty. Cocoon's main script and its inline configuration now run at page load even under Maximum Delay whenever Cocoon is the active theme, so the handler is ready before the first tap. Other scripts stay delayed.
 
 = 1.10.50 =
 * Fixed: the minified CSS/JS cache is now keyed by the source file rather than its request URL. Some themes — Cocoon most notably — add a version query string to every stylesheet that changes on each page render; because the cache filename was derived from the full URL, byte-identical CSS was written to a fresh file on every hit and the `wp-content/cache/prime-cache-fo` folder grew without bound. One site had reached over 250,000 files and several gigabytes of duplicate CSS. The cache key now uses the resolved file path plus its modification time and size, so identical output collapses to a single file. After updating, clear the Minify cache once to remove the duplicates that have already accumulated.
@@ -410,6 +413,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.51 =
+Fixes the Cocoon mobile slide-in sidebar opening blank while Delay JavaScript (or Maximum Delay) is enabled. Cocoon's main script now runs at load so the sidebar populates on the first tap.
 
 = 1.10.50 =
 Fixes a cache key that could fill wp-content/cache/prime-cache-fo with hundreds of thousands of duplicate minified CSS/JS files on themes (e.g. Cocoon) that vary the ?ver= query per render. Clear the Minify cache once after updating to reclaim the space.
