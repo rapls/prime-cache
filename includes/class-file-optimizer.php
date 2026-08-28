@@ -800,6 +800,18 @@ class Prime_Cache_File_Optimizer {
 			}
 		}
 
+		// A dependency of a kept-synchronous (inline-paired) script must also
+		// stay synchronous. Otherwise the dependency (e.g. wp-hooks) is deferred
+		// while the dependent we kept for its -js-after block (e.g. wp-i18n)
+		// runs first and throws "Cannot read properties of undefined (reading
+		// 'hooks')", cascading a broken `wp` namespace to i18n/CF7/admin-bar.
+		if ( $handle ) {
+			$dep_protected = $this->get_inline_pair_dep_protected();
+			if ( isset( $dep_protected[ $handle ] ) ) {
+				return $tag;
+			}
+		}
+
 		// Check defer exclusion list. Always exclude jQuery and its core
 		// dependencies: deferring them breaks the many inline scripts (printed
 		// by themes/plugins) that call jQuery()/$ during parsing, before a
@@ -818,6 +830,106 @@ class Prime_Cache_File_Optimizer {
 
 		// Add defer attribute.
 		return str_replace( ' src=', ' defer src=', $tag );
+	}
+
+	/**
+	 * Transitive dependency handles of the given seed scripts (dependencies
+	 * only, not the seeds themselves), resolved against the WP script registry.
+	 *
+	 * @param array $handles Seed handles.
+	 * @return array List of dependency handles.
+	 */
+	private function collect_script_deps( $handles ) {
+		if ( ! function_exists( 'wp_scripts' ) ) {
+			return array();
+		}
+		$wp_scripts = wp_scripts();
+		if ( ! $wp_scripts || empty( $wp_scripts->registered ) ) {
+			return array();
+		}
+		$out   = array();
+		$stack = (array) $handles;
+		while ( $stack ) {
+			$h = array_pop( $stack );
+			if ( ! isset( $wp_scripts->registered[ $h ] ) ) {
+				continue;
+			}
+			foreach ( (array) $wp_scripts->registered[ $h ]->deps as $dep ) {
+				if ( ! isset( $out[ $dep ] ) ) {
+					$out[ $dep ] = true;
+					$stack[] = $dep;
+				}
+			}
+		}
+		return array_keys( $out );
+	}
+
+	/**
+	 * Handles that must stay synchronous (never deferred or delayed) because
+	 * they are a dependency of a script we keep synchronous for its inline
+	 * before/after pairing.
+	 *
+	 * WordPress prints a paired script's inline `-js-{before|after}` block as a
+	 * synchronous <script> next to the external tag, so we never defer/delay
+	 * such a script — it would run after its own inline block and break it. But
+	 * its *dependencies* usually carry no inline block, so nothing protected
+	 * them: deferring/delaying a dependency lets the kept-synchronous dependent
+	 * run first and throw "X is not defined". The canonical case is wp-i18n
+	 * (kept for its translation `-js-after`) depending on wp-hooks (deferred),
+	 * so wp-i18n reads `window.wp.hooks` before wp-hooks has run and takes down
+	 * the whole `wp` namespace (i18n, Contact Form 7, the admin bar, …).
+	 *
+	 * @return array Set of handle => true.
+	 */
+	private function get_inline_pair_dep_protected() {
+		static $set = null;
+		if ( null !== $set ) {
+			return $set;
+		}
+		$set = array();
+		if ( ! function_exists( 'wp_scripts' ) ) {
+			return $set;
+		}
+		$wp_scripts = wp_scripts();
+		if ( ! $wp_scripts || empty( $wp_scripts->registered ) ) {
+			return $set;
+		}
+
+		// Scope to scripts actually printed on this page: the enqueue queue plus
+		// their recursive dependencies. Seeding from every *registered* script
+		// would pull in core handles that aren't on the page (block editor, wp-data,
+		// mediaelement, …) and drag their large dependency trees — jQuery included —
+		// into the protected set, needlessly keeping jQuery synchronous and undoing
+		// the mobile jQuery-defer optimization on pages that never use those handles.
+		$print_set = array();
+		$stack     = (array) $wp_scripts->queue;
+		while ( $stack ) {
+			$h = array_pop( $stack );
+			if ( isset( $print_set[ $h ] ) || ! isset( $wp_scripts->registered[ $h ] ) ) {
+				continue;
+			}
+			$print_set[ $h ] = true;
+			foreach ( (array) $wp_scripts->registered[ $h ]->deps as $d ) {
+				$stack[] = $d;
+			}
+		}
+
+		// Seed: printed scripts that carry an inline before/after block (kept
+		// synchronous), then protect their dependencies so they stay synchronous
+		// too and run first.
+		$seed = array();
+		foreach ( array_keys( $print_set ) as $handle ) {
+			$reg    = $wp_scripts->registered[ $handle ];
+			$after  = isset( $reg->extra['after'] ) ? array_filter( (array) $reg->extra['after'] ) : array();
+			$before = isset( $reg->extra['before'] ) ? array_filter( (array) $reg->extra['before'] ) : array();
+			if ( ! empty( $after ) || ! empty( $before ) ) {
+				$seed[] = $handle;
+			}
+		}
+		foreach ( $this->collect_script_deps( $seed ) as $dep ) {
+			$set[ $dep ] = true;
+		}
+		return $set;
 	}
 
 	/**
@@ -965,6 +1077,17 @@ class Prime_Cache_File_Optimizer {
 		) ) {
 			foreach ( array_unique( $m[1] ) as $handle ) {
 				$exact_handles[] = $handle;
+			}
+		}
+		// Keep the dependencies of inline-paired (kept-synchronous) scripts out
+		// of the delay bucket too — otherwise wp-i18n (protected for its
+		// -js-after) runs at parse while its dependency wp-hooks is delayed,
+		// throwing "reading 'hooks' of undefined". Not needed under Maximum
+		// Delay: there wp-i18n is delayed as well, so document order already
+		// runs wp-hooks (earlier in the DOM) before it.
+		if ( ! $max ) {
+			foreach ( array_keys( $this->get_inline_pair_dep_protected() ) as $dep_handle ) {
+				$exact_handles[] = $dep_handle;
 			}
 		}
 		$exact_handles = array_values( array_unique( $exact_handles ) );

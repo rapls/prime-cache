@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.53
+Stable tag: 1.10.54
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -176,6 +176,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.54 =
+* Fixed: with Defer or Delay JavaScript enabled, WordPress i18n-based scripts could fail with "wp is not defined" or "Cannot read properties of undefined (reading 'hooks')", breaking translations, Contact Form 7, the admin bar, and other wp.* features. A script kept synchronous for its inline translation block (e.g. wp-i18n, which carries a `-js-after`) was allowed to run before its deferred/delayed dependency (wp-hooks), so it read `window.wp.hooks` before wp-hooks had defined it — taking down the whole `wp` namespace. Prime Cache now keeps the dependencies of such kept-synchronous scripts synchronous as well, preserving dependency order. The set is scoped to scripts actually printed on the page, so unrelated optimizations — including mobile jQuery defer — are unaffected.
 
 = 1.10.53 =
 * Fixed: on the Cocoon theme, the mobile slide-in sidebar could still open blank even after the jQuery fix in 1.10.52. When the sidebar button is tapped, Cocoon moves the sidebar into the drawer and renames its id, but its own script then re-selects the element by the *old* id when adding the visibility class — so the class is never applied and the relocated sidebar falls back to the theme's mobile display:none. Prime Cache now outputs a small Cocoon-only CSS rule that keeps the relocated sidebar visible inside the drawer (scoped to the drawer, so the in-page sidebar is untouched). Together with 1.10.52 this fully resolves the blank Cocoon mobile sidebar.
@@ -420,6 +423,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.54 =
+Fixes Defer/Delay JavaScript breaking WordPress i18n scripts ("wp is not defined"), which could break translations, Contact Form 7, and the admin bar. Dependencies of kept-synchronous scripts now stay in order. Recommended for all Defer/Delay JS users.
 
 = 1.10.53 =
 Completes the Cocoon mobile slide-in sidebar fix: the relocated sidebar now stays visible inside the drawer instead of opening blank. Pairs with the jQuery fix in 1.10.52.
