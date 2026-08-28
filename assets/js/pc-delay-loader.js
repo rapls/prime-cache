@@ -121,15 +121,22 @@
 	}
 
 	var _jq = window.jQuery;
+	var _$ = window.$;
 	try {
 		Object.defineProperty(window, 'jQuery', {
 			get: function () { return _jq; },
 			set: function (v) { _jq = v; patchJQuery(v); },
 			configurable: true
 		});
+		// window.$ tracks its OWN backing value, independent of window.jQuery.
+		// jQuery.noConflict() — which many themes/plugins call to free `$` —
+		// resets window.$ to its pre-jQuery value (undefined here). If `$` and
+		// `jQuery` shared one backing variable, that reset would wipe window.jQuery
+		// too, and every jQuery-dependent script on the page would then throw
+		// "jQuery is not a function" / "$ is not a function". Keep them separate.
 		Object.defineProperty(window, '$', {
-			get: function () { return _jq; },
-			set: function (v) { _jq = v; patchJQuery(v); },
+			get: function () { return _$; },
+			set: function (v) { _$ = v; patchJQuery(v); },
 			configurable: true
 		});
 	} catch (e) {}
@@ -373,7 +380,7 @@
 		} catch (e) {}
 		try {
 			Object.defineProperty(window, 'jQuery', { value: _jq, writable: true, configurable: true });
-			Object.defineProperty(window, '$', { value: _jq, writable: true, configurable: true });
+			Object.defineProperty(window, '$', { value: _$, writable: true, configurable: true });
 		} catch (e) {}
 	}
 

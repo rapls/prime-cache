@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.51
+Stable tag: 1.10.52
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -177,8 +177,12 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 
 == Changelog ==
 
+= 1.10.52 =
+* Fixed: with Delay JavaScript enabled, jQuery — and with it every jQuery-dependent script on the page — could become undefined on any site where the theme or a plugin calls `jQuery.noConflict()` (the common call that frees the `$` alias). The Delay JS loader backed both `window.jQuery` and `window.$` with a single internal variable, so `noConflict()` resetting `window.$` to its pre-jQuery value also wiped `window.jQuery`. The whole page then failed with "jQuery is not a function" / "$ is not a function", breaking anything that relies on jQuery. `window.$` now keeps its own backing value, independent of `window.jQuery`. This is the actual cause behind the Cocoon mobile slide-in sidebar opening blank (reported for 1.10.51), and the fix restores every other jQuery-dependent feature broken the same way.
+* Reverted: the Cocoon-specific change shipped in 1.10.51 targeted the wrong cause and has been removed; the jQuery loader fix above is the correct fix.
+
 = 1.10.51 =
-* Fixed: the Cocoon theme's mobile slide-in sidebar no longer opens blank when Delay JavaScript is on. Cocoon fills that drawer by moving the sidebar into it the instant the sidebar button is tapped, using a handler in the theme's main script. With Delay JavaScript — and especially Maximum Delay — that script was held back until the first interaction, which is after the tap has already happened, so the handler was not yet attached and the drawer opened empty. Cocoon's main script and its inline configuration now run at page load even under Maximum Delay whenever Cocoon is the active theme, so the handler is ready before the first tap. Other scripts stay delayed.
+* Attempted a Cocoon-specific fix for the mobile slide-in sidebar opening blank under Delay JavaScript, by forcing Cocoon's main script to run at load. This addressed the wrong cause and did not resolve the issue; it is reverted in 1.10.52, which fixes the real cause (see above).
 
 = 1.10.50 =
 * Fixed: the minified CSS/JS cache is now keyed by the source file rather than its request URL. Some themes — Cocoon most notably — add a version query string to every stylesheet that changes on each page render; because the cache filename was derived from the full URL, byte-identical CSS was written to a fresh file on every hit and the `wp-content/cache/prime-cache-fo` folder grew without bound. One site had reached over 250,000 files and several gigabytes of duplicate CSS. The cache key now uses the resolved file path plus its modification time and size, so identical output collapses to a single file. After updating, clear the Minify cache once to remove the duplicates that have already accumulated.
@@ -414,8 +418,11 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 
 == Upgrade Notice ==
 
+= 1.10.52 =
+Fixes Delay JavaScript breaking jQuery (making the whole page fail with "jQuery is not a function") on sites where a theme or plugin calls jQuery.noConflict(). This is the real cause of the Cocoon mobile sidebar opening blank; the 1.10.51 Cocoon change is reverted. Recommended for all Delay JS users.
+
 = 1.10.51 =
-Fixes the Cocoon mobile slide-in sidebar opening blank while Delay JavaScript (or Maximum Delay) is enabled. Cocoon's main script now runs at load so the sidebar populates on the first tap.
+Attempted Cocoon mobile-sidebar fix that targeted the wrong cause. Superseded by 1.10.52 — please update to 1.10.52.
 
 = 1.10.50 =
 Fixes a cache key that could fill wp-content/cache/prime-cache-fo with hundreds of thousands of duplicate minified CSS/JS files on themes (e.g. Cocoon) that vary the ?ver= query per render. Clear the Minify cache once after updating to reclaim the space.

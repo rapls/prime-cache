@@ -922,20 +922,6 @@ class Prime_Cache_File_Optimizer {
 		// the marker's combine protection is safe.
 		$max = $this->delay_max_active();
 
-		// Cocoon compatibility: the theme's mobile slide-in sidebar is populated
-		// by a jQuery change-handler in the `cocoon-js` script, which moves
-		// #sidebar into #sidebar-menu-content the moment the user toggles the
-		// sidebar button (`$(document).on('change','#sidebar-menu-input',…)`).
-		// If that handler isn't attached before the tap, the toggle's change
-		// event fires with no listener and the drawer opens empty (white). Delay
-		// JS — and especially Maximum Delay — would otherwise defer cocoon-js
-		// (and its localize config) until first interaction, i.e. after the
-		// toggle already fired, so the move never runs. Force the cocoon-js
-		// external + localize pair to execute at load whenever Cocoon is active,
-		// even under Maximum Delay. jQuery already runs at load (the delay path
-		// force-excludes it), so cocoon-js has its dependency available.
-		$is_cocoon = false !== strpos( (string) get_template(), 'cocoon' );
-
 		// Exact handle names — compared against the {handle} prefix of an
 		// extracted id attribute (`id="{handle}-js"`), so substring noise such
 		// as `id="xfoo-js-y"` cannot trigger a false positive on `foo`.
@@ -981,16 +967,11 @@ class Prime_Cache_File_Optimizer {
 				$exact_handles[] = $handle;
 			}
 		}
-		// Cocoon's main script must run at load even under Maximum Delay so its
-		// mobile-sidebar change-handler is attached before the first toggle.
-		if ( $is_cocoon ) {
-			$exact_handles[] = 'cocoon-js';
-		}
 		$exact_handles = array_values( array_unique( $exact_handles ) );
 
 		return preg_replace_callback(
 			'#<script\b[^>]*>#i',
-			function ( $tag_match ) use ( $exact_handles, $url_substrings, $max, $is_cocoon ) {
+			function ( $tag_match ) use ( $exact_handles, $url_substrings, $max ) {
 				$tag = $tag_match[0];
 
 				// Already marked — leave as-is (idempotent). Case-insensitive
@@ -1001,13 +982,9 @@ class Prime_Cache_File_Optimizer {
 
 				// Inline extra/before/after blocks — must execute immediately
 				// so the paired external script sees the localized globals.
-				// Under Maximum Delay the pair is delayed together instead —
-				// except cocoon-js, whose config must precede its load-time
-				// sidebar handler even under Maximum Delay (see $is_cocoon note).
-				if ( preg_match( '#\bid\s*=\s*["\']([^"\']+)-js-(?:before|extra|after)["\']#i', $tag, $inline_m ) ) {
-					if ( ! $max || ( $is_cocoon && 'cocoon-js' === $inline_m[1] ) ) {
-						return preg_replace( '#^<script\b#i', '<script data-no-delay', $tag, 1 );
-					}
+				// Under Maximum Delay the pair is delayed together instead.
+				if ( ! $max && preg_match( '#\bid\s*=\s*["\'][^"\']+-js-(?:before|extra|after)["\']#i', $tag ) ) {
+					return preg_replace( '#^<script\b#i', '<script data-no-delay', $tag, 1 );
 				}
 
 				// Strict id-attribute match: extract the id value, then compare
