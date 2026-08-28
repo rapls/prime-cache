@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.52
+Stable tag: 1.10.53
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -176,6 +176,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.53 =
+* Fixed: on the Cocoon theme, the mobile slide-in sidebar could still open blank even after the jQuery fix in 1.10.52. When the sidebar button is tapped, Cocoon moves the sidebar into the drawer and renames its id, but its own script then re-selects the element by the *old* id when adding the visibility class — so the class is never applied and the relocated sidebar falls back to the theme's mobile display:none. Prime Cache now outputs a small Cocoon-only CSS rule that keeps the relocated sidebar visible inside the drawer (scoped to the drawer, so the in-page sidebar is untouched). Together with 1.10.52 this fully resolves the blank Cocoon mobile sidebar.
 
 = 1.10.52 =
 * Fixed: with Delay JavaScript enabled, jQuery — and with it every jQuery-dependent script on the page — could become undefined on any site where the theme or a plugin calls `jQuery.noConflict()` (the common call that frees the `$` alias). The Delay JS loader backed both `window.jQuery` and `window.$` with a single internal variable, so `noConflict()` resetting `window.$` to its pre-jQuery value also wiped `window.jQuery`. The whole page then failed with "jQuery is not a function" / "$ is not a function", breaking anything that relies on jQuery. `window.$` now keeps its own backing value, independent of `window.jQuery`. This is the actual cause behind the Cocoon mobile slide-in sidebar opening blank (reported for 1.10.51), and the fix restores every other jQuery-dependent feature broken the same way.
@@ -417,6 +420,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.53 =
+Completes the Cocoon mobile slide-in sidebar fix: the relocated sidebar now stays visible inside the drawer instead of opening blank. Pairs with the jQuery fix in 1.10.52.
 
 = 1.10.52 =
 Fixes Delay JavaScript breaking jQuery (making the whole page fail with "jQuery is not a function") on sites where a theme or plugin calls jQuery.noConflict(). This is the real cause of the Cocoon mobile sidebar opening blank; the 1.10.51 Cocoon change is reverted. Recommended for all Delay JS users.

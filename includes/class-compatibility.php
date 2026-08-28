@@ -28,6 +28,29 @@ class Prime_Cache_Compatibility {
 	public function __construct() {
 		add_action( 'admin_notices', array( $this, 'check_conflicts' ) );
 		add_action( 'wp_footer', array( $this, 'cocoon_bfcache_menu_close' ), 99 );
+		add_action( 'wp_head', array( $this, 'cocoon_slide_in_sidebar_css' ), 99 );
+	}
+
+	/**
+	 * Cocoon: keep the mobile slide-in sidebar visible after it is moved into
+	 * the drawer.
+	 *
+	 * When the sidebar button is tapped, Cocoon's script moves #sidebar into
+	 * #sidebar-menu-content, renames it to #slide-in-sidebar, and is supposed to
+	 * add a `slide-in-sidebar` class — but its own code re-selects `#sidebar`
+	 * *after* renaming the id, so that selector matches nothing and the class is
+	 * never added. The drawer copy then falls back to the theme's mobile
+	 * `display:none` and the panel opens blank. Cocoon happens to render anyway
+	 * without our optimizations, but with the drawer content present yet hidden
+	 * the failure is visible. Force the moved sidebar visible inside the drawer.
+	 * The selector is scoped to #sidebar-menu-content, so it only affects the
+	 * relocated copy — never the sidebar in its normal in-page position.
+	 */
+	public function cocoon_slide_in_sidebar_css() {
+		if ( false === strpos( (string) get_template(), 'cocoon' ) ) {
+			return;
+		}
+		echo '<style id="prime-cache-cocoon-compat">#sidebar-menu-content #slide-in-sidebar,#sidebar-menu-content .sidebar{display:block!important}</style>' . "\n";
 	}
 
 	/**
