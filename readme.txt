@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.54
+Stable tag: 1.10.55
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -176,6 +176,10 @@ No. The free plugin does not send your data or API requests to any third-party s
 Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
 
 == Changelog ==
+
+= 1.10.55 =
+* Fixed: "Clear Minified CSS/JS" and "Clear Critical CSS" now also clear the page cache. The cached page HTML embeds the hashed filenames of those generated assets; deleting the files while keeping the HTML left every cached page pointing at assets that no longer existed. Served as a cache hit, they returned the theme's 404 HTML page, which the browser rejects as a stylesheet, so the page rendered unstyled until it was regenerated. Both buttons now purge the page cache so the HTML is rebuilt with valid asset URLs.
+* Added: a missing-asset fallback. If an optimizer asset (minified/combined CSS/JS or Remove Unused CSS) is ever requested but its file is gone — a partial cache clear, a manual delete, a disk hiccup — Prime Cache now rebuilds it on the fly from the original source (recorded in a small manifest) and serves it with the correct `text/css` / `application/javascript` type and a 200, self-healing it back to disk. When it cannot be rebuilt it serves an empty file of the right type instead of a 404 HTML page, so a single missing asset can no longer break a page's styling.
 
 = 1.10.54 =
 * Fixed: with Defer or Delay JavaScript enabled, WordPress i18n-based scripts could fail with "wp is not defined" or "Cannot read properties of undefined (reading 'hooks')", breaking translations, Contact Form 7, the admin bar, and other wp.* features. A script kept synchronous for its inline translation block (e.g. wp-i18n, which carries a `-js-after`) was allowed to run before its deferred/delayed dependency (wp-hooks), so it read `window.wp.hooks` before wp-hooks had defined it — taking down the whole `wp` namespace. Prime Cache now keeps the dependencies of such kept-synchronous scripts synchronous as well, preserving dependency order. The set is scoped to scripts actually printed on the page, so unrelated optimizations — including mobile jQuery defer — are unaffected.
@@ -423,6 +427,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * Initial release: page cache (advanced-cache.php drop-in), browser cache headers, .htaccess optimization, Gzip compression, 404 caching, HTML/CSS/JS minification, lazy load, WebP conversion, bulk image optimization, cache preloading, link prefetching, automatic cache purge, performance tweaks, security headers, import/export, and WP-CLI support.
 
 == Upgrade Notice ==
+
+= 1.10.55 =
+Fixes cached pages rendering unstyled after "Clear Minified/Critical CSS" (those now also purge the page cache), and adds a fallback that rebuilds a missing optimizer asset instead of returning a 404 that breaks the page. Recommended for all users.
 
 = 1.10.54 =
 Fixes Defer/Delay JavaScript breaking WordPress i18n scripts ("wp is not defined"), which could break translations, Contact Form 7, and the admin bar. Dependencies of kept-synchronous scripts now stay in order. Recommended for all Defer/Delay JS users.

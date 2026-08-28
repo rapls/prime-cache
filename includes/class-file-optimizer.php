@@ -51,6 +51,17 @@ class Prime_Cache_File_Optimizer {
 			// Delay JS is wired in the HTML pipeline (process_html →
 			// delay_all_scripts), which captures inline / external / CDN
 			// scripts that script_loader_tag does not see.
+
+			// Missing-asset fallback. A cached page's HTML embeds hashed
+			// optimizer asset URLs; if such a file is ever gone (a partial cache
+			// clear, a manual delete, a disk hiccup) the browser gets the theme's
+			// 404 HTML page for a stylesheet and the page renders unstyled. Catch
+			// those requests (they fall through to WordPress as a 404) and rebuild
+			// the asset from its recorded sources, or at worst serve an empty file
+			// with the right Content-Type so nothing is rejected. Registered
+			// regardless of should_optimize_html(): stale HTML can reference these
+			// files even after optimization is turned off.
+			add_action( 'template_redirect', array( $this, 'maybe_serve_fo_fallback' ), 0 );
 		}
 
 		// Debug logging hooks must register independently of HTML optimization
@@ -528,6 +539,10 @@ class Prime_Cache_File_Optimizer {
 		if ( ! self::atomic_write( $out, $css ) ) {
 			return false;
 		}
+
+		// Record the source so a missing asset can be rebuilt (see
+		// maybe_serve_fo_fallback).
+		self::record_asset( $hash . '.css', array( $path ) );
 
 		return $out_url;
 	}
@@ -1488,6 +1503,10 @@ class Prime_Cache_File_Optimizer {
 			return false;
 		}
 
+		// Record the source so a missing asset can be rebuilt (see
+		// maybe_serve_fo_fallback).
+		self::record_asset( $hash . '.js', array( $path ) );
+
 		return $out_url;
 	}
 
@@ -1581,6 +1600,12 @@ class Prime_Cache_File_Optimizer {
 		}
 
 		if ( ! $found ) {
+			// Clean-URL mode: attempt the same missing-asset rebuild as the
+			// direct-URL path before giving up. Only css/js are rebuildable.
+			if ( in_array( $ext, array( 'css', 'js' ), true )
+				&& preg_match( '#^[a-f0-9]{32}\.(?:css|js)$#', $file ) ) {
+				$this->recover_and_serve( 'css' === $ext ? 'css' : 'js', $file );
+			}
 			status_header( 404 );
 			exit;
 		}
@@ -1606,6 +1631,174 @@ class Prime_Cache_File_Optimizer {
 		header( 'Cache-Control: public, max-age=31536000' . $immutable_suffix );
 		header( 'X-Prime-Cache-FO: HIT' );
 		readfile( $found );
+		exit;
+	}
+
+	// ── Missing-asset fallback ──────────────────────────────
+
+	/** Path to the hash → source-list manifest (kept outside the fo dir so it
+	 * survives a wipe of prime-cache-fo/). */
+	private static function manifest_path() {
+		return PRIME_CACHE_CONFIG_DIR . 'fo-manifest.json';
+	}
+
+	/**
+	 * Record the sources a generated optimizer asset was built from, so the
+	 * asset can be rebuilt on demand if its file goes missing. Called only when
+	 * a new asset is actually written (existing assets short-circuit earlier),
+	 * so manifest writes are rare. Sources are stored relative to WP_CONTENT_DIR.
+	 *
+	 * @param string $filename Output basename, e.g. "abc123.css".
+	 * @param array  $sources  Absolute source file paths.
+	 */
+	public static function record_asset( $filename, $sources ) {
+		if ( ! preg_match( '#^[a-f0-9]{32}\.(?:css|js)$#', $filename ) || empty( $sources ) ) {
+			return;
+		}
+		$base = str_replace( '\\', '/', WP_CONTENT_DIR );
+		$rel  = array();
+		foreach ( $sources as $s ) {
+			$s = str_replace( '\\', '/', (string) $s );
+			$rel[] = ( 0 === strpos( $s, $base . '/' ) ) ? substr( $s, strlen( $base ) + 1 ) : $s;
+		}
+
+		$path = self::manifest_path();
+		if ( ! wp_mkdir_p( dirname( $path ) ) ) {
+			return;
+		}
+		$fp = @fopen( $path, 'c+' );
+		if ( ! $fp ) {
+			return;
+		}
+		if ( flock( $fp, LOCK_EX ) ) {
+			$map = json_decode( (string) stream_get_contents( $fp ), true );
+			if ( ! is_array( $map ) ) {
+				$map = array();
+			}
+			if ( ! isset( $map[ $filename ] ) ) {
+				$map[ $filename ] = $rel;
+				// Bound growth: drop the oldest entries past a generous cap.
+				if ( count( $map ) > 5000 ) {
+					$map = array_slice( $map, -4000, null, true );
+				}
+				ftruncate( $fp, 0 );
+				rewind( $fp );
+				fwrite( $fp, (string) wp_json_encode( $map ) );
+				fflush( $fp );
+			}
+			flock( $fp, LOCK_UN );
+		}
+		fclose( $fp );
+	}
+
+	/** Read the manifest as an array (empty if absent/corrupt). */
+	private static function read_manifest() {
+		$path = self::manifest_path();
+		if ( ! is_readable( $path ) ) {
+			return array();
+		}
+		$map = json_decode( (string) file_get_contents( $path ), true );
+		return is_array( $map ) ? $map : array();
+	}
+
+	/**
+	 * Front-end catch for a request to an optimizer asset whose file is gone.
+	 * These fall through to WordPress as a 404 (the theme's HTML error page),
+	 * which the browser rejects as CSS/JS. Rebuild the asset instead.
+	 */
+	public function maybe_serve_fo_fallback() {
+		$uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		if ( '' === $uri ) {
+			return;
+		}
+		$marker = wp_parse_url( $this->cache_url, PHP_URL_PATH ); // /wp-content/cache/prime-cache-fo/
+		if ( ! $marker || false === strpos( $uri, $marker ) ) {
+			return;
+		}
+		$reqpath = strtok( $uri, '?' );
+		if ( ! preg_match( '#' . preg_quote( $marker, '#' ) . '(css|js|ucss|ccss)/([a-f0-9]{32}\.(?:css|js))$#', $reqpath, $m ) ) {
+			return;
+		}
+		$subdir   = $m[1];
+		$filename = $m[2];
+
+		// If the file exists we should never have reached PHP; bail defensively.
+		if ( file_exists( $this->cache_dir . $subdir . '/' . $filename ) ) {
+			return;
+		}
+		$this->recover_and_serve( $subdir, $filename );
+	}
+
+	/**
+	 * Rebuild a missing optimizer asset from its recorded sources and serve it
+	 * (self-healing to disk), or serve an empty file with the correct
+	 * Content-Type when it cannot be rebuilt. Always exits.
+	 *
+	 * @param string $subdir   One of css|js|ucss|ccss.
+	 * @param string $filename "{32hex}.{css|js}".
+	 */
+	private function recover_and_serve( $subdir, $filename ) {
+		$ext = strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
+		$ct  = ( 'js' === $ext ) ? 'application/javascript; charset=UTF-8' : 'text/css; charset=UTF-8';
+
+		$map     = self::read_manifest();
+		$content = null;
+
+		if ( isset( $map[ $filename ] ) && is_array( $map[ $filename ] ) ) {
+			$content_root = realpath( WP_CONTENT_DIR );
+			$parts        = array();
+			foreach ( $map[ $filename ] as $rel ) {
+				$src  = ( 0 === strpos( $rel, '/' ) ) ? $rel : WP_CONTENT_DIR . '/' . $rel;
+				$real = realpath( $src );
+				// Confine reads to wp-content so a tampered manifest cannot leak
+				// arbitrary files.
+				if ( ! $real || ! is_readable( $real ) || ! self::path_within( $real, $content_root ) ) {
+					continue;
+				}
+				$c = file_get_contents( $real );
+				if ( false === $c ) {
+					continue;
+				}
+				if ( 'js' !== $ext ) {
+					$c = $this->rebase_css_urls( $c, $real );
+				}
+				$parts[] = $c;
+			}
+			if ( $parts ) {
+				$joined = implode( "\n", $parts );
+				if ( 'js' === $ext ) {
+					$content = $this->minify_js_content( $joined );
+				} elseif ( 'ucss' === $subdir ) {
+					// The stripped selector set depended on a page DOM we no longer
+					// have. Serve the full source CSS — larger, but visually correct.
+					$content = $joined;
+				} else {
+					$content = $this->minify_css_content( $joined );
+				}
+			}
+		}
+
+		if ( null === $content ) {
+			// Could not rebuild — serve an empty, correctly-typed body so the
+			// browser accepts it instead of choking on a 404 HTML page.
+			$content = '';
+		} else {
+			// Self-heal: persist so the next hit is served statically.
+			$out = $this->cache_dir . $subdir . '/' . $filename;
+			if ( wp_mkdir_p( dirname( $out ) ) ) {
+				self::atomic_write( $out, $content );
+			}
+		}
+
+		if ( ! headers_sent() ) {
+			status_header( 200 );
+			header( 'Content-Type: ' . $ct );
+			// Short TTL: a recovered/empty body should not be cached as long as a
+			// real hashed asset.
+			header( 'Cache-Control: public, max-age=3600' );
+			header( 'X-Prime-Cache-FO: RECOVERED' );
+		}
+		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- raw CSS/JS body, not HTML.
 		exit;
 	}
 

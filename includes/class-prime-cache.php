@@ -712,11 +712,23 @@ class Prime_Cache {
 
 			case 'clear_minified':
 				$this->clear_minified_files();
+				// The cached page HTML embeds the minified/combined/UCSS asset
+				// URLs (their hashed filenames). Deleting those files without
+				// dropping the HTML leaves every cached page pointing at assets
+				// that no longer exist — served as a cache HIT, they 404 forever
+				// (the 404 body is the theme's HTML error page, which the browser
+				// rejects as a stylesheet, so the page renders unstyled). Always
+				// purge the page cache too so the HTML is regenerated with valid,
+				// freshly written asset URLs.
+				$this->purge->purge_all();
 				$msg = 'minified';
 				break;
 
 			case 'clear_critical_css':
 				$this->clear_critical_css_files();
+				// Cached HTML embeds the generated critical-CSS inline/URL too —
+				// purge it so it does not reference deleted files (see above).
+				$this->purge->purge_all();
 				$msg = 'ccss';
 				break;
 
