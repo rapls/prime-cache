@@ -1813,5 +1813,65 @@ class Prime_Cache {
 		} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			// Retry on the next scheduled run.
 		}
+
+		// The file-optimizer assets live in a sibling directory
+		// (prime-cache-fo/), outside PRIME_CACHE_CACHE_DIR, so the sweep above
+		// never reaches them. Without their own GC they accumulate forever: a
+		// content change mints a fresh hash and orphans the old asset, and any
+		// 0-byte file (a failed generation before the atomic_write guard) lingers
+		// as a silent broken stylesheet. Age them out on the same lifespan, and
+		// drop 0-byte files on sight — a still-referenced asset that gets removed
+		// is rebuilt on demand by the missing-asset fallback.
+		$this->cleanup_expired_fo_assets( $lifespan, $now );
+	}
+
+	/**
+	 * Age out generated file-optimizer assets and purge 0-byte files.
+	 *
+	 * @param int $lifespan Cache lifespan in seconds.
+	 * @param int $now      Current timestamp.
+	 */
+	private function cleanup_expired_fo_assets( $lifespan, $now ) {
+		$fo_dir = WP_CONTENT_DIR . '/cache/prime-cache-fo/';
+		if ( ! is_dir( $fo_dir ) || ! class_exists( 'Prime_Cache_File_Optimizer' ) ) {
+			return;
+		}
+
+		$cache_root = realpath( WP_CONTENT_DIR . '/cache/' );
+
+		// Only the per-source / per-page asset dirs that grow without bound and
+		// that the missing-asset fallback can rebuild on demand. ccss/ (critical
+		// CSS) and fonts/ are left alone: critical CSS is costly to regenerate
+		// and fonts are not hashed per page, so neither explodes the way css/,
+		// js/ and ucss/ do.
+		foreach ( array( 'css', 'js', 'ucss' ) as $subdir ) {
+			$dir  = $fo_dir . $subdir . '/';
+			$real = realpath( $dir );
+			// Refuse to recurse through a symlink that resolves outside the cache
+			// root — mirrors the boundary check in the manual clear paths.
+			if ( ! $real || ! is_dir( $real )
+				|| ! Prime_Cache_File_Optimizer::path_within( $real, $cache_root ) ) {
+				continue;
+			}
+
+			try {
+				$iterator = new DirectoryIterator( $real );
+				foreach ( $iterator as $item ) {
+					if ( $item->isDot() || ! $item->isFile() ) {
+						continue;
+					}
+					$ext = strtolower( $item->getExtension() );
+					if ( ! in_array( $ext, array( 'css', 'js' ), true ) ) {
+						continue;
+					}
+					// Drop 0-byte files immediately (any age); age the rest out.
+					if ( 0 === $item->getSize() || ( $now - $item->getMTime() ) > $lifespan ) {
+						@unlink( $item->getPathname() );
+					}
+				}
+			} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				// Retry on the next scheduled run.
+			}
+		}
 	}
 }

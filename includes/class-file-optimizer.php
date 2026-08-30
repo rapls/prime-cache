@@ -1808,6 +1808,14 @@ class Prime_Cache_File_Optimizer {
 	 * Atomic file write: temp file + rename to prevent serving partial files.
 	 */
 	public static function atomic_write( $path, $content ) {
+		// An empty body is never a valid optimized asset. Written to disk it
+		// serves as a silent 200 with no CSS/JS — worse than a 404, which at
+		// least surfaces the failure — and leaves the page unstyled (this is the
+		// source of the 0-byte cache files that broke Cocoon's mobile menu).
+		// Refuse it so callers fall back to the original, un-optimized URL.
+		if ( '' === $content || null === $content ) {
+			return false;
+		}
 		$tmp = $path . '.tmp.' . getmypid();
 		if ( false === file_put_contents( $tmp, $content ) ) { // phpcs:ignore
 			return false;

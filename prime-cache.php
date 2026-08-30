@@ -3,7 +3,7 @@
  * Plugin Name: Prime Cache – Page Cache & Core Web Vitals (Zero Config)
  * Plugin URI:  https://raplsworks.com/plugins/prime-cache/
  * Description: Serves pages from a static copy, converts images to WebP, and defers the JavaScript that blocks rendering. No wp-config.php edits.
- * Version: 1.10.55
+ * Version: 1.10.56
  * Author: rapls
  * Author URI:  https://raplsworks.com/
  * License: GPL-2.0-or-later
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PRIME_CACHE_VERSION', '1.10.55' );
+define( 'PRIME_CACHE_VERSION', '1.10.56' );
 define( 'PRIME_CACHE_FILE', __FILE__ );
 define( 'PRIME_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 

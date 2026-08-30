@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.55
+Stable tag: 1.10.56
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -177,6 +177,10 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 
 == Changelog ==
 
+= 1.10.56 =
+* Fixed: an optimizer asset could be written as a 0-byte file and then served as an empty but "successful" (200) stylesheet or script, leaving the page silently unstyled — harder to spot than a 404. Prime Cache now refuses to write an empty optimized asset and falls back to the original, un-optimized file instead. This is a likely cause of the blank Cocoon mobile sidebar on some sites.
+* Added: the hourly cleanup now also ages out generated optimizer assets (combined/minified CSS/JS and Remove Unused CSS) and removes any stray 0-byte files. Previously these lived in a sibling directory the cleanup never reached, so they could accumulate without bound; critical CSS and self-hosted fonts are left untouched. A still-referenced asset that is removed is rebuilt on demand by the missing-asset fallback added in 1.10.55.
+
 = 1.10.55 =
 * Fixed: "Clear Minified CSS/JS" and "Clear Critical CSS" now also clear the page cache. The cached page HTML embeds the hashed filenames of those generated assets; deleting the files while keeping the HTML left every cached page pointing at assets that no longer existed. Served as a cache hit, they returned the theme's 404 HTML page, which the browser rejects as a stylesheet, so the page rendered unstyled until it was regenerated. Both buttons now purge the page cache so the HTML is rebuilt with valid asset URLs.
 * Added: a missing-asset fallback. If an optimizer asset (minified/combined CSS/JS or Remove Unused CSS) is ever requested but its file is gone — a partial cache clear, a manual delete, a disk hiccup — Prime Cache now rebuilds it on the fly from the original source (recorded in a small manifest) and serves it with the correct `text/css` / `application/javascript` type and a 200, self-healing it back to disk. When it cannot be rebuilt it serves an empty file of the right type instead of a 404 HTML page, so a single missing asset can no longer break a page's styling.
@@ -318,6 +322,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * For the changelog of version 1.10.19 and earlier, see the plugin page: https://raplsworks.com/plugins/prime-cache/
 
 == Upgrade Notice ==
+
+= 1.10.56 =
+Prevents optimizer assets from being written as empty 0-byte files that serve as a silent, unstyled 200 (a likely cause of the blank Cocoon mobile sidebar), and ages out old/stray optimizer files the hourly cleanup previously never reached. Recommended for all users.
 
 = 1.10.55 =
 Fixes cached pages rendering unstyled after "Clear Minified/Critical CSS" (those now also purge the page cache), and adds a fallback that rebuilds a missing optimizer asset instead of returning a 404 that breaks the page. Recommended for all users.
