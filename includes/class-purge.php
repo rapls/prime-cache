@@ -266,13 +266,20 @@ class Prime_Cache_Purge {
 	// ── Core update (upgrader) ───────────────────────────────
 
 	/**
-	 * Only purge cache when a core update completes, not plugin/theme/translation updates.
+	 * Purge the whole cache after a core, plugin, or theme update completes.
+	 *
+	 * A plugin/theme update can change the CSS/JS it ships, which invalidates
+	 * both the cached page HTML and any combined/optimized assets that embed a
+	 * content hash of those files. A normal in-place update leaves the plugin
+	 * active, so 'activated_plugin' never fires — this hook is the only signal
+	 * that catches it. purge_all() is idempotent, so bulk and automatic updates
+	 * that fire this repeatedly are safe. Translation-only updates are ignored.
 	 *
 	 * @param WP_Upgrader $upgrader Upgrader instance.
 	 * @param array       $options  Update details including 'type'.
 	 */
 	public function on_upgrader_complete( $upgrader, $options ) {
-		if ( isset( $options['type'] ) && 'core' === $options['type'] ) {
+		if ( isset( $options['type'] ) && in_array( $options['type'], array( 'core', 'plugin', 'theme' ), true ) ) {
 			$this->purge_all();
 		}
 	}

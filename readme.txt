@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.56
+Stable tag: 1.10.57
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -177,6 +177,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 
 == Changelog ==
 
+= 1.10.57 =
+* Fixed: updating a plugin or theme did not clear the cache, so a cached page — and any combined/minified CSS or JS whose content hash came from the updated files — could keep serving the old version until the cache was cleared by hand. Prime Cache only purged on WordPress core updates, and a normal in-place plugin update leaves the plugin active, so no other event caught it. It now purges the whole cache after a plugin or theme update as well (core updates already did this; translation-only updates are still ignored).
+
 = 1.10.56 =
 * Fixed: an optimizer asset could be written as a 0-byte file and then served as an empty but "successful" (200) stylesheet or script, leaving the page silently unstyled — harder to spot than a 404. Prime Cache now refuses to write an empty optimized asset and falls back to the original, un-optimized file instead. This is a likely cause of the blank Cocoon mobile sidebar on some sites.
 * Added: the hourly cleanup now also ages out generated optimizer assets (combined/minified CSS/JS and Remove Unused CSS) and removes any stray 0-byte files. Previously these lived in a sibling directory the cleanup never reached, so they could accumulate without bound; critical CSS and self-hosted fonts are left untouched. A still-referenced asset that is removed is rebuilt on demand by the missing-asset fallback added in 1.10.55.
@@ -322,6 +325,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * For the changelog of version 1.10.19 and earlier, see the plugin page: https://raplsworks.com/plugins/prime-cache/
 
 == Upgrade Notice ==
+
+= 1.10.57 =
+Clears the cache after a plugin or theme update, not just WordPress core updates, so changes to a plugin's or theme's CSS/JS take effect without a manual cache clear. Recommended for all users.
 
 = 1.10.56 =
 Prevents optimizer assets from being written as empty 0-byte files that serve as a silent, unstyled 200 (a likely cause of the blank Cocoon mobile sidebar), and ages out old/stray optimizer files the hourly cleanup previously never reached. Recommended for all users.
