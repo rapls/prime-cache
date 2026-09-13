@@ -307,21 +307,18 @@ function prime_cache_get_settings( $force = false ) {
 	return $cached;
 }
 
-/**
- * Load bundled plugin translations.
+/*
+ * No load_plugin_textdomain(). The catalogue is not shipped any more:
+ * WordPress.org builds it from translate.wordpress.org and serves it into
+ * wp-content/languages/plugins/, where core's just-in-time loader finds it
+ * without being asked. The sources stay in languages/ for the translator and
+ * are export-ignored out of the package.
  *
- * WordPress.org language packs (delivered into wp-content/languages/plugins/)
- * are used when available, but the bundled translations under languages/ are
- * still required for sideloaded installs and for the window between a release
- * and translate.wordpress.org distributing the language pack. WP 6.7+ also
- * needs this hooked on init or later to avoid the
- * "_load_textdomain_just_in_time was called incorrectly" notice.
+ * The two windows this call used to cover are now simply uncovered, and that
+ * was the trade accepted when the bundle was dropped: strings newer than the
+ * published pack read English until GlotPress catches up, and an install that
+ * did not come from WordPress.org has no translations at all.
  */
-add_action( 'init', 'prime_cache_load_textdomain' );
-function prime_cache_load_textdomain() {
-	// phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- Bundled languages/*.mo files must still be loaded for sideloaded installs and for the period before translate.wordpress.org has distributed the language pack. WP_LANG_DIR/plugins is empty in those windows so just-in-time loading cannot find the file.
-	load_plugin_textdomain( 'prime-cache', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-}
 
 register_activation_hook( __FILE__, array( 'Prime_Cache', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'Prime_Cache', 'deactivate' ) );
