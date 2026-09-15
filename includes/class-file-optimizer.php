@@ -484,8 +484,13 @@ class Prime_Cache_File_Optimizer {
 		// Remove spaces around { } ; : , but preserve space before ( for media queries.
 		// "and (" must keep the space — "and(" is invalid CSS.
 		$css = preg_replace( '#\s*([{};:,])\s*#', '$1', $css );
-		// Fix: restore space before ( after keywords like "and", "not", "or", "only".
-		$css = preg_replace( '#\b(and|not|or|only)\(#i', '$1 (', $css );
+		// Fix: restore space before ( after media/@supports keywords "and", "not",
+		// "or", "only" ("and(" is invalid CSS). The negative lookbehind for ":" is
+		// essential: without it this also matches the ":not(" pseudo-class, turning
+		// ".x:not(.y)" into the invalid ".x:not (.y)" and dropping every rule that
+		// uses :not() — which silently broke layout on themes that rely on it
+		// (e.g. Avada's :not(.fusion-search-form-classic) search-form rules).
+		$css = preg_replace( '#(?<!:)\b(and|not|or|only)\(#i', '$1 (', $css );
 		// Remove last semicolon before }.
 		$css = str_replace( ';}', '}', $css );
 
@@ -509,7 +514,12 @@ class Prime_Cache_File_Optimizer {
 		// would mint a fresh hash for byte-identical CSS on every hit and grow
 		// the cache without bound. filemtime + filesize still force a new hash
 		// on a same-path redeploy so a content change is never served stale.
-		$hash = md5( $path . '|' . filemtime( $path ) . '|' . filesize( $path ) );
+		// The plugin version is mixed in so a minifier fix (e.g. the :not()
+		// spacing fix) invalidates every cached asset on update — the file's
+		// own mtime does not change, so without this the old, broken output
+		// would be reused indefinitely (and its URL would stay the same,
+		// letting upstream/server caches keep serving stale bytes too).
+		$hash = md5( PRIME_CACHE_VERSION . '|' . $path . '|' . filemtime( $path ) . '|' . filesize( $path ) );
 		$out  = $this->cache_dir . 'css/' . $hash . '.css';
 		$out_url = $this->cache_url . 'css/' . $hash . '.css';
 
@@ -1477,7 +1487,9 @@ class Prime_Cache_File_Optimizer {
 		// Key on the resolved file identity (path + mtime + size), not the raw
 		// request URL — a per-render ?ver= query would otherwise mint a fresh
 		// hash for identical JS on every hit and grow the cache without bound.
-		$hash = md5( $path . '|' . filemtime( $path ) . '|' . filesize( $path ) );
+		// The plugin version is mixed in so a code fix invalidates cached assets
+		// on update even when the source file's mtime is unchanged.
+		$hash = md5( PRIME_CACHE_VERSION . '|' . $path . '|' . filemtime( $path ) . '|' . filesize( $path ) );
 		$out  = $this->cache_dir . 'js/' . $hash . '.js';
 		$out_url = $this->cache_url . 'js/' . $hash . '.js';
 

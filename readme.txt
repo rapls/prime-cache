@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.58
+Stable tag: 1.10.59
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -177,6 +177,10 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 
 == Changelog ==
 
+= 1.10.59 =
+* Fixed: the CSS minifier corrupted `:not()` selectors. A rule that added the required space to media-query keywords (`and(` to `and (`) also matched the `:not(` pseudo-class, turning `.a:not(.b)` into the invalid `.a:not (.b)` — so browsers dropped every style rule that used `:not()`. On themes that rely on `:not()` for layout (e.g. Avada's search form) this left elements mispositioned or unstyled once CSS optimization was on. The minifier now leaves `:not()` untouched while still spacing media-query keywords.
+* Changed: minified CSS/JS (and, with the Pro add-on, combined and unused-CSS files) now include the plugin version in their cache filename. A code fix like the one above previously reused the old, broken output because the source file's timestamp had not changed; now an update regenerates the assets automatically, and the new filenames also stop upstream/server caches from serving stale bytes. Existing optimized files are replaced on the next visit after updating.
+
 = 1.10.58 =
 * Fixed: a deleted image could keep being shown. The WebP rewrite rule served a `.webp` whenever one existed on disk, without checking that the original was still there — so an orphaned `.webp` left behind by a deleted original kept being served at 200 instead of returning a clean 404. The rule now also requires the original file to exist. (The Pro add-on's AVIF rule gets the same fix.)
 * Fixed: deleting an image in the Media Library now also deletes its generated `.webp`/`.avif` variants (the original and every size). Before, WordPress removed only the originals it tracks and the converted files were orphaned — and because conversion skips a file that already has a variant, re-uploading an image under the same name could keep showing the OLD picture.
@@ -330,6 +334,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * For the changelog of version 1.10.19 and earlier, see the plugin page: https://raplsworks.com/plugins/prime-cache/
 
 == Upgrade Notice ==
+
+= 1.10.59 =
+Fixes a CSS minifier bug that broke `:not()` selectors (turning `:not(` into an invalid `:not (`), which could misposition or unstyle elements on themes that use `:not()` for layout, such as Avada. Optimized CSS/JS now carry the plugin version in their filename so fixes take effect on update without a manual cache clear. Recommended for all users, especially anyone using CSS optimization.
 
 = 1.10.58 =
 Fixes a deleted image continuing to show (an orphaned WebP/AVIF served at 200), and now removes the converted variants when you delete an image. Adds a cleanup for variants orphaned by earlier deletes (Media settings, or `wp prime-cache image-orphans`). Recommended for all users.
