@@ -103,10 +103,17 @@ class Prime_Cache_Image_Converter {
 			}
 		}
 
+		// Clean up converted siblings when an attachment is deleted, so a removed
+		// original never leaves an orphaned .webp/.avif behind. Registered
+		// unconditionally (even when conversion is off) so toggling the feature
+		// never strands siblings that were created earlier.
+		add_action( 'delete_attachment', array( $this, 'on_delete_attachment' ) );
+
 		// AJAX batch handlers (registered regardless — bulk/column work for WebP in Free).
 		add_action( 'wp_ajax_prime_cache_img_scan', array( $this, 'ajax_scan' ) );
 		add_action( 'wp_ajax_prime_cache_img_batch', array( $this, 'ajax_batch' ) );
 		add_action( 'wp_ajax_prime_cache_img_stats', array( $this, 'ajax_stats' ) );
+		add_action( 'wp_ajax_prime_cache_img_clean_orphans', array( $this, 'ajax_clean_orphans' ) );
 
 		// Media Library column.
 		add_filter( 'manage_media_columns', array( $this, 'add_media_column' ) );
@@ -224,6 +231,53 @@ class Prime_Cache_Image_Converter {
 		$this->update_stats( $attachment_id, $old_meta );
 
 		return $metadata;
+	}
+
+	/**
+	 * Delete the converted siblings of an attachment being removed.
+	 *
+	 * Converted files are named "{original}.webp" / "{original}.avif" (extension
+	 * appended, not replaced), one per size, and WordPress only deletes the
+	 * originals it knows about — so without this the .webp/.avif are orphaned. A
+	 * left-behind .avif then keeps being served for a re-uploaded same-name image
+	 * (the converter skips regeneration when the variant already exists), showing
+	 * the OLD picture. Runs on `delete_attachment`, before core unlinks the
+	 * originals, so the metadata is still readable.
+	 *
+	 * @param int $attachment_id Attachment being deleted.
+	 * @return void
+	 */
+	public function on_delete_attachment( $attachment_id ) {
+		$file = get_attached_file( $attachment_id );
+		if ( ! $file ) {
+			return;
+		}
+
+		$targets = array( $file );
+
+		$meta = wp_get_attachment_metadata( $attachment_id );
+		if ( ! empty( $meta['sizes'] ) ) {
+			$dir = dirname( $file );
+			foreach ( $meta['sizes'] as $size ) {
+				if ( ! empty( $size['file'] ) ) {
+					$targets[] = $dir . '/' . $size['file'];
+				}
+			}
+		}
+
+		foreach ( $targets as $src ) {
+			foreach ( array( '.webp', '.avif' ) as $ext ) {
+				$variant = $src . $ext;
+				if ( is_file( $variant ) ) {
+					wp_delete_file( $variant );
+				}
+				// The "leave it alone" markers written when a source can't be
+				// converted (e.g. {src}.avif.skip) — remove them too.
+				if ( is_file( $variant . '.skip' ) ) {
+					wp_delete_file( $variant . '.skip' );
+				}
+			}
+		}
 	}
 
 	// ── Conversion ───────────────────────────────────────────
@@ -1132,8 +1186,98 @@ class Prime_Cache_Image_Converter {
 			'is_sample'  => $sampled < $total,
 		);
 
+		$orphans           = $this->scan_orphans( 20000, false );
+		$result['orphans'] = $orphans['count'];
+		$result['orphans_capped'] = $orphans['capped'];
+
 		set_transient( 'prime_cache_img_stats_cache', $result, 60 );
 		wp_send_json_success( $result );
+	}
+
+	// ── Orphaned converted files ─────────────────────────────
+
+	/**
+	 * Walk the uploads tree for converted files (.webp / .avif) whose original
+	 * no longer exists — the residue a pre-fix delete, or an old same-name
+	 * re-upload, left behind. Optionally delete them.
+	 *
+	 * Bounded so a huge media library can't stall the request; when the cap is
+	 * hit the result is marked capped and the caller can run it again.
+	 *
+	 * @param int  $limit  Max converted files to inspect.
+	 * @param bool $delete Delete the orphans found (true) or just count (false).
+	 * @return array{count:int,capped:bool,files:string[]} `files` holds up to 200
+	 *   sample paths (relative to uploads) for a dry-run listing.
+	 */
+	public function scan_orphans( $limit = 20000, $delete = false ) {
+		$out = array( 'count' => 0, 'capped' => false, 'files' => array() );
+
+		if ( ! function_exists( 'wp_upload_dir' ) ) {
+			return $out;
+		}
+		$up = wp_upload_dir();
+		if ( empty( $up['basedir'] ) || ! is_dir( $up['basedir'] ) ) {
+			return $out;
+		}
+		$basedir = $up['basedir'];
+
+		try {
+			$it = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $basedir, \FilesystemIterator::SKIP_DOTS )
+			);
+		} catch ( \Exception $e ) {
+			return $out;
+		}
+
+		$seen = 0;
+		foreach ( $it as $file ) {
+			if ( ! $file->isFile() ) {
+				continue;
+			}
+			$path = $file->getPathname();
+			// Only our appended-extension variants: "{original}.webp" / ".avif".
+			if ( ! preg_match( '/\.(?:jpe?g|png)\.(?:webp|avif)$/i', $path ) ) {
+				continue;
+			}
+			if ( ++$seen > $limit ) {
+				$out['capped'] = true;
+				break;
+			}
+			// The original is the variant path with the trailing ".webp"/".avif"
+			// removed. Orphan = that original is gone.
+			$original = preg_replace( '/\.(?:webp|avif)$/i', '', $path );
+			if ( is_file( $original ) ) {
+				continue;
+			}
+			$out['count']++;
+			if ( count( $out['files'] ) < 200 ) {
+				$out['files'][] = ltrim( str_replace( $basedir, '', $path ), '/\\' );
+			}
+			if ( $delete ) {
+				wp_delete_file( $path );
+				if ( is_file( $path . '.skip' ) ) {
+					wp_delete_file( $path . '.skip' );
+				}
+			}
+		}
+
+		return $out;
+	}
+
+	/**
+	 * AJAX: delete orphaned converted files (nonce + capability protected).
+	 */
+	public function ajax_clean_orphans() {
+		check_ajax_referer( 'prime_cache_img_nonce', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error();
+		}
+		$res = $this->scan_orphans( 20000, true );
+		delete_transient( 'prime_cache_img_stats_cache' );
+		wp_send_json_success( array(
+			'deleted' => $res['count'],
+			'capped'  => $res['capped'],
+		) );
 	}
 
 	// ── Media Library Column ─────────────────────────────────

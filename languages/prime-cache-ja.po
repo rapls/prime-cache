@@ -3303,3 +3303,43 @@ msgstr "いいえ / 対応済み"
 #: includes/admin/class-admin-settings.php
 msgid "Got it"
 msgstr "了解した"
+
+#: includes/admin/class-admin-settings.php
+msgid "Orphaned converted files are .webp/.avif variants whose original image was deleted. They are checked here and can be safely removed. (Deleting an image in the Media Library now removes its variants automatically; this cleans up any left from before.)"
+msgstr "孤立した変換ファイルとは、元画像が削除された .webp/.avif のことです。ここで確認して安全に削除できます (メディアライブラリで画像を削除すると、変換ファイルも自動で削除されるようになりました。これは以前に残ったものを掃除します)。"
+
+#: includes/admin/class-admin-settings.php
+msgid "Check for Orphaned Files"
+msgstr "孤立ファイルを確認"
+
+#: includes/admin/class-admin-settings.php
+msgid "Delete Orphaned Files"
+msgstr "孤立ファイルを削除"
+
+#: includes/admin/class-admin-settings.php
+msgid "Checking…"
+msgstr "確認中…"
+
+#: includes/admin/class-admin-settings.php
+msgid "No orphaned files found."
+msgstr "孤立ファイルはありません。"
+
+#: includes/admin/class-admin-settings.php
+msgid "%d orphaned file(s) found."
+msgstr "%d個の孤立ファイルが見つかりました。"
+
+#: includes/admin/class-admin-settings.php
+msgid "Delete %d orphaned converted file(s)? This cannot be undone."
+msgstr "%d個の孤立した変換ファイルを削除しますか ? この操作は取り消せません。"
+
+#: includes/admin/class-admin-settings.php
+msgid "Deleting…"
+msgstr "削除中…"
+
+#: includes/admin/class-admin-settings.php
+msgid "Deleted %d orphaned file(s)."
+msgstr "%d個の孤立ファイルを削除しました。"
+
+#: includes/admin/class-admin-settings.php
+msgid "More remain — run the check again."
+msgstr "まだ残っています — もう一度確認を実行してください。"

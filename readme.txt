@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.57
+Stable tag: 1.10.58
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -177,6 +177,11 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 
 == Changelog ==
 
+= 1.10.58 =
+* Fixed: a deleted image could keep being shown. The WebP rewrite rule served a `.webp` whenever one existed on disk, without checking that the original was still there — so an orphaned `.webp` left behind by a deleted original kept being served at 200 instead of returning a clean 404. The rule now also requires the original file to exist. (The Pro add-on's AVIF rule gets the same fix.)
+* Fixed: deleting an image in the Media Library now also deletes its generated `.webp`/`.avif` variants (the original and every size). Before, WordPress removed only the originals it tracks and the converted files were orphaned — and because conversion skips a file that already has a variant, re-uploading an image under the same name could keep showing the OLD picture.
+* Added: an orphaned-file cleanup for variants left behind by deletes made before this fix. The Media settings show a count and a one-click "Delete Orphaned Files" (with confirmation); `wp prime-cache image-orphans` lists them (add `--delete` to remove).
+
 = 1.10.57 =
 * Fixed: updating a plugin or theme did not clear the cache, so a cached page — and any combined/minified CSS or JS whose content hash came from the updated files — could keep serving the old version until the cache was cleared by hand. Prime Cache only purged on WordPress core updates, and a normal in-place plugin update leaves the plugin active, so no other event caught it. It now purges the whole cache after a plugin or theme update as well (core updates already did this; translation-only updates are still ignored).
 
@@ -325,6 +330,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * For the changelog of version 1.10.19 and earlier, see the plugin page: https://raplsworks.com/plugins/prime-cache/
 
 == Upgrade Notice ==
+
+= 1.10.58 =
+Fixes a deleted image continuing to show (an orphaned WebP/AVIF served at 200), and now removes the converted variants when you delete an image. Adds a cleanup for variants orphaned by earlier deletes (Media settings, or `wp prime-cache image-orphans`). Recommended for all users.
 
 = 1.10.57 =
 Clears the cache after a plugin or theme update, not just WordPress core updates, so changes to a plugin's or theme's CSS/JS take effect without a manual cache clear. Recommended for all users.

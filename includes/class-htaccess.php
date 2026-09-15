@@ -366,6 +366,10 @@ class Prime_Cache_Htaccess {
 			$rules[] = '    # WebP';
 			$rules[] = '    RewriteCond %{HTTP_ACCEPT} image/webp';
 			$rules[] = '    RewriteCond %{REQUEST_URI} \.(jpe?g|png)$ [NC]';
+			// Only serve the .webp when the ORIGINAL still exists — otherwise a
+			// deleted original whose orphaned .webp was left behind would keep being
+			// served (a stale image at 200) instead of a clean 404.
+			$rules[] = '    RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f';
 			$rules[] = '    RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.webp -f';
 			$rules[] = '    RewriteRule ^(.+)\.(jpe?g|png)$ $1.$2.webp [T=image/webp,E=REQUEST_image,L]';
 		}

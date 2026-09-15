@@ -1839,6 +1839,13 @@ class Prime_Cache_Admin_Settings {
 					<span><b id="pc-bulk-progress-count">0</b> / <b id="pc-bulk-progress-total">0</b></span>
 				</div>
 			</div>
+			<hr style="margin:14px 0;border:0;border-top:1px solid #e0e0e0">
+			<p class="pc-help"><?php esc_html_e( 'Orphaned converted files are .webp/.avif variants whose original image was deleted. They are checked here and can be safely removed. (Deleting an image in the Media Library now removes its variants automatically; this cleans up any left from before.)', 'prime-cache' ); ?></p>
+			<div class="pc-field">
+				<button type="button" class="button" id="pc-orphan-check"><?php esc_html_e( 'Check for Orphaned Files', 'prime-cache' ); ?></button>
+				<button type="button" class="button button-link-delete" id="pc-orphan-clean" style="display:none;margin-left:6px"><?php esc_html_e( 'Delete Orphaned Files', 'prime-cache' ); ?></button>
+				<span id="pc-orphan-status" style="margin-left:8px"></span>
+			</div>
 		</div>
 		<?php
 		$i18n_obj = wp_json_encode(
@@ -1907,6 +1914,55 @@ class Prime_Cache_Admin_Settings {
 			. '.fail(function(){'
 			. "\$status.text(fmt(i18n.error,i18n.ajaxErr));\$btn.prop('disabled',false);"
 			. '});'
+			. '});'
+			. '});'
+			. '})();'
+		);
+
+		$orphan_i18n = wp_json_encode(
+			array(
+				'checking' => __( 'Checking…', 'prime-cache' ),
+				'none'     => __( 'No orphaned files found.', 'prime-cache' ),
+				/* translators: %d: number of orphaned files found. */
+				'found'    => __( '%d orphaned file(s) found.', 'prime-cache' ),
+				/* translators: %d: number of orphaned files that will be deleted. */
+				'confirm'  => __( 'Delete %d orphaned converted file(s)? This cannot be undone.', 'prime-cache' ),
+				'deleting' => __( 'Deleting…', 'prime-cache' ),
+				/* translators: %d: number of orphaned files deleted. */
+				'deleted'  => __( 'Deleted %d orphaned file(s).', 'prime-cache' ),
+				'more'     => __( 'More remain — run the check again.', 'prime-cache' ),
+				'ajaxErr'  => __( 'network error', 'prime-cache' ),
+			)
+		);
+		$this->inline_admin_script(
+			'(function(){'
+			. "if (typeof jQuery === 'undefined') return;"
+			. 'jQuery(function($){'
+			. "var \$c=$('#pc-orphan-check');"
+			. "if (!\$c.length || \$c.data('pcBound')) return;"
+			. "\$c.data('pcBound', true);"
+			. "var \$del=$('#pc-orphan-clean'),\$st=$('#pc-orphan-status');"
+			. "var nonce=\$c.closest('.pc-card').data('pc-bulk-nonce')||'';"
+			. 'if (!nonce) return;'
+			. "var i18n={$orphan_i18n};"
+			. 'function fmt(tpl,n){return tpl.replace(/%d/,n);}'
+			. "\$c.on('click',function(e){e.preventDefault();"
+			. "\$c.prop('disabled',true);\$del.hide();\$st.text(i18n.checking);"
+			. "\$.post(ajaxurl,{action:'prime_cache_img_stats',nonce:nonce}).done(function(r){"
+			. 'var n=(r&&r.success&&r.data)?parseInt(r.data.orphans,10)||0:0;'
+			. "if(n>0){\$st.text(fmt(i18n.found,n));\$del.data('n',n).show();}else{\$st.text(i18n.none);}"
+			. "\$c.prop('disabled',false);"
+			. "}).fail(function(){\$st.text(i18n.ajaxErr);\$c.prop('disabled',false);});"
+			. '});'
+			. "\$del.on('click',function(e){e.preventDefault();"
+			. "var n=parseInt(\$del.data('n'),10)||0;"
+			. 'if(!window.confirm(fmt(i18n.confirm,n)))return;'
+			. "\$del.prop('disabled',true);\$c.prop('disabled',true);\$st.text(i18n.deleting);"
+			. "\$.post(ajaxurl,{action:'prime_cache_img_clean_orphans',nonce:nonce}).done(function(r){"
+			. 'var d=(r&&r.success&&r.data)?parseInt(r.data.deleted,10)||0:0;'
+			. "var msg=fmt(i18n.deleted,d);if(r&&r.data&&r.data.capped)msg+=' '+i18n.more;"
+			. "\$st.text(msg);\$del.hide();\$c.prop('disabled',false);"
+			. "}).fail(function(){\$st.text(i18n.ajaxErr);\$del.prop('disabled',false);\$c.prop('disabled',false);});"
 			. '});'
 			. '});'
 			. '})();'

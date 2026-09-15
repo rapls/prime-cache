@@ -299,6 +299,57 @@ class Prime_Cache_CLI extends WP_CLI_Command {
 		WP_CLI::line( '' );
 		WP_CLI::line( 'Object Cache:  ' . ( $oc_label[ $oc ] ?? strtoupper( $oc ) ) );
 	}
+
+	/**
+	 * List or delete orphaned converted images (.webp/.avif whose original is gone).
+	 *
+	 * Lists by default (nothing is deleted). Pass --delete to remove them. An
+	 * orphan is a "{original}.webp" / "{original}.avif" file whose original
+	 * jpg/png no longer exists — the residue of a delete made before the
+	 * delete-attachment cleanup shipped, which can otherwise keep serving an old
+	 * image for a same-name re-upload.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--delete]
+	 * : Delete the orphaned files. Without it, they are only listed (dry run).
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp prime-cache image-orphans
+	 *     wp prime-cache image-orphans --delete
+	 *
+	 * @subcommand image-orphans
+	 */
+	public function image_orphans( $args, $assoc_args ) {
+		if ( ! class_exists( 'Prime_Cache_Image_Converter' ) ) {
+			WP_CLI::error( 'Image converter is unavailable.' );
+		}
+		$delete    = ! empty( $assoc_args['delete'] );
+		$converter = new Prime_Cache_Image_Converter();
+		$res       = $converter->scan_orphans( 100000, $delete );
+
+		if ( 0 === $res['count'] ) {
+			WP_CLI::success( 'No orphaned converted files found.' );
+			return;
+		}
+
+		if ( ! $delete ) {
+			foreach ( $res['files'] as $f ) {
+				WP_CLI::line( $f );
+			}
+			if ( count( $res['files'] ) < $res['count'] ) {
+				WP_CLI::line( '… and ' . ( $res['count'] - count( $res['files'] ) ) . ' more.' );
+			}
+			WP_CLI::warning( $res['count'] . ' orphaned file(s) found. Re-run with --delete to remove them.' );
+			return;
+		}
+
+		WP_CLI::success( 'Deleted ' . $res['count'] . ' orphaned converted file(s).' );
+		if ( $res['capped'] ) {
+			WP_CLI::warning( 'Scan cap reached — run the command again to continue.' );
+		}
+	}
 }
 
 WP_CLI::add_command( 'prime-cache', 'Prime_Cache_CLI' );

@@ -2825,3 +2825,43 @@ msgstr ""
 #: includes/admin/class-admin-settings.php
 msgid "Got it"
 msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Orphaned converted files are .webp/.avif variants whose original image was deleted. They are checked here and can be safely removed. (Deleting an image in the Media Library now removes its variants automatically; this cleans up any left from before.)"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Check for Orphaned Files"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Delete Orphaned Files"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Checking…"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "No orphaned files found."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "%d orphaned file(s) found."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Delete %d orphaned converted file(s)? This cannot be undone."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Deleting…"
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "Deleted %d orphaned file(s)."
+msgstr ""
+
+#: includes/admin/class-admin-settings.php
+msgid "More remain — run the check again."
+msgstr ""
