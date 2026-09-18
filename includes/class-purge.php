@@ -84,8 +84,13 @@ class Prime_Cache_Purge {
 			add_action( 'wp_delete_nav_menu', array( $this, 'purge_all' ) );
 		}
 
-		// ── WordPress core update ─────────────────────────────
-		if ( $s['purge_on_core_update'] ) {
+		// ── Core / plugin / theme update (upgrader) ───────────
+		// One hook covers all three update types, so it has to be registered
+		// when ANY of them is enabled — gating it on purge_on_core_update alone
+		// meant a site with core-update purging turned off got no purge after a
+		// plugin update either, however its own setting was set. The callback
+		// checks the setting matching the update type.
+		if ( $s['purge_on_core_update'] || $s['purge_on_plugin_change'] || $s['purge_on_theme_switch'] ) {
 			add_action( 'upgrader_process_complete', array( $this, 'on_upgrader_complete' ), 10, 2 );
 		}
 
@@ -275,11 +280,22 @@ class Prime_Cache_Purge {
 	 * that catches it. purge_all() is idempotent, so bulk and automatic updates
 	 * that fire this repeatedly are safe. Translation-only updates are ignored.
 	 *
+	 * Each update type honours its own setting: 'core' → purge_on_core_update,
+	 * 'plugin' → purge_on_plugin_change, 'theme' → purge_on_theme_switch.
+	 *
 	 * @param WP_Upgrader $upgrader Upgrader instance.
 	 * @param array       $options  Update details including 'type'.
 	 */
 	public function on_upgrader_complete( $upgrader, $options ) {
-		if ( isset( $options['type'] ) && in_array( $options['type'], array( 'core', 'plugin', 'theme' ), true ) ) {
+		$type = isset( $options['type'] ) ? $options['type'] : '';
+
+		$setting_for_type = array(
+			'core'   => 'purge_on_core_update',
+			'plugin' => 'purge_on_plugin_change',
+			'theme'  => 'purge_on_theme_switch',
+		);
+
+		if ( isset( $setting_for_type[ $type ] ) && ! empty( $this->settings[ $setting_for_type[ $type ] ] ) ) {
 			$this->purge_all();
 		}
 	}

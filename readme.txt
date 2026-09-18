@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.59
+Stable tag: 1.10.60
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -177,6 +177,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 
 == Changelog ==
 
+= 1.10.60 =
+* Fixed: with "Purge on WordPress core update" turned off, no cache was cleared after a plugin or theme update either — even with "Purge on plugin activate/deactivate" and "Purge on theme switch" enabled. All three update types arrive through one WordPress hook, and that hook was only registered when the core-update setting was on. It is now registered whenever any of the three is enabled, and each update type follows its own setting. Sites with all three enabled (the default) are unaffected.
+
 = 1.10.59 =
 * Fixed: the CSS minifier corrupted `:not()` selectors. A rule that added the required space to media-query keywords (`and(` to `and (`) also matched the `:not(` pseudo-class, turning `.a:not(.b)` into the invalid `.a:not (.b)` — so browsers dropped every style rule that used `:not()`. On themes that rely on `:not()` for layout (e.g. Avada's search form) this left elements mispositioned or unstyled once CSS optimization was on. The minifier now leaves `:not()` untouched while still spacing media-query keywords.
 * Changed: minified CSS/JS (and, with the Pro add-on, combined and unused-CSS files) now include the plugin version in their cache filename. A code fix like the one above previously reused the old, broken output because the source file's timestamp had not changed; now an update regenerates the assets automatically, and the new filenames also stop upstream/server caches from serving stale bytes. Existing optimized files are replaced on the next visit after updating.
@@ -334,6 +337,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * For the changelog of version 1.10.19 and earlier, see the plugin page: https://raplsworks.com/plugins/prime-cache/
 
 == Upgrade Notice ==
+
+= 1.10.60 =
+Fixes plugin and theme updates not clearing the cache on sites that turned "Purge on WordPress core update" off. Only matters if you changed that setting; the default configuration is unaffected.
 
 = 1.10.59 =
 Fixes a CSS minifier bug that broke `:not()` selectors (turning `:not(` into an invalid `:not (`), which could misposition or unstyle elements on themes that use `:not()` for layout, such as Avada. Optimized CSS/JS now carry the plugin version in their filename so fixes take effect on update without a manual cache clear. Recommended for all users, especially anyone using CSS optimization.
