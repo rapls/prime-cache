@@ -2250,7 +2250,7 @@ class Prime_Cache_Admin_Settings {
 				$presets = array(
 					'safe' => array(
 						__( 'Safe', 'prime-cache' ),
-						__( 'Minimal risk. Enables page caching, gzip compression, browser caching, and lazy loading. No file optimization or advanced features. Recommended for beginners or production sites that need stability.', 'prime-cache' ),
+						__( 'Minimal risk. Enables page caching, gzip compression, browser caching, and lazy loading. Turns off the following, including any you enabled yourself: Minify HTML, Minify CSS, Minify JavaScript, Optimize HTML via DOM Parser, Remove HTML Comments, Load JavaScript Deferred, Delay JavaScript Execution, Load CSS Asynchronously (Free), Inline Small CSS Files, Use Local jQuery, Add Missing Image Dimensions, Disable Gutenberg Block CSS, Disable WP Embed, Disable oEmbed, WooCommerce Script Optimization, and Disable Cart Fragments AJAX. Use it to get back to a page that is known to display correctly.', 'prime-cache' ),
 						'#22c55e',
 						'dashicons-shield',
 					),

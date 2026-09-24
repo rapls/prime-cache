@@ -984,7 +984,7 @@ class Prime_Cache {
 
 		switch ( $preset ) {
 			case 'safe':
-				return array_merge( $common, array(
+				$preset = array_merge( $common, array(
 					'lazyload_images'     => true,
 					'lazyload_iframes'    => true,
 					'browser_cache'       => true,
@@ -999,7 +999,28 @@ class Prime_Cache {
 					'defer_js'            => false,
 					'delay_js'            => false,
 					'optimize_css_delivery' => false,
+					// Safe is the "back to a known-good page" button, so it also
+					// turns off every other setting Auto (or the site owner) can
+					// switch on that changes how a page looks or behaves. Pressing
+					// Safe only affects the site where it is pressed; speed is
+					// secondary here. Harmless tweaks (emoji, query strings, DNS
+					// prefetch limits, preloading) are left as they are.
+					'async_css_free'         => false,
+					'inline_small_css'       => false,
+					'minify_html_dom'        => false,
+					'remove_html_comments'   => false,
+					'local_jquery'           => false,
+					'add_missing_dimensions' => false,
+					'disable_block_css'      => false,
+					'disable_wp_embed'       => false,
+					'disable_oembed'         => false,
+					'woo_disable_scripts'    => false,
+					'woo_disable_cart_frag'  => false,
 				) );
+				// The optional add-on turns off its own page-changing features
+				// here (Remove Unused CSS, Delay JS additions, etc.) by adding
+				// false values to this array.
+				return apply_filters( 'prime_cache_preset_safe', $preset );
 
 			case 'balanced':
 				return array_merge( $common, array(

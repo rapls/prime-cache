@@ -1,75 +1,112 @@
-=== Prime Cache – Page Cache & Core Web Vitals (Zero Config) ===
+=== Prime Cache – Page Cache on Activation & One-Click Speed Optimization ===
 
 Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.60
+Stable tag: 1.10.61
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Serves pages from a static copy, converts images to WebP, and defers the JavaScript that blocks rendering. No wp-config.php edits.
+Page caching that works the moment you activate it, plus one-click speed tuning. Runs on shared hosting without editing wp-config.php.
 
 == Description ==
 
-Prime Cache is a lightweight performance plugin for WordPress. Page caching works immediately after activation — no wp-config.php edits, no manual setup. It also provides browser cache headers, file optimization (minify, defer, delay), lazy loading, WebP conversion, cache preloading, and automatic cache purge.
+Activate Prime Cache and your pages are cached. There is no setup screen to get through first and no wp-config.php to edit.
+
+When you want more, one button, Auto, applies a set of speed settings in one go: HTML, CSS and JavaScript minification, deferred JavaScript, non-blocking CSS, lazy loading, browser caching, link prefetching and cache preloading. Every setting stays on its own screen afterwards, so you can review or change any of them.
 
 **Watch the 5-minute setup tutorial:**
 
 [youtube https://www.youtube.com/watch?v=ZUxESCRtaEU]
 
-**Then take it further — how to push a stuck PageSpeed score from an orange 82 into the green 90s (Japanese narration):**
+= How it works without any setup =
 
-[youtube https://www.youtube.com/watch?v=n0oQ3w9nuuU]
+Page caching is on from the moment you activate the plugin. Prime Cache runs its page-cache engine early in each request and sends the stored copy of a page instead of building it again, so the theme and the database queries behind the page are skipped. Logged-in users, the admin screens, form submissions and WooCommerce cart, checkout and account pages are never served from the cache.
 
-For site owners who want the fastest possible path, the settings screen shows an optional one-line `WP_CACHE` snippet that upgrades serving to drop-in mode, where cached pages are served before WordPress core even loads. Adding it is entirely optional and entirely manual — the plugin never writes to wp-config.php.
+Two faster serving paths are optional:
 
-= Free Features =
+* **.htaccess Optimization** (servers that read .htaccess): cached pages are sent by the web server without starting PHP. Turn it on in the Page Cache tab, or let Auto turn it on when .htaccess is writable.
+* **Drop-in mode**: add `define( 'WP_CACHE', true );` to wp-config.php yourself and cached pages are served before WordPress core loads. The settings screen shows the exact line.
 
-* Page Cache
-* Browser Cache Headers
+The free plugin never edits wp-config.php. That file controls the whole site and some hosts manage it themselves, so an automatic edit is a risk the plugin does not take. The drop-in step stays in your hands, and page caching works without it.
+
+Prime Cache is developed and run on shared hosting.
+
+= If something looks wrong after Auto =
+
+Auto's JavaScript and CSS settings do the most for speed, and they are also the ones most likely to disagree with a theme or another plugin. Menus, sliders and forms are where problems usually show.
+
+The quickest fix is the Safe preset in the Tools tab. It keeps page caching, browser caching and lazy loading, and turns off minification, deferred and delayed JavaScript, the CSS delivery settings and the other Auto settings that change how a page looks, including any you turned on yourself. The preset card in the Tools tab lists every setting it turns off. Clear the cache and check the page again.
+
+To keep the rest of Auto and find the one setting that disagrees, apply Auto again and turn settings off in this order instead, clearing the cache after each step:
+
+1. **Delay JavaScript Execution** and **Maximum Delay**, if you turned them on yourself. Auto does not turn them on in the free plugin.
+2. **Load JavaScript Deferred**
+3. **Load CSS Asynchronously (Free)**, then **Inline Small CSS Files**
+4. **Minify HTML**, **Minify CSS** and **Minify JavaScript**
+
+= Free features =
+
+* Page cache, on from activation
+* Auto preset (plus Safe, Balanced and Aggressive presets)
+* Browser cache headers
 * .htaccess Optimization
-* Gzip Compression
-* 404 Page Caching
-* HTML / CSS / JavaScript Minification
-* Inline Small CSS
+* Gzip compression
+* 404 page caching
+* HTML / CSS / JavaScript minification
+* Inline small CSS
 * Defer JavaScript
-* Delay JavaScript
+* Delay JavaScript, including Maximum Delay
 * Google Fonts display=swap
-* Lazy Load
-* WebP Conversion
-* Image Resize on Upload
-* EXIF Data Removal
-* Bulk WebP Optimization
-* Cache Preloading for homepage, public posts, and public taxonomies
-* Link Prefetching
-* Performance Tweaks (disable emoji, jQuery Migrate, embeds, and other WordPress bloat)
-* Automatic Cache Purge on content changes
-* Security Headers
+* Lazy load for images, iframes and videos
+* WebP conversion, with bulk conversion
+* Image resize on upload and EXIF removal
+* Cache preloading for the homepage, public posts and public taxonomies
+* Link prefetching
+* Performance tweaks (disable emoji, jQuery Migrate, embeds and other WordPress extras)
+* Automatic cache purge on content changes
+* Security headers
 * Import / Export
-* WP-CLI Support
+* WP-CLI support
 
-= Optional Add-on Features =
+= Prime Cache Pro (optional add-on) =
 
-Prime Cache Pro, a separate add-on sold on the author's website (https://raplsworks.com/plugins/prime-cache/), extends the free plugin. It is not required for the free plugin to work:
+Prime Cache Pro is a separate add-on sold on the author's website (https://raplsworks.com/plugins/prime-cache/). Everything described above is free, with no limits, and the free plugin does not need Pro to work.
 
-* AI Speed Diagnosis & consultation — measures your server and homepage, explains what is slow in plain language, and applies validated fixes in one click (bring your own API key: Anthropic / OpenAI / OpenRouter / Gemini)
-* AVIF conversion (on top of the shared WebP engine)
-* Critical CSS and Remove Unused CSS
+With Pro installed, Auto also turns on:
+
+* Remove Unused CSS, with automatically generated Critical CSS
+* Delay JavaScript Execution with Maximum Delay
+* AVIF image conversion (WebP when the server cannot make AVIF)
+* Self-hosted Google Fonts and font preloading
+* LCP optimization
+* Speculation Rules
+* Click-to-load YouTube thumbnails
+* Preloading of taxonomy archives
+
+Pro also adds features you turn on yourself:
+
+* AI speed diagnosis and consultation (bring your own API key: Anthropic / OpenAI / OpenRouter / Gemini)
+* CSS and JavaScript combining
 * CDN URL rewriting
-* Cloudflare, Sucuri, and Varnish integration
-* Object Cache backends (APCu / Redis / Memcached)
+* Cloudflare, Sucuri and Varnish integration
+* Object cache backends (APCu / Redis / Memcached)
 * Sitemap-based cache preloading
 * Database cleanup
 * Heartbeat control
-* Self-hosted Google Fonts and Google Analytics
+* Self-hosted Google Analytics
+* One-click `WP_CACHE` setup in wp-config.php, with a backup written first
+* A warning when a server-side cache sits in front of the site
 
-= Internationalization =
+**Prime Cache Pro walkthrough (Japanese narration):**
 
-* English (source)
-* Japanese translation included (WordPress Translation Style Guide compliant)
-* Translation-ready with .pot template
+[youtube https://www.youtube.com/watch?v=n0oQ3w9nuuU]
+
+= Japanese =
+
+The admin screens are translated into Japanese.
 
 = Documentation =
 
@@ -87,28 +124,27 @@ The free Prime Cache plugin does not connect to any external service. No data is
 The following third-party hostnames appear inside the plugin's source code as **string literals only**, and the plugin never makes outbound requests to them:
 
 * `googletagmanager.com`, `google-analytics.com`, `connect.facebook.net`, `widget.intercom.io`, `embed.tawk.to` — listed in `includes/class-file-optimizer.php` as URL-pattern presets for the "Delay JS" feature. They are used **only** to recognize third-party scripts already present on the page (added by other plugins or the theme) and to defer their execution until first user interaction. The plugin itself does not load, fetch, or embed any of these services.
-* `cdnjs.cloudflare.com` — referenced **only** in code comments and admin-screen help text describing how some themes (e.g. Cocoon) replace bundled jQuery with a CDN version. The plugin does not call or include any resource from this host.
+* `cdnjs.cloudflare.com` — referenced **only** in code comments and admin-screen help text describing how some themes replace bundled jQuery with a CDN version. The plugin does not call or include any resource from this host.
 
 If you install the optional Prime Cache Pro add-on, that separate plugin documents its own external service usage in its own readme — Prime Cache (free) on its own makes no outbound calls.
 
 == Why the page-cache drop-in keeps an open output buffer ==
 
-Page-cache plugins must capture the entire rendered HTML response so the body can be written to disk before the browser receives it. `dropins/page-cache.php` opens an `ob_start()` early in the request and lets PHP flush the buffer naturally at request shutdown — the captured body is written to the cache file inside the buffer callback. The buffer is deliberately not closed mid-request; doing so would either truncate the cached body or break the capture for plugins/themes that emit their last output during shutdown. This matches the design of every other major page-cache plugin (WP Super Cache, W3 Total Cache, WP Rocket, Cache Enabler, etc.). The HTML transformation pipeline in `includes/class-html-pipeline.php` follows the same pattern for the same reason.
+A page cache has to capture the entire rendered HTML response so the body can be written to disk before the browser receives it. `dropins/page-cache.php` opens an `ob_start()` early in the request and lets PHP flush the buffer naturally at request shutdown — the captured body is written to the cache file inside the buffer callback. The buffer is deliberately not closed mid-request; doing so would either truncate the cached body or break the capture for plugins/themes that emit their last output during shutdown. This is the standard design for WordPress page caching. The HTML transformation pipeline in `includes/class-html-pipeline.php` follows the same pattern for the same reason.
 
 == Installation ==
 
 1. Go to Plugins > Add New in your WordPress admin and search for "Prime Cache", then click Install Now (or upload the `prime-cache` folder to `/wp-content/plugins/`)
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Go to Prime Cache in the admin menu
-4. The Dashboard tab shows an overview of all features
-5. Enable Page Cache in the Page Cache tab to get started — no wp-config.php changes are needed
+2. Activate the plugin through the 'Plugins' menu in WordPress. Page caching starts immediately; no wp-config.php changes are needed.
+3. Optional: go to Prime Cache > Tools and click Apply Auto Preset to turn on the speed settings described above.
+4. Optional: follow the on-screen note to add the `WP_CACHE` line yourself for drop-in mode.
 
-= Quick Start =
+= Settings tabs =
 
-1. **Page Cache tab** - Enable page caching and .htaccess optimization
-2. **File Optimization tab** - Enable HTML, CSS, and JS minification
-3. **Media tab** - Enable lazy loading and WebP conversion
-4. **Preload tab** - Enable cache preloading and link prefetching
+1. **Page Cache tab** - Mobile cache, gzip compression, .htaccess Optimization and 404 caching
+2. **File Optimization tab** - HTML, CSS and JS minification, defer and delay
+3. **Media tab** - Lazy loading and WebP conversion
+4. **Preload tab** - Cache preloading and link prefetching
 
 == Screenshots ==
 
@@ -123,37 +159,70 @@ Page-cache plugins must capture the entire rendered HTML response so the body ca
 
 == Frequently Asked Questions ==
 
-= Does it improve my PageSpeed Insights / Core Web Vitals scores? =
+= Something looks broken after I pressed Auto. =
 
-The features target the usual Core Web Vitals bottlenecks: page caching and preloading shorten server response time (TTFB, which feeds LCP), minification and defer/delay JavaScript reduce render-blocking resources, lazy loading and WebP conversion cut image weight, and skip-first-N lazy loading with fetchpriority=high protects the LCP image. Actual score changes depend on your theme, hosting, and other plugins — test with PageSpeed Insights before and after enabling each feature.
+Apply the Safe preset in the Tools tab first. It keeps page caching, browser caching and lazy loading, and turns off minification, deferred and delayed JavaScript, the CSS delivery settings and the other Auto settings that change how a page looks, including any you turned on yourself. The preset card in the Tools tab lists every setting it turns off. Then clear the cache (Admin bar > Prime Cache > Clear All Cache) and check menus, sliders and forms again.
+
+If Safe fixes it and you want to keep the rest of Auto, apply Auto again and turn settings off in this order, clearing the cache after each step:
+
+1. **Delay JavaScript Execution** and **Maximum Delay**, if you turned them on yourself. Auto does not turn them on in the free plugin.
+2. **Load JavaScript Deferred**
+3. **Load CSS Asynchronously (Free)**, then **Inline Small CSS Files**
+4. **Minify HTML**, **Minify CSS** and **Minify JavaScript**
+
+= What does Auto change, exactly? =
+
+In the free plugin, Auto turns on: page cache with mobile caching, gzip compression, browser cache headers, .htaccess Optimization (only when .htaccess is writable), HTML / CSS / JavaScript minification, removal of HTML comments, lazy loading for images, iframes and videos (the first six images stay eager so the largest image is not delayed), missing image width/height, a local copy of jQuery when the theme loads it from a CDN, deferred JavaScript, inline small CSS, asynchronous loading of non-first CSS, Google Fonts display=swap, disabling emoji and embeds, removing version query strings, limiting DNS prefetch, disabling block CSS on classic themes, link prefetching and cache preloading. On WooCommerce sites it also turns off WooCommerce scripts on non-shop pages and cart fragments, and adds the cart, checkout and account pages to the exclusions.
+
+Auto does not turn on Delay JavaScript Execution, WebP conversion or Brotli compression in the free plugin. Prime Cache Pro adds its own items to Auto (see the Description).
+
+= Does it edit wp-config.php? =
+
+The free plugin does not. It reads wp-config.php to see whether `WP_CACHE` is set, and never writes to it. Page caching works without `WP_CACHE`. If you add `define( 'WP_CACHE', true );` yourself, cached pages are served before WordPress core loads, which is faster still. Prime Cache Pro can add the line for you with one click and writes a backup first.
+
+= Can I use it with another cache plugin? =
+
+Do not run two page caches at once. Deactivate the other cache plugin before you activate Prime Cache. Prime Cache detects 14 known caching and optimization plugins and warns you when one is active.
+
+= My host already has a server cache. =
+
+Do not let two page caches serve the same pages. When the host's cache sits in front of Prime Cache, Prime Cache's purge does not reach it, so visitors can keep seeing an old copy after you update a post. Decide which one serves your pages. If you keep the host's cache, clear it as well whenever you clear Prime Cache. Prime Cache Pro detects common server-side caches and tells you when one is in front of the site.
+
+= Logged-in users see old pages. =
+
+They should not by default. Logged-in users are never served cached pages, and page optimizations are skipped for them. If you turned on **Logged-in User Cache** in the Page Cache tab, every logged-in user shares one cached copy with anonymous visitors; turn it off.
+
+= How do I clear the cache? =
+
+Multiple ways: the admin bar menu (Prime Cache > Clear All Cache and other options), Dashboard quick actions, WP-CLI (`wp prime-cache flush`), or the automatic purge triggers.
+
+= Is it available in Japanese? =
+
+Yes. The admin screens are translated into Japanese.
+
+= Does it help Core Web Vitals? =
+
+The features target the usual Core Web Vitals bottlenecks: page caching and preloading shorten server response time (TTFB, which feeds LCP), minification and deferred JavaScript reduce render-blocking resources, lazy loading and WebP conversion cut image weight, and keeping the first images eager protects the LCP image. Results depend on your theme, hosting and other plugins, so measure before and after each change.
 
 = What are the server requirements? =
 
 WordPress 5.8+, PHP 7.4+. For WebP conversion, the GD or Imagick PHP extension is required.
 
-= Is Prime Cache compatible with other caching plugins? =
-
-No. Running multiple caching plugins causes conflicts. Prime Cache automatically detects and warns about 14 known caching plugins. Deactivate other caching plugins before using Prime Cache.
-
 = Does it work with Nginx? =
 
-Yes. Page caching, file optimization, media optimization, and all PHP-based features work on any server. The .htaccess optimization feature is Apache-specific but can be disabled on Nginx.
+Yes. Page caching, file optimization, media optimization, and all PHP-based features work on any server. The .htaccess Optimization feature needs a server that reads .htaccess and can be left off on Nginx.
 
 = Does it support WooCommerce? =
 
 Yes. WooCommerce cart, checkout, and account pages are automatically excluded from caching. Additional WooCommerce optimizations include disabling scripts on non-WC pages and disabling cart fragments AJAX.
 
-= How do I clear the cache? =
-
-Multiple ways: Admin bar menu (10+ options), Dashboard quick actions, WP-CLI commands (`wp prime-cache flush`), or automatic purge triggers.
-
 = Can I disable cache for a specific page? =
 
 Yes. Edit the post/page and check "Disable cache for this page" in the Prime Cache metabox in the sidebar.
 
-= Does the .htaccess fast-path work for all requests? =
+= Does the .htaccess fast path work for all requests? =
 
-The .htaccess fast-path serves cached pages without loading PHP for maximum speed. It requires: lowercase Host header, no query string (unless cache_query_strings is disabled), no Vary Cookies, ASCII-safe URL paths, and GET requests only. Requests that don't match these conditions are served via the PHP drop-in, which is still very fast but not zero-PHP.
+The .htaccess fast path serves cached pages without loading PHP. It requires: lowercase Host header, no query string (unless cache_query_strings is disabled), no Vary Cookies, ASCII-safe URL paths, and GET requests only. Requests that don't match these conditions are served by the PHP engine, which is still fast but not zero-PHP.
 
 = Does it support WordPress multisite? =
 
@@ -161,21 +230,17 @@ Page caching is not supported on multisite installations. Other features (file o
 
 = How does the image optimization work? =
 
-On upload (if auto-convert is enabled), JPG/PNG images are converted to WebP. All thumbnail sizes are also converted. WebP is served to supporting browsers via .htaccess rewrite rules, picture tags, or URL rewriting.
-
-= Is it safe to enable all optimizations? =
-
-Start with page caching and basic file optimization. Test your site after each change. JavaScript defer and delay may affect some themes or plugins — test thoroughly.
+When WebP conversion and auto-convert are on, JPG/PNG images are converted to WebP on upload, including every thumbnail size. WebP is served to supporting browsers via .htaccess rewrite rules, picture tags, or URL rewriting.
 
 = Does Prime Cache send data to external services? =
 
 No. The free plugin does not send your data or API requests to any third-party service. Cache preloading only requests URLs on your own site. Some optional features may add browser resource hints (such as preconnect) for external assets your site already uses, but Prime Cache itself does not transmit data to external services.
 
-= Does Prime Cache modify wp-config.php? =
-
-Never. Prime Cache does not write to wp-config.php under any circumstances. Page caching works immediately after activation in standard mode — the plugin serves cached pages itself, skipping the theme, database queries, and template rendering. Optionally, you can add `define( 'WP_CACHE', true );` to wp-config.php yourself to enable drop-in mode, where cached pages are served before WordPress core even loads (the fastest possible path). This step is entirely optional and entirely in your hands: the plugin only detects the constant, and never adds, changes, or removes it.
-
 == Changelog ==
+
+= 1.10.61 =
+* Display name and readme updated.
+* Changed: the Safe preset now also turns off Load CSS Asynchronously, Inline Small CSS Files and the other page-changing settings Auto turns on (Use Local jQuery, Disable Gutenberg Block CSS, Disable WP Embed, Disable oEmbed, Add Missing Image Dimensions, the HTML DOM and comment options, and the WooCommerce script and cart-fragment options), so it undoes every setting in the free Auto preset that can change how a page looks. The Safe card in the Tools tab now lists everything it turns off. Add-ons can extend Safe through the new `prime_cache_preset_safe` filter.
 
 = 1.10.60 =
 * Fixed: with "Purge on WordPress core update" turned off, no cache was cleared after a plugin or theme update either — even with "Purge on plugin activate/deactivate" and "Purge on theme switch" enabled. All three update types arrive through one WordPress hook, and that hook was only registered when the core-update setting was on. It is now registered whenever any of the three is enabled, and each update type follows its own setting. Sites with all three enabled (the default) are unaffected.
@@ -337,6 +402,9 @@ Never. Prime Cache does not write to wp-config.php under any circumstances. Page
 * For the changelog of version 1.10.19 and earlier, see the plugin page: https://raplsworks.com/plugins/prime-cache/
 
 == Upgrade Notice ==
+
+= 1.10.61 =
+Display name and readme updated. The Safe preset now undoes every setting in the free Auto preset that can change how a page looks.
 
 = 1.10.60 =
 Fixes plugin and theme updates not clearing the cache on sites that turned "Purge on WordPress core update" off. Only matters if you changed that setting; the default configuration is unaffected.
