@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.61
+Stable tag: 1.10.62
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -238,6 +238,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.62 =
+* Fixed: with Delay JavaScript on, the Cocoon theme's mobile sidebar drawer opened empty on the first tap and worked from the second tap on. The tap that opens the drawer is also the one that starts loading the delayed scripts, so Cocoon's script that moves the sidebar into the drawer had not run yet. A small script that is never delayed now moves the sidebar when Cocoon's script has not run yet, and does nothing once Cocoon's script is running. Only sites using Cocoon are affected.
+
 = 1.10.61 =
 * Display name and readme updated.
 * Changed: the Safe preset now also turns off Load CSS Asynchronously, Inline Small CSS Files and the other page-changing settings Auto turns on (Use Local jQuery, Disable Gutenberg Block CSS, Disable WP Embed, Disable oEmbed, Add Missing Image Dimensions, the HTML DOM and comment options, and the WooCommerce script and cart-fragment options), so it undoes every setting in the free Auto preset that can change how a page looks. The Safe card in the Tools tab now lists everything it turns off. Add-ons can extend Safe through the new `prime_cache_preset_safe` filter.
@@ -402,6 +405,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * For the changelog of version 1.10.19 and earlier, see the plugin page: https://raplsworks.com/plugins/prime-cache/
 
 == Upgrade Notice ==
+
+= 1.10.62 =
+Fixes the Cocoon mobile sidebar drawer opening empty on the first tap when Delay JavaScript is on.
 
 = 1.10.61 =
 Display name and readme updated. The Safe preset now undoes every setting in the free Auto preset that can change how a page looks.

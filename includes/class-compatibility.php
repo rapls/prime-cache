@@ -29,6 +29,34 @@ class Prime_Cache_Compatibility {
 		add_action( 'admin_notices', array( $this, 'check_conflicts' ) );
 		add_action( 'wp_footer', array( $this, 'cocoon_bfcache_menu_close' ), 99 );
 		add_action( 'wp_head', array( $this, 'cocoon_slide_in_sidebar_css' ), 99 );
+		add_action( 'wp_footer', array( $this, 'cocoon_slide_in_sidebar_move' ), 99 );
+	}
+
+	/**
+	 * Cocoon: move the sidebar into the mobile drawer even before the theme
+	 * script has run.
+	 *
+	 * The drawer itself is a pure-CSS checkbox toggle, but its *content* is
+	 * filled by javascript.js (`$(document).on('change', '#sidebar-menu-input')`
+	 * appends #sidebar into #sidebar-menu-content). With Delay JS, the first
+	 * tap on the sidebar button is also the interaction that starts loading
+	 * the delayed scripts: touchstart triggers the loader, the click toggles
+	 * the checkbox and fires `change` immediately, and Cocoon's handler is
+	 * bound only afterwards. The drawer opens empty the first time and works
+	 * from the second time on.
+	 *
+	 * This undelayed shim mirrors Cocoon's handler in vanilla JS. It listens
+	 * on window in the bubble phase, i.e. after Cocoon's handler delegated on
+	 * document, so once javascript.js is running Cocoon does the move itself
+	 * (including binding its close-on-link-click) and the shim finds nothing
+	 * to do. If the shim moved the sidebar first, javascript.js's init-time
+	 * drawerCloser('#slide-in-sidebar a') still binds when it runs later.
+	 */
+	public function cocoon_slide_in_sidebar_move() {
+		if ( false === strpos( (string) get_template(), 'cocoon' ) ) {
+			return;
+		}
+		echo '<script data-no-delay data-no-defer>window.addEventListener("change",function(e){var i=e.target;if(!i||i.id!=="sidebar-menu-input")return;var c=document.getElementById("sidebar-menu-content");if(!c)return;if(i.checked){var s=document.getElementById("sidebar");if(s){c.appendChild(s);s.id="slide-in-sidebar";s.classList.add("slide-in-sidebar");}}else{var t=document.getElementById("slide-in-sidebar"),m=document.getElementById("main");if(t&&m){t.classList.remove("slide-in-sidebar");t.id="sidebar";m.parentNode.insertBefore(t,m.nextSibling);}}});</script>' . "\n";
 	}
 
 	/**
