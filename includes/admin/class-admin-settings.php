@@ -8,6 +8,7 @@ class Prime_Cache_Admin_Settings {
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_init', array( $this, 'handle_cf_dismiss' ) );
 		add_action( 'admin_init', array( $this, 'handle_review_actions' ) );
+		add_action( 'admin_init', array( 'Prime_Cache_Promo_Notice', 'handle_dismiss_request' ) );
 		add_action( 'admin_init', array( $this, 'handle_delay_max_ack' ) );
 		add_action( 'admin_init', array( $this, 'redirect_legacy_addons_tab' ) );
 		add_action( 'admin_notices', array( $this, 'show_notices' ) );
@@ -1099,6 +1100,10 @@ class Prime_Cache_Admin_Settings {
 		// system blocks; hidden when the optional add-on is active; links only
 		// to the in-admin Pro Features page (no external purchase URL).
 		$this->render_pro_dashboard_card();
+
+		// Time-limited promotion (Black Friday 2026): the last block of the
+		// Dashboard tab; draws nothing outside its window.
+		Prime_Cache_Promo_Notice::bf26()->render();
 	}
 
 	/**
@@ -2742,25 +2747,28 @@ class Prime_Cache_Admin_Settings {
 	}
 
 	/**
-	 * One-time "please review" banner, shown once the plugin has been in use for
-	 * a week. Only appears on Prime Cache's own screens (never nags across the
-	 * whole admin), only for admins, and never again once the user reviews or
-	 * dismisses it. Pro users are not asked (the review is for the free listing).
+	 * Whether the one-time "please review" banner should show on this screen:
+	 * the plugin has been in use for a week, the screen is one of Prime Cache's
+	 * own (never across the whole admin), the user is an admin, and it has not
+	 * been answered or dismissed. Pro users are not asked (the review is for the
+	 * free listing).
+	 *
+	 * @return bool
 	 */
-	private function show_review_request_notice() {
+	private function should_show_review_request() {
 		if ( ! current_user_can( 'manage_options' ) || prime_cache_is_pro() ) {
-			return;
+			return false;
 		}
 
 		// Already reviewed or dismissed — never show again.
 		if ( get_option( 'prime_cache_review_notice_done' ) ) {
-			return;
+			return false;
 		}
 
 		// Confine to Prime Cache's own admin screens.
 		$screen = get_current_screen();
 		if ( ! $screen || false === strpos( $screen->id, 'prime-cache' ) ) {
-			return;
+			return false;
 		}
 
 		// Start the clock for installs that predate the install-time option
@@ -2769,11 +2777,27 @@ class Prime_Cache_Admin_Settings {
 		$install_time = (int) get_option( 'prime_cache_install_time' );
 		if ( ! $install_time ) {
 			add_option( 'prime_cache_install_time', time(), '', false );
-			return;
+			return false;
 		}
 
 		// Wait until the plugin has been installed for at least a week.
-		if ( ( time() - $install_time ) < 7 * DAY_IN_SECONDS ) {
+		return ( time() - $install_time ) >= 7 * DAY_IN_SECONDS;
+	}
+
+	/**
+	 * The one-time "please review" banner (see should_show_review_request()).
+	 *
+	 * While the Black Friday notice is eligible for this user, the request is
+	 * held back on every Prime Cache screen: the two never appear together, and
+	 * the one-week campaign reaches the existing users the request would
+	 * otherwise cover. Once the user dismisses the campaign, or it ends, the
+	 * request shows under its usual conditions again.
+	 */
+	private function show_review_request_notice() {
+		if ( ! $this->should_show_review_request() ) {
+			return;
+		}
+		if ( Prime_Cache_Promo_Notice::bf26()->is_eligible() ) {
 			return;
 		}
 

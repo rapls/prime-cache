@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.63
+Stable tag: 1.10.64
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -242,6 +242,10 @@ No. The free plugin does not send your data or API requests to any third-party s
 
 == Changelog ==
 
+= 1.10.64 =
+* Added: during Black Friday 2026 (November 26 to December 2), the Dashboard tab of the Prime Cache settings shows a short notice about the Prime Cache Pro discount, with the end time in your site's timezone. It appears only on that tab, only to administrators of sites where Prime Cache Pro is not installed, and not at all outside those dates. Each administrator can dismiss it for good, and the prime_cache_show_promo_notice filter turns it off. Nothing is loaded from outside the plugin.
+* Changed: while that notice is shown, the review request is held back, so the two never appear together. Once the notice is dismissed or the dates have passed, the review request returns under its usual conditions.
+
 = 1.10.63 =
 * Fixed: the .htaccess rules now register .woff/.woff2 as font/woff and font/woff2, so the browser-cache expiry for these fonts takes effect.
 * Fixed: when an update rewrote the .htaccess rules automatically, it ran before add-ons were loaded, so Prime Cache Pro's AVIF rules were left out until settings were saved again. The rewrite now runs after add-ons have loaded, and it changes only the lines between the Prime Cache markers.
@@ -413,6 +417,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * For the changelog of version 1.10.19 and earlier, see the plugin page: https://raplsworks.com/plugins/prime-cache/
 
 == Upgrade Notice ==
+
+= 1.10.64 =
+Adds a dismissible Black Friday notice on the Dashboard tab of the Prime Cache settings (November 26 to December 2, 2026 only).
 
 = 1.10.63 =
 Fixes the .htaccess font types so the browser-cache expiry for .woff/.woff2 takes effect. The Prime Cache block in .htaccess is rewritten once after updating; nothing outside it is changed.

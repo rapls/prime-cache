@@ -3578,3 +3578,17 @@ msgstr "%d個の孤立ファイルを削除しました。"
 #: includes/admin/class-admin-settings.php
 msgid "More remain — run the check again."
 msgstr "まだ残っています — もう一度確認を実行してください。"
+
+msgid "Dismiss this notice"
+msgstr "このお知らせを閉じる"
+
+#. translators: 1: discount, e.g. "20%", 2: date and time the offer ends, in the site's timezone with its abbreviation (e.g. "December 2, 2026 5:59 PM JST")
+msgid "Black Friday: %1$s off Prime Cache Pro until %2$s."
+msgstr "ブラックフライデー: Prime Cache Pro が %2$s まで %1$s オフ。"
+
+#. translators: %s: coupon code
+msgid "Use code %s at checkout."
+msgstr "お支払いのときにコード %s をご利用ください。"
+
+msgid "See Pro features"
+msgstr "Pro の機能を見る"

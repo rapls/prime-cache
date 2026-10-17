@@ -348,6 +348,9 @@ delete_option( 'prime_cache_cf_purge_failed' );
 delete_option( 'prime_cache_install_time' );
 delete_option( 'prime_cache_review_notice_done' );
 delete_option( 'prime_cache_delay_max_ack' );
+// Dismissed promotion notices (user_meta). usermeta is shared by the whole
+// network, so one call clears every user.
+delete_metadata( 'user', 0, 'prime_cache_promo_bf26_dismissed', '', true );
 wp_clear_scheduled_hook( 'prime_cache_cleanup_gf_options' );
 // Clean up any remaining Google Fonts pending options.
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'prime\_cache\_gf\_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall cleanup of leftover options; runs once on deletion, not cacheable.
