@@ -170,6 +170,10 @@ If Safe fixes it and you want to keep the rest of Auto, apply Auto again and tur
 3. **Load CSS Asynchronously (Free)**, then **Inline Small CSS Files**
 4. **Minify HTML**, **Minify CSS** and **Minify JavaScript**
 
+= Does it work with the Cocoon theme? =
+
+Yes. In our tests with Cocoon 2.9.5 (October 2026), Prime Cache's Auto preset worked together with all of Cocoon's speed settings turned on (minification, lazy loading and browser cache), and no layout or script problems were found. Both write browser-cache rules to .htaccess; where they overlap, Cocoon's rules come later and take effect, which is fine. If something does look wrong on your site, turn off Cocoon's HTML/CSS/JS minification first, then press Safe in Prime Cache.
+
 = What does Auto change, exactly? =
 
 In the free plugin, Auto turns on: page cache with mobile caching, gzip compression, browser cache headers, .htaccess Optimization (only when .htaccess is writable), HTML / CSS / JavaScript minification, removal of HTML comments, lazy loading for images, iframes and videos (the first six images stay eager so the largest image is not delayed), missing image width/height, a local copy of jQuery when the theme loads it from a CDN, deferred JavaScript, inline small CSS, asynchronous loading of non-first CSS, Google Fonts display=swap, disabling emoji and embeds, removing version query strings, limiting DNS prefetch, disabling block CSS on classic themes, link prefetching and cache preloading. On WooCommerce sites it also turns off WooCommerce scripts on non-shop pages and cart fragments, and adds the cart, checkout and account pages to the exclusions.
