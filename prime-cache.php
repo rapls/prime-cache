@@ -3,7 +3,7 @@
  * Plugin Name: Prime Cache – Page Cache on Activation & One-Click Speed Optimization
  * Plugin URI:  https://raplsworks.com/plugins/prime-cache/
  * Description: Page caching that works the moment you activate it, plus one-click speed tuning. Runs on shared hosting without editing wp-config.php.
- * Version: 1.10.62
+ * Version: 1.10.63
  * Author: rapls
  * Author URI:  https://raplsworks.com/
  * License: GPL-2.0-or-later
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PRIME_CACHE_VERSION', '1.10.62' );
+define( 'PRIME_CACHE_VERSION', '1.10.63' );
 define( 'PRIME_CACHE_FILE', __FILE__ );
 define( 'PRIME_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 
