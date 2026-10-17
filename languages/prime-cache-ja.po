@@ -84,8 +84,8 @@ msgid ""
 msgstr ""
 "設定はデータベースに保存されましたが、ドロップイン用の config ファイルを書き"
 "込めませんでした。ファイルが書き込み可能になるまで、ページキャッシュは変更内"
-"容を反映しない場合があります。wp-content/cache/ が存在し、PHP から書き込み可能"
-"であることを確認してください。"
+"容を反映しない場合があります。wp-content/cache/ が存在し、PHP から書き込み可"
+"能であることを確認してください。"
 
 #: includes/admin/class-admin-settings.php:371
 msgid ""
@@ -127,9 +127,9 @@ msgid ""
 "512 chars) or did not compile as a regex: %s. Saved value is empty for these "
 "fields — open the field, fix the pattern, and save again."
 msgstr ""
-"次の除外パターンは、値が長すぎる (512 文字超) か、正規表現としてコンパイルで"
-"きなかったため破棄されました: %s。これらのフィールドには空の値が保存されてい"
-"ます — フィールドを開いてパターンを修正してから再保存してください。"
+"次の除外パターンは、値が長すぎる (512文字超) か、正規表現としてコンパイルでき"
+"なかったため破棄されました: %s。これらのフィールドには空の値が保存されていま"
+"す — フィールドを開いてパターンを修正してから再保存してください。"
 
 #: includes/admin/class-admin-settings.php:550
 #: includes/admin/class-admin-settings.php:989
@@ -253,7 +253,7 @@ msgstr "AVIF 画像変換"
 
 #: includes/admin/class-admin-settings.php:673
 msgid "Advanced CSS and JavaScript optimization"
-msgstr "高度な CSS・JavaScript 最適化"
+msgstr "高度な CSS、JavaScript 最適化"
 
 #: includes/admin/class-admin-settings.php:674
 msgid "Advanced preloading options"
@@ -290,7 +290,7 @@ msgstr "ヒット率"
 #: includes/admin/class-admin-settings.php:717
 #: includes/class-prime-cache.php:1491
 msgid "Pages"
-msgstr "固定ページ"
+msgstr "ページ"
 
 #: includes/admin/class-admin-settings.php:723
 msgid "Cache Hit Rate"
@@ -304,7 +304,7 @@ msgstr "計測開始: %s"
 
 #: includes/admin/class-admin-settings.php:731
 msgid "Reset all hit/miss statistics to zero?"
-msgstr "すべてのヒット/ミス統計をゼロにリセットしますか？"
+msgstr "すべてのヒット/ミス統計をゼロにリセットしますか ?"
 
 #: includes/admin/class-admin-settings.php:731
 msgid "Reset"
@@ -370,7 +370,7 @@ msgstr "WP_CACHE 定数"
 
 #: includes/admin/class-admin-settings.php:778
 msgid "Cache Directory"
-msgstr "キャッシュディレクトリー"
+msgstr "キャッシュディレクトリ"
 
 #: includes/admin/class-admin-settings.php:779
 msgid "Gzip Support"
@@ -447,7 +447,7 @@ msgstr ""
 
 #: includes/admin/class-admin-settings.php:884
 msgid "Separate Mobile Cache"
-msgstr "モバイル専用キャッシュ"
+msgstr "モバイル別キャッシュ"
 
 #: includes/admin/class-admin-settings.php:884
 msgid ""
@@ -471,8 +471,8 @@ msgid ""
 "enable on sites that serve byte-for-byte identical content to everyone (e.g. "
 "membership sites with no per-user output)."
 msgstr ""
-"ログインユーザーにもキャッシュページを配信します。セキュリティ警告: ログイン"
-"ユーザーと匿名訪問者が各ページのキャッシュを 1 つ共有するため、あるユーザー向"
+"ログインユーザーにもキャッシュページを配信します。セキュリティー警告: ログイ"
+"ンユーザーと匿名訪問者が各ページのキャッシュを1つ共有するため、あるユーザー向"
 "けに生成されたページ (管理バー、nonce、ユーザー固有のコンテンツを含む) が、他"
 "のユーザーや一般訪問者に配信される可能性があります。すべての訪問者に完全に同"
 "一のコンテンツを配信するサイト (例: ユーザーごとの出力がない会員制サイト) で"
@@ -489,7 +489,7 @@ msgid ""
 "environments."
 msgstr ""
 "キャッシュファイルを事前に gzip 圧縮して保存します。対応ブラウザーには圧縮版"
-"を配信し、転送量を 60〜80% 削減します。ほとんどの環境で有効にすることを推奨し"
+"を配信し、転送量を60〜80% 削減します。ほとんどの環境で有効にすることを推奨し"
 "ます。"
 
 #: includes/admin/class-admin-settings.php:887
@@ -503,10 +503,10 @@ msgid ""
 "Optimization to be enabled. Falls back to gzip via mod_deflate if Brotli is "
 "unavailable."
 msgstr ""
-"mod_brotli (Apache 2.4+) 経由で Brotli 圧縮を有効化します。Brotli は gzip よ"
-"り 15〜25% 優れた圧縮率を実現します。mod_brotli と .htaccess 最適化の有効化が"
-"必要です。Brotli が利用できない場合は mod_deflate 経由の gzip にフォールバッ"
-"クします。"
+"Brotli 圧縮を mod_brotli (Apache 2.4+) 経由で有効化します。Brotli は gzip よ"
+"り15〜25% 高い圧縮率を実現します。mod_brotli と .htaccess 最適化の有効化が必"
+"要です。Brotli が利用できない場合は mod_deflate 経由の gzip にフォールバック"
+"します。"
 
 #: includes/admin/class-admin-settings.php:888
 msgid ".htaccess Optimization"
@@ -523,12 +523,12 @@ msgstr ""
 "Apache 向けの最適化ルールを .htaccess に書き込みます。PHP を経由せず Apache "
 "が直接キャッシュファイルを配信するため、応答速度が大幅に向上します。さらに "
 "mod_deflate による動的 gzip 圧縮と ETag 無効化も設定されます。mod_expires と "
-"Cache-Control ヘッダーは「Enable Browser Cache Headers」も有効な場合に追加さ"
-"れます。Nginx 環境では効果がありません。"
+"Cache-Control ヘッダーは「ブラウザーキャッシュヘッダーを有効化」も有効な場合"
+"に追加されます。Nginx 環境では効果がありません。"
 
 #: includes/admin/class-admin-settings.php:889
 msgid "Cache 404 Pages"
-msgstr "404 ページのキャッシュ"
+msgstr "404ページのキャッシュ"
 
 #: includes/admin/class-admin-settings.php:889
 msgid ""
@@ -541,13 +541,12 @@ msgid ""
 "the hourly cleanup."
 msgstr ""
 "404 (Not Found) ページをキャッシュします。存在しない URL への繰り返しリクエス"
-"トによるサーバー負荷を軽減します。キャッシュされた 404 ページは PHP ドロップ"
-"インを通じて適切な 404 HTTP ステータスコードで配信されます。注意: .htaccess "
-"最適化はキャッシュされた 404 ページを配信しません (正しいステータスコードを保"
-"証するため常に PHP を経由します)。存在しない URL ごとに個別のキャッシュエント"
-"リーが作成されるため、ランダムな URL スキャンを受けるサイトではディスク使用量"
-"が増える場合があります。期限切れのエントリーは毎時のクリーンアップで削除され"
-"ます。"
+"トによるサーバー負荷を軽減します。キャッシュされた404ページは PHP ドロップイ"
+"ンを通じて適切な404 HTTP ステータスコードで配信されます。注意: .htaccess 最適"
+"化はキャッシュされた404ページを配信しません (正しいステータスコードを保証する"
+"ため常に PHP を経由します)。存在しない URL ごとに個別のキャッシュエントリーが"
+"作成されるため、ランダムな URL スキャンを受けるサイトではディスク使用量が増え"
+"る場合があります。期限切れのエントリーは毎時のクリーンアップで削除されます。"
 
 #: includes/admin/class-admin-settings.php:890
 msgid "Mixed HTTP/HTTPS Site"
@@ -603,7 +602,7 @@ msgid ""
 msgstr ""
 "キャッシュされたレスポンスに Cache-Control および Expires ヘッダーを追加しま"
 "す。いずれも下記で設定した有効期間を使用します。HTML の Cache-Control は PHP "
-"ドロップインによって適用されます。CSS・JS・画像・フォント・Expires の各ヘッ"
+"ドロップインによって適用されます。CSS、JS、画像、フォント、Expires の各ヘッ"
 "ダーには .htaccess 最適化の有効化が必要です。"
 
 #: includes/admin/class-admin-settings.php:906
@@ -618,7 +617,7 @@ msgid ""
 msgstr ""
 "CSS、JS、画像、フォントの Cache-Control に \"immutable\" ディレクティブを追加"
 "します。ファイルがキャッシュ期間中に変更されないことをブラウザーに伝え、条件"
-"付き再検証リクエスト (304 チェック) を防止します。"
+"付き再検証リクエスト (304チェック) を防止します。"
 
 #: includes/admin/class-admin-settings.php:910
 msgid "CSS & JS Cache Lifetime"
@@ -641,8 +640,8 @@ msgid ""
 "0 = no-cache (recommended for HTML). Non-zero values cache HTML in the "
 "browser."
 msgstr ""
-"0 = no-cache (HTML では推奨)。0 以外の値を設定するとブラウザーで HTML が"
-"キャッシュされます。"
+"0 = no-cache (HTML では推奨)。0以外の値を設定するとブラウザーで HTML がキャッ"
+"シュされます。"
 
 #: includes/admin/class-admin-settings.php:932
 #: includes/admin/class-admin-settings.php:964
@@ -734,16 +733,16 @@ msgid ""
 "cleanup will not run and expired files will keep being served indefinitely."
 msgstr ""
 "キャッシュファイルが自動的に破棄されるまでの時間。期限切れのキャッシュは次の"
-"アクセス時に再生成され、WP-Cron により毎時クリーンアップされます。0 に設定す"
-"ると無制限 — その場合、キャッシュは有効化された Auto Purge トリガー (Auto "
-"Purge タブ) または手動の「Clear Cache」によって無効化されるまで保持されます。"
-"頻繁に更新されるニュースサイトには 1〜6 時間、更新が少ないサイトには 1〜7 日"
-"または無制限を推奨します。注意: .htaccess 最適化が有効な場合、Apache はキャッ"
-"シュファイルを直接配信するため、ファイルの有効期限をチェックできません。期限"
-"切れファイルは次の WP-Cron クリーンアップ (毎時実行) まで配信され続ける場合が"
-"あります。WP-Cron が無効化 (DISABLE_WP_CRON) されており、wp-cron.php を実行す"
-"るシステム cron も設定されていない環境では、クリーンアップが実行されず、期限"
-"切れファイルが無期限に配信され続けます。"
+"アクセス時に再生成され、WP-Cron により毎時クリーンアップされます。0に設定する"
+"と無制限になり、キャッシュは有効な自動パージのトリガー (「自動パージ」タブ) "
+"か、手動の「キャッシュをクリア」で無効化されるまで保持されます。頻繁に更新さ"
+"れるニュースサイトには1〜6時間、更新が少ないサイトには1〜7日または無制限を推"
+"奨します。注意: .htaccess 最適化が有効な場合、Apache はキャッシュファイルを直"
+"接配信するため、ファイルの有効期限をチェックできません。期限切れファイルは次"
+"の WP-Cron クリーンアップ (毎時実行) まで配信され続ける場合があります。WP-"
+"Cron が無効化 (DISABLE_WP_CRON) されており、wp-cron.php を実行するシステム "
+"cron も設定されていない環境では、クリーンアップが実行されず、期限切れファイル"
+"が無期限に配信され続けます。"
 
 #: includes/admin/class-admin-settings.php:979
 #: includes/admin/class-admin-settings.php:1233
@@ -795,7 +794,7 @@ msgid ""
 "elements while preserving inline formatting. Falls back to regex if DOM "
 "parsing fails."
 msgstr ""
-"上の「HTML を圧縮」が有効である必要があります。圧縮エンジンを正規表現から "
+"上の「HTML の圧縮」が有効である必要があります。圧縮エンジンを正規表現から "
 "DOMDocument に切り替えてより深い最適化を行います — ドキュメントツリーを解析"
 "し、ブロックレベル要素間の空白をより積極的に圧縮しつつ、インラインフォーマッ"
 "トを保持します。DOM 解析に失敗した場合は正規表現にフォールバックします。"
@@ -821,9 +820,9 @@ msgid ""
 "every page load. Does not affect actual emoji display in modern browsers."
 msgstr ""
 "すべてのページから絵文字のインライン CSS、wp-emoji-release.min.js スクリプ"
-"ト、s.w.org の DNS プリフェッチを削除します。ページ読み込みごとに 2 つの "
-"HTTP リクエストと約 16 KB を削減します。最新のブラウザーでの絵文字表示には影"
-"響しません。"
+"ト、s.w.org の DNS プリフェッチを削除します。ページ読み込みごとに2つの HTTP "
+"リクエストと約16 KB を削減します。最新のブラウザーでの絵文字表示には影響しま"
+"せん。"
 
 #: includes/admin/class-admin-settings.php:1075
 msgid "Minify CSS"
@@ -858,12 +857,12 @@ msgid ""
 "Inline CSS files smaller than the threshold directly into the HTML as inline "
 "style blocks, eliminating HTTP requests for small stylesheets."
 msgstr ""
-"閾値より小さい CSS ファイルを HTML 内にインラインのスタイルブロックとして直接"
-"展開し、小さなスタイルシートの HTTP リクエストを排除します。"
+"しきい値より小さい CSS ファイルを HTML 内にインラインのスタイルブロックとして"
+"直接展開し、小さなスタイルシートの HTTP リクエストを排除します。"
 
 #: includes/admin/class-admin-settings.php:1084
 msgid "Threshold (bytes)"
-msgstr "閾値 (バイト)"
+msgstr "しきい値 (バイト)"
 
 #: includes/admin/class-admin-settings.php:1089
 msgid "Load CSS Asynchronously (Free)"
@@ -871,17 +870,17 @@ msgstr "CSS を非同期読み込み (Free)"
 
 #: includes/admin/class-admin-settings.php:1089
 msgid ""
-"Convert non-first stylesheet link tags to non-render-blocking loading via the "
-"media-print and onload swap technique. The first stylesheet on the page is "
-"intentionally left synchronous to preserve LCP and prevent unstyled flash for "
-"above-the-fold content. Use the \"Excluded CSS Files\" list above for "
+"Convert non-first stylesheet link tags to non-render-blocking loading via "
+"the media-print and onload swap technique. The first stylesheet on the page "
+"is intentionally left synchronous to preserve LCP and prevent unstyled flash "
+"for above-the-fold content. Use the \"Excluded CSS Files\" list above for "
 "additional stylesheets that must remain render-blocking."
 msgstr ""
-"2 番目以降のスタイルシートのリンクタグを、media-print と onload を使った切り替"
-"え方式に変換し、レンダリングをブロックしない読み込みに変更します。先頭の "
-"stylesheet は LCP を維持し、ファーストビューのちらつきを防ぐため意図的に同期"
-"読み込みのまま残します。レンダリングブロックを維持したい追加の CSS は上の「除"
-"外する CSS ファイル」に追加してください。"
+"2番目以降のスタイルシートのリンクタグを、media-print と onload を使った切り替"
+"え方式に変換し、レンダリングをブロックしない読み込みに変更します。先頭のスタ"
+"イルシートは LCP を維持し、ファーストビューのちらつきを防ぐため意図的に同期読"
+"み込みのまま残します。レンダリングブロックを維持したい追加の CSS は上の「除"
+"外 CSS ファイル」に追加してください。"
 
 #: includes/admin/class-admin-settings.php:1098
 msgid "Minify JavaScript"
@@ -925,28 +924,27 @@ msgstr "JavaScript 実行の遅延"
 
 #: includes/admin/class-admin-settings.php:1100
 msgid ""
-"Delay every external script tag (one with a src attribute) in the HTML output "
-"(including third-party / CDN — not limited to wp_enqueue_script handles) "
-"until user "
-"interaction (scroll, click, keydown, touchstart, mousemove). Inline scripts "
-"(no src) are never delayed because they typically set up variables that "
-"external scripts depend on (wp_localize_script output, consent_api config, "
-"chat widget configs, etc.). Applied on mobile devices only to avoid CLS "
-"regression on desktop. Separate mobile cache is automatically enabled when "
-"this setting is on. Significantly improves mobile page load metrics but may "
-"cause a brief delay on first interaction. Use the exclusion list below for "
-"external scripts that must run before interaction."
+"Delay every external script tag (one with a src attribute) in the HTML "
+"output (including third-party / CDN — not limited to wp_enqueue_script "
+"handles) until user interaction (scroll, click, keydown, touchstart, "
+"mousemove). Inline scripts (no src) are never delayed because they typically "
+"set up variables that external scripts depend on (wp_localize_script output, "
+"consent_api config, chat widget configs, etc.). Applied on mobile devices "
+"only to avoid CLS regression on desktop. Separate mobile cache is "
+"automatically enabled when this setting is on. Significantly improves mobile "
+"page load metrics but may cause a brief delay on first interaction. Use the "
+"exclusion list below for external scripts that must run before interaction."
 msgstr ""
-"HTML 出力中のすべての外部スクリプトタグ (src 属性付き、サードパーティ / CDN を"
-"含み、wp_enqueue_script ハンドルに限定しません) をユーザー操作 (スクロール、"
-"クリック、キー入力、タッチ、マウス移動) まで遅延します。インラインスクリプト "
-"(src 無し) は遅延しません — 通常 wp_localize_script の出力や consent_api の設"
-"定、チャットウィジェットの設定など、外部スクリプトが依存する変数をセットアッ"
-"プするためです。デスクトップの CLS 悪化を避けるため、モバイルデバイスのみに適"
-"用されます。この設定が有効な場合、モバイル別キャッシュが自動的に有効化されま"
-"す。モバイルのページ読み込み指標を大幅に改善しますが、初回操作時にわずかな遅"
-"延が生じる場合があります。操作前に実行が必要な外部スクリプトは下の除外リスト"
-"に登録してください。"
+"HTML 出力中のすべての外部スクリプトタグ (src 属性付き、サードパーティー / "
+"CDN を含み、wp_enqueue_script ハンドルに限定しません) をユーザー操作 (スク"
+"ロール、クリック、キー入力、タッチ、マウス移動) まで遅延します。インラインス"
+"クリプト (src 無し) は遅延しません — 通常 wp_localize_script の出力や "
+"consent_api の設定、チャットウィジェットの設定など、外部スクリプトが依存する"
+"変数をセットアップするためです。デスクトップの CLS 悪化を避けるため、モバイル"
+"デバイスのみに適用されます。この設定が有効な場合、モバイル別キャッシュが自動"
+"的に有効化されます。モバイルのページ読み込み指標を大幅に改善しますが、初回操"
+"作時にわずかな遅延が生じる場合があります。操作前に実行が必要な外部スクリプト"
+"は下の除外リストに登録してください。"
 
 #: includes/admin/class-admin-settings.php:1103
 msgid "Delay Timeout (ms)"
@@ -1000,7 +998,7 @@ msgstr ""
 
 #: includes/admin/class-admin-settings.php:1120
 msgid "Excluded from Defer"
-msgstr "defer 除外"
+msgstr "Defer 除外"
 
 #: includes/admin/class-admin-settings.php:1122
 msgid "JS files that should not be deferred. One pattern per line."
@@ -1009,7 +1007,7 @@ msgstr ""
 
 #: includes/admin/class-admin-settings.php:1125
 msgid "Excluded from Delay"
-msgstr "delay 除外"
+msgstr "Delay 除外"
 
 #: includes/admin/class-admin-settings.php:1127
 msgid ""
@@ -1043,7 +1041,7 @@ msgstr ""
 
 #: includes/admin/class-admin-settings.php:1136
 msgid "Remove Query Strings"
-msgstr "クエリーストリングの削除"
+msgstr "クエリー文字列の削除"
 
 #: includes/admin/class-admin-settings.php:1136
 msgid ""
@@ -1051,9 +1049,9 @@ msgid ""
 "Improves cacheability by CDNs and proxies that ignore query strings. "
 "External URLs are not affected."
 msgstr ""
-"ローカル CSS および JS ファイル URL からバージョンクエリ文字列 (?ver=, ?v=) "
-"を削除します。クエリ文字列を無視する CDN やプロキシによるキャッシュ効率を改善"
-"します。外部 URL には影響しません。"
+"ローカル CSS および JS ファイル URL からバージョンクエリー文字列 (?ver=, ?"
+"v=) を削除します。クエリー文字列を無視する CDN やプロキシによるキャッシュ効率"
+"を改善します。外部 URL には影響しません。"
 
 #: includes/admin/class-admin-settings.php:1142
 msgid "Advanced"
@@ -1073,9 +1071,9 @@ msgid ""
 msgstr ""
 "最適化された CSS/JS ファイルを直接ファイルパスではなくクリーン URL (/_pc-"
 "static/) で配信します。WordPress リライトルールを使用して移植性を確保します。"
-"最適なブラウザーキャッシュのために 1 年の Cache-Control max-age を付与しま"
-"す。`immutable` ディレクティブは「Immutable Cache-Control」も有効な場合に追加"
-"されます。この設定が変更されるとパーマリンクが自動的にフラッシュされます。"
+"最適なブラウザーキャッシュのために1年の Cache-Control max-age を付与します。"
+"`immutable` ディレクティブは「Immutable Cache-Control」も有効な場合に追加され"
+"ます。この設定が変更されるとパーマリンクが自動的にフラッシュされます。"
 
 #: includes/admin/class-admin-settings.php:1148
 msgid "Performance Tweaks"
@@ -1093,11 +1091,11 @@ msgid ""
 msgstr ""
 "テーマが外部 CDN から jQuery を読み込む場合に WordPress 同梱の jQuery に戻し"
 "ます。同一オリジンから jQuery を配信することで外部接続のオーバーヘッド (モバ"
-"イルで約 600ms) を排除します。"
+"イルで約600ms) を排除します。"
 
 #: includes/admin/class-admin-settings.php:1152
 msgid "Disable jQuery Migrate"
-msgstr "jQuery Migrate を無効化"
+msgstr "互換スクリプト (jQuery Migrate) を無効化"
 
 #: includes/admin/class-admin-settings.php:1152
 msgid ""
@@ -1105,7 +1103,7 @@ msgid ""
 "plugins no longer need it. Saves ~10 KB per page."
 msgstr ""
 "フロントエンドから jquery-migrate.min.js を削除します。最新の jQuery コードや"
-"プラグインのほとんどは不要です。ページあたり約 10 KB を節約します。"
+"プラグインのほとんどは不要です。ページあたり約10 KB を節約します。"
 
 #: includes/admin/class-admin-settings.php:1153
 msgid "Disable WP Embed"
@@ -1118,10 +1116,10 @@ msgid ""
 "discovery, but the oEmbed REST endpoint still responds — combine with "
 "\"Disable oEmbed\" below for full embed prevention."
 msgstr ""
-"wp-embed.min.js と oEmbed ディスカバリーリンクをページから削除します。1 ペー"
-"ジあたり約 6 KB の JavaScript を削減し、ディスカバリー経由の自動埋め込みを困"
-"難にしますが、oEmbed REST エンドポイントは引き続き応答します。完全に埋め込み"
-"を防止するには下の「Disable oEmbed」と併用してください。"
+"ページから wp-embed.min.js と oEmbed ディスカバリーリンクを削除します。1ペー"
+"ジあたり約6 KB の JavaScript を削減し、ディスカバリー経由の自動埋め込みを難し"
+"くしますが、oEmbed の REST エンドポイントは引き続き応答します。埋め込みを完全"
+"に防ぐには、下の「埋め込み (oEmbed) を無効化」と併用してください。"
 
 #: includes/admin/class-admin-settings.php:1154
 msgid "Disable Dashicons (Frontend)"
@@ -1132,9 +1130,8 @@ msgid ""
 "Remove the Dashicons stylesheet for non-logged-in visitors. Saves ~46 KB. "
 "Icons remain available for logged-in users and the admin area."
 msgstr ""
-"ログインしていない訪問者向けに Dashicons スタイルシートを削除します。約 46 "
-"KB を節約します。ログインユーザーと管理画面ではアイコンは引き続き利用可能で"
-"す。"
+"ログインしていない訪問者向けに Dashicons スタイルシートを削除します。約46 KB "
+"を節約します。ログインユーザーと管理画面ではアイコンは引き続き利用可能です。"
 
 #: includes/admin/class-admin-settings.php:1155
 msgid "Remove WordPress Version"
@@ -1145,8 +1142,8 @@ msgid ""
 "Remove the WordPress version meta tag and feed generator tag. Minor security "
 "improvement — prevents version fingerprinting."
 msgstr ""
-"WordPress バージョンメタタグとフィードジェネレータータグを削除します。バー"
-"ジョンフィンガープリンティングを防ぐ軽微なセキュリティ改善です。"
+"WordPress バージョンメタタグとフィードジェネレータタグを削除します。バージョ"
+"ンフィンガープリンティングを防ぐ軽微なセキュリティー改善です。"
 
 #: includes/admin/class-admin-settings.php:1156
 msgid "Disable XML-RPC"
@@ -1159,10 +1156,10 @@ msgid ""
 "level — use .htaccess or server configuration for full blocking. Not needed "
 "if you use the REST API."
 msgstr ""
-"xmlrpc_enabled フィルターで XML-RPC API を無効化し、X-Pingback ヘッダーを削除"
-"します。サーバーレベルでの xmlrpc.php へのアクセスはブロックしません。完全な"
-"ブロックには .htaccess またはサーバー設定を使用してください。REST API を使用"
-"している場合は不要です。"
+"XML-RPC API を xmlrpc_enabled フィルターで無効化し、X-Pingback ヘッダーを削除"
+"します。サーバーレベルで xmlrpc.php へのアクセスをブロックするものではありま"
+"せん。完全にブロックするには .htaccess またはサーバーの設定を使用してくださ"
+"い。REST API を使用している場合は不要です。"
 
 #: includes/admin/class-admin-settings.php:1157
 msgid "Disable Self-Pingbacks"
@@ -1190,15 +1187,15 @@ msgstr ""
 
 #: includes/admin/class-admin-settings.php:1159
 msgid "Disable oEmbed"
-msgstr "oEmbed を無効化"
+msgstr "埋め込み (oEmbed) を無効化"
 
 #: includes/admin/class-admin-settings.php:1159
 msgid ""
 "Remove oEmbed discovery links, host JavaScript, and REST API route. Prevents "
 "remote embedding of your content."
 msgstr ""
-"oEmbed ディスカバリーリンク、ホスト JavaScript、REST API ルートを削除します。"
-"コンテンツのリモート埋め込みを防止します。"
+"埋め込み (oEmbed) のディスカバリーリンク、ホスト JavaScript、REST API ルート"
+"を削除します。コンテンツがほかのサイトに埋め込まれるのを防ぎます。"
 
 #: includes/admin/class-admin-settings.php:1160
 msgid "Disable Gutenberg Block CSS"
@@ -1210,9 +1207,9 @@ msgid ""
 "stylesheets. Use only if you are using the Classic Editor and not using any "
 "Gutenberg blocks."
 msgstr ""
-"wp-block-library、wp-block-library-theme、WooCommerce ブロックスタイルシート"
-"を削除します。クラシックエディターを使用し、Gutenberg ブロックを使用していな"
-"い場合のみ使用してください。"
+"ブロック用スタイルシート (wp-block-library、wp-block-library-theme、"
+"WooCommerce のブロック用スタイルシート) を削除します。旧エディターを使用し、"
+"Gutenberg ブロックを使っていない場合にのみ使用してください。"
 
 #: includes/admin/class-admin-settings.php:1161
 msgid "Disable Google Fonts"
@@ -1237,8 +1234,8 @@ msgid ""
 "Remove the global-styles inline CSS and SVG filters added by WordPress 6.1+. "
 "Saves ~2 KB of inline markup on every page."
 msgstr ""
-"WordPress 6.1 以降で追加された global-styles インライン CSS と SVG フィルター"
-"を削除します。ページあたり約 2 KB のインラインマークアップを節約します。"
+"WordPress 6.1以降で追加された global-styles インライン CSS と SVG フィルター"
+"を削除します。ページあたり約2 KB のインラインマークアップを節約します。"
 
 #: includes/admin/class-admin-settings.php:1163
 msgid "Limit DNS Prefetch Hints"
@@ -1250,9 +1247,9 @@ msgid ""
 "hints for every external domain, which wastes mobile connections. PageSpeed "
 "recommends 4 or fewer."
 msgstr ""
-"dns-prefetch と preconnect ヒントを 4 エントリーに制限します。WordPress は外"
-"部ドメインごとにヒントを自動追加しますが、モバイル接続を浪費します。"
-"PageSpeed は 4 つ以下を推奨しています。"
+"リソースヒント (dns-prefetch と preconnect) を4件に制限します。WordPress は外"
+"部ドメインごとにヒントを自動で追加するため、モバイルの接続を浪費します。"
+"PageSpeed は4件以下を推奨しています。"
 
 #: includes/admin/class-admin-settings.php:1171
 msgid "Limit Post Revisions"
@@ -1285,8 +1282,8 @@ msgid ""
 "~100 KB+ on regular blog/pages."
 msgstr ""
 "WooCommerce 以外のページで WooCommerce の CSS と JavaScript を無効化します "
-"(ショップ、商品、アーカイブ、カート、チェックアウト、アカウントページは除"
-"外)。通常のブログ/固定ページで 100KB 以上を節約します。"
+"(ショップ、商品、アーカイブ、カート、購入手続き、アカウントページは除外)。通"
+"常のブログ/固定ページで100KB 以上を節約します。"
 
 #: includes/admin/class-admin-settings.php:1181
 msgid "Disable Cart Fragments AJAX"
@@ -1406,20 +1403,21 @@ msgid ""
 "load every image."
 msgstr ""
 "ページ先頭から遅延読み込みをスキップする画像数 (通常は LCP 候補とその周辺の"
-"ファーストビュー画像)。デフォルトは 3 です。0 を指定するとすべての画像を遅延"
-"読み込みします。"
+"ファーストビュー画像)。デフォルトは3です。0を指定するとすべての画像を遅延読み"
+"込みします。"
 
 #: includes/admin/class-admin-settings.php:1321
 msgid "Lazy Load Iframes"
-msgstr "iframe の遅延読み込み"
+msgstr "インラインフレーム (iframe) の遅延読み込み"
 
 #: includes/admin/class-admin-settings.php:1321
 msgid ""
 "Add loading=\"lazy\" to iframes (YouTube embeds, Google Maps, etc.). "
 "Significantly reduces initial page weight for embed-heavy pages."
 msgstr ""
-"iframe (YouTube 埋め込み、Google Maps など) に loading=\"lazy\" を追加しま"
-"す。埋め込みが多いページの初期読み込みサイズを大幅に削減します。"
+"インラインフレーム (iframe。YouTube の埋め込み、Google Maps など) に "
+"loading=\"lazy\" を追加します。埋め込みが多いページの初期読み込みサイズを大幅"
+"に削減します。"
 
 #: includes/admin/class-admin-settings.php:1322
 msgid "Lazy Load Videos"
@@ -1430,8 +1428,8 @@ msgid ""
 "Set preload=\"none\" on video elements to prevent auto-downloading video "
 "files until playback is requested."
 msgstr ""
-"video 要素に preload=\"none\" を設定し、再生が要求されるまで動画ファイルの自"
-"動ダウンロードを防止します。"
+"動画 (video 要素) に preload=\"none\" を設定し、再生が要求されるまで動画ファ"
+"イルを自動でダウンロードしないようにします。"
 
 #: includes/admin/class-admin-settings.php:1323
 msgid "Disable WordPress Native Lazy Load"
@@ -1444,7 +1442,7 @@ msgid ""
 "to prevent double lazy-load attributes. When disabled, WordPress will not "
 "automatically add loading=\"lazy\" to images and iframes."
 msgstr ""
-"WordPress 5.5 以降で追加された組み込みの遅延読み込みを無効化します。Prime "
+"WordPress 5.5以降で追加された組み込みの遅延読み込みを無効化します。Prime "
 "Cache で遅延読み込みを完全に制御したい場合や、loading=\"lazy\" 属性の重複を防"
 "ぎたい場合に使用してください。無効にすると、WordPress が画像や iframe に自動"
 "で loading=\"lazy\" を追加しなくなります。"
@@ -1489,9 +1487,9 @@ msgid ""
 "them. Prevents Cumulative Layout Shift (CLS) — a Core Web Vitals metric. "
 "Only works for locally hosted images."
 msgstr ""
-"width と height 属性が欠けている画像に自動的に追加します。Core Web Vitals の"
+"画像に width と height 属性がない場合、自動的に追加します。Core Web Vitals の"
 "指標である Cumulative Layout Shift (CLS) を防止します。ローカルでホストされて"
-"いる画像のみ対象です。"
+"いる画像のみが対象です。"
 
 #: includes/admin/class-admin-settings.php:1339
 msgid "Strip EXIF Data"
@@ -1505,9 +1503,9 @@ msgid ""
 "stripping location data."
 msgstr ""
 "アップロード時に JPEG 画像から EXIF メタデータ (カメラモデル、GPS 座標、タイ"
-"ムスタンプ) を削除します。JPEG 画像のみが処理されます。品質 92 で再エンコード"
-"されるため、ファイルサイズがわずかに変わる場合があります。位置情報を削除する"
-"ことでプライバシーを改善します。"
+"ムスタンプ) を削除します。JPEG 画像のみが処理されます。品質92で再エンコードさ"
+"れるため、ファイルサイズがわずかに変わる場合があります。位置情報を削除するこ"
+"とでプライバシーを改善します。"
 
 #: includes/admin/class-admin-settings.php:1340
 msgid "Resize Oversized Images"
@@ -1548,7 +1546,7 @@ msgid ""
 "Convert JPEG and PNG images to modern formats for smaller file sizes and "
 "faster loading."
 msgstr ""
-"JPEG・PNG 画像を最新フォーマットに変換し、ファイルサイズを削減して読み込みを"
+"JPEG、PNG 画像を最新フォーマットに変換し、ファイルサイズを削減して読み込みを"
 "高速化します。"
 
 #: includes/admin/class-admin-settings.php:1375
@@ -1578,8 +1576,8 @@ msgid ""
 "Your server does not support AVIF conversion — AVIF will be skipped even if "
 "enabled. (Requires GD with AVIF support or ImageMagick with AVIF.)"
 msgstr ""
-"お使いのサーバーは AVIF 変換に対応していません。有効にしても AVIF はスキップ"
-"されます。 (AVIF 対応の GD または AVIF 対応の ImageMagick が必要です)"
+"お使いのサーバーは AVIF 変換に対応していないため、有効にしても AVIF はスキッ"
+"プされます (AVIF 対応の GD または AVIF 対応の ImageMagick が必要です)。"
 
 #: includes/admin/class-admin-settings.php:1397
 msgid "Quality Mode"
@@ -1708,13 +1706,13 @@ msgstr "最適化が必要な画像は見つかりませんでした。"
 #: includes/admin/class-admin-settings.php:1533
 #, php-format
 msgid "Converting %1$d / %2$d…"
-msgstr "変換中 %1$d / %2$d…"
+msgstr "変換中%1$d / %2$d…"
 
 #. translators: %d: number of images processed.
 #: includes/admin/class-admin-settings.php:1534
 #, php-format
 msgid "Done. Processed %d images."
-msgstr "完了しました。%d 枚の画像を処理しました。"
+msgstr "完了しました。%d枚の画像を処理しました。"
 
 #. translators: %s: error message.
 #: includes/admin/class-admin-settings.php:1535
@@ -1833,11 +1831,11 @@ msgid ""
 "of CPU core count or 2.0 — whichever is higher — or when a sudden load spike "
 "is detected."
 msgstr ""
-"各プリロードバッチ間の遅延。1 バッチで最大 10 URL を連続送信し、その後この秒"
-"数だけ待機してから WP-Cron で次のバッチを実行します。値を大きくするとサーバー"
-"負荷は減りますが、完了までの時間が長くなります。負荷 (1/5/15 分の加重平均) "
-"が CPU コア数の 80% または 2.0 のいずれか高い方を超えた場合、または負荷スパイ"
-"クを検出した場合、プリロードは自動的に一時停止します。"
+"各プリロードバッチ間の遅延。1バッチで最大10 URL を連続送信し、その後この秒数"
+"だけ待機してから WP-Cron で次のバッチを実行します。値を大きくするとサーバー負"
+"荷は減りますが、完了までの時間が長くなります。負荷 (1/5/15分の加重平均) が "
+"CPU コア数の80% または2.0のいずれか高い方を超えた場合、または負荷スパイクを検"
+"出した場合、プリロードは自動的に一時停止します。"
 
 #: includes/admin/class-admin-settings.php:1680
 msgid "Preload Excluded URLs"
@@ -1870,17 +1868,16 @@ msgid ""
 msgstr ""
 "ユーザーがリンクにホバーした時やビューポートに入った時に、内部リンクをプリ"
 "フェッチする軽量 JavaScript を注入します。ブラウザーが事前にページをダウン"
-"ロードするため、次のクリックが瞬時に感じられます。秒間 3 リンクにレート制限さ"
-"れています。管理画面、ログイン、カート、購入手続き、外部リンクは除外されま"
-"す。"
+"ロードするため、次のクリックが瞬時に感じられます。秒間3リンクにレート制限され"
+"ています。管理画面、ログイン、カート、購入手続き、外部リンクは除外されます。"
 
 #: includes/admin/class-admin-settings.php:1706
 msgid "Query Parameters"
-msgstr "クエリーパラメーター"
+msgstr "クエリーパラメータ"
 
 #: includes/admin/class-admin-settings.php:1707
 msgid "Ignored Query Parameters"
-msgstr "無視するクエリーパラメーター"
+msgstr "無視するクエリーパラメータ"
 
 #: includes/admin/class-admin-settings.php:1707
 msgid ""
@@ -1891,16 +1888,17 @@ msgid ""
 "drop-in (the .htaccess fast-path requires an empty query string), still very "
 "fast but not zero-PHP."
 msgstr ""
-"カンマ区切りでパラメーター名を指定します。ここに記載されたパラメーターが URL "
-"に含まれていても、パラメーターなしの URL と同じキャッシュが配信されます。広告"
-"トラッキング用のパラメーター (utm_source, fbclid, gclid など) を登録すること"
-"で、不要なキャッシュの重複を防ぎます。<strong>注意:</strong> クエリ文字列を含"
-"むリクエストはすべて PHP ドロップイン経由で配信されます (.htaccess 高速配信は"
-"空のクエリ文字列を要件とするため)。非常に高速ですが PHP なしではありません。"
+"カンマ区切りでパラメータ名を指定します。ここに記載されたパラメータが URL に含"
+"まれていても、パラメータなしの URL と同じキャッシュが配信されます。広告トラッ"
+"キング用のパラメータ (utm_source、fbclid、gclid など) を登録することで、不要"
+"なキャッシュの重複を防ぎます。<strong>注意:</strong> クエリー文字列を含むリク"
+"エストはすべて PHP ドロップイン経由で配信されます (.htaccess 高速パスは空のク"
+"エリー文字列を要件とするため)。非常に高速ですが、PHP をまったく使わないわけで"
+"はありません。"
 
 #: includes/admin/class-admin-settings.php:1708
 msgid "Cached Query Parameters"
-msgstr "キャッシュするクエリーパラメーター"
+msgstr "キャッシュするクエリーパラメータ"
 
 #: includes/admin/class-admin-settings.php:1708
 msgid ""
@@ -1912,14 +1910,15 @@ msgid ""
 "fast-path is automatically disabled — all requests are served via the drop-"
 "in to ensure correct variant selection (still very fast, but not zero-PHP)."
 msgstr ""
-"カンマ区切りでパラメーター名を指定します。ここに記載されたパラメーターは、値"
-"ごとに個別のキャッシュファイルを生成します。例えば <code>lang</code> を指定す"
-"ると、<code>?lang=en</code> と <code>?lang=ja</code> にそれぞれ別のキャッシュ"
-"が保存されます。多言語プラグインや通貨切替など、クエリーパラメーターでコンテ"
-"ンツが変わるサイトで使用します。どちらのリストにも含まれないパラメーターが付"
-"いた URL はキャッシュされません。<strong>注意:</strong> 有効化時、.htaccess "
-"高速配信は自動的に無効化され、すべてのリクエストがドロップイン経由で正しいバ"
-"リアントを選択して配信されます (非常に高速ですが、PHP なしではありません)。"
+"カンマ区切りでパラメータ名を指定します。ここに記載されたパラメータは、値ごと"
+"に個別のキャッシュファイルを生成します。例えば <code>lang</code> を指定する"
+"と、<code>?lang=en</code> と <code>?lang=ja</code> にそれぞれ別のキャッシュが"
+"保存されます。多言語プラグインや通貨切替など、クエリーパラメータでコンテンツ"
+"が変わるサイトで使用します。どちらのリストにも含まれないパラメータが付いた "
+"URL はキャッシュされません。<strong>注意:</strong> 有効化時、.htaccess 高速パ"
+"スは自動的に無効化され、すべてのリクエストがドロップイン経由で正しいバリアン"
+"トを選択して配信されます (非常に高速ですが、PHP をまったく使わないわけではあ"
+"りません)。"
 
 #: includes/admin/class-admin-settings.php:1710
 msgid "Cookie-based Cache Splitting"
@@ -1945,7 +1944,7 @@ msgstr ""
 "<code>currency=JPY</code> のユーザーにそれぞれ別のキャッシュが配信されます。"
 "EC サイトの通貨・国別表示、A/B テストなど、Cookie によってページ内容が変わる"
 "場合に使用します。<strong>注意:</strong> この機能が有効な場合、.htaccess 高速"
-"配信は自動的に無効化されます。正しいバリアントを選択するため、すべてのリクエ"
+"パスは自動的に無効化されます。正しいバリアントを選択するため、すべてのリクエ"
 "ストがドロップインを経由して配信されます。"
 
 #: includes/admin/class-admin-settings.php:1713
@@ -1964,7 +1963,7 @@ msgid ""
 "sitemaps, custom landing pages, or shortcode-based post listing pages that "
 "are not auto-detected."
 msgstr ""
-"1行に1つの URL を記入します。いずれかの投稿が公開・更新・ゴミ箱移動・削除され"
+"1行に1つの URL を記入します。いずれかの投稿が公開、更新、ゴミ箱移動、削除され"
 "るたびに、通常の関連ページ (ホーム、カテゴリー、タグ、投稿者、日付アーカイブ"
 "など) に加えて、ここに記載された URL のキャッシュも自動的に削除されます。サイ"
 "トマップ、カスタムランディングページ、投稿一覧を表示するショートコードページ"
@@ -1982,10 +1981,10 @@ msgid ""
 "page/2/, etc.) is left for natural expiry to preserve cache hit rate."
 msgstr ""
 "投稿、固定ページ、カスタム投稿タイプが公開または更新されたときに、関連する"
-"キャッシュをクリアします。投稿 URL、ホーム、投稿一覧ページ、著者アーカイブ、"
-"タームアーカイブ、日付アーカイブ、カスタム投稿タイプアーカイブの 1 ページ目が"
-"対象です。`/page/2/` 以降のページネーションは、キャッシュヒット率維持のため自"
-"然な期限切れに任せます。"
+"キャッシュをクリアします。投稿 URL、ホーム、投稿一覧ページ、投稿者アーカイ"
+"ブ、タームアーカイブ、日付アーカイブ、カスタム投稿タイプアーカイブの1ページ目"
+"が対象です。`/page/2/` 以降のページ送りは、キャッシュヒット率維持のため自然な"
+"期限切れに任せます。"
 
 #: includes/admin/class-admin-settings.php:1733
 msgid "Post Trash / Delete"
@@ -2008,7 +2007,7 @@ msgid ""
 "posted, approved, edited, trashed, or deleted. (Home/posts page cleared "
 "because they typically display comment counts and recent-comments widgets.)"
 msgstr ""
-"コメントの投稿・承認・編集・ゴミ箱移動・削除時に、該当する投稿ページ、ホー"
+"コメントの投稿、承認、編集、ゴミ箱移動、削除時に、該当する投稿ページ、ホー"
 "ム、投稿一覧ページのキャッシュをクリアします (ホームと投稿一覧ページはコメン"
 "ト数や最近のコメントウィジェットを表示するため)。"
 
@@ -2022,8 +2021,8 @@ msgid ""
 "when a category, tag, or custom taxonomy term is created, edited, or deleted."
 msgstr ""
 "カテゴリー、タグ、カスタムタクソノミーのタームが作成・編集・削除されたとき"
-"に、タームアーカイブ (ページネーション含む)、ホーム、投稿一覧ページのキャッ"
-"シュをクリアします。"
+"に、タームアーカイブ (ページ送り含む)、ホーム、投稿一覧ページのキャッシュをク"
+"リアします。"
 
 #: includes/admin/class-admin-settings.php:1736
 msgid "Theme Switch"
@@ -2120,8 +2119,8 @@ msgid ""
 "when a user profile is updated or a user is deleted."
 msgstr ""
 "ユーザープロフィールが更新されたとき、またはユーザーが削除されたときに、投稿"
-"者アーカイブ (ページネーション含む)、ホーム、投稿一覧ページのキャッシュをクリ"
-"アします。"
+"者アーカイブ (ページ送り含む)、ホーム、投稿一覧ページのキャッシュをクリアしま"
+"す。"
 
 #: includes/admin/class-admin-settings.php:1747
 msgid ""
@@ -2156,8 +2155,8 @@ msgid ""
 msgstr ""
 "URL パスパターンを <code>|</code> で区切って入力します。<code>*</code> をワイ"
 "ルドカードとして使用できます。マッチした URL は常に WordPress が動的に生成し"
-"ます。WooCommerce のカート/チェックアウト、マイアカウントページ、またはユー"
-"ザー固有のコンテンツを含むページを指定してください。"
+"ます。WooCommerce のカート/購入手続き、マイアカウントページ、またはユーザー固"
+"有のコンテンツを含むページを指定してください。"
 
 #: includes/admin/class-admin-settings.php:1776
 msgid "Cookies that disable caching"
@@ -2261,7 +2260,7 @@ msgid ""
 "current values; settings the preset does not touch (rejected URIs, "
 "additional purge URLs, etc.) are preserved."
 msgstr ""
-"「%s」プリセットを適用しますか？ プリセットに含まれる設定は現在の値を上書きし"
+"「%s」プリセットを適用しますか ? プリセットに含まれる設定は現在の値を上書きし"
 "ますが、プリセットが扱わない設定 (除外 URI、追加パージ URL など) は保持されま"
 "す。"
 
@@ -2278,13 +2277,22 @@ msgid ""
 "Minimal risk. Enables page caching, gzip compression, browser caching, and "
 "lazy loading. Turns off the following, including any you enabled yourself: "
 "Minify HTML, Minify CSS, Minify JavaScript, Optimize HTML via DOM Parser, "
-"Remove HTML Comments, Load JavaScript Deferred, Delay JavaScript "
-"Execution, Load CSS Asynchronously (Free), Inline Small CSS Files, Use "
-"Local jQuery, Add Missing Image Dimensions, Disable Gutenberg Block CSS, "
-"Disable WP Embed, Disable oEmbed, WooCommerce Script Optimization, and "
-"Disable Cart Fragments AJAX. Use it to get back to a page that is known to "
-"display correctly."
+"Remove HTML Comments, Load JavaScript Deferred, Delay JavaScript Execution, "
+"Load CSS Asynchronously (Free), Inline Small CSS Files, Use Local jQuery, "
+"Add Missing Image Dimensions, Disable Gutenberg Block CSS, Disable WP Embed, "
+"Disable oEmbed, WooCommerce Script Optimization, and Disable Cart Fragments "
+"AJAX. Use it to get back to a page that is known to display correctly."
 msgstr ""
+"リスクを最小限に抑えます。ページキャッシュ、gzip 圧縮、ブラウザーキャッシュ、"
+"遅延読み込みを有効化します。次の設定は、手動で有効にしたものも含めて無効化し"
+"ます: 「HTML の圧縮」、「CSS の圧縮」、「JavaScript の圧縮」、「DOM パーサー"
+"による HTML 最適化」、「HTML コメントの削除」、「JavaScript の遅延読み込"
+"み」、「JavaScript 実行の遅延」、「CSS を非同期読み込み (Free)」、「小さな "
+"CSS ファイルのインライン化」、「ローカル jQuery を使用」、「画像の寸法を自動"
+"補完」、「Gutenberg ブロック CSS を無効化」、「WP Embed を無効化」、「埋め込"
+"み (oEmbed) を無効化」、「WooCommerce スクリプト最適化」、「カートフラグメン"
+"ト AJAX の無効化」。正しく表示されることがわかっている状態にページを戻すとき"
+"に使います。"
 
 #: includes/admin/class-admin-settings.php:1881
 msgid "Balanced"
@@ -2297,8 +2305,8 @@ msgid ""
 "and .htaccess optimization on top of Safe settings."
 msgstr ""
 "低リスクで良好なパフォーマンスを実現します。安全プリセットの設定に加え、HTML/"
-"CSS/JS の圧縮、リンクプリフェッチ、JS の遅延読み込み、クエリ文字列の削除、絵"
-"文字の無効化、埋め込みの無効化、.htaccess 最適化を追加します。"
+"CSS/JS の圧縮、リンクプリフェッチ、JS の遅延読み込み、クエリー文字列の削除、"
+"絵文字の無効化、埋め込みの無効化、.htaccess 最適化を追加します。"
 
 #: includes/admin/class-admin-settings.php:1887
 msgid "Aggressive"
@@ -2319,8 +2327,8 @@ msgstr ""
 "WordPress アセット (絵文字、埋め込み、dashicons、oEmbed、ブロック CSS) を無効"
 "化します。Pro アドオンを併用すると、未使用 CSS の削除、クリティカル CSS の自"
 "動生成、最大 Delay (jQuery とインラインスクリプトも遅延)、Google Fonts のセル"
-"フホストを行います。ファイル結合は HTTP/2 では効果がないため意図的にオフのま"
-"まにします。互換性のためにテストや除外ルールが必要な場合があります。"
+"フホストを行います。ファイル結合は HTTP/2では効果がないため意図的にオフのまま"
+"にします。互換性のためにテストや除外ルールが必要な場合があります。"
 
 #: includes/admin/class-admin-settings.php:1902
 msgid "Apply"
@@ -2359,7 +2367,7 @@ msgid ""
 msgstr ""
 "インポートすると JSON に含まれる設定が上書きされます。JSON に記載されていない"
 "設定 (および JSON に含まれない Cloudflare/Sucuri API キー) は現在の値のまま保"
-"持されます。続行しますか？"
+"持されます。続行しますか ?"
 
 #: includes/admin/class-admin-settings.php:1926
 msgid ""
@@ -2391,7 +2399,7 @@ msgid ""
 "This will reset ALL settings to defaults. This cannot be undone. Continue?"
 msgstr ""
 "すべての設定がデフォルトにリセットされます。この操作は取り消せません。続行し"
-"ますか？"
+"ますか ?"
 
 #: includes/admin/class-admin-settings.php:1935
 msgid "Reset to Defaults"
@@ -2406,8 +2414,8 @@ msgid ""
 "Security headers require .htaccess Optimization to be enabled on the Page "
 "Cache tab. Without it, these headers will not be added to responses."
 msgstr ""
-"セキュリティヘッダーにはページキャッシュタブの .htaccess 最適化の有効化が必要"
-"です。有効化しないと、これらのヘッダーはレスポンスに追加されません。"
+"セキュリティーヘッダーには「ページキャッシュ」タブの .htaccess 最適化の有効化"
+"が必要です。有効化しないと、これらのヘッダーはレスポンスに追加されません。"
 
 #: includes/admin/class-admin-settings.php:1949
 msgid "HTTP Strict Transport Security (HSTS)"
@@ -2421,8 +2429,8 @@ msgid ""
 msgstr ""
 "ブラウザーに今後のすべての接続で HTTPS を使用するよう強制します。サイトが完全"
 "に HTTPS に対応している場合のみ有効化してください。includeSubDomains と "
-"preload ディレクティブを含みます。ページキャッシュタブの .htaccess 最適化が必"
-"要です。"
+"preload ディレクティブを含みます。「ページキャッシュ」タブの .htaccess 最適化"
+"が必要です。"
 
 #: includes/admin/class-admin-settings.php:1962
 msgid "HSTS Max-Age"
@@ -2441,8 +2449,8 @@ msgid ""
 msgstr ""
 "X-Content-Type-Options (nosniff)、X-Frame-Options (SAMEORIGIN)、X-XSS-"
 "Protection、Referrer-Policy、Permissions-Policy ヘッダーを追加します。クリッ"
-"クジャッキング、MIME タイプスニッフィング、XSS 攻撃から保護します。ページ"
-"キャッシュタブの .htaccess 最適化が必要です。"
+"クジャッキング、MIME タイプスニッフィング、XSS 攻撃から保護します。「ページ"
+"キャッシュ」タブの .htaccess 最適化が必要です。"
 
 #: includes/admin/class-admin-settings.php:1992
 msgid "Debug"
@@ -2557,7 +2565,7 @@ msgid ""
 "is disabled or driven by a system cron)."
 msgstr ""
 "すべてのキャッシュをクリアしました。次の WP-Cron 実行時 (通常のアクセスがある"
-"サイトでは概ね 1 分以内、DISABLE_WP_CRON 設定時やシステム cron 駆動時はそれ以"
+"サイトでは概ね1分以内、DISABLE_WP_CRON 設定時やシステム cron 駆動時はそれ以"
 "上) にプリロードが開始されます。"
 
 #: includes/admin/class-admin-settings.php:2255
@@ -2627,9 +2635,9 @@ msgid ""
 "delayed accordingly."
 msgstr ""
 "キャッシュのプリロードをスケジュールしました。次の WP-Cron 実行時 (通常のアク"
-"セスがあるサイトでは概ね 1 分以内) に開始されます。DISABLE_WP_CRON が定義され"
-"ている、またはシステム cron に依存している環境では、開始までの時間がそれに応"
-"じて遅延します。"
+"セスがあるサイトでは概ね1分以内) に開始されます。DISABLE_WP_CRON が定義されて"
+"いる、またはシステム cron に依存している環境では、開始までの時間がそれに応じ"
+"て遅延します。"
 
 #: includes/admin/class-admin-settings.php:2268
 msgid ""
@@ -2645,16 +2653,16 @@ msgid ""
 "Cannot start preload: page caching is disabled. Enable \"Cache Enabled\" in "
 "Page Cache settings first."
 msgstr ""
-"プリロードを開始できません: ページキャッシュが無効です。先に Page Cache 設定"
-"の「Cache Enabled」を有効化してください。"
+"プリロードを開始できません: ページキャッシュが無効です。先に「ページキャッ"
+"シュ」設定で「キャッシュ有効」を有効化してください。"
 
 #: includes/admin/class-admin-settings.php:2270
 msgid ""
 "Cannot start preload: preload is disabled. Enable \"Cache Preload\" in "
 "Preload settings first."
 msgstr ""
-"プリロードを開始できません: プリロードが無効です。先に Preload 設定の「Cache "
-"Preload」を有効化してください。"
+"プリロードを開始できません: プリロードが無効です。先に「プリロード」設定で"
+"「キャッシュプリロード」を有効化してください。"
 
 #: includes/admin/class-admin-settings.php:2271
 msgid ""
@@ -2710,10 +2718,9 @@ msgid ""
 "bumped to 5000ms so delayed scripts still fire on no-interaction sessions. "
 "Set it back to 0 if you want interaction-only mode."
 msgstr ""
-"Prime Cache のアップグレード: 「Delay JS Timeout」が 0 (フォールバックなし) "
-"だったため、操作のないセッションでも遅延スクリプトが実行されるよう 5000ms に"
-"変更しました。操作時のみ実行するモードに戻したい場合は 0 に設定し直してくださ"
-"い。"
+"Prime Cache のアップグレード: 「遅延タイムアウト」が0 (フォールバックなし) "
+"だったため、操作のないセッションでも遅延スクリプトが実行されるよう5000ms に変"
+"更しました。操作時のみ実行するモードに戻したい場合は0に設定し直してください。"
 
 #: includes/class-prime-cache.php:338
 msgid ""
@@ -2928,12 +2935,22 @@ msgid "Go beyond page caching."
 msgstr "ページキャッシュの次へ。"
 
 #: includes/admin/class-admin-settings.php:718
-msgid "Prime Cache Free covers the essentials: page cache, browser cache, minification, lazy loading, WebP, and preload."
-msgstr "Prime Cache Free は土台をカバーします: ページキャッシュ、ブラウザーキャッシュ、最小化、遅延読み込み、WebP、プリロード。"
+msgid ""
+"Prime Cache Free covers the essentials: page cache, browser cache, "
+"minification, lazy loading, WebP, and preload."
+msgstr ""
+"Prime Cache Free は土台をカバーします: ページキャッシュ、ブラウザーキャッ"
+"シュ、圧縮、遅延読み込み、WebP、プリロード。"
 
 #: includes/admin/class-admin-settings.php:719
-msgid "Prime Cache Pro adds advanced optimization for production sites — Critical CSS, unused CSS cleanup, object cache, AVIF, external cache purge, sitemap preload, and database cleanup."
-msgstr "Prime Cache Pro は本番サイト向けの高度な最適化を追加します — Critical CSS、未使用 CSS の整理、オブジェクトキャッシュ、AVIF、外部キャッシュパージ、サイトマッププリロード、データベースクリーンアップ。"
+msgid ""
+"Prime Cache Pro adds advanced optimization for production sites — Critical "
+"CSS, unused CSS cleanup, object cache, AVIF, external cache purge, sitemap "
+"preload, and database cleanup."
+msgstr ""
+"Prime Cache Pro は本番サイト向けの高度な最適化を追加します — クリティカル "
+"CSS、未使用 CSS の整理、オブジェクトキャッシュ、AVIF、外部キャッシュパージ、"
+"サイトマッププリロード、データベースクリーンアップ。"
 
 #: includes/admin/class-admin-settings.php:722
 msgid "Get Prime Cache Pro"
@@ -2961,11 +2978,11 @@ msgstr "ブラウザーキャッシュ"
 
 #: includes/admin/class-admin-settings.php:738
 msgid "Critical CSS"
-msgstr "Critical CSS"
+msgstr "クリティカル CSS"
 
 #: includes/admin/class-admin-settings.php:739
 msgid "Minification"
-msgstr "最小化"
+msgstr "圧縮"
 
 #: includes/admin/class-admin-settings.php:739
 msgid "Remove unused CSS"
@@ -3012,8 +3029,11 @@ msgid "Improve first paint"
 msgstr "ファーストペイントを改善"
 
 #: includes/admin/class-admin-settings.php:753
-msgid "Generate Critical CSS and optimize CSS delivery for above-the-fold rendering."
-msgstr "Critical CSS を生成し、ファーストビューの描画に向けて CSS 配信を最適化します。"
+msgid ""
+"Generate Critical CSS and optimize CSS delivery for above-the-fold rendering."
+msgstr ""
+"クリティカル CSS を生成し、ファーストビューの描画に向けて CSS 配信を最適化し"
+"ます。"
 
 #: includes/admin/class-admin-settings.php:756
 msgid "Reduce unused weight"
@@ -3021,15 +3041,19 @@ msgstr "不要なバイト数を削減"
 
 #: includes/admin/class-admin-settings.php:757
 msgid "Remove unused CSS so each page loads less unnecessary stylesheet code."
-msgstr "未使用 CSS を削除し、各ページが読み込む不要なスタイルシートを減らします。"
+msgstr ""
+"未使用 CSS を削除し、各ページが読み込む不要なスタイルシートを減らします。"
 
 #: includes/admin/class-admin-settings.php:760
 msgid "Keep external caches in sync"
 msgstr "外部キャッシュを同期"
 
 #: includes/admin/class-admin-settings.php:761
-msgid "Automatically purge Cloudflare, Sucuri, and Varnish when content changes."
-msgstr "コンテンツが変わると Cloudflare、Sucuri、Varnish のキャッシュも自動でパージします。"
+msgid ""
+"Automatically purge Cloudflare, Sucuri, and Varnish when content changes."
+msgstr ""
+"コンテンツが変わると Cloudflare、Sucuri、Varnish のキャッシュも自動でパージし"
+"ます。"
 
 #: includes/admin/class-admin-settings.php:764
 msgid "Go beyond WebP"
@@ -3044,24 +3068,34 @@ msgid "Warm important pages automatically"
 msgstr "重要なページを自動で温める"
 
 #: includes/admin/class-admin-settings.php:769
-msgid "Use sitemap and resource preloading to prepare key pages before visitors arrive."
-msgstr "サイトマップとリソースのプリロードで、訪問者が来る前に主要ページを準備します。"
+msgid ""
+"Use sitemap and resource preloading to prepare key pages before visitors "
+"arrive."
+msgstr ""
+"サイトマップとリソースのプリロードで、訪問者が来る前に主要ページを準備しま"
+"す。"
 
 #: includes/admin/class-admin-settings.php:772
 msgid "Clean long-running sites"
 msgstr "長く運用したサイトを軽くする"
 
 #: includes/admin/class-admin-settings.php:773
-msgid "Schedule database cleanup for revisions, transients, expired data, and overhead."
-msgstr "リビジョン、トランジェント、期限切れデータ、テーブルオーバーヘッドのクリーンアップをスケジュール実行します。"
+msgid ""
+"Schedule database cleanup for revisions, transients, expired data, and "
+"overhead."
+msgstr ""
+"リビジョン、Transient、期限切れデータ、テーブルオーバーヘッドのクリーンアップ"
+"をスケジュール実行します。"
 
 #: includes/admin/class-admin-settings.php:776
 msgid "Add persistent object cache"
 msgstr "永続的なオブジェクトキャッシュを追加"
 
 #: includes/admin/class-admin-settings.php:777
-msgid "Use Redis, Memcached, or APCu for dynamic workloads and admin-heavy sites."
-msgstr "Redis、Memcached、APCu を使い、動的処理や管理画面が多いサイトに対応します。"
+msgid ""
+"Use Redis, Memcached, or APCu for dynamic workloads and admin-heavy sites."
+msgstr ""
+"Redis、Memcached、APCu を使い、動的処理や管理画面が多いサイトに対応します。"
 
 #: includes/admin/class-admin-settings.php:784
 msgid "Recommended for"
@@ -3093,15 +3127,21 @@ msgstr "Redis / Memcached / APCu が利用可能なサーバー環境"
 
 #: includes/admin/class-admin-settings.php:797
 msgid "Ready to go beyond page caching?"
-msgstr "ページキャッシュの次へ進む準備はできましたか?"
+msgstr "ページキャッシュの次へ進む準備はできましたか ?"
 
 #: includes/admin/class-admin-settings.php:1013
 msgid "Looking for advanced optimization?"
-msgstr "さらに高度な最適化をお探しですか?"
+msgstr "さらに高度な最適化をお探しですか ?"
 
 #: includes/admin/class-admin-settings.php:1014
-msgid "Prime Cache Free covers the essentials. Prime Cache Pro adds advanced CSS optimization, object cache, AVIF, external cache purge, and database cleanup for production sites."
-msgstr "Prime Cache Free は土台をカバーします。Prime Cache Pro は本番サイト向けに、高度な CSS 最適化、オブジェクトキャッシュ、AVIF、外部キャッシュパージ、データベースクリーンアップを追加します。"
+msgid ""
+"Prime Cache Free covers the essentials. Prime Cache Pro adds advanced CSS "
+"optimization, object cache, AVIF, external cache purge, and database cleanup "
+"for production sites."
+msgstr ""
+"Prime Cache Free は土台をカバーします。Prime Cache Pro は本番サイト向けに、高"
+"度な CSS 最適化、オブジェクトキャッシュ、AVIF、外部キャッシュパージ、データ"
+"ベースクリーンアップを追加します。"
 
 #: includes/admin/class-admin-settings.php:1017
 msgid "View Pro Features"
@@ -3112,88 +3152,153 @@ msgid "Advanced CSS optimization"
 msgstr "より高度な CSS 最適化"
 
 #: includes/admin/class-admin-settings.php:1456
-msgid "Prime Cache Pro adds Critical CSS generation, unused CSS cleanup, and advanced CSS delivery for sites that need deeper front-end optimization."
-msgstr "Prime Cache Pro は、フロントエンドをさらに最適化したいサイト向けに、Critical CSS の生成、未使用 CSS の整理、高度な CSS 配信を追加します。"
+msgid ""
+"Prime Cache Pro adds Critical CSS generation, unused CSS cleanup, and "
+"advanced CSS delivery for sites that need deeper front-end optimization."
+msgstr ""
+"Prime Cache Pro は、フロントエンドをさらに最適化したいサイト向けに、クリティ"
+"カル CSS の生成、未使用 CSS の整理、高度な CSS 配信を追加します。"
 
 #: includes/admin/class-admin-settings.php:1802
 msgid "Need smaller modern images?"
-msgstr "より小さい最新形式の画像が必要ですか?"
+msgstr "より小さい最新形式の画像が必要ですか ?"
 
 #: includes/admin/class-admin-settings.php:1803
-msgid "Prime Cache Pro adds AVIF conversion for sites that want to go beyond WebP."
-msgstr "Prime Cache Pro は、WebP のさらに先を求めるサイト向けに AVIF 変換を追加します。"
+msgid ""
+"Prime Cache Pro adds AVIF conversion for sites that want to go beyond WebP."
+msgstr ""
+"Prime Cache Pro は、WebP のさらに先を求めるサイト向けに AVIF 変換を追加しま"
+"す。"
 
 #: includes/admin/class-admin-settings.php:1693
 msgid "AVIF Conversion"
 msgstr "AVIF 変換"
 
 #: includes/admin/class-admin-settings.php:1694
-msgid "Prime Cache Pro adds AVIF conversion for smaller modern image delivery. WebP conversion remains available in Prime Cache Free."
-msgstr "Prime Cache Pro はより小さな最新形式での画像配信に向けて AVIF 変換を追加します。WebP 変換は Prime Cache Free でも引き続き利用できます。"
+msgid ""
+"Prime Cache Pro adds AVIF conversion for smaller modern image delivery. WebP "
+"conversion remains available in Prime Cache Free."
+msgstr ""
+"Prime Cache Pro はより小さな最新形式での画像配信に向けて AVIF 変換を追加しま"
+"す。WebP 変換は Prime Cache Free でも引き続き利用できます。"
 
 #: includes/admin/class-admin-settings.php:1305
 msgid "Critical CSS & Unused CSS"
-msgstr "Critical CSS と未使用 CSS"
+msgstr "クリティカル CSS と未使用 CSS"
 
 #: includes/admin/class-admin-settings.php:1929
 msgid "Advanced Preload"
 msgstr "高度なプリロード"
 
 #: includes/admin/class-admin-settings.php:1930
-msgid "Prime Cache Pro adds sitemap preload, resource preload, DNS prefetch, and preconnect to warm important pages and assets before visitors arrive."
-msgstr "Prime Cache Pro はサイトマッププリロード、リソースプリロード、DNS プリフェッチ、preconnect を追加し、訪問者が来る前に主要なページとアセットを温めます。"
+msgid ""
+"Prime Cache Pro adds sitemap preload, resource preload, DNS prefetch, and "
+"preconnect to warm important pages and assets before visitors arrive."
+msgstr ""
+"Prime Cache Pro はサイトマッププリロード、リソースプリロード、DNS プリフェッ"
+"チ、preconnect を追加し、訪問者が来る前に主要なページとアセットを温めます。"
 
 #: includes/admin/class-admin-settings.php:1950
 msgid "Persistent Object Cache"
 msgstr "永続オブジェクトキャッシュ"
 
 #: includes/admin/class-admin-settings.php:1951
-msgid "Prime Cache Pro adds persistent object cache support for Redis, Memcached, and APCu environments, helping dynamic and admin-heavy sites reduce repeated database work."
-msgstr "Prime Cache Pro は Redis、Memcached、APCu 環境向けに永続オブジェクトキャッシュを追加し、動的な処理や管理画面が多いサイトでデータベースへの繰り返しアクセスを削減します。"
+msgid ""
+"Prime Cache Pro adds persistent object cache support for Redis, Memcached, "
+"and APCu environments, helping dynamic and admin-heavy sites reduce repeated "
+"database work."
+msgstr ""
+"Prime Cache Pro は Redis、Memcached、APCu 環境向けに永続オブジェクトキャッ"
+"シュを追加し、動的な処理や管理画面が多いサイトでデータベースへの繰り返しアク"
+"セスを削減します。"
 
 #: includes/admin/class-admin-settings.php:1979
 msgid "External Cache Purge"
 msgstr "外部キャッシュのパージ"
 
 #: includes/admin/class-admin-settings.php:1980
-msgid "Prime Cache Pro can purge Cloudflare, Sucuri, and Varnish when content changes, keeping external cache layers in sync."
-msgstr "Prime Cache Pro はコンテンツの変更時に Cloudflare、Sucuri、Varnish のキャッシュもパージし、外部キャッシュレイヤーを同期させ続けます。"
+msgid ""
+"Prime Cache Pro can purge Cloudflare, Sucuri, and Varnish when content "
+"changes, keeping external cache layers in sync."
+msgstr ""
+"Prime Cache Pro はコンテンツの変更時に Cloudflare、Sucuri、Varnish のキャッ"
+"シュもパージし、外部キャッシュレイヤーを同期させ続けます。"
 
 #: includes/admin/class-admin-settings.php:2206
 msgid "Database Cleanup"
 msgstr "データベースクリーンアップ"
 
 #: includes/admin/class-admin-settings.php:2207
-msgid "Prime Cache Pro adds scheduled cleanup for revisions, expired transients, and overhead on long-running WordPress sites."
-msgstr "Prime Cache Pro はリビジョン、期限切れトランジェント、テーブルオーバーヘッドのクリーンアップを長期運用の WordPress サイト向けにスケジュール実行できるようにします。"
+msgid ""
+"Prime Cache Pro adds scheduled cleanup for revisions, expired transients, "
+"and overhead on long-running WordPress sites."
+msgstr ""
+"Prime Cache Pro はリビジョン、期限切れ Transient、テーブルオーバーヘッドのク"
+"リーンアップを長期運用の WordPress サイト向けにスケジュール実行できるようにし"
+"ます。"
 
 #: includes/admin/class-admin-settings.php
-msgid "Page caching is running in standard mode. Your wp-config.php currently sets WP_CACHE to false, which keeps the faster drop-in mode turned off. Changing that one word — false to true — switches it on. The steps below are written so that anyone can do it."
-msgstr "ページキャッシュは標準モードで動作しています。現在 wp-config.php で WP_CACHE が false になっているため、より高速なドロップインモードはオフのままです。この 1 語 (false を true) を書き換えるだけでオンになります。以下の手順は、どなたでもできるように書いています。"
+msgid ""
+"Page caching is running in standard mode. Your wp-config.php currently sets "
+"WP_CACHE to false, which keeps the faster drop-in mode turned off. Changing "
+"that one word — false to true — switches it on. The steps below are written "
+"so that anyone can do it."
+msgstr ""
+"ページキャッシュは標準モードで動作しています。現在 wp-config.php で WP_CACHE "
+"が false に設定されているため、より高速なドロップインモードはオフのままです。"
+"この1語 (false を true) を書き換えるだけで有効になります。以下の手順はどなた"
+"でもできるように書いています。"
 
 #: includes/admin/class-admin-settings.php
-msgid "Page caching is running in standard mode. There is an optional way to make it even faster: serving cached pages before WordPress loads (drop-in mode). It only takes adding one line to wp-config.php, and the steps below are written so that anyone can do it."
-msgstr "ページキャッシュは標準モードで動作しています。さらに速くする方法があります (任意)。WordPress の読み込み前にキャッシュを配信する「ドロップインモード」です。wp-config.php に 1 行を追加するだけで、以下の手順はどなたでもできるように書いています。"
+msgid ""
+"Page caching is running in standard mode. There is an optional way to make "
+"it even faster: serving cached pages before WordPress loads (drop-in mode). "
+"It only takes adding one line to wp-config.php, and the steps below are "
+"written so that anyone can do it."
+msgstr ""
+"ページキャッシュは標準モードで動作しています。さらに高速化する任意の方法とし"
+"て、WordPress の読み込み前にキャッシュを配信する「ドロップインモード」があり"
+"ます。wp-config.php に1行追加するだけで、以下の手順はどなたでもできるように書"
+"いています。"
 
 #: includes/admin/class-admin-settings.php:2599
-msgid "This step is optional — caching already works without it. Prime Cache never edits wp-config.php; adding or removing the line is always up to you."
-msgstr "この手順は任意です。追加しなくてもキャッシュは動作します。Prime Cache が wp-config.php を編集することはなく、行の追加と削除は常にサイト所有者が行います。"
+msgid ""
+"This step is optional — caching already works without it. Prime Cache never "
+"edits wp-config.php; adding or removing the line is always up to you."
+msgstr ""
+"この手順は任意です。追加しなくてもキャッシュは動作します。Prime Cache が wp-"
+"config.php を編集することはなく、行の追加と削除は常にサイト所有者が行います。"
 
 #: includes/admin/class-admin-settings.php
 msgid "How to turn on drop-in mode (step by step)"
 msgstr "ドロップインモードを有効にする手順"
 
 #: includes/admin/class-admin-settings.php
-msgid "Open your hosting control panel and start its File Manager (or connect with an FTP app). In your site's top folder — the one that also contains wp-login.php and the wp-content folder — open the file named wp-config.php."
-msgstr "ご利用のレンタルサーバーの管理画面で「ファイルマネージャー」を開きます (または FTP ソフトで接続します)。サイトの一番上のフォルダー (wp-login.php や wp-content フォルダーがある場所) にある wp-config.php というファイルを開きます。"
+msgid ""
+"Open your hosting control panel and start its File Manager (or connect with "
+"an FTP app). In your site's top folder — the one that also contains wp-"
+"login.php and the wp-content folder — open the file named wp-config.php."
+msgstr ""
+"ご利用のレンタルサーバーの管理画面で「ファイルマネージャー」を開きます (また"
+"は FTP ソフトで接続します)。サイトの最上位フォルダー (wp-login.php や wp-"
+"content フォルダーもある場所) にある wp-config.php というファイルを開きます。"
 
 #: includes/admin/class-admin-settings.php
-msgid "Before you change anything, download a copy of wp-config.php and keep it somewhere safe. If anything goes wrong, you can upload this copy to undo the change."
-msgstr "変更する前に、wp-config.php のコピーをダウンロードして安全な場所に保管します。もし不具合が起きても、このコピーをアップロードすれば元に戻せます。"
+msgid ""
+"Before you change anything, download a copy of wp-config.php and keep it "
+"somewhere safe. If anything goes wrong, you can upload this copy to undo the "
+"change."
+msgstr ""
+"変更する前に、wp-config.php のコピーをダウンロードして安全な場所に保管してく"
+"ださい。もし不具合が起きても、このコピーをアップロードすれば元に戻せます。"
 
 #: includes/admin/class-admin-settings.php
-msgid "Find the line that already mentions WP_CACHE and change the single word false to true, so it matches the \"After\" example. Change nothing else."
-msgstr "すでに WP_CACHE が書かれている行を探し、false という 1 語だけを true に書き換えて、「変更後」の見本と同じにします。ほかは何も変更しないでください。"
+msgid ""
+"Find the line that already mentions WP_CACHE and change the single word "
+"false to true, so it matches the \"After\" example. Change nothing else."
+msgstr ""
+"すでに WP_CACHE が書かれている行を探し、false という1語だけを true に書き換え"
+"て、「変更後」の見本と同じにします。ほかは何も変更しないでください。"
 
 #: includes/admin/class-admin-settings.php
 msgid "Before"
@@ -3204,44 +3309,94 @@ msgid "After"
 msgstr "変更後"
 
 #: includes/admin/class-admin-settings.php
-msgid "The very first line of the file is the opening PHP tag. Add the highlighted line on its own line, directly beneath it — exactly as shown below. Do not delete or change anything else."
-msgstr "ファイルの一番最初の行は PHP 開始タグです。その 1 行のすぐ下に、下の見本のとおり、ハイライトした行を 1 行だけ追加します。ほかは削除も変更もしないでください。"
+msgid ""
+"The very first line of the file is the opening PHP tag. Add the highlighted "
+"line on its own line, directly beneath it — exactly as shown below. Do not "
+"delete or change anything else."
+msgstr ""
+"ファイルの一番最初の行は PHP の開始タグです。その行のすぐ下に、下の見本のとお"
+"り、ハイライトされた行を単独の行として追加します。ほかは何も削除・変更しない"
+"でください。"
 
 #: includes/admin/class-admin-settings.php
 msgid "← add only this one line"
-msgstr "← 追加するのはこの 1 行だけ"
+msgstr "← 追加するのはこの1行だけ"
 
 #: includes/admin/class-admin-settings.php
 msgid "← everything from here down stays exactly as it was"
-msgstr "← これより下は元のまま"
+msgstr "← ここから下は元のまま"
 
 #: includes/admin/class-admin-settings.php
-msgid "Save the file, then reload this page. When System Status on the Dashboard tab shows \"WP_CACHE Constant: Active\", drop-in mode is on and this notice goes away."
-msgstr "ファイルを保存し、このページを再読み込みします。ダッシュボードタブの「システム状態」に「WP_CACHE Constant: Active」と表示されれば、ドロップインモードが有効になり、この通知は消えます。"
+msgid ""
+"Save the file, then reload this page. When System Status on the Dashboard "
+"tab shows \"WP_CACHE Constant: Active\", drop-in mode is on and this notice "
+"goes away."
+msgstr ""
+"ファイルを保存し、このページを再読み込みします。「ダッシュボード」タブの「シ"
+"ステム状態」で「WP_CACHE 定数」が「有効」と表示されれば、ドロップインモードが"
+"有効になり、この通知は消えます。"
 
 #: includes/admin/class-admin-settings.php
-msgid "Careful: a typo in wp-config.php can make the whole site show an error for a moment. If that happens, upload your backup copy to put it back. Not comfortable editing the file? You can simply keep using standard mode — caching already works."
-msgstr "注意: wp-config.php を打ち間違えると、一時的にサイト全体にエラーが表示されることがあります。その場合はバックアップのコピーをアップロードして元に戻してください。ファイルの編集に不安がある場合は、そのまま標準モードで使い続けても問題ありません (キャッシュはすでに動作しています)。"
+msgid ""
+"Careful: a typo in wp-config.php can make the whole site show an error for a "
+"moment. If that happens, upload your backup copy to put it back. Not "
+"comfortable editing the file? You can simply keep using standard mode — "
+"caching already works."
+msgstr ""
+"注意: wp-config.php を打ち間違えると、一時的にサイト全体にエラーが表示される"
+"ことがあります。その場合は、バックアップしておいたコピーをアップロードして元"
+"に戻してください。ファイルの編集に不安がある場合は、そのまま標準モードで使い"
+"続けても問題ありません。キャッシュはすでに動作しています。"
 
 #: includes/admin/class-admin-settings.php
 msgid "Maximum Delay (also delay jQuery & inline scripts)"
 msgstr "最大 Delay (jQuery とインラインスクリプトも遅延)"
 
 #: includes/admin/class-admin-settings.php
-msgid "Extends Delay JS to jQuery core and inline scripts. During a lab test (PageSpeed Insights) almost no JavaScript executes, so TBT drops to near zero — this is how the highest-scoring cache plugins reach their scores. Scripts still run in document order after interaction, and DOMContentLoaded / load events are re-dispatched, so most themes keep working. Consent scripts, JSON-LD and the exclusion list below are never delayed. Cannot be combined with Safe Mode (Safe Mode wins). Test menus, sliders and forms after enabling."
-msgstr "Delay JS の対象を jQuery 本体とインラインスクリプトまで拡大します。ラボ計測 (PageSpeed Insights) 中はほぼすべての JavaScript が実行されなくなるため、TBT がほぼゼロになります。最高スコアを出すキャッシュプラグインと同じ仕組みです。操作後はドキュメント順に実行され、DOMContentLoaded / load イベントも再送出されるため、ほとんどのテーマはそのまま動作します。同意管理スクリプト・JSON-LD・下の除外リストは遅延されません。セーフモードとは併用できません (セーフモード優先)。有効化後はメニュー・スライダー・フォームをテストしてください。"
+msgid ""
+"Extends Delay JS to jQuery core and inline scripts. During a lab test "
+"(PageSpeed Insights) almost no JavaScript executes, so TBT drops to near "
+"zero — this is how the highest-scoring cache plugins reach their scores. "
+"Scripts still run in document order after interaction, and "
+"DOMContentLoaded / load events are re-dispatched, so most themes keep "
+"working. Consent scripts, JSON-LD and the exclusion list below are never "
+"delayed. Cannot be combined with Safe Mode (Safe Mode wins). Test menus, "
+"sliders and forms after enabling."
+msgstr ""
+"Delay JS の対象を jQuery 本体とインラインスクリプトまで拡大します。ラボ計測 "
+"(PageSpeed Insights) 中はほぼすべての JavaScript が実行されなくなるため、TBT "
+"がほぼゼロになります。最高スコアを出すキャッシュプラグインと同じ仕組みです。"
+"操作後はドキュメント順に実行され、DOMContentLoaded / load イベントも再送出さ"
+"れるため、ほとんどのテーマはそのまま動作します。同意管理スクリプト、JSON-LD、"
+"下の除外リストは遅延されません。セーフモードとは併用できません (セーフモード"
+"優先)。有効化後はメニュー、スライダー、フォームをテストしてください。"
 
 #: includes/admin/class-admin-settings.php
 msgid "Apply Delay JS on Desktop"
 msgstr "デスクトップにも Delay JS を適用"
 
 #: includes/admin/class-admin-settings.php
-msgid "By default Delay JS runs on mobile responses only. Enable this to also delay scripts on desktop — improves the desktop PageSpeed score the same way. If desktop layout depends on JavaScript (sliders, mega menus), verify there is no layout shift after enabling."
-msgstr "Delay JS は通常モバイル応答のみに適用されます。有効にするとデスクトップでもスクリプトを遅延し、デスクトップの PageSpeed スコアも同様に改善します。デスクトップのレイアウトが JavaScript に依存する場合 (スライダー・メガメニュー) は、有効化後にレイアウトシフトがないか確認してください。"
+msgid ""
+"By default Delay JS runs on mobile responses only. Enable this to also delay "
+"scripts on desktop — improves the desktop PageSpeed score the same way. If "
+"desktop layout depends on JavaScript (sliders, mega menus), verify there is "
+"no layout shift after enabling."
+msgstr ""
+"Delay JS は通常モバイル応答のみに適用されます。有効にするとデスクトップでもス"
+"クリプトを遅延し、デスクトップの PageSpeed スコアも同様に改善します。デスク"
+"トップのレイアウトが JavaScript に依存する場合 (スライダー、メガメニュー) "
+"は、有効化後にレイアウトシフトがないか確認してください。"
 
 #: includes/admin/class-admin-settings.php
-msgid "Maximum Delay enabled: jQuery and inline scripts are also delayed. Test menus, sliders and forms carefully. If you exclude a script from delay, it must not depend on jQuery (or add jquery to the exclusion list too)."
-msgstr "最大 Delay が有効です: jQuery とインラインスクリプトも遅延されます。メニュー・スライダー・フォームを入念にテストしてください。スクリプトを遅延から除外する場合、そのスクリプトが jQuery に依存しないことを確認してください (依存する場合は jquery も除外リストに追加してください)。"
+msgid ""
+"Maximum Delay enabled: jQuery and inline scripts are also delayed. Test "
+"menus, sliders and forms carefully. If you exclude a script from delay, it "
+"must not depend on jQuery (or add jquery to the exclusion list too)."
+msgstr ""
+"最大 Delay が有効です: jQuery とインラインスクリプトも遅延されます。メ"
+"ニュー、スライダー、フォームを入念にテストしてください。スクリプトを遅延から"
+"除外する場合、そのスクリプトが jQuery に依存しないことを確認してください (依"
+"存する場合は jquery も除外リストに追加してください)。"
 
 #: includes/admin/class-admin-settings.php
 msgid "Nginx Direct Serving (PHP-less)"
@@ -3253,27 +3408,87 @@ msgstr "Nginx を検出"
 
 #: includes/admin/class-admin-settings.php
 msgid "Show the nginx configuration snippet"
-msgstr "nginx 設定スニペットを表示"
+msgstr "Nginx 設定スニペットを表示"
 
 #: includes/admin/class-admin-settings.php
-msgid "On nginx, .htaccess has no effect, so every cached page still boots PHP before the cache file is read. Pasting this snippet into the server block of your nginx site configuration lets nginx serve Prime Cache files directly from disk — response time (TTFB) typically drops from 100-300 ms to a few milliseconds. The snippet reflects your current settings; copy it again after changing cache settings. After editing, run \"nginx -t\" and reload nginx. If you cannot edit the nginx configuration (shared hosting), this optimization is not available — the PHP drop-in keeps working as before."
-msgstr "Nginx では .htaccess が無効なため、キャッシュ済みページでも毎回 PHP が起動してからキャッシュファイルを読み込まれます。このスニペットをサイトの nginx 設定の server ブロックに貼り付けると、Nginx がディスクから直接キャッシュファイルを配信し、応答時間 (TTFB) は通常 100〜300ms から数ミリ秒に短縮されます。スニペットは現在の設定を反映しています。キャッシュ設定を変更したら再度コピーしてください。編集後は「nginx -t」を実行してから nginx をリロードしてください。nginx 設定を編集できない環境 (共有ホスティング) ではこの最適化は利用できませんが、PHP ドロップインは従来どおり動作します。"
+msgid ""
+"On nginx, .htaccess has no effect, so every cached page still boots PHP "
+"before the cache file is read. Pasting this snippet into the server block of "
+"your nginx site configuration lets nginx serve Prime Cache files directly "
+"from disk — response time (TTFB) typically drops from 100-300 ms to a few "
+"milliseconds. The snippet reflects your current settings; copy it again "
+"after changing cache settings. After editing, run \"nginx -t\" and reload "
+"nginx. If you cannot edit the nginx configuration (shared hosting), this "
+"optimization is not available — the PHP drop-in keeps working as before."
+msgstr ""
+"Nginx では .htaccess が無効なため、キャッシュ済みページでも毎回 PHP が起動し"
+"てからキャッシュファイルが読み込まれます。このスニペットをサイトの nginx 設定"
+"の server ブロックに貼り付けると、Nginx がディスクから直接キャッシュファイル"
+"を配信し、応答時間 (TTFB) は通常100〜300ms から数ミリ秒に短縮されます。スニ"
+"ペットは現在の設定を反映しています。キャッシュ設定を変更したら再度コピーして"
+"ください。編集後は「nginx -t」を実行してから nginx をリロードしてください。"
+"nginx 設定を編集できない環境 (共有ホスティング) ではこの最適化は利用できませ"
+"んが、PHP ドロップインは従来どおり動作します。"
 
 #: includes/admin/class-admin-settings.php
-msgid "Inline CSS files smaller than the threshold directly into the HTML as inline style blocks, eliminating HTTP requests for small stylesheets. With the Pro add-on and Combine CSS enabled, the combined stylesheet is also inlined when it fits within the threshold — zero render-blocking CSS requests without the restyle jank of async loading."
-msgstr "しきい値より小さい CSS ファイルを HTML 内へ style ブロックとして直接インライン化し、小さなスタイルシートへの HTTP リクエストを削減します。Pro アドオンと CSS 結合が有効な場合、結合後のスタイルシートもしきい値以内ならインライン化され、非同期読み込みの再スタイル揺れなしでレンダーブロック CSS リクエストをゼロにできます。"
+msgid ""
+"Inline CSS files smaller than the threshold directly into the HTML as inline "
+"style blocks, eliminating HTTP requests for small stylesheets. With the Pro "
+"add-on and Combine CSS enabled, the combined stylesheet is also inlined when "
+"it fits within the threshold — zero render-blocking CSS requests without the "
+"restyle jank of async loading."
+msgstr ""
+"しきい値より小さい CSS ファイルを HTML 内へ style ブロックとして直接インライ"
+"ン化し、小さなスタイルシートへの HTTP リクエストを削減します。Pro アドオンと "
+"CSS 結合が有効な場合、結合後のスタイルシートもしきい値以内ならインライン化さ"
+"れ、非同期読み込みの再スタイル揺れなしでレンダーブロック CSS リクエストをゼロ"
+"にできます。"
 
 #: includes/admin/class-admin-settings.php
-msgid "Delay every external script tag (one with a src attribute) in the HTML output (including third-party / CDN — not limited to wp_enqueue_script handles) until user interaction (scroll, click, keydown, touchstart, mousemove). Inline scripts (no src) are not delayed unless Maximum Delay is enabled, because they typically set up variables that external scripts depend on (wp_localize_script output, consent_api config, chat widget configs, etc.). Applied on mobile devices only unless \"Apply Delay JS on Desktop\" is enabled. Separate mobile cache is automatically enabled when this setting is on. Significantly improves mobile page load metrics but may cause a brief delay on first interaction. Use the exclusion list below for external scripts that must run before interaction."
-msgstr "HTML 出力内のすべての外部スクリプトタグ (src 属性を持つもの。サードパーティ / CDN を含み、wp_enqueue_script のハンドルに限定されません) を、ユーザー操作 (スクロール・クリック・キー入力・タッチ・マウス移動) まで遅延します。インラインスクリプト (src なし) は、外部スクリプトが依存する変数 (wp_localize_script の出力、consent_api 設定、チャットウィジェット設定など) を定義していることが多いため、最大 Delay が有効な場合を除いて遅延されません。「デスクトップにも Delay JS を適用」が有効な場合を除き、モバイル端末のみに適用されます。この設定を有効にすると、モバイル別キャッシュが自動的に有効になります。モバイルの読み込み指標を大幅に改善しますが、最初の操作時にわずかな遅延が発生する場合があります。操作前に実行が必要な外部スクリプトは下の除外リストへ追加してください。"
+msgid ""
+"Delay every external script tag (one with a src attribute) in the HTML "
+"output (including third-party / CDN — not limited to wp_enqueue_script "
+"handles) until user interaction (scroll, click, keydown, touchstart, "
+"mousemove). Inline scripts (no src) are not delayed unless Maximum Delay is "
+"enabled, because they typically set up variables that external scripts "
+"depend on (wp_localize_script output, consent_api config, chat widget "
+"configs, etc.). Applied on mobile devices only unless \"Apply Delay JS on "
+"Desktop\" is enabled. Separate mobile cache is automatically enabled when "
+"this setting is on. Significantly improves mobile page load metrics but may "
+"cause a brief delay on first interaction. Use the exclusion list below for "
+"external scripts that must run before interaction."
+msgstr ""
+"HTML 出力内のすべての外部スクリプトタグ (src 属性を持つもの。サードパー"
+"ティー / CDN を含み、wp_enqueue_script のハンドルに限定されません) を、ユー"
+"ザー操作 (スクロール、クリック、キー入力、タッチ、マウス移動) まで遅延しま"
+"す。インラインスクリプト (src なし) は、外部スクリプトが依存する変数 "
+"(wp_localize_script の出力、consent_api 設定、チャットウィジェット設定など) "
+"を定義していることが多いため、最大 Delay が有効な場合を除いて遅延されません。"
+"「デスクトップにも Delay JS を適用」が有効な場合を除き、モバイル端末のみに適"
+"用されます。この設定を有効にすると、モバイル別キャッシュが自動的に有効になり"
+"ます。モバイルの読み込み指標を大幅に改善しますが、最初の操作時にわずかな遅延"
+"が発生する場合があります。操作前に実行が必要な外部スクリプトは下の除外リスト"
+"へ追加してください。"
 
 #: includes/admin/class-admin-settings.php:924
-msgid "Cache files written by the preload crawler (warm-ups). Not counted as visitor misses."
-msgstr "プリロードクローラーが生成したキャッシュファイル (ウォームアップ) です。訪問者の MISS には数えられません。"
+msgid ""
+"Cache files written by the preload crawler (warm-ups). Not counted as "
+"visitor misses."
+msgstr ""
+"プリロードクローラーが生成したキャッシュファイル (ウォームアップ) です。訪問"
+"者の MISS には数えられません。"
 
 #: includes/admin/class-admin-settings.php
-msgid "New: AI Speed Diagnosis — Pro measures your server and homepage, has an AI explain what is slow in plain language, and applies validated fixes in one click. Ask follow-up questions in chat. Bring your own API key (Anthropic / OpenAI / OpenRouter / Gemini)."
-msgstr "新機能: AI スピード診断 — Pro がサーバーとトップページを計測し、遅さの原因を AI が日本語で解説。検証済みの対策はワンクリックで適用できます。追加の質問はチャットでどうぞ。API キーはお客様ご自身のものを使用します (Anthropic / OpenAI / OpenRouter / Gemini)。"
+msgid ""
+"New: AI Speed Diagnosis — Pro measures your server and homepage, has an AI "
+"explain what is slow in plain language, and applies validated fixes in one "
+"click. Ask follow-up questions in chat. Bring your own API key (Anthropic / "
+"OpenAI / OpenRouter / Gemini)."
+msgstr ""
+"新機能: AI スピード診断 — Pro がサーバーとトップページを計測し、遅い原因を "
+"AI がわかりやすい言葉で解説します。検証済みの対策はワンクリックで適用できま"
+"す。追加の質問はチャットでどうぞ。API キーはご自身のものを使用します "
+"(Anthropic / OpenAI / OpenRouter / Gemini)。"
 
 #: includes/admin/class-admin-settings.php
 msgid "Manual tuning"
@@ -3288,12 +3503,22 @@ msgid "Ask the AI what is slow"
 msgstr "遅い原因を AI に相談"
 
 #: includes/admin/class-admin-settings.php
-msgid "AI Speed Diagnosis measures your environment, explains bottlenecks in plain language, and applies validated fixes in one click — with your own API key."
-msgstr "AI スピード診断が環境を計測し、ボトルネックを分かりやすく解説。検証済みの対策をワンクリックで適用できます。API キーはお客様ご自身のものを使用します。"
+msgid ""
+"AI Speed Diagnosis measures your environment, explains bottlenecks in plain "
+"language, and applies validated fixes in one click — with your own API key."
+msgstr ""
+"AI スピード診断が環境を計測し、ボトルネックを分かりやすく解説。検証済みの対策"
+"をワンクリックで適用できます。API キーはお客様ご自身のものを使用します。"
 
 #: includes/admin/class-admin-settings.php
-msgid "You've been using Prime Cache for a week — we hope it's making your site faster! If you're enjoying it, a quick review on WordPress.org would mean a lot and helps other people find the plugin."
-msgstr "Prime Cache をお使いいただいて 1 週間が経ちました。表示が速くなっていれば幸いです。もしお気に召しましたら、WordPress.org でレビューをいただけると大変励みになり、ほかの方がプラグインを見つける手助けにもなります。"
+msgid ""
+"You've been using Prime Cache for a week — we hope it's making your site "
+"faster! If you're enjoying it, a quick review on WordPress.org would mean a "
+"lot and helps other people find the plugin."
+msgstr ""
+"Prime Cache をお使いいただいて1週間が経ちました。表示が速くなっていれば幸いで"
+"す。もしお気に召しましたら、WordPress.org でレビューをいただけると大変励みに"
+"なり、ほかの方がプラグインを見つける手助けにもなります。"
 
 #: includes/admin/class-admin-settings.php
 msgid "Leave a review"
@@ -3305,11 +3530,18 @@ msgstr "いいえ / 対応済み"
 
 #: includes/admin/class-admin-settings.php
 msgid "Got it"
-msgstr "了解した"
+msgstr "了解"
 
 #: includes/admin/class-admin-settings.php
-msgid "Orphaned converted files are .webp/.avif variants whose original image was deleted. They are checked here and can be safely removed. (Deleting an image in the Media Library now removes its variants automatically; this cleans up any left from before.)"
-msgstr "孤立した変換ファイルとは、元画像が削除された .webp/.avif のことです。ここで確認して安全に削除できます (メディアライブラリで画像を削除すると、変換ファイルも自動で削除されるようになりました。これは以前に残ったものを掃除します)。"
+msgid ""
+"Orphaned converted files are .webp/.avif variants whose original image was "
+"deleted. They are checked here and can be safely removed. (Deleting an image "
+"in the Media Library now removes its variants automatically; this cleans up "
+"any left from before.)"
+msgstr ""
+"孤立した変換ファイルとは、元画像が削除された .webp/.avif のことです。ここで確"
+"認して安全に削除できます (メディアライブラリで画像を削除すると、変換ファイル"
+"も自動で削除されるようになりました。これは以前に残ったものを掃除します)。"
 
 #: includes/admin/class-admin-settings.php
 msgid "Check for Orphaned Files"
