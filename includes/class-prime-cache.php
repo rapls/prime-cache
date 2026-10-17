@@ -20,8 +20,12 @@ class Prime_Cache {
 	 * the stored schema version is behind, so security-relevant keys (e.g.
 	 * $prime_cache_allowed_hosts, $prime_cache_site_scheme) become active
 	 * without waiting for an admin visit or a manual settings save.
+	 *
+	 * The same migration rewrites the Prime Cache block in .htaccess, so it is
+	 * also bumped when the generated .htaccess rules change (14: .woff/.woff2
+	 * registered as font/woff and font/woff2).
 	 */
-	const CONFIG_SCHEMA_VERSION = 13;
+	const CONFIG_SCHEMA_VERSION = 14;
 
 	/**
 	 * @var Prime_Cache|null
@@ -290,12 +294,27 @@ class Prime_Cache {
 			Prime_Cache_Config::install_advanced_cache();
 		}
 		Prime_Cache_Config::cleanup_legacy_config_location();
-		// Regenerate .htaccess so existing installs pick up new fast-path rules
-		// (host allowlist, admin/login excludes, scheme gating, etc.) without
-		// waiting for the operator to re-save settings. Schema bumps are the
-		// only signal we have that the rule set has changed. If this fails
-		// (read-only .htaccess, missing file under tight perms, etc.), keep
-		// schema at the old version so we retry on the next request.
+		// The .htaccess rewrite waits for init. This method runs while the
+		// plugin file is still being included, before any add-on has hooked
+		// its .htaccess filters (Prime Cache Pro adds its AVIF rules on
+		// plugins_loaded), so writing the block now would drop those rules
+		// until the next settings save.
+		add_action( 'init', array( $this, 'finish_config_schema_migration' ), 0 );
+	}
+
+	/**
+	 * Second half of maybe_migrate_config_schema(), run on init.
+	 *
+	 * Regenerates .htaccess so existing installs pick up new rules (host
+	 * allowlist, admin/login excludes, scheme gating, MIME types, etc.)
+	 * without waiting for the operator to re-save settings. Schema bumps are
+	 * the only signal we have that the rule set has changed. Only the block
+	 * between the Prime Cache markers is replaced. If the write fails
+	 * (read-only .htaccess, missing file under tight perms, etc.), the schema
+	 * stays at the old version so the next request retries.
+	 */
+	public function finish_config_schema_migration() {
+		$settings = prime_cache_get_settings();
 		if ( ! empty( $settings['htaccess_enabled'] ) && class_exists( 'Prime_Cache_Htaccess' ) ) {
 			if ( ! Prime_Cache_Htaccess::add_rules( $settings ) ) {
 				return;

@@ -102,8 +102,9 @@ class Prime_Cache_Htaccess {
 				$content = $new_block . "\n" . $content;
 			}
 
-			// Clean up multiple blank lines.
-			$content = preg_replace( "#\n{3,}#", "\n\n", $content );
+			// No file-wide whitespace cleanup here: everything outside our own
+			// markers (WordPress, Cocoon and other plugins' blocks) is left byte
+			// for byte. The block swap above is already stable across rewrites.
 
 			// Atomic write.
 			$tempfile = $htaccess . '.tmp.' . getmypid();
@@ -297,8 +298,8 @@ class Prime_Cache_Htaccess {
 			'    AddType image/x-icon                          .ico',
 			'',
 			'    # Fonts',
-			'    AddType application/font-woff                 .woff',
-			'    AddType application/font-woff2                .woff2',
+			'    AddType font/woff                             .woff',
+			'    AddType font/woff2                            .woff2',
 			'    AddType font/ttf                              .ttf',
 			'    AddType font/otf                              .otf',
 			'    AddType application/vnd.ms-fontobject         .eot',
