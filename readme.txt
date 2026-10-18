@@ -172,7 +172,9 @@ If Safe fixes it and you want to keep the rest of Auto, apply Auto again and tur
 
 = Does it work with the Cocoon theme? =
 
-Yes. In our tests with Cocoon 2.9.5 (October 2026), Prime Cache's Auto preset worked together with all of Cocoon's speed settings turned on (minification, lazy loading and browser cache), and no layout or script problems were found. Both write browser-cache rules to .htaccess; where they overlap, Cocoon's rules come later and take effect, which is fine. If something does look wrong on your site, turn off Cocoon's HTML/CSS/JS minification first, then press Safe in Prime Cache.
+Yes. In our tests with Cocoon 2.9.5 (October 2026), Prime Cache's Auto preset worked together with Cocoon's minification, lazy loading and browser cache turned on, and no layout or script problems were found. Both write browser-cache rules to .htaccess; where they overlap, Cocoon's rules come later and take effect, which is fine. If something does look wrong on your site, turn off Cocoon's HTML/CSS/JS minification first, then press Safe in Prime Cache.
+
+Details (Japanese): https://raplsworks.com/cocoon-prime-cache/
 
 = What does Auto change, exactly? =
 
