@@ -1453,7 +1453,7 @@ class Prime_Cache_Admin_Settings {
 					<p class="pc-help"><?php esc_html_e( 'Auto-load delayed scripts after this many milliseconds even without user interaction. 0 = wait for interaction only.', 'prime-cache' ); ?></p>
 				</div>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js_safe_mode]" value="1" <?php checked( $settings['delay_js_safe_mode'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Delay JS Safe Mode', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Only delay external (third-party) scripts. All internal scripts from your site (wp-includes, wp-content) load immediately. Reduces performance gains but prevents most compatibility issues.', 'prime-cache' ); ?></small></span></label>
-				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js_max]" value="1" <?php checked( $settings['delay_js_max'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Maximum Delay (also delay jQuery & inline scripts)', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Extends Delay JS to jQuery core and inline scripts. During a lab test (PageSpeed Insights) almost no JavaScript executes, so TBT drops to near zero — this is how the highest-scoring cache plugins reach their scores. Scripts still run in document order after interaction, and DOMContentLoaded / load events are re-dispatched, so most themes keep working. Consent scripts, JSON-LD and the exclusion list below are never delayed. Cannot be combined with Safe Mode (Safe Mode wins). Test menus, sliders and forms after enabling.', 'prime-cache' ); ?></small></span></label>
+				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js_max]" value="1" <?php checked( $settings['delay_js_max'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Maximum Delay (also delay jQuery & inline scripts)', 'prime-cache' ); ?></b><small><?php esc_html_e( 'Extends Delay JS to jQuery core and inline scripts. During a lab test (PageSpeed Insights) almost no JavaScript executes, so TBT drops to near zero — this is how the highest-scoring cache plugins reach their scores. Scripts still run in document order after interaction, and DOMContentLoaded / load events are re-dispatched, so most themes keep working. Consent scripts, JSON-LD and the exclusion list below are never delayed. Cannot be combined with Safe Mode (Safe Mode wins). Test menus, sliders and forms after enabling. If the page looks broken, undo the last preset or press Safe on the Tools tab.', 'prime-cache' ); ?></small></span></label>
 				<label class="pc-sw"><input type="checkbox" name="prime_cache_settings[delay_js_desktop]" value="1" <?php checked( $settings['delay_js_desktop'] ); ?>><span class="pc-sw__track"></span><span class="pc-sw__body"><b><?php esc_html_e( 'Apply Delay JS on Desktop', 'prime-cache' ); ?></b><small><?php esc_html_e( 'By default Delay JS runs on mobile responses only. Enable this to also delay scripts on desktop — improves the desktop PageSpeed score the same way. If desktop layout depends on JavaScript (sliders, mega menus), verify there is no layout shift after enabling.', 'prime-cache' ); ?></small></span></label>
 				<?php do_action( 'prime_cache_file_opt_js_controls', $settings ); ?>
 				<div class="pc-field">
@@ -1567,6 +1567,10 @@ class Prime_Cache_Admin_Settings {
 						'hubspot' => 'HubSpot (hs-scripts / hs-analytics)',
 						'pinterest' => 'Pinterest (pinit.js)',
 						'twitter' => 'Twitter / X widgets (widgets.js)',
+						'contact-form-7' => 'Contact Form 7',
+						'mw-wp-form' => 'MW WP Form',
+						'snow-monkey-forms' => 'Snow Monkey Forms',
+						'wpforms' => 'WPForms',
 					);
 					$active_presets = array_filter( array_map( 'trim', explode( ',', $settings['delay_js_presets'] ) ) );
 					foreach ( $presets as $key => $label ) :
@@ -2174,6 +2178,22 @@ class Prime_Cache_Admin_Settings {
 
 	/* ── tab: tools ───────────────────────────────────────── */
 
+	/**
+	 * Translated name of a preset, for the Undo button and notices.
+	 *
+	 * @param string $preset Preset slug.
+	 * @return string
+	 */
+	private function preset_label( $preset ) {
+		$labels = array(
+			'auto'       => __( 'Auto', 'prime-cache' ),
+			'safe'       => __( 'Safe', 'prime-cache' ),
+			'balanced'   => __( 'Balanced', 'prime-cache' ),
+			'aggressive' => __( 'Aggressive', 'prime-cache' ),
+		);
+		return isset( $labels[ $preset ] ) ? $labels[ $preset ] : ucfirst( $preset );
+	}
+
 	private function tab_tools( $settings ) {
 		$vis = array( 'hsts_enabled','hsts_max_age','security_headers','debug_log' );
 		$export_url = wp_nonce_url( admin_url( 'admin.php?pc_export_settings=1' ), 'pc_export' );
@@ -2207,6 +2227,18 @@ class Prime_Cache_Admin_Settings {
 			<div class="notice notice-success is-dismissible" style="margin:0 0 16px"><p><?php
 			/* translators: %s: preset name (e.g. "Standard", "Aggressive") */
 			printf( esc_html__( '"%s" preset applied successfully.', 'prime-cache' ), esc_html( ucfirst( sanitize_key( $_GET['pc_preset'] ) ) ) );
+			?></p>
+			<?php if ( isset( $_GET['pc_maxdelay'] ) && 'on' === $_GET['pc_maxdelay'] ) : ?>
+				<p><?php esc_html_e( 'Maximum Delay is now on. Check that menus, forms, sliders and the cookie consent banner still work. If anything looks broken, press the Undo button below.', 'prime-cache' ); ?></p>
+			<?php elseif ( isset( $_GET['pc_maxdelay'] ) ) : ?>
+				<p><?php esc_html_e( 'You can also try Maximum Delay on the File Optimization tab. Check how your pages look after turning it on.', 'prime-cache' ); ?></p>
+			<?php endif; ?>
+			</div>
+		<?php endif; ?>
+		<?php if ( isset( $_GET['pc_undone'] ) ) : ?>
+			<div class="notice notice-success is-dismissible" style="margin:0 0 16px"><p><?php
+			/* translators: %s: preset name */
+			printf( esc_html__( 'The settings from before the "%s" preset are back, and the cache was cleared.', 'prime-cache' ), esc_html( $this->preset_label( sanitize_key( $_GET['pc_undone'] ) ) ) );
 			?></p></div>
 		<?php endif; ?>
 		<?php if ( isset( $_GET['pc_preset_error'] ) ) : ?>
@@ -2221,6 +2253,27 @@ class Prime_Cache_Admin_Settings {
 		<div class="pc-card">
 			<span class="pc-card__h"><?php esc_html_e( 'Optimization Presets', 'prime-cache' ); ?></span>
 			<p class="pc-help" style="margin:0 0 16px"><?php esc_html_e( 'Quickly apply a preset configuration based on your comfort level. You can customize individual settings afterward.', 'prime-cache' ); ?></p>
+
+			<?php
+			// Undo the last preset. Shown only while a backup exists; one
+			// generation, removed once used.
+			$preset_backup = get_option( 'prime_cache_preset_backup' );
+			if ( is_array( $preset_backup ) && ! empty( $preset_backup['settings'] ) ) :
+				$undo_url  = wp_nonce_url( admin_url( 'admin.php?pc_action=undo_preset' ), 'prime_cache_admin_action' );
+				$undo_name = $this->preset_label( (string) ( $preset_backup['preset'] ?? '' ) );
+				$undo_when = wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) ( $preset_backup['time'] ?? 0 ) );
+				?>
+			<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border:1px solid var(--c-subtle);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px">
+				<span class="pc-help" style="margin:0"><?php
+				/* translators: 1: preset name, 2: date and time it was applied */
+				printf( esc_html__( 'The "%1$s" preset was applied on %2$s. Undo puts the settings it changed back to their earlier values.', 'prime-cache' ), esc_html( $undo_name ), esc_html( $undo_when ) );
+				?></span>
+				<a href="<?php echo esc_url( $undo_url ); ?>" class="pc-btn pc-btn--o pc-btn--sm" onclick="return confirm(<?php echo esc_attr( wp_json_encode( __( 'Settings you changed by hand after applying the preset also go back to their values from before it was applied. Continue?', 'prime-cache' ) ) ); ?>)"><?php
+				/* translators: %s: preset name */
+				printf( esc_html__( 'Undo "%s" preset', 'prime-cache' ), esc_html( $undo_name ) );
+				?></a>
+			</div>
+			<?php endif; ?>
 
 			<!-- Auto Preset (featured) -->
 			<?php
@@ -2255,7 +2308,7 @@ class Prime_Cache_Admin_Settings {
 				$presets = array(
 					'safe' => array(
 						__( 'Safe', 'prime-cache' ),
-						__( 'Minimal risk. Enables page caching, gzip compression, browser caching, and lazy loading. Turns off the following, including any you enabled yourself: Minify HTML, Minify CSS, Minify JavaScript, Optimize HTML via DOM Parser, Remove HTML Comments, Load JavaScript Deferred, Delay JavaScript Execution, Load CSS Asynchronously (Free), Inline Small CSS Files, Use Local jQuery, Add Missing Image Dimensions, Disable Gutenberg Block CSS, Disable WP Embed, Disable oEmbed, WooCommerce Script Optimization, and Disable Cart Fragments AJAX. Use it to get back to a page that is known to display correctly.', 'prime-cache' ),
+						__( 'Minimal risk. Enables page caching, gzip compression, browser caching, and lazy loading. Turns off the following, including any you enabled yourself: Minify HTML, Minify CSS, Minify JavaScript, Optimize HTML via DOM Parser, Remove HTML Comments, Load JavaScript Deferred, Delay JavaScript Execution, Maximum Delay, Load CSS Asynchronously (Free), Inline Small CSS Files, Use Local jQuery, Add Missing Image Dimensions, Disable Gutenberg Block CSS, Disable WP Embed, Disable oEmbed, WooCommerce Script Optimization, and Disable Cart Fragments AJAX. Use it to get back to a page that is known to display correctly.', 'prime-cache' ),
 						'#22c55e',
 						'dashicons-shield',
 					),
@@ -2267,7 +2320,7 @@ class Prime_Cache_Admin_Settings {
 					),
 					'aggressive' => array(
 						__( 'Aggressive', 'prime-cache' ),
-						__( 'Maximum performance. Adds defer/delay JS, async CSS, separate mobile cache, preloading, lazy load for iframes/videos, and disables unused WordPress assets (emoji, embed, dashicons, oEmbed, block CSS). With the Pro add-on it removes unused CSS, auto-generates Critical CSS, applies Maximum Delay (delaying jQuery and inline scripts), and self-hosts Google Fonts; file combining is intentionally left off since it does not help on HTTP/2. May require testing and exclusion rules for compatibility.', 'prime-cache' ),
+						__( 'Maximum performance. Adds defer/delay JS with Maximum Delay (jQuery and inline scripts are delayed too), async CSS, separate mobile cache, preloading, lazy load for iframes/videos, and disables unused WordPress assets (emoji, embed, dashicons, oEmbed, block CSS). With the Pro add-on it removes unused CSS, auto-generates Critical CSS, and self-hosts Google Fonts; file combining is intentionally left off since it does not help on HTTP/2. May require testing and exclusion rules for compatibility.', 'prime-cache' ),
 						'#ef4444',
 						'dashicons-controls-forward',
 					),

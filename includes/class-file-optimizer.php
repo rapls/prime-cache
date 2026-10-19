@@ -986,6 +986,16 @@ class Prime_Cache_File_Optimizer {
 			'hubspot'           => array( 'js.hs-scripts.com', 'js.hs-analytics.net' ),
 			'pinterest'         => array( 'assets.pinterest.com/js/pinit' ),
 			'twitter'           => array( 'platform.twitter.com/widgets.js' ),
+			// Form plugins. Each entry also keeps what the form script needs
+			// loaded before it (jQuery, wp-i18n): under Maximum Delay those are
+			// delayed, and an undelayed form script would run without them.
+			'contact-form-7'    => array(
+				'contact-form-7/includes/', 'contact-form-7-js',
+				'wp-includes/js/dist/hooks', 'wp-includes/js/dist/i18n', 'wp-i18n-js-after',
+			),
+			'mw-wp-form'        => array( 'mw-wp-form/js/form.js', 'jquery.min.js', 'jquery-migrate.min.js' ),
+			'snow-monkey-forms' => array( 'snow-monkey-forms/dist/js/app' ),
+			'wpforms'           => array( '/wpforms', 'wpforms_settings', 'jquery.min.js', 'jquery-migrate.min.js' ),
 		);
 
 		$active = array_filter( array_map( 'trim', explode( ',', $presets_value ) ) );
@@ -1216,6 +1226,20 @@ class Prime_Cache_File_Optimizer {
 		// WP Consent API — consent must never wait for interaction.
 		$excl[] = 'wp-consent-api';
 		$excl[] = 'consent_api';
+		// Cookie consent banners: the banner has to be on screen before the
+		// visitor's first interaction, so these are never delayed either.
+		// None of their banner scripts depend on jQuery.
+		// CookieYes (cookie-law-info): its scripts, inline config and CDN script.
+		$excl[] = 'cookie-law-info';
+		$excl[] = 'cdn-cookieyes.com';
+		// Complianz: cookiebanner/js/complianz(.min).js and its localize block.
+		$excl[] = 'cookiebanner/js/complianz';
+		$excl[] = 'cmplz-cookiebanner';
+		// Cookie Notice: js/front(.min).js, its cnArgs block, and the
+		// Cookie Compliance (hu-banner) options and loader.
+		$excl[] = 'cookie-notice/js/front';
+		$excl[] = 'cookie-notice-front';
+		$excl[] = 'hu-banner';
 		// Google Site Kit — multi-chunk webpack app; delaying any chunk
 		// desynchronizes its shared registry ("googlesitekit is not defined").
 		// React-based (no jQuery dependency), so safe to keep undelayed even

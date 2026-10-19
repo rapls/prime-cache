@@ -386,7 +386,7 @@ class Prime_Cache_Htaccess {
 
 		// Vary header for content negotiation.
 		$r[] = '<IfModule mod_headers.c>';
-		$r[] = '    Header append Vary Accept env=REQUEST_image';
+		$r[] = '    Header merge Vary Accept env=REQUEST_image';
 		$r[] = '</IfModule>';
 
 		return $r;
@@ -786,7 +786,7 @@ class Prime_Cache_Htaccess {
 			'        AddOutputFilterByType DEFLATE image/svg+xml image/x-icon',
 			'    </IfModule>',
 			'    <IfModule mod_headers.c>',
-			'        Header append Vary Accept-Encoding',
+			'        Header merge Vary Accept-Encoding',
 			'    </IfModule>',
 			'</IfModule>',
 		);

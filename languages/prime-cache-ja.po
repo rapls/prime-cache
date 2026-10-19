@@ -3588,7 +3588,7 @@ msgstr "ブラックフライデー: Prime Cache Pro が %2$s まで %1$s オフ
 
 #. translators: %s: coupon code
 msgid "Use code %s at checkout."
-msgstr "お支払いのときにコード %s をご利用ください。"
+msgstr "購入手続きでコード %s をご利用ください。"
 
 msgid "See Pro features"
 msgstr "Pro の機能を見る"

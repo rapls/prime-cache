@@ -397,7 +397,7 @@ No. The free plugin does not send your data or API requests to any third-party s
 * Hardening: Renamed every internal page-cache drop-in variable from the short `$_pc_` prefix to the unique `$prime_cache_pc_` prefix so nothing leaks into the global scope under a generic name after the drop-in returns control to WordPress on a cache miss. No behavior change.
 
 = 1.10.23 =
-* Hardening: All five admin-settings inline <script> blocks are now attached via wp_add_inline_script() against a footer-registered stub handle (`prime-cache-admin-ui`), so Plugin Check no longer flags them as direct script output.
+* Hardening: All five admin-settings inline `<script>` blocks are now attached via wp_add_inline_script() against a footer-registered stub handle (`prime-cache-admin-ui`), so Plugin Check no longer flags them as direct script output.
 * Hardening: The page-cache drop-in now stripslashes and (where applicable) length-caps `$_SERVER['HTTP_HOST']`, `HTTP_REFERER`, `HTTP_USER_AGENT`, and `HTTP_IF_MODIFIED_SINCE` before consumption, and validates `SERVER_PROTOCOL` against an allow-list before reflecting it in the 304 status line.
 * Hardening: Renamed the object-cache drop-in signature constant from `PRIME_OBJECT_CACHE` to `PRIME_CACHE_OBJECT_CACHE_DROPIN` to clear the plugin's `PRIME_CACHE_` prefix convention end-to-end.
 * Docs: Added an "External services" section to readme.txt clarifying that the free plugin makes no outbound calls — the third-party hostnames (Google Analytics, GTM, Facebook Pixel, Intercom, Tawk) appear only as Delay-JS detection patterns and `cdnjs.cloudflare.com` only in code comments / help text.

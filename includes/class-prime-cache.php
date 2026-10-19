@@ -23,9 +23,53 @@ class Prime_Cache {
 	 *
 	 * The same migration rewrites the Prime Cache block in .htaccess, so it is
 	 * also bumped when the generated .htaccess rules change (14: .woff/.woff2
-	 * registered as font/woff and font/woff2).
+	 * registered as font/woff and font/woff2; 15: Vary added with merge, not
+	 * append).
 	 */
-	const CONFIG_SCHEMA_VERSION = 14;
+	const CONFIG_SCHEMA_VERSION = 15;
+
+	/**
+	 * Themes on which the Auto preset turns on Maximum Delay, by the folder
+	 * name of the parent theme (so child themes count). Only themes that have
+	 * been checked with Maximum Delay belong here. Filter:
+	 * prime_cache_max_delay_themes.
+	 */
+	const MAX_DELAY_THEMES = array( 'cocoon-master' );
+
+	/**
+	 * What keeps the Auto preset from turning on Maximum Delay: shops, page
+	 * builders, sliders and popups, whose scripts tend to break when jQuery
+	 * and inline scripts wait for the first interaction. Matched by plugin
+	 * folder name and parent theme folder name; the values are only the
+	 * names shown in the reason. Filter: prime_cache_max_delay_conflicts.
+	 */
+	const MAX_DELAY_CONFLICTS = array(
+		'plugins' => array(
+			'woocommerce'                 => 'WooCommerce',
+			'usc-e-shop'                  => 'Welcart',
+			'easy-digital-downloads'      => 'Easy Digital Downloads',
+			'easy-digital-downloads-pro'  => 'Easy Digital Downloads',
+			'elementor'                   => 'Elementor',
+			'elementor-pro'               => 'Elementor Pro',
+			'beaver-builder-lite-version' => 'Beaver Builder',
+			'bb-plugin'                   => 'Beaver Builder',
+			'js_composer'                 => 'WPBakery',
+			'oxygen'                      => 'Oxygen',
+			'breakdance'                  => 'Breakdance',
+			'smart-slider-3'              => 'Smart Slider 3',
+			'nextend-smart-slider3-pro'   => 'Smart Slider 3',
+			'ml-slider'                   => 'MetaSlider',
+			'revslider'                   => 'Slider Revolution',
+			'LayerSlider'                 => 'LayerSlider',
+			'popup-maker'                 => 'Popup Maker',
+			'optinmonster'                => 'OptinMonster',
+		),
+		'themes'  => array(
+			'Divi'   => 'Divi',
+			'Extra'  => 'Extra',
+			'bricks' => 'Bricks',
+		),
+	);
 
 	/**
 	 * @var Prime_Cache|null
@@ -134,6 +178,10 @@ class Prime_Cache {
 		if ( ! is_multisite() ) {
 			add_action( 'init', array( $this, 'maybe_refresh_env_snapshot' ), 1 );
 		}
+
+		// Keep .htaccess in step with the add-on being turned off and on.
+		// One autoloaded option compare per request once in sync.
+		add_action( 'init', array( $this, 'maybe_sync_addon_state' ), 1 );
 
 		// Expired cache cleanup cron (handler only — scheduling done on activation).
 		add_action( 'prime_cache_cleanup_expired', array( $this, 'cleanup_expired_cache' ) );
@@ -321,6 +369,133 @@ class Prime_Cache {
 			}
 		}
 		update_option( 'prime_cache_config_schema', self::CONFIG_SCHEMA_VERSION, true );
+	}
+
+	/**
+	 * Decide whether the Auto preset turns on Maximum Delay on this site.
+	 *
+	 * On only when the parent theme is in the tested list and no plugin or
+	 * theme from the conflict list is active. Checked when Auto is pressed,
+	 * so updating the plugin never changes a site that already applied Auto.
+	 *
+	 * @return array {
+	 *     @type bool     $on     Whether to turn it on.
+	 *     @type string   $reason '' when on, 'theme' or 'conflict' when off.
+	 *     @type string[] $names  Theme or plugin names behind the reason.
+	 * }
+	 */
+	public static function get_max_delay_verdict() {
+		$template  = (string) get_template();
+		$themes    = (array) apply_filters( 'prime_cache_max_delay_themes', self::MAX_DELAY_THEMES );
+		$conflicts = (array) apply_filters( 'prime_cache_max_delay_conflicts', self::MAX_DELAY_CONFLICTS );
+
+		if ( ! in_array( $template, $themes, true ) ) {
+			$theme = wp_get_theme( $template );
+			return array(
+				'on'     => false,
+				'reason' => 'theme',
+				'names'  => array( $theme->exists() ? $theme->get( 'Name' ) : $template ),
+			);
+		}
+
+		$found        = array();
+		$theme_blocks = isset( $conflicts['themes'] ) ? (array) $conflicts['themes'] : array();
+		if ( isset( $theme_blocks[ $template ] ) ) {
+			$found[] = $theme_blocks[ $template ];
+		}
+		$plugin_blocks = isset( $conflicts['plugins'] ) ? (array) $conflicts['plugins'] : array();
+		$active        = (array) get_option( 'active_plugins', array() );
+		if ( is_multisite() ) {
+			$active = array_merge( $active, array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) ) );
+		}
+		foreach ( $active as $basename ) {
+			$folder = explode( '/', (string) $basename )[0];
+			if ( isset( $plugin_blocks[ $folder ] ) ) {
+				$found[] = $plugin_blocks[ $folder ];
+			}
+		}
+		$found = array_values( array_unique( $found ) );
+		if ( $found ) {
+			return array(
+				'on'     => false,
+				'reason' => 'conflict',
+				'names'  => $found,
+			);
+		}
+		return array(
+			'on'     => true,
+			'reason' => '',
+			'names'  => array(),
+		);
+	}
+
+	/**
+	 * Keep the settings a preset is about to change, for the Undo button.
+	 *
+	 * Only the keys the preset sets (the add-on's preset filters included,
+	 * so Safe Mode, the Delay JS timeout and the rest are covered) and the
+	 * fields derived from them on apply. Settings the preset does not touch
+	 * are left out, so undoing it never rolls back an unrelated change made
+	 * since. One generation: the next preset replaces it. .htaccess is not
+	 * stored; undo rebuilds the Prime Cache block from the restored settings.
+	 *
+	 * @param string $preset          Preset slug.
+	 * @param array  $preset_settings The preset as applied.
+	 * @param array  $before          Settings before the preset.
+	 */
+	private static function save_preset_backup( $preset, $preset_settings, $before ) {
+		$keys   = array_merge( array_keys( $preset_settings ), array( 'async_css', 'remove_unused_css', 'cache_mobile_separate' ) );
+		$values = array();
+		$added  = array();
+		foreach ( array_unique( $keys ) as $key ) {
+			if ( array_key_exists( $key, $before ) ) {
+				$values[ $key ] = $before[ $key ];
+			} else {
+				$added[] = $key;
+			}
+		}
+		update_option(
+			'prime_cache_preset_backup',
+			array(
+				'preset'   => $preset,
+				'time'     => time(),
+				'settings' => $values,
+				'added'    => $added,
+			),
+			false
+		);
+	}
+
+	/**
+	 * Follow the add-on being turned off (or removed) and back on.
+	 *
+	 * The request that deactivates the add-on still has its .htaccess
+	 * filter loaded, so the Prime Cache block kept the add-on's AVIF rules
+	 * until the settings were saved again, and AVIF images kept being
+	 * served. This runs on the next request, when the add-on's code is no
+	 * longer loaded, and rewrites the config file and the Prime Cache block
+	 * in .htaccess. When the add-on comes back, the block is rewritten
+	 * again so its rules return. Settings are left as they are.
+	 */
+	public function maybe_sync_addon_state() {
+		$active = (bool) apply_filters( 'prime_cache_addon_active', false );
+		$last   = get_option( 'prime_cache_addon_state', null );
+		if ( null !== $last && (bool) $last === $active ) {
+			return;
+		}
+		update_option( 'prime_cache_addon_state', $active ? 1 : 0, true );
+		// First run with the add-on active: nothing can be stale yet.
+		if ( null === $last && $active ) {
+			return;
+		}
+		if ( is_multisite() ) {
+			return;
+		}
+		$settings = prime_cache_get_settings();
+		Prime_Cache_Config::write_config_file( $settings );
+		if ( ! empty( $settings['htaccess_enabled'] ) ) {
+			Prime_Cache_Htaccess::add_rules( $settings );
+		}
 	}
 
 	/**
@@ -917,6 +1092,7 @@ class Prime_Cache {
 						$merged['cache_mobile_separate'] = true;
 					}
 
+					self::save_preset_backup( $preset, $preset_settings, $current );
 					update_option( 'prime_cache_settings', $merged );
 					if ( ! is_multisite() ) {
 						$preset_warnings = array();
@@ -940,8 +1116,50 @@ class Prime_Cache {
 				$redirect_args = $preset_applied
 					? array( 'tab' => 'tools', 'pc_preset' => $preset )
 					: array( 'tab' => 'tools', 'pc_preset_error' => $preset );
+				// Tell the Tools tab whether Auto left Maximum Delay working, so
+				// the notice can say what to check or what else to try.
+				if ( $preset_applied && 'auto' === $preset ) {
+					$max_on = ! empty( $merged['delay_js'] ) && ! empty( $merged['delay_js_max'] ) && empty( $merged['delay_js_safe_mode'] );
+					$redirect_args['pc_maxdelay'] = $max_on ? 'on' : 'off';
+				}
 				$redirect = add_query_arg( $redirect_args, admin_url( 'admin.php?page=prime-cache' ) );
 				wp_safe_redirect( $redirect );
+				exit;
+
+			case 'undo_preset':
+				$backup = get_option( 'prime_cache_preset_backup' );
+				if ( ! is_array( $backup ) || empty( $backup['settings'] ) || ! is_array( $backup['settings'] ) ) {
+					wp_safe_redirect( admin_url( 'admin.php?page=prime-cache&tab=tools' ) );
+					exit;
+				}
+				$s = prime_cache_get_settings( true );
+				foreach ( $backup['settings'] as $key => $value ) {
+					$s[ $key ] = $value;
+				}
+				foreach ( (array) ( $backup['added'] ?? array() ) as $key ) {
+					unset( $s[ $key ] );
+				}
+				update_option( 'prime_cache_settings', $s );
+				// One generation only: the button goes away once used.
+				delete_option( 'prime_cache_preset_backup' );
+				$s = prime_cache_get_settings( true );
+				if ( ! is_multisite() ) {
+					Prime_Cache_Config::write_config_file( $s );
+					Prime_Cache_Config::install_advanced_cache();
+					// Rebuilt from the restored settings; only the block between
+					// the Prime Cache markers changes.
+					if ( ! empty( $s['htaccess_enabled'] ) ) {
+						Prime_Cache_Htaccess::add_rules( $s );
+					} else {
+						Prime_Cache_Htaccess::remove_rules();
+					}
+				}
+				// Pages cached under the preset would keep its output.
+				$this->clear_all_caches();
+				wp_safe_redirect( add_query_arg(
+					array( 'tab' => 'tools', 'pc_undone' => sanitize_key( $backup['preset'] ?? '' ) ),
+					admin_url( 'admin.php?page=prime-cache' )
+				) );
 				exit;
 
 			case 'toggle_cache':
@@ -1035,6 +1253,7 @@ class Prime_Cache {
 					'disable_oembed'         => false,
 					'woo_disable_scripts'    => false,
 					'woo_disable_cart_frag'  => false,
+					'delay_js_max'           => false,
 				) );
 				// The optional add-on turns off its own page-changing features
 				// here (Remove Unused CSS, Delay JS additions, etc.) by adding
@@ -1093,7 +1312,11 @@ class Prime_Cache {
 					'disable_oembed'        => true,
 					'disable_block_css'     => true,
 					'remove_query_strings'  => true,
-					'delay_js_safe_mode'    => true,
+					// Maximum Delay also delays jQuery and inline scripts, which
+					// is what drives lab TBT to near zero. Safe Mode must be off
+					// for it to take effect (delay_max_active()).
+					'delay_js_max'          => true,
+					'delay_js_safe_mode'    => false,
 					'inline_small_css'      => true,
 					'async_css_free'        => true,
 					'local_jquery'          => true,
@@ -1227,6 +1450,17 @@ class Prime_Cache {
 			'preload_public_posts'  => true,
 		);
 
+		// Maximum Delay only where it has been checked to work: a tested theme
+		// and none of the plugins that tend to break with it. Same values as
+		// the Aggressive preset.
+		$max_delay = self::get_max_delay_verdict();
+		if ( $max_delay['on'] ) {
+			$s['delay_js']           = true;
+			$s['delay_js_max']       = true;
+			$s['delay_js_safe_mode'] = false;
+			$s['delay_js_timeout']   = 10000;
+		}
+
 		// The optional add-on enhances the auto preset with additional features.
 		$s = apply_filters( 'prime_cache_preset_auto', $s );
 
@@ -1322,6 +1556,22 @@ class Prime_Cache {
 		if ( class_exists( 'WooCommerce' ) ) {
 			$info[ 'WooCommerce' ] = WC()->version;
 		}
+
+		// Whether Auto will turn on Maximum Delay, and why not.
+		$max_delay = self::get_max_delay_verdict();
+		if ( has_filter( 'prime_cache_preset_auto' ) ) {
+			// The add-on's Auto turns it on whatever the verdict.
+			$max_value = __( 'Turn on (Prime Cache Pro)', 'prime-cache' );
+		} elseif ( $max_delay['on'] ) {
+			$max_value = __( 'Turn on', 'prime-cache' );
+		} elseif ( 'theme' === $max_delay['reason'] ) {
+			/* translators: %s: theme name */
+			$max_value = sprintf( __( 'Leave off (theme not tested yet: %s)', 'prime-cache' ), implode( ', ', $max_delay['names'] ) );
+		} else {
+			/* translators: %s: comma-separated plugin or theme names */
+			$max_value = sprintf( __( 'Leave off (active: %s)', 'prime-cache' ), implode( ', ', $max_delay['names'] ) );
+		}
+		$info[ __( 'Maximum Delay', 'prime-cache' ) ] = $max_value;
 
 		// Optional add-on — only surfaced when an add-on is actually active, so the
 		// free plugin's System Info never advertises an inactive add-on.
