@@ -381,7 +381,8 @@ class Prime_Cache {
 	 * @return array {
 	 *     @type bool     $on     Whether to turn it on.
 	 *     @type string   $reason '' when on, 'theme' or 'conflict' when off.
-	 *     @type string[] $names  Theme or plugin names behind the reason.
+	 *     @type string[] $names  The tested theme when on; the theme or the
+	 *                            plugins behind the reason when off.
 	 * }
 	 */
 	public static function get_max_delay_verdict() {
@@ -422,10 +423,11 @@ class Prime_Cache {
 				'names'  => $found,
 			);
 		}
+		$theme = wp_get_theme( $template );
 		return array(
 			'on'     => true,
 			'reason' => '',
-			'names'  => array(),
+			'names'  => array( $theme->exists() ? $theme->get( 'Name' ) : $template ),
 		);
 	}
 
@@ -1563,13 +1565,13 @@ class Prime_Cache {
 			// The add-on's Auto turns it on whatever the verdict.
 			$max_value = __( 'Turn on (Prime Cache Pro)', 'prime-cache' );
 		} elseif ( $max_delay['on'] ) {
-			$max_value = __( 'Turn on', 'prime-cache' );
-		} elseif ( 'theme' === $max_delay['reason'] ) {
 			/* translators: %s: theme name */
-			$max_value = sprintf( __( 'Leave off (theme not tested yet: %s)', 'prime-cache' ), implode( ', ', $max_delay['names'] ) );
+			$max_value = sprintf( __( 'Turn on (%s, no plugins that tend to break)', 'prime-cache' ), implode( ', ', $max_delay['names'] ) );
+		} elseif ( 'theme' === $max_delay['reason'] ) {
+			$max_value = __( 'Leave off (theme not tested yet)', 'prime-cache' );
 		} else {
 			/* translators: %s: comma-separated plugin or theme names */
-			$max_value = sprintf( __( 'Leave off (active: %s)', 'prime-cache' ), implode( ', ', $max_delay['names'] ) );
+			$max_value = sprintf( __( 'Leave off (%s detected)', 'prime-cache' ), implode( ', ', $max_delay['names'] ) );
 		}
 		$info[ __( 'Maximum Delay', 'prime-cache' ) ] = $max_value;
 

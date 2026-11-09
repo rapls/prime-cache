@@ -2226,7 +2226,7 @@ class Prime_Cache_Admin_Settings {
 		<?php if ( isset( $_GET['pc_preset'] ) ) : ?>
 			<div class="notice notice-success is-dismissible" style="margin:0 0 16px"><p><?php
 			/* translators: %s: preset name (e.g. "Standard", "Aggressive") */
-			printf( esc_html__( '"%s" preset applied successfully.', 'prime-cache' ), esc_html( ucfirst( sanitize_key( $_GET['pc_preset'] ) ) ) );
+			printf( esc_html__( '"%s" preset applied successfully.', 'prime-cache' ), esc_html( $this->preset_label( sanitize_key( $_GET['pc_preset'] ) ) ) );
 			?></p>
 			<?php if ( isset( $_GET['pc_maxdelay'] ) && 'on' === $_GET['pc_maxdelay'] ) : ?>
 				<p><?php esc_html_e( 'Maximum Delay is now on. Check that menus, forms, sliders and the cookie consent banner still work. If anything looks broken, press the Undo button below.', 'prime-cache' ); ?></p>

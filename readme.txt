@@ -4,7 +4,7 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.64
+Stable tag: 1.10.65
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -40,9 +40,11 @@ Auto's JavaScript and CSS settings do the most for speed, and they are also the 
 
 The quickest fix is the Safe preset in the Tools tab. It keeps page caching, browser caching and lazy loading, and turns off minification, deferred and delayed JavaScript, the CSS delivery settings and the other Auto settings that change how a page looks, including any you turned on yourself. The preset card in the Tools tab lists every setting it turns off. Clear the cache and check the page again.
 
+To go back to exactly the settings you had before Auto, press the Undo button above the presets in the Tools tab. It puts back what the last preset changed.
+
 To keep the rest of Auto and find the one setting that disagrees, apply Auto again and turn settings off in this order instead, clearing the cache after each step:
 
-1. **Delay JavaScript Execution** and **Maximum Delay**, if you turned them on yourself. Auto does not turn them on in the free plugin.
+1. **Delay JavaScript Execution** and **Maximum Delay**. Auto turns them on only on a tested theme (Cocoon for now) with no shop, page builder, slider or popup plugin active.
 2. **Load JavaScript Deferred**
 3. **Load CSS Asynchronously (Free)**, then **Inline Small CSS Files**
 4. **Minify HTML**, **Minify CSS** and **Minify JavaScript**
@@ -165,7 +167,7 @@ Apply the Safe preset in the Tools tab first. It keeps page caching, browser cac
 
 If Safe fixes it and you want to keep the rest of Auto, apply Auto again and turn settings off in this order, clearing the cache after each step:
 
-1. **Delay JavaScript Execution** and **Maximum Delay**, if you turned them on yourself. Auto does not turn them on in the free plugin.
+1. **Delay JavaScript Execution** and **Maximum Delay**. Auto turns them on only on a tested theme (Cocoon for now) with no shop, page builder, slider or popup plugin active.
 2. **Load JavaScript Deferred**
 3. **Load CSS Asynchronously (Free)**, then **Inline Small CSS Files**
 4. **Minify HTML**, **Minify CSS** and **Minify JavaScript**
@@ -180,7 +182,7 @@ Details (Japanese): https://raplsworks.com/cocoon-prime-cache/
 
 In the free plugin, Auto turns on: page cache with mobile caching, gzip compression, browser cache headers, .htaccess Optimization (only when .htaccess is writable), HTML / CSS / JavaScript minification, removal of HTML comments, lazy loading for images, iframes and videos (the first six images stay eager so the largest image is not delayed), missing image width/height, a local copy of jQuery when the theme loads it from a CDN, deferred JavaScript, inline small CSS, asynchronous loading of non-first CSS, Google Fonts display=swap, disabling emoji and embeds, removing version query strings, limiting DNS prefetch, disabling block CSS on classic themes, link prefetching and cache preloading. On WooCommerce sites it also turns off WooCommerce scripts on non-shop pages and cart fragments, and adds the cart, checkout and account pages to the exclusions.
 
-Auto does not turn on Delay JavaScript Execution, WebP conversion or Brotli compression in the free plugin. Prime Cache Pro adds its own items to Auto (see the Description).
+Auto turns on Delay JavaScript Execution with Maximum Delay only on a tested theme (Cocoon and its child themes for now) when no shop, page builder, slider or popup plugin is active; the Auto card in the Tools tab shows whether it will, and why. It does not turn on WebP conversion or Brotli compression in the free plugin. Prime Cache Pro adds its own items to Auto (see the Description).
 
 = Does it edit wp-config.php? =
 
@@ -243,6 +245,15 @@ When WebP conversion and auto-convert are on, JPG/PNG images are converted to We
 No. The free plugin does not send your data or API requests to any third-party service. Cache preloading only requests URLs on your own site. Some optional features may add browser resource hints (such as preconnect) for external assets your site already uses, but Prime Cache itself does not transmit data to external services.
 
 == Changelog ==
+
+= 1.10.65 =
+* Added: on a tested theme (Cocoon and its child themes for now) with no shop, page builder, slider or popup plugin active, the Auto preset turns on Maximum Delay. The Auto card in the Tools tab shows whether it will, and why. A site that already applied Auto is not changed until Auto is pressed again.
+* Added: an Undo button for the last preset in the Tools tab. It puts back the settings that preset changed, rebuilds the Prime Cache block in .htaccess from them and clears the cache. Only the last preset is kept.
+* Changed: the Aggressive preset turns on Maximum Delay with Safe Mode off, and the Safe preset turns Maximum Delay off.
+* Added: cookie consent banners from CookieYes, Complianz and Cookie Notice are never delayed. Contact Form 7, MW WP Form, Snow Monkey Forms and WPForms are new choices in the Delay JS exclusion presets; each also keeps the scripts it needs (jQuery or wp-i18n) from being delayed.
+* Fixed: after Prime Cache Pro was turned off, the .htaccess block kept its AVIF rules until settings were saved again. The block is now rewritten on the next request after the add-on is turned off or back on.
+* Changed: the .htaccess rules add Vary with "Header merge" instead of "append", so Prime Cache no longer repeats Accept or Accept-Encoding when the value is already present.
+* Docs: a 1.10.23 changelog line was cut off on WordPress.org at a raw script tag; it now shows in full.
 
 = 1.10.64 =
 * Added: during Black Friday 2026 (November 26 to December 2), the Dashboard tab of the Prime Cache settings shows a short notice about the Prime Cache Pro discount, with the end time in your site's timezone. It appears only on that tab, only to administrators of sites where Prime Cache Pro is not installed, and not at all outside those dates. Each administrator can dismiss it for good, and the prime_cache_show_promo_notice filter turns it off. Nothing is loaded from outside the plugin.
@@ -419,6 +430,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * For the changelog of version 1.10.19 and earlier, see the plugin page: https://raplsworks.com/plugins/prime-cache/
 
 == Upgrade Notice ==
+
+= 1.10.65 =
+Auto can now turn on Maximum Delay on tested themes (Cocoon for now), and the Tools tab gets an Undo button for the last preset. The Prime Cache block in .htaccess is rewritten once after updating; nothing outside it is changed.
 
 = 1.10.64 =
 Adds a dismissible Black Friday notice on the Dashboard tab of the Prime Cache settings (November 26 to December 2, 2026 only).
