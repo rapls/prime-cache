@@ -4,8 +4,8 @@ Contributors: rapls
 Tags: cache, page cache, performance, optimization, core web vitals
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.10.65
-Requires PHP: 7.4
+Stable tag: 1.10.66
+Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -214,7 +214,7 @@ The features target the usual Core Web Vitals bottlenecks: page caching and prel
 
 = What are the server requirements? =
 
-WordPress 5.8+, PHP 7.4+. For WebP conversion, the GD or Imagick PHP extension is required.
+WordPress 5.8+, PHP 8.2+. For WebP conversion, the GD or Imagick PHP extension is required.
 
 = Does it work with Nginx? =
 
@@ -245,6 +245,9 @@ When WebP conversion and auto-convert are on, JPG/PNG images are converted to We
 No. The free plugin does not send your data or API requests to any third-party service. Cache preloading only requests URLs on your own site. Some optional features may add browser resource hints (such as preconnect) for external assets your site already uses, but Prime Cache itself does not transmit data to external services.
 
 == Changelog ==
+
+= 1.10.66 =
+* Changed: Prime Cache now requires PHP 8.2 or later. PHP 7.4, 8.0 and 8.1 no longer receive security fixes. Sites on an older PHP version keep the version they have; WordPress does not offer this update until PHP is upgraded.
 
 = 1.10.65 =
 * Added: on a tested theme (Cocoon and its child themes for now) with no shop, page builder, slider or popup plugin active, the Auto preset turns on Maximum Delay. The Auto card in the Tools tab shows whether it will, and why. A site that already applied Auto is not changed until Auto is pressed again.
@@ -430,6 +433,9 @@ No. The free plugin does not send your data or API requests to any third-party s
 * For the changelog of version 1.10.19 and earlier, see the plugin page: https://raplsworks.com/plugins/prime-cache/
 
 == Upgrade Notice ==
+
+= 1.10.66 =
+Prime Cache now requires PHP 8.2 or later. Check your PHP version (Tools > Site Health > Info > Server) before updating.
 
 = 1.10.65 =
 Auto can now turn on Maximum Delay on tested themes (Cocoon for now), and the Tools tab gets an Undo button for the last preset. The Prime Cache block in .htaccess is rewritten once after updating; nothing outside it is changed.
