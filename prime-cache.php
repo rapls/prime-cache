@@ -9,7 +9,6 @@
  * Author URI:  https://raplsworks.com/
  * License: GPL-2.0-or-later
  * Text Domain: prime-cache
- * Domain Path: /languages
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -313,8 +312,8 @@ function prime_cache_get_settings( $force = false ) {
  * No load_plugin_textdomain(). The catalogue is not shipped any more:
  * WordPress.org builds it from translate.wordpress.org and serves it into
  * wp-content/languages/plugins/, where core's just-in-time loader finds it
- * without being asked. The sources stay in languages/ for the translator and
- * are export-ignored out of the package.
+ * without being asked. The plugin has no languages/ folder; the translations
+ * live only on translate.wordpress.org.
  *
  * The two windows this call used to cover are now simply uncovered, and that
  * was the trade accepted when the bundle was dropped: strings newer than the
